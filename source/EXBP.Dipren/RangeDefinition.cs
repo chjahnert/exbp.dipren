@@ -7,7 +7,7 @@ namespace EXBP.Dipren
     /// <typeparam name="TKey">
     ///   The type of the key.
     /// </typeparam>
-    public class RangeDefinition<TKey>
+    public class RangeDefinition<TKey> where TKey : IComparable<TKey>
     {
         private readonly TKey _first;
         private readonly TKey _last;

@@ -7,7 +7,7 @@ namespace EXBP.Dipren
     /// <typeparam name="TKey">
     ///   The type of the key that identifies the entries to be processed.
     /// </typeparam>
-    public class JobDefinition<TKey>
+    public class JobDefinition<TKey> where TKey : IComparable<TKey>
     {
         private readonly string _name;
         private readonly string _description;
