@@ -1,4 +1,6 @@
 ﻿
+using EXBP.Dipren.Diagnostics;
+
 namespace EXBP.Dipren
 {
     /// <summary>
@@ -38,6 +40,7 @@ namespace EXBP.Dipren
         /// </value>
         public RangeDefinition<TKey> Range => this._range;
 
+
         /// <summary>
         ///   Initializes a new instance of the <see cref="JobDefinition{TKey}"/> class.
         /// </summary>
@@ -52,6 +55,10 @@ namespace EXBP.Dipren
         /// </param>
         public JobDefinition(string name, string description, RangeDefinition<TKey> range)
         {
+            Assert.ArgumentIsNotNull(name, nameof(name));
+            Assert.ArgumentIsNotEmpty(name, false, nameof(name));
+            Assert.ArgumentIsNotNull(range, nameof(range));
+
             this._name = name;
             this._description = description;
             this._range = range;
