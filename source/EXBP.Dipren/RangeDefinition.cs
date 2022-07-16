@@ -1,4 +1,7 @@
 ﻿
+using EXBP.Dipren.Diagnostics;
+
+
 namespace EXBP.Dipren
 {
     /// <summary>
@@ -47,6 +50,9 @@ namespace EXBP.Dipren
         /// </param>
         public RangeDefinition(TKey first, TKey last)
         {
+            Assert.ArgumentIsNotNull(first, nameof(first));
+            Assert.ArgumentIsNotNull(last, nameof(last));
+
             this._first = first;
             this._last = last;
         }   
