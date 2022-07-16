@@ -1,0 +1,28 @@
+name: Build Dipren
+
+on:
+  push:
+    branches:
+      - main
+      - feature/*
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  Build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET 6.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore ./source
+    - name: Build solution
+      run: dotnet build --configuration Debug --no-restore ./source
+    - name: Verify solution
+      run: dotnet test --no-restore --verbosity normal --logger trx --results-directory ./output/results ./source
