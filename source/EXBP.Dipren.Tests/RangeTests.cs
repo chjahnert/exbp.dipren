@@ -5,18 +5,18 @@ using NUnit.Framework;
 namespace EXBP.Dipren.Tests
 {
     [TestFixture]
-    public class RangeDefintionTests
+    public class RangeTests
     {
         [Test]
         public void Ctor_ArgumentFirstIsNull_ThrowsExcption()
         {
-            Assert.Throws<ArgumentNullException>(() => new RangeDefinition<string>(null, "z"));
+            Assert.Throws<ArgumentNullException>(() => new Range<string>(null, "z"));
         }
 
         [Test]
         public void Ctor_ArgumentLastIsNull_ThrowsExcption()
         {
-            Assert.Throws<ArgumentNullException>(() => new RangeDefinition<string>("a", null));
+            Assert.Throws<ArgumentNullException>(() => new Range<string>("a", null));
         }
     }
 }
