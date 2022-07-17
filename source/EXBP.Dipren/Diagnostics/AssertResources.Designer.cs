@@ -61,11 +61,65 @@ namespace EXBP.Dipren.Diagnostics {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The specified collection is empty..
+        /// </summary>
+        internal static string MessageCollectionIsEmpty {
+            get {
+                return ResourceManager.GetString("MessageCollectionIsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified comparand is null..
+        /// </summary>
+        internal static string MessageComparandIsNull {
+            get {
+                return ResourceManager.GetString("MessageComparandIsNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified date-time value is not in local time..
+        /// </summary>
+        internal static string MessageDateTimeNotLocal {
+            get {
+                return ResourceManager.GetString("MessageDateTimeNotLocal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified date-time value is not in UTC time..
+        /// </summary>
+        internal static string MessageDateTimeNotUtc {
+            get {
+                return ResourceManager.GetString("MessageDateTimeNotUtc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified GUID value is empty..
+        /// </summary>
+        internal static string MessageGuidIsEmpty {
+            get {
+                return ResourceManager.GetString("MessageGuidIsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The specified string value is empty..
         /// </summary>
         internal static string MessageStringIsEmpty {
             get {
                 return ResourceManager.GetString("MessageStringIsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified type is not an enumeration..
+        /// </summary>
+        internal static string MessageTypeIsNotEnum {
+            get {
+                return ResourceManager.GetString("MessageTypeIsNotEnum", resourceCulture);
             }
         }
     }

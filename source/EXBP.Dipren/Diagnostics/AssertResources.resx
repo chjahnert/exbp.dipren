@@ -117,7 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="MessageCollectionIsEmpty" xml:space="preserve">
+    <value>The specified collection is empty.</value>
+  </data>
+  <data name="MessageComparandIsNull" xml:space="preserve">
+    <value>The specified comparand is null.</value>
+  </data>
+  <data name="MessageDateTimeNotLocal" xml:space="preserve">
+    <value>The specified date-time value is not in local time.</value>
+  </data>
+  <data name="MessageDateTimeNotUtc" xml:space="preserve">
+    <value>The specified date-time value is not in UTC time.</value>
+  </data>
+  <data name="MessageGuidIsEmpty" xml:space="preserve">
+    <value>The specified GUID value is empty.</value>
+  </data>
   <data name="MessageStringIsEmpty" xml:space="preserve">
     <value>The specified string value is empty.</value>
+  </data>
+  <data name="MessageTypeIsNotEnum" xml:space="preserve">
+    <value>The specified type is not an enumeration.</value>
   </data>
 </root>
