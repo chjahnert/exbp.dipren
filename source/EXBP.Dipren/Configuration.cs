@@ -10,10 +10,10 @@ namespace EXBP.Dipren
     [DebuggerDisplay("Maximum Clock Drift = {MaximumClockDrift}")]
     public class Configuration
     {
-        private const double DEFAULT_MAXIMUM_CLOCK_DRIFT = 2.0;
+        private const double DEFAULT_MAXIMUM_CLOCK_DRIFT_SECONDS = 2.0;
 
 
-        private readonly TimeSpan _maximumClockDrift = TimeSpan.FromSeconds(DEFAULT_MAXIMUM_CLOCK_DRIFT);
+        private readonly TimeSpan _maximumClockDrift = TimeSpan.FromSeconds(DEFAULT_MAXIMUM_CLOCK_DRIFT_SECONDS);
 
 
         /// <summary>
