@@ -9,6 +9,7 @@ namespace EXBP.Dipren
     /// </summary>
     public class Engine
     {
+        private readonly IEngineDataStore _store;
         private readonly Configuration _configuration;
         private readonly NodeInfo _node;
 
@@ -30,6 +31,9 @@ namespace EXBP.Dipren
         /// <summary>
         ///   Initializes a new instance of the <see cref="Engine"/> class.
         /// </summary>
+        /// <param name="store">
+        ///   The <see cref="IEngineDataStore"/> to use.
+        /// </param>
         /// <param name="configuration">
         ///   The configuration settings to use.
         /// </param>
@@ -37,10 +41,12 @@ namespace EXBP.Dipren
         ///   A <see cref="NodeInfo"/> object that holds information about the current processing node; or
         ///   <see langword="null"/> to use the default values.
         /// </param>
-        public Engine(Configuration configuration, NodeInfo node = null)
+        public Engine(IEngineDataStore store, Configuration configuration, NodeInfo node = null)
         {
+            Assert.ArgumentIsNotNull(store, nameof(store));
             Assert.ArgumentIsNotNull(configuration, nameof(configuration));
 
+            this._store = store;
             this._configuration = configuration;
             this._node = (node ?? NodeInfo.Current);
         }
