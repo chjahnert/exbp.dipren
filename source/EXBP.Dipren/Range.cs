@@ -1,4 +1,6 @@
 ﻿
+using System.Diagnostics;
+
 using EXBP.Dipren.Diagnostics;
 
 
@@ -10,6 +12,7 @@ namespace EXBP.Dipren
     /// <typeparam name="TKey">
     ///   The type of the key.
     /// </typeparam>
+    [DebuggerDisplay("Range = [{First}..{Last}], Inclusive = {IsInclusive}, Ascending = {IsAscending}")]
     public class Range<TKey> where TKey : IComparable<TKey>
     {
         private readonly TKey _first;
