@@ -1,4 +1,6 @@
 ﻿
+using System.Diagnostics;
+
 using EXBP.Dipren.Diagnostics;
 
 
@@ -13,6 +15,7 @@ namespace EXBP.Dipren
     /// <typeparam name="TItem">
     ///   The type of the items to process.
     /// </typeparam>
+    [DebuggerDisplay("Name = {Name}")]
     public class Job<TKey, TItem> where TKey : IComparable<TKey>
     {
         private readonly string _name;
