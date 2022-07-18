@@ -9,23 +9,23 @@ namespace EXBP.Dipren
     /// </summary>
     public class Engine
     {
-        private readonly string _id;
         private readonly Configuration _configuration;
+        private readonly NodeInfo _node;
 
-
-        /// <summary>
-        ///   Gets the unique identifier of the current distributed processing engine instance.
-        /// </summary>
-        /// <value>
-        ///   A <see cref="string"/> value that uniquely identifies the current engine instance.
-        /// </value>
-        public string Id => this._id;
 
         /// <summary>
         ///   Gets the configuration settings for the current distributed processing engine instance.
         /// </summary>
         public Configuration Configuration => this._configuration;
 
+        /// <summary>
+        ///   Gets an object that holds information about the current processing node.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="NodeInfo"/> object that holds information about the current processing node.
+        /// </value>
+        public NodeInfo Node => this._node;
+
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="Engine"/> class.
@@ -33,30 +33,16 @@ namespace EXBP.Dipren
         /// <param name="configuration">
         ///   The configuration settings to use.
         /// </param>
-        public Engine(Configuration configuration)
+        /// <param name="node">
+        ///   A <see cref="NodeInfo"/> object that holds information about the current processing node; or
+        ///   <see langword="null"/> to use the default values.
+        /// </param>
+        public Engine(Configuration configuration, NodeInfo node = null)
         {
             Assert.ArgumentIsNotNull(configuration, nameof(configuration));
 
-            this._id = Engine.GenerateEngineIdentifier();
             this._configuration = configuration;
-        }
-
-        /// <summary>
-        ///   Initializes a new instance of the <see cref="Engine"/> class.
-        /// </summary>
-        /// <param name="id">
-        ///   The unique identifier to use for the engine instance.
-        /// </param>
-        /// <param name="configuration">
-        ///   The configuration settings to use.
-        /// </param>
-        public Engine(string id, Configuration configuration)
-        {
-            Assert.ArgumentIsNotNull(id, nameof(id));
-            Assert.ArgumentIsNotNull(configuration, nameof(configuration));
-
-            this._id = id;
-            this._configuration = configuration;
+            this._node = (node ?? NodeInfo.Current);
         }
 
         /// <summary>
@@ -82,14 +68,5 @@ namespace EXBP.Dipren
         {
             throw new NotImplementedException();
         }
-
-        /// <summary>
-        ///   Generates a unique identifier for an engine instance.
-        /// </summary>
-        /// <returns>
-        ///   The unique identifier generated.
-        /// </returns>
-        private static string GenerateEngineIdentifier()
-            => "machine-name/process-path/pid/instance";
     }
 }
