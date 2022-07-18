@@ -46,7 +46,7 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
-        ///   Starts a distributed processing job.
+        ///   Executes a distributed processing job.
         /// </summary>
         /// <typeparam name="TKey">
         ///   The type of the item key.
@@ -64,7 +64,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Task"/> that represents the asynchronous operation and can be used to access the result.
         /// </returns>
-        public Task StartAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
+        public Task ExecuteAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
             throw new NotImplementedException();
         }
