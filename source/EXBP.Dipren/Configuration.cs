@@ -1,9 +1,13 @@
 ﻿
+using System.Diagnostics;
+
+
 namespace EXBP.Dipren
 {
     /// <summary>
     ///   Holds the configuration settings to be used by an <see cref="Engine"/> instance.
     /// </summary>
+    [DebuggerDisplay("Maximum Clock Drift = {MaximumClockDrift}")]
     public class Configuration
     {
         private const double DEFAULT_MAXIMUM_CLOCK_DRIFT = 2.0;
