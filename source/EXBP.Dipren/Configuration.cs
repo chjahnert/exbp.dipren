@@ -27,7 +27,7 @@ namespace EXBP.Dipren
         {
             get
             {
-                return _maximumClockDrift;
+                return this._maximumClockDrift;
             }
             init
             {
