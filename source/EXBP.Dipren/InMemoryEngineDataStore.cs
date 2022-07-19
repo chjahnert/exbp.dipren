@@ -30,7 +30,7 @@ namespace EXBP.Dipren
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and  can
+        ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and can
         ///   be used to access the result.
         /// </returns>
         public Task<long> CountJobsAsync(CancellationToken cancellation)
@@ -83,6 +83,75 @@ namespace EXBP.Dipren
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        ///   Sets the state of a job to the specified value.
+        /// </summary>
+        /// <param name="name">
+        ///   The unique name of the job to update.
+        /// </param>
+        /// <param name="state">
+        ///   The new state to set.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> that represents the asynchronous operation.
+        /// </returns>
+        public Task SetJobStateAsync(string name, JobState state, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(name, nameof(name));
+
+            Job job = null;
+            
+            lock (this._syncRoot)
+            {
+                job = this._jobs[name];
+            }
+
+            lock (job)
+            {
+                job.State = state;
+            }
+
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        ///   Returns the current state of a job.
+        /// </summary>
+        /// <param name="name">
+        ///   The unique name of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="JobState"/> object that represents the asynchronous operation
+        ///   and can be used to access the result.
+        /// </returns>
+        public Task<JobState> GetJobStateAsync(string name, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(name, nameof(name));
+
+            Job job = null;
+
+            lock (this._syncRoot)
+            {
+                job = this._jobs[name];
+            }
+
+            JobState result = default;
+
+            lock (job)
+            {
+                result = job.State;
+            }
+
+            return Task.FromResult(result);
+        }
 
         /// <summary>
         ///   Implements a collection of <see cref="Job"/> objects.
