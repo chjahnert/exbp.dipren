@@ -46,114 +46,6 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
-        ///   Inserts a job with the specified details into the current data store.
-        /// </summary>
-        /// <param name="name">
-        ///   The unique name of the distributed processing job.
-        /// </param>
-        /// <param name="state">
-        ///   The state of the new distributed processing job.
-        /// </param>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task"/> that represents the asynchronous operation.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="name"/> is a <see langword="null"/> reference.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///   Argument <paramref name="state"/> contains value that is not defined; or a distributed processing job
-        ///   with the same name already exists in the current data store.
-        /// </exception>
-        public Task InsertJobAsync(string name, JobState state, CancellationToken cancellation)
-        {
-            Assert.ArgumentIsNotNull(name, nameof(name));
-            Assert.ArgumentIsDefined(state, nameof(state));
-
-            Job job = new Job(name, state);
-
-            lock (this._syncRoot)
-            {
-                this._jobs.Add(job);
-            }
-
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        ///   Sets the state of a job to the specified value.
-        /// </summary>
-        /// <param name="name">
-        ///   The unique name of the job to update.
-        /// </param>
-        /// <param name="state">
-        ///   The new state to set.
-        /// </param>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task"/> that represents the asynchronous operation.
-        /// </returns>
-        public Task SetJobStateAsync(string name, JobState state, CancellationToken cancellation)
-        {
-            Assert.ArgumentIsNotNull(name, nameof(name));
-
-            Job job = null;
-            
-            lock (this._syncRoot)
-            {
-                job = this._jobs[name];
-            }
-
-            lock (job)
-            {
-                job.State = state;
-            }
-
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        ///   Returns the current state of a job.
-        /// </summary>
-        /// <param name="name">
-        ///   The unique name of the job.
-        /// </param>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="JobState"/> object that represents the asynchronous operation
-        ///   and can be used to access the result.
-        /// </returns>
-        public Task<JobState> GetJobStateAsync(string name, CancellationToken cancellation)
-        {
-            Assert.ArgumentIsNotNull(name, nameof(name));
-
-            Job job = null;
-
-            lock (this._syncRoot)
-            {
-                job = this._jobs[name];
-            }
-
-            JobState result = default;
-
-            lock (job)
-            {
-                result = job.State;
-            }
-
-            return Task.FromResult(result);
-        }
-
-        /// <summary>
         ///   Implements a collection of <see cref="Job"/> objects.
         /// </summary>
         private class JobCollection : KeyedCollection<string, Job>
@@ -191,14 +83,6 @@ namespace EXBP.Dipren
             /// </value>
             public string Name { get; }
 
-            /// <summary>
-            ///   Gets or sets a value that indicates the state of the current distributed processing job.
-            /// </summary>
-            /// <value>
-            ///   A <see cref="JobState"/> value that indicates the state of the current distributed processing job.
-            /// </value>
-            public JobState State { get; set; }
-
 
             /// <summary>
             ///   Initializes a new instance of the <see cref="Job"/> class.
@@ -206,13 +90,9 @@ namespace EXBP.Dipren
             /// <param name="name">
             ///   The unique name of the job.
             /// </param>
-            /// <param name="state">
-            ///   The initial state of the job.
-            /// </param>
-            public Job(string name, JobState state)
+            public Job(string name)
             {
                 this.Name = name;
-                this.State = state;
             }   
         }
     }
