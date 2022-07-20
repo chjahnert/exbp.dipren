@@ -62,10 +62,11 @@ namespace EXBP.Dipren
         public IBatchProcessor<TItem> Processor => this._processor;
 
         /// <summary>
-        ///   Gets the time after which a range is considered stalled.
+        ///   Gets the time after which a range is considered stalled or abandoned.
         /// </summary>
         /// <value>
-        ///   A <see cref="TimeSpan"/> value that contains the time after which a range is considered stalled.
+        ///   A <see cref="TimeSpan"/> value that contains the time after which a range is considered stalled or
+        ///   abandoned.
         /// </value>
         public TimeSpan Timeout => this._timeout;
 
@@ -92,6 +93,9 @@ namespace EXBP.Dipren
         /// </param>
         /// <param name="processor">
         ///   The <see cref="IBatchProcessor{TEntry}"/> object to use to process the entries.
+        /// </param>
+        /// <param name="timeout">
+        ///   The time after which a range is considered stalled or abandoned.
         /// </param>
         /// <param name="batchSize">
         ///   The maximum number of entries to include in a batch.
