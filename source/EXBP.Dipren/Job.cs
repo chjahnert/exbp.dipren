@@ -21,6 +21,7 @@ namespace EXBP.Dipren
         private readonly string _name;
         private readonly IDataSource<TKey, TItem> _source;
         private readonly IKeyArithmetics<TKey> _arithmetics;
+        private readonly IKeySerializer<TKey> _serializer;
         private readonly IBatchProcessor<TItem> _processor;
         private readonly TimeSpan _timeout;
         private readonly int _batchSize;
@@ -52,6 +53,15 @@ namespace EXBP.Dipren
         ///   An <see cref="IKeyArithmetics{TKey}"/> object that is used to manipulate key ranges.
         /// </value>
         public IKeyArithmetics<TKey> Arithmetics => this._arithmetics;
+
+        /// <summary>
+        ///   Gets the serializer to use to convert keys to their string representation and back.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="IKeyArithmetics{TKey}"/> object that can convert between keys and their string
+        ///   representations.
+        /// </value>
+        public IKeySerializer<TKey> Serializer => this._serializer;
 
         /// <summary>
         ///   Gets the object that processes batches of entries.
@@ -91,6 +101,10 @@ namespace EXBP.Dipren
         /// <param name="arithmetics">
         ///   The <see cref="IKeyArithmetics{TKey}"/> object to use to manipulate key ranges.
         /// </param>
+        /// <param name="serializer">
+        ///   The <see cref="IKeyArithmetics{TKey}"/> object to use to convert between key values and their string
+        ///   representation.
+        /// </param>
         /// <param name="processor">
         ///   The <see cref="IBatchProcessor{TEntry}"/> object to use to process the entries.
         /// </param>
@@ -100,12 +114,13 @@ namespace EXBP.Dipren
         /// <param name="batchSize">
         ///   The maximum number of entries to include in a batch.
         /// </param>
-        public Job(string name, IDataSource<TKey, TItem> source, IKeyArithmetics<TKey> arithmetics, IBatchProcessor<TItem> processor, TimeSpan timeout, int batchSize)
+        public Job(string name, IDataSource<TKey, TItem> source, IKeyArithmetics<TKey> arithmetics, IKeySerializer<TKey> serializer, IBatchProcessor<TItem> processor, TimeSpan timeout, int batchSize)
         {
             Assert.ArgumentIsNotNull(name, nameof(name));
             Assert.ArgumentIsNotEmpty(name, false, nameof(name));
             Assert.ArgumentIsNotNull(source, nameof(source));
             Assert.ArgumentIsNotNull(arithmetics, nameof(arithmetics));
+            Assert.ArgumentIsNotNull(serializer, nameof(serializer));
             Assert.ArgumentIsNotNull(processor, nameof(processor));
             Assert.ArgumentIsGreater(timeout, TimeSpan.Zero, nameof(timeout));
             Assert.ArgumentIsGreater(batchSize, 0, nameof(batchSize));
@@ -113,6 +128,7 @@ namespace EXBP.Dipren
             this._name = name;
             this._source = source;
             this._arithmetics = arithmetics;
+            this._serializer = serializer;
             this._processor = processor;
             this._timeout = timeout;
             this._batchSize = batchSize;
