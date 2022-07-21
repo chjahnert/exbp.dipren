@@ -9,9 +9,9 @@ namespace EXBP.Dipren
     /// </summary>
     public class Engine
     {
+        private readonly string _id;
         private readonly IEngineDataStore _store;
         private readonly Configuration _configuration;
-        private readonly NodeInfo _node;
 
 
         /// <summary>
@@ -20,12 +20,12 @@ namespace EXBP.Dipren
         public Configuration Configuration => this._configuration;
 
         /// <summary>
-        ///   Gets an object that holds information about the current processing node.
+        ///   Gets the unique identifier of the current engine.
         /// </summary>
         /// <value>
-        ///   A <see cref="NodeInfo"/> object that holds information about the current processing node.
+        ///   A <see cref="string"/> value that contains the unique identifier of the current engine.
         /// </value>
-        public NodeInfo Node => this._node;
+        public string Identity => this._id;
 
 
         /// <summary>
@@ -37,18 +37,16 @@ namespace EXBP.Dipren
         /// <param name="configuration">
         ///   The configuration settings to use.
         /// </param>
-        /// <param name="node">
-        ///   A <see cref="NodeInfo"/> object that holds information about the current processing node; or
-        ///   <see langword="null"/> to use the default values.
-        /// </param>
-        public Engine(IEngineDataStore store, Configuration configuration, NodeInfo node = null)
+        public Engine(IEngineDataStore store, Configuration configuration)
         {
             Assert.ArgumentIsNotNull(store, nameof(store));
             Assert.ArgumentIsNotNull(configuration, nameof(configuration));
 
+            IEngineIdentityProvider identity = new DefaultEngineIdentityProvider();
+
             this._store = store;
             this._configuration = configuration;
-            this._node = (node ?? NodeInfo.Current);
+            this._id = identity.GetEngineIdentifier();
         }
 
         /// <summary>
