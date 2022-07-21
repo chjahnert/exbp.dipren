@@ -10,6 +10,7 @@ namespace EXBP.Dipren
     public class Scheduler
     {
         private readonly IEngineDataStore _store;
+        private readonly IDateTimeProvider _clock;
         private readonly Configuration _configuration;
 
 
@@ -28,13 +29,28 @@ namespace EXBP.Dipren
         /// <param name="configuration">
         ///   The configuration settings to use.
         /// </param>
-        public Scheduler(IEngineDataStore store, Configuration configuration)
+        internal Scheduler(IEngineDataStore store, IDateTimeProvider clock, Configuration configuration)
         {
             Assert.ArgumentIsNotNull(store, nameof(store));
+            Assert.ArgumentIsNotNull(clock, nameof(clock));
             Assert.ArgumentIsNotNull(configuration, nameof(configuration));
 
             this._store = store;
+            this._clock = clock;
             this._configuration = configuration;
+        }
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="Engine"/> class.
+        /// </summary>
+        /// <param name="store">
+        ///   The <see cref="IEngineDataStore"/> to use.
+        /// </param>
+        /// <param name="configuration">
+        ///   The configuration settings to use.
+        /// </param>
+        public Scheduler(IEngineDataStore store, Configuration configuration) : this(store, UtcDateTimeProvider.Default, configuration)
+        {
         }
 
 
