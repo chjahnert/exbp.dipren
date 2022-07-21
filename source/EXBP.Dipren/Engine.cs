@@ -42,11 +42,9 @@ namespace EXBP.Dipren
             Assert.ArgumentIsNotNull(store, nameof(store));
             Assert.ArgumentIsNotNull(configuration, nameof(configuration));
 
-            IEngineIdentityProvider identity = new DefaultEngineIdentityProvider();
-
             this._store = store;
             this._configuration = configuration;
-            this._id = identity.GetEngineIdentifier();
+            this._id = EngineIdentifier.Generate();
         }
 
         /// <summary>
