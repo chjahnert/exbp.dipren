@@ -120,7 +120,7 @@ namespace EXBP.Dipren
         /// <param name="remaining">
         ///   The estimated number of unprocessed items.
         /// </param>
-        protected Partition(Guid id, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining)
+        internal Partition(Guid id, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining)
         {
             Debug.Assert(created.Kind == DateTimeKind.Utc);
             Debug.Assert(updated.Kind == DateTimeKind.Utc);
