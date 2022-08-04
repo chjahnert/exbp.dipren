@@ -94,7 +94,7 @@ namespace EXBP.Dipren
         ///   A <see cref="long"/> value that contains the estimated number of unprocessed items in the current
         ///   partition.
         /// </value>
-        public long remaining => this._remaining;
+        public long Remaining => this._remaining;
 
 
         /// <summary>
@@ -247,7 +247,7 @@ namespace EXBP.Dipren
         ///   A <see cref="long"/> value that contains the estimated number of unprocessed items in the current
         ///   partition.
         /// </value>
-        public long remaining => this._remaining;
+        public long Remaining => this._remaining;
 
 
         /// <summary>
