@@ -18,5 +18,20 @@ namespace EXBP.Dipren
         ///   be used to access the result.
         /// </returns>
         Task<long> CountJobsAsync(CancellationToken cancellation);
+
+        /// <summary>
+        ///   Inserts a new partition into the data store.
+        /// </summary>
+        /// <param name="partition">
+        ///   The new partition to insert.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
+        Task InsertPartitionAsync(Partition partition, CancellationToken cancellation);
     }
 }
