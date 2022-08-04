@@ -57,15 +57,36 @@ namespace EXBP.Dipren
         /// <summary>
         ///   Schedules a distributed processing job.
         /// </summary>
-        /// <typeparam name="TKey"></typeparam>
-        /// <typeparam name="TItem"></typeparam>
-        /// <param name="job"></param>
-        /// <param name="cancellation"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public Task ScheduleAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
+        /// <typeparam name="TKey">
+        ///   The type of the item key.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        ///   The type of items to process.
+        /// </typeparam>
+        /// <param name="job">
+        ///   The job to schedule for distributed processing.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
+        public async Task ScheduleAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
-            throw new NotImplementedException();
+            Assert.ArgumentIsNotNull(job, nameof(job));
+
+            Range<TKey> range = await job.Source.GetRangeAsync(cancellation);
+            long remaining = await job.Source.EstimateRangeSizeAsync(range, cancellation);
+
+            Guid id = Guid.NewGuid();
+            DateTime timestamp = this._clock.GetDateTime();
+
+            Partition<TKey> partition = new Partition<TKey>(id, null, timestamp, timestamp, range, default, 0L, remaining);
+            Partition record = partition.Dehydrate(job.Serializer);
+
+            await this._store.InsertPartitionAsync(record, cancellation);
         }
     }
 }
