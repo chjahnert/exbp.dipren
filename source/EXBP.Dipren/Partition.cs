@@ -140,6 +140,9 @@ namespace EXBP.Dipren
         }
     }
 
+    /// <summary>
+    ///   Represents a partition of the data being processed.
+    /// </summary>
     public record Partition
     {
         private readonly Guid _id;
