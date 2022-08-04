@@ -14,7 +14,7 @@ namespace EXBP.Dipren
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and  can
+        ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and can
         ///   be used to access the result.
         /// </returns>
         Task<long> CountJobsAsync(CancellationToken cancellation);
