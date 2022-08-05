@@ -303,7 +303,8 @@ namespace EXBP.Dipren
             this._last = last;
             this._inclusive = inclusive;
             this._position = position;
-
+            this._processed = processed;
+            this._remaining = remaining;
         }
     }
 }
