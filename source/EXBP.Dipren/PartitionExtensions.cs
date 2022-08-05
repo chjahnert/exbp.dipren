@@ -38,5 +38,36 @@ namespace EXBP.Dipren
 
             return null;
         }
+
+        /// <summary>
+        ///   Converts a <see cref="Partition"/> object to a <see cref="Partition{TKey}"/> object.
+        /// </summary>
+        /// <typeparam name="TKey">
+        ///   The type of keys.
+        /// </typeparam>
+        /// <param name="source">
+        ///   The <see cref="Partition"/> object to convert.
+        /// </param>
+        /// <param name="serializer">
+        ///   The key serializer to use.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Partition{TKey}"/> object that is equivalent to <paramref name="source"/>.
+        /// </returns>
+        internal static Partition<TKey> Hydrate<TKey>(this Partition source, IKeySerializer<TKey> serializer) where TKey : IComparable<TKey>
+        {
+            Debug.Assert(source != null);
+            Debug.Assert(serializer != null);
+
+            TKey first = serializer.Deserailize(source.First);
+            TKey last = serializer.Deserailize(source.Last);
+            TKey position = serializer.Deserailize(source.Position);
+
+            Range<TKey> range = new Range<TKey>(first, last, source.IsInclusive);
+
+            Partition<TKey> result = new Partition<TKey>(source.Id, source.Owner, source.Created, source.Updated, range, position, source.Processed, source.Remaining);
+
+            return result;
+        }
     }
 }
