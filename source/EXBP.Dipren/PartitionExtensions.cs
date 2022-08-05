@@ -25,7 +25,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Partition"/> object that is equivalent to <paramref name="source"/>.
         /// </returns>
-        internal static Partition Dehydrate<TKey>(this Partition<TKey> source, IKeySerializer<TKey> serializer) where TKey : IComparable<TKey>
+        internal static Partition Flatten<TKey>(this Partition<TKey> source, IKeySerializer<TKey> serializer) where TKey : IComparable<TKey>
         {
             Debug.Assert(source != null);
             Debug.Assert(serializer != null);
@@ -54,7 +54,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Partition{TKey}"/> object that is equivalent to <paramref name="source"/>.
         /// </returns>
-        internal static Partition<TKey> Hydrate<TKey>(this Partition source, IKeySerializer<TKey> serializer) where TKey : IComparable<TKey>
+        internal static Partition<TKey> Restore<TKey>(this Partition source, IKeySerializer<TKey> serializer) where TKey : IComparable<TKey>
         {
             Debug.Assert(source != null);
             Debug.Assert(serializer != null);

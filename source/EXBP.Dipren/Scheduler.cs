@@ -84,7 +84,7 @@ namespace EXBP.Dipren
             DateTime timestamp = this._clock.GetDateTime();
 
             Partition<TKey> partition = new Partition<TKey>(id, null, timestamp, timestamp, range, default, 0L, remaining);
-            Partition record = partition.Dehydrate(job.Serializer);
+            Partition record = partition.Flatten(job.Serializer);
 
             await this._store.InsertPartitionAsync(record, cancellation);
         }
