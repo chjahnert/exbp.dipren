@@ -30,13 +30,13 @@ namespace EXBP.Dipren
             Debug.Assert(source != null);
             Debug.Assert(serializer != null);
 
-            string first = serializer.Searialize(source.Range.First);
-            string last = serializer.Searialize(source.Range.Last);
-            string position = serializer.Searialize(source.Position);
+            string first = serializer.Serialize(source.Range.First);
+            string last = serializer.Serialize(source.Range.Last);
+            string position = serializer.Serialize(source.Position);
 
             Partition result = new Partition(source.Id, source.Owner, source.Created, source.Updated, first, last, source.Range.IsInclusive, position, source.Processed, source.Remaining);
 
-            return null;
+            return result;
         }
 
         /// <summary>
@@ -59,9 +59,9 @@ namespace EXBP.Dipren
             Debug.Assert(source != null);
             Debug.Assert(serializer != null);
 
-            TKey first = serializer.Deserailize(source.First);
-            TKey last = serializer.Deserailize(source.Last);
-            TKey position = serializer.Deserailize(source.Position);
+            TKey first = serializer.Deserialize(source.First);
+            TKey last = serializer.Deserialize(source.Last);
+            TKey position = serializer.Deserialize(source.Position);
 
             Range<TKey> range = new Range<TKey>(first, last, source.IsInclusive);
 
