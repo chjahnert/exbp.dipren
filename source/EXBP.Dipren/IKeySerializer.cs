@@ -18,7 +18,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="string"/> value containing the string representation of <paramref name="key"/>.
         /// </returns>
-        string Searialize(TKey key);
+        string Serialize(TKey key);
 
         /// <summary>
         ///   Converts the <see cref="string"/> representation of a key to its original value.
@@ -29,6 +29,6 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <typeparamref name="TKey"/> value converted from <paramref name="value"/>.
         /// </returns>
-        TKey Deserailize(string value);
+        TKey Deserialize(string value);
     }
 }
