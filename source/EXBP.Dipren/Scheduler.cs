@@ -77,16 +77,26 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
+            DateTime timestamp = this._clock.GetDateTime();
+            JobEntry jobEntryInitial = new JobEntry(job.Id, job.Name, timestamp, timestamp, JobState.Initializing);
+
+            await this._store.InsertAsync(jobEntryInitial, cancellation);
+
             Range<TKey> range = await job.Source.GetRangeAsync(cancellation);
             long remaining = await job.Source.EstimateRangeSizeAsync(range, cancellation);
 
+            timestamp = this._clock.GetDateTime();
+
             Guid id = Guid.NewGuid();
-            DateTime timestamp = this._clock.GetDateTime();
-
             Partition<TKey> partition = new Partition<TKey>(id, job.Id, null, timestamp, timestamp, range, default, 0L, remaining);
-            PartitionEntry entry = partition.ToEntry(job.Serializer);
+            PartitionEntry partitionEntry = partition.ToEntry(job.Serializer);
 
-            await this._store.InsertPartitionAsync(entry, cancellation);
+            await this._store.InsertAsync(partitionEntry, cancellation);
+
+            timestamp = this._clock.GetDateTime();
+            JobEntry jobEntryReady = new JobEntry(jobEntryInitial.Id, jobEntryInitial.Name, jobEntryInitial.Created, timestamp, JobState.Ready);
+
+            await this._store.UpdateAsync(jobEntryReady, cancellation);
         }
     }
 }
