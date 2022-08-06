@@ -132,19 +132,19 @@ namespace EXBP.Dipren
         ///   Initializes a new instance of the <see cref="PartitionEntry"/> record.
         /// </summary>
         /// <param name="id">
-        ///   The unique identifier of the current partition.
+        ///   The unique identifier of the partition.
         /// </param>
         /// <param name="jobId">
         ///   The unique identifier of the distributed processing job.
         /// </param>
         /// <param name="owner">
-        ///   The owner of the current partition.
+        ///   The owner of the partition.
         /// </param>
         /// <param name="created">
-        ///   The date and time when the current partition was created.
+        ///   The date and time when the partition was created.
         /// </param>
         /// <param name="updated">
-        ///   The date and time when the current partition was last updated.
+        ///   The date and time when the partition was last updated.
         /// </param>
         /// <param name="first">
         ///   The string representation of the first key in the partition's key range.
