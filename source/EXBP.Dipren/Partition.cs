@@ -111,19 +111,19 @@ namespace EXBP.Dipren
         ///   Initializes a new instance of the <see cref="Partition{TKey}"/> class.
         /// </summary>
         /// <param name="id">
-        ///   The unique identifier of the current partition.
+        ///   The unique identifier of the partition.
         /// </param>
         /// <param name="jobId">
         ///   The unique identifier of the distributed processing job.
         /// </param>
         /// <param name="owner">
-        ///   Identifies the owner of the current partition
+        ///   Identifies the owner of the partition
         /// </param>
         /// <param name="created">
-        ///   The date and time when the current partition was created, expressed as UTC time.
+        ///   The date and time when the partition was created, expressed as UTC time.
         /// </param>
         /// <param name="updated">
-        ///   The date and time when the current partition was last updated, expressed as UTC time.
+        ///   The date and time when the partition was last updated, expressed as UTC time.
         /// </param>
         /// <param name="range">
         ///   The key range for the partition.
