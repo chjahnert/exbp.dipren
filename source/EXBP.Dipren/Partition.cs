@@ -14,6 +14,7 @@ namespace EXBP.Dipren
     internal class Partition<TKey> where TKey : IComparable<TKey>
     {
         private readonly Guid _id;
+        private readonly Guid _jobId;
         private readonly string _owner;
         private readonly DateTime _created;
         private readonly DateTime _updated;
@@ -30,6 +31,15 @@ namespace EXBP.Dipren
         ///   A <see cref="Guid"/> value that is the unique identifier of the current partition.
         /// </value>
         public Guid Id =>  this._id;
+
+        /// <summary>
+        ///   Gets the unique identifier of the distributed processing job the current partition belongs to.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="Guid"/> value that contains the unique identifier of the distributed processing job the
+        ///   current partition belongs to.
+        /// </value>
+        public Guid JobId => this._jobId;
 
         /// <summary>
         ///   Gets a value that identifies the owner of the current partition. The owner is the node processing the
@@ -103,6 +113,12 @@ namespace EXBP.Dipren
         /// <param name="id">
         ///   The unique identifier of the current partition.
         /// </param>
+        /// <param name="jobId">
+        ///   The unique identifier of the distributed processing job.
+        /// </param>
+        /// <param name="owner">
+        ///   Identifies the owner of the current partition
+        /// </param>
         /// <param name="created">
         ///   The date and time when the current partition was created, expressed as UTC time.
         /// </param>
@@ -121,7 +137,7 @@ namespace EXBP.Dipren
         /// <param name="remaining">
         ///   The estimated number of unprocessed items.
         /// </param>
-        internal Partition(Guid id, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining)
+        internal Partition(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining)
         {
             Debug.Assert(created.Kind == DateTimeKind.Utc);
             Debug.Assert(updated.Kind == DateTimeKind.Utc);
@@ -130,6 +146,7 @@ namespace EXBP.Dipren
             Debug.Assert(remaining >= 0L);
 
             this._id = id;
+            this._jobId = jobId;
             this._owner = owner;
             this._created = created;
             this._updated = updated;
@@ -146,6 +163,7 @@ namespace EXBP.Dipren
     public record Partition
     {
         private readonly Guid _id;
+        private readonly Guid _jobId;
         private readonly string _owner;
         private readonly DateTime _created;
         private readonly DateTime _updated;
@@ -163,6 +181,15 @@ namespace EXBP.Dipren
         ///   A <see cref="Guid"/> value that is the unique identifier of the current partition.
         /// </value>
         public Guid Id =>  this._id;
+
+        /// <summary>
+        ///   Gets the unique identifier of the distributed processing job the current partition belongs to.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="Guid"/> value that contains the unique identifier of the distributed processing job the
+        ///   current partition belongs to.
+        /// </value>
+        public Guid JobId => this._jobId;
 
         /// <summary>
         ///   Gets a value that identifies the owner of the current partition. The owner is the node processing the
@@ -259,6 +286,9 @@ namespace EXBP.Dipren
         /// <param name="id">
         ///   The unique identifier of the current partition.
         /// </param>
+        /// <param name="jobId">
+        ///   The unique identifier of the distributed processing job.
+        /// </param>
         /// <param name="owner">
         ///   The owner of the current partition.
         /// </param>
@@ -286,7 +316,7 @@ namespace EXBP.Dipren
         /// <param name="remaining">
         ///   The estimated number of unprocessed items in the partition.
         /// </param>
-        public Partition(Guid id, string owner, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining)
+        public Partition(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining)
         {
             Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(first, nameof(first));
@@ -296,6 +326,7 @@ namespace EXBP.Dipren
             Assert.ArgumentIsGreaterOrEqual(remaining, 0L, nameof(remaining));
 
             this._id = id;
+            this._jobId = jobId;
             this._owner = owner;
             this._created = created;
             this._updated = updated;

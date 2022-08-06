@@ -26,15 +26,17 @@ namespace EXBP.Dipren.Tests
         [Test]
         public void Flatten_RestoredPartiton_RetrunsCorrectValue()
         {
-            Guid id = Guid.NewGuid();
+            Guid partitionId = Guid.NewGuid();
+            Guid jobId = Guid.NewGuid();
             DateTime created = new DateTime(2022, 8, 1, 11, 32, 17, DateTimeKind.Utc);
             DateTime updated = new DateTime(2022, 8, 1, 11, 36, 43, DateTimeKind.Utc);
             Range<int> range = new Range<int>(1, 1024, true);
 
-            Partition<int> source = new Partition<int>(id, "machine-name/251/1/1442", created, updated, range, 621, 621, 403);
+            Partition<int> source = new Partition<int>(partitionId, jobId, "machine-name/251/1/1442", created, updated, range, 621, 621, 403);
             Partition target = source.Flatten(this._serializer);
 
             Assert.That(target.Id, Is.EqualTo(source.Id));
+            Assert.That(target.JobId, Is.EqualTo(source.JobId));
             Assert.That(target.Owner, Is.EqualTo(source.Owner));
             Assert.That(target.Created, Is.EqualTo(source.Created));
             Assert.That(target.Updated, Is.EqualTo(source.Updated));
@@ -49,14 +51,16 @@ namespace EXBP.Dipren.Tests
         [Test]
         public void Restore_FlattenedPartiton_RetrunsCorrectValue()
         {
-            Guid id = Guid.NewGuid();
+            Guid partitionId = Guid.NewGuid();
+            Guid jobId = Guid.NewGuid();
             DateTime created = new DateTime(2022, 8, 1, 11, 32, 17, DateTimeKind.Utc);
             DateTime updated = new DateTime(2022, 8, 1, 11, 36, 43, DateTimeKind.Utc);
 
-            Partition source = new Partition(id, "machine-name/251/1/1442", created, updated, "1", "1024", true, "621", 621, 403);
+            Partition source = new Partition(partitionId, jobId, "machine-name/251/1/1442", created, updated, "1", "1024", true, "621", 621, 403);
             Partition<int> target = source.Restore(this._serializer);
 
             Assert.That(target.Id, Is.EqualTo(source.Id));
+            Assert.That(target.JobId, Is.EqualTo(source.JobId));
             Assert.That(target.Owner, Is.EqualTo(source.Owner));
             Assert.That(target.Created, Is.EqualTo(source.Created));
             Assert.That(target.Updated, Is.EqualTo(source.Updated));

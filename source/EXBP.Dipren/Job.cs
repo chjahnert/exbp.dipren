@@ -18,6 +18,7 @@ namespace EXBP.Dipren
     [DebuggerDisplay("Name = {Name}")]
     public class Job<TKey, TItem> where TKey : IComparable<TKey>
     {
+        private readonly Guid _id;
         private readonly string _name;
         private readonly IDataSource<TKey, TItem> _source;
         private readonly IKeyArithmetics<TKey> _arithmetics;
@@ -26,6 +27,14 @@ namespace EXBP.Dipren
         private readonly TimeSpan _timeout;
         private readonly int _batchSize;
 
+
+        /// <summary>
+        ///   Gets the unique identifier of the current distributed processing job.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="Guid"/> value that contains the unique identifier of the current distributed processing job.
+        /// </value>
+        public Guid Id => this._id;
 
         /// <summary>
         ///   Gets the name of the current distributed processing job.
@@ -125,6 +134,7 @@ namespace EXBP.Dipren
             Assert.ArgumentIsGreater(timeout, TimeSpan.Zero, nameof(timeout));
             Assert.ArgumentIsGreater(batchSize, 0, nameof(batchSize));
 
+            this._id = Guid.NewGuid();
             this._name = name;
             this._source = source;
             this._arithmetics = arithmetics;

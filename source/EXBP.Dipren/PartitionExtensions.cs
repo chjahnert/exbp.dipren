@@ -34,7 +34,7 @@ namespace EXBP.Dipren
             string last = serializer.Serialize(source.Range.Last);
             string position = serializer.Serialize(source.Position);
 
-            Partition result = new Partition(source.Id, source.Owner, source.Created, source.Updated, first, last, source.Range.IsInclusive, position, source.Processed, source.Remaining);
+            Partition result = new Partition(source.Id, source.JobId, source.Owner, source.Created, source.Updated, first, last, source.Range.IsInclusive, position, source.Processed, source.Remaining);
 
             return result;
         }
@@ -65,7 +65,7 @@ namespace EXBP.Dipren
 
             Range<TKey> range = new Range<TKey>(first, last, source.IsInclusive);
 
-            Partition<TKey> result = new Partition<TKey>(source.Id, source.Owner, source.Created, source.Updated, range, position, source.Processed, source.Remaining);
+            Partition<TKey> result = new Partition<TKey>(source.Id, source.JobId, source.Owner, source.Created, source.Updated, range, position, source.Processed, source.Remaining);
 
             return result;
         }
