@@ -22,6 +22,7 @@ namespace EXBP.Dipren
         private readonly TKey _position;
         private readonly long _processed;
         private readonly long _remaining;
+        private readonly bool _split;
 
 
         /// <summary>
@@ -106,6 +107,14 @@ namespace EXBP.Dipren
         /// </value>
         public long Remaining => this._remaining;
 
+        /// <summary>
+        ///   Gets a value indicating whether a split was requested.
+        /// </summary>
+        /// <value>
+        ///   <see langword="true"/> if a split was requested; otherwise, <see langword="false"/>.
+        /// </value>
+        public bool IsSplitRequested => this._split;
+
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="Partition{TKey}"/> class.
@@ -137,7 +146,10 @@ namespace EXBP.Dipren
         /// <param name="remaining">
         ///   The estimated number of unprocessed items.
         /// </param>
-        internal Partition(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining)
+        /// <param name="split">
+        ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
+        /// </param>
+        internal Partition(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool split = false)
         {
             Debug.Assert(created.Kind == DateTimeKind.Utc);
             Debug.Assert(updated.Kind == DateTimeKind.Utc);
@@ -154,6 +166,7 @@ namespace EXBP.Dipren
             this._position = position;
             this._processed = processed;
             this._remaining = remaining;
+            this._split = split;
         }
     }
 }

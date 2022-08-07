@@ -35,7 +35,7 @@ namespace EXBP.Dipren
 
             Range<TKey> range = new Range<TKey>(first, last, source.IsInclusive);
 
-            Partition<TKey> result = new Partition<TKey>(source.Id, source.JobId, source.Owner, source.Created, source.Updated, range, position, source.Processed, source.Remaining);
+            Partition<TKey> result = new Partition<TKey>(source.Id, source.JobId, source.Owner, source.Created, source.Updated, range, position, source.Processed, source.Remaining, source.IsSplitRequested);
 
             return result;
         }

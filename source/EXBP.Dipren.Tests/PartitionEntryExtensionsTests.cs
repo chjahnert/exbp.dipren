@@ -31,7 +31,7 @@ namespace EXBP.Dipren.Tests
             DateTime created = new DateTime(2022, 8, 1, 11, 32, 17, DateTimeKind.Utc);
             DateTime updated = new DateTime(2022, 8, 1, 11, 36, 43, DateTimeKind.Utc);
 
-            PartitionEntry source = new PartitionEntry(partitionId, jobId, "machine-name/251/1/1442", created, updated, "1", "1024", true, "621", 621, 403);
+            PartitionEntry source = new PartitionEntry(partitionId, jobId, "machine-name/251/1/1442", created, updated, "1", "1024", true, "621", 621, 403, true);
             Partition<int> target = source.ToPartition(this._serializer);
 
             Assert.That(target.Id, Is.EqualTo(source.Id));
@@ -45,6 +45,7 @@ namespace EXBP.Dipren.Tests
             Assert.That(target.Position, Is.EqualTo(this._serializer.Deserialize(source.Position)));
             Assert.That(target.Processed, Is.EqualTo(source.Processed));
             Assert.That(target.Remaining, Is.EqualTo(source.Remaining));
+            Assert.That(target.IsSplitRequested, Is.EqualTo(source.IsSplitRequested));
         }
     }
 }

@@ -20,6 +20,7 @@ namespace EXBP.Dipren
         private readonly string _position;
         private readonly long _processed;
         private readonly long _remaining;
+        private readonly bool _split;
 
 
         /// <summary>
@@ -127,6 +128,14 @@ namespace EXBP.Dipren
         /// </value>
         public long Remaining => this._remaining;
 
+        /// <summary>
+        ///   Gets a value indicating whether a split was requested.
+        /// </summary>
+        /// <value>
+        ///   <see langword="true"/> if a split was requested; otherwise, <see langword="false"/>.
+        /// </value>
+        public bool IsSplitRequested => this._split;
+
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="PartitionEntry"/> record.
@@ -164,7 +173,10 @@ namespace EXBP.Dipren
         /// <param name="remaining">
         ///   The estimated number of unprocessed items in the partition.
         /// </param>
-        public PartitionEntry(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining)
+        /// <param name="split">
+        ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
+        /// </param>
+        public PartitionEntry(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, bool split = false)
         {
             Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(first, nameof(first));
@@ -184,6 +196,7 @@ namespace EXBP.Dipren
             this._position = position;
             this._processed = processed;
             this._remaining = remaining;
+            this._split = split;
         }
     }
 }
