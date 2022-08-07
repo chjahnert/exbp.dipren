@@ -77,26 +77,135 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
+            JobEntry jobEntry = await this.CreateJobEntryAsync(job, cancellation);
+
+            try
+            {
+                await this.CreatePartitionEntryAsync(job, cancellation);
+                await this.MarkJobAsReadyAsync(jobEntry, cancellation);
+            }
+            catch (Exception ex)
+            {
+                await this.MarkJobAsFailedAsync(jobEntry, ex, cancellation);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///   Creates a job entry for the specified job in the engine data store.
+        /// </summary>
+        /// <typeparam name="TKey">
+        ///   The type of the item key.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        ///   The type of items to process.
+        /// </typeparam>
+        /// <param name="job">
+        ///   The <see cref="Job{TKey, TItem}"/> object for which to create the entry.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="JobEntry"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        private async Task<JobEntry> CreateJobEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
+        {
             DateTime timestamp = this._clock.GetDateTime();
-            JobEntry jobEntryInitial = new JobEntry(job.Id, job.Name, timestamp, timestamp, JobState.Initializing);
+            JobEntry result = new JobEntry(job.Id, job.Name, timestamp, timestamp, JobState.Initializing);
 
-            await this._store.InsertAsync(jobEntryInitial, cancellation);
+            await this._store.InsertAsync(result, cancellation);
 
+            return result;
+        }
+
+        /// <summary>
+        ///   Creates a partition entry for the specified job in the engine data store.
+        /// </summary>
+        /// <typeparam name="TKey">
+        ///   The type of the item key.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        ///   The type of items to process.
+        /// </typeparam>
+        /// <param name="job">
+        ///   The <see cref="Job{TKey, TItem}"/> object for which to create the entry.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="PartitionEntry"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        private async Task<PartitionEntry> CreatePartitionEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
+        {
             Range<TKey> range = await job.Source.GetRangeAsync(cancellation);
             long remaining = await job.Source.EstimateRangeSizeAsync(range, cancellation);
 
-            timestamp = this._clock.GetDateTime();
-
             Guid id = Guid.NewGuid();
-            Partition<TKey> partition = new Partition<TKey>(id, job.Id, null, timestamp, timestamp, range, default, 0L, remaining);
-            PartitionEntry partitionEntry = partition.ToEntry(job.Serializer);
+            DateTime timestampPartitionCreated = this._clock.GetDateTime();
+            Partition<TKey> partition = new Partition<TKey>(id, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining);
+            PartitionEntry result = partition.ToEntry(job.Serializer);
 
-            await this._store.InsertAsync(partitionEntry, cancellation);
+            await this._store.InsertAsync(result, cancellation);
 
-            timestamp = this._clock.GetDateTime();
-            JobEntry jobEntryReady = new JobEntry(jobEntryInitial.Id, jobEntryInitial.Name, jobEntryInitial.Created, timestamp, JobState.Ready);
+            return result;
+        }
 
-            await this._store.UpdateAsync(jobEntryReady, cancellation);
+        /// <summary>
+        ///   Marks a job entry as ready.
+        /// </summary>
+        /// <param name="template">
+        ///   The job entry to use as a template for the updated job entry.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="JobEntry"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        private async Task<JobEntry> MarkJobAsReadyAsync(JobEntry template, CancellationToken cancellation)
+        {
+            DateTime timetamp = this._clock.GetDateTime();
+            JobEntry result = new JobEntry(template.Id, template.Name, template.Created, timetamp, JobState.Ready);
+
+            await this._store.UpdateAsync(result, cancellation);
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Marks a job entry as failed.
+        /// </summary>
+        /// <param name="template">
+        ///   The job entry to use as a template for the updated job entry.
+        /// </param>
+        /// <param name="exception">
+        ///   The exception, if available, that provides information about the error.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="JobEntry"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        private async Task<JobEntry> MarkJobAsFailedAsync(JobEntry template, Exception exception, CancellationToken cancellation)
+        {
+            DateTime timetamp = this._clock.GetDateTime();
+            JobEntry result = new JobEntry(template.Id, template.Name, template.Created, timetamp, JobState.Failed, exception);
+
+            await this._store.UpdateAsync(result, cancellation);
+
+            return result;
         }
     }
 }

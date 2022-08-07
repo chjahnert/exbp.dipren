@@ -14,6 +14,7 @@ namespace EXBP.Dipren
         private readonly DateTime _created;
         private readonly DateTime _updated;
         private readonly JobState _state;
+        private readonly Exception _exception;
 
 
         /// <summary>
@@ -56,6 +57,15 @@ namespace EXBP.Dipren
         /// </value>
         public JobState State => this._state;
 
+        /// <summary>
+        ///   Gets the exception that is the reason the current job failed.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="Exception"/> object that provides information about the error that occurred; or
+        ///   <see langword="null"/> if no error occurred.
+        /// </value>
+        public Exception Exception => this._exception;
+
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="PartitionEntry"/> record.
@@ -75,7 +85,10 @@ namespace EXBP.Dipren
         /// <param name="state">
         ///   The state of the job.
         /// </param>
-        public JobEntry(Guid id, string name, DateTime created, DateTime updated, JobState state)
+        /// <param name="exception">
+        ///   The exception that is the reason the job failed.
+        /// </param>
+        public JobEntry(Guid id, string name, DateTime created, DateTime updated, JobState state, Exception exception = null)
         {
             Assert.ArgumentIsNotNull(name, nameof(name));
             Assert.ArgumentIsDefined(state, nameof(state));
@@ -85,6 +98,7 @@ namespace EXBP.Dipren
             this._created = created;
             this._updated = updated;
             this._state = state;
+            this._exception = exception;
         }
     }
 }

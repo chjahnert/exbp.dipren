@@ -24,6 +24,11 @@ namespace EXBP.Dipren
         /// <summary>
         ///   The distributed processing job is complete.
         /// </summary>
-        Completed = 9
+        Completed = 8,
+
+        /// <summary>
+        ///   The distributed processing job failed.
+        /// </summary>
+        Failed = 9
     }
 }
