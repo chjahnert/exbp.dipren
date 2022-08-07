@@ -149,7 +149,7 @@ namespace EXBP.Dipren
         /// <param name="split">
         ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
         /// </param>
-        internal Partition(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool split = false)
+        internal Partition(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool split)
         {
             Debug.Assert(created.Kind == DateTimeKind.Utc);
             Debug.Assert(updated.Kind == DateTimeKind.Utc);
