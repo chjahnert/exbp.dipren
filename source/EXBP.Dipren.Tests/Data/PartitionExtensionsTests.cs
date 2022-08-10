@@ -1,20 +1,22 @@
 ﻿
 using System.Globalization;
 
+using EXBP.Dipren.Data;
+
 using NSubstitute;
 
 using NUnit.Framework;
 
 
-namespace EXBP.Dipren.Tests
+namespace EXBP.Dipren.Tests.Data
 {
     [TestFixture]
-    public class PartitionEntryExtensionsTests
+    public class PartitionExtensionsTests
     {
         private readonly IKeySerializer<int> _serializer;
 
 
-        public PartitionEntryExtensionsTests()
+        public PartitionExtensionsTests()
         {
             this._serializer = Substitute.For<IKeySerializer<int>>();
 
@@ -31,7 +33,7 @@ namespace EXBP.Dipren.Tests
             DateTime created = new DateTime(2022, 8, 1, 11, 32, 17, DateTimeKind.Utc);
             DateTime updated = new DateTime(2022, 8, 1, 11, 36, 43, DateTimeKind.Utc);
 
-            PartitionEntry source = new PartitionEntry(partitionId, jobId, "machine-name/251/1/1442", created, updated, "1", "1024", true, "621", 621, 403, true);
+            Partition source = new Partition(partitionId, jobId, "machine-name/251/1/1442", created, updated, "1", "1024", true, "621", 621, 403, true);
             Partition<int> target = source.ToPartition(this._serializer);
 
             Assert.That(target.Id, Is.EqualTo(source.Id));

@@ -1,5 +1,4 @@
-﻿
-namespace EXBP.Dipren
+﻿namespace EXBP.Dipren.Data
 {
     /// <summary>
     ///   Allows a class to implement a data store for the distributed processing engine.
@@ -32,7 +31,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        Task InsertAsync(JobEntry job, CancellationToken cancellation);
+        Task InsertAsync(Job job, CancellationToken cancellation);
 
         /// <summary>
         ///   Updates an existing job entry in the data store.
@@ -47,7 +46,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        Task UpdateAsync(JobEntry job, CancellationToken cancellation);
+        Task UpdateAsync(Job job, CancellationToken cancellation);
 
         /// <summary>
         ///   Inserts a new partition entry into the data store.
@@ -62,6 +61,6 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        Task InsertAsync(PartitionEntry partition, CancellationToken cancellation);
+        Task InsertAsync(Partition partition, CancellationToken cancellation);
     }
 }

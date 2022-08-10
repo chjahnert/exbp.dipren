@@ -2,12 +2,12 @@
 using EXBP.Dipren.Diagnostics;
 
 
-namespace EXBP.Dipren
+namespace EXBP.Dipren.Data
 {
     /// <summary>
     ///   Represents a persisted <see cref="Job{TKey, TItem}"/> object.
     /// </summary>
-    public record JobEntry
+    public record Job
     {
         private readonly Guid _id;
         private readonly string _name;
@@ -23,7 +23,7 @@ namespace EXBP.Dipren
         /// <value>
         ///   A <see cref="Guid"/> value that is the unique identifier of the current partition.
         /// </value>
-        public Guid Id =>  this._id;
+        public Guid Id => this._id;
 
         /// <summary>
         ///   Gets the name of the current job.
@@ -68,7 +68,7 @@ namespace EXBP.Dipren
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="PartitionEntry"/> record.
+        ///   Initializes a new instance of the <see cref="Partition"/> record.
         /// </summary>
         /// <param name="id">
         ///   The unique identifier of the job.
@@ -88,7 +88,7 @@ namespace EXBP.Dipren
         /// <param name="exception">
         ///   The exception that is the reason the job failed.
         /// </param>
-        public JobEntry(Guid id, string name, DateTime created, DateTime updated, JobState state, Exception exception = null)
+        public Job(Guid id, string name, DateTime created, DateTime updated, JobState state, Exception exception = null)
         {
             Assert.ArgumentIsNotNull(name, nameof(name));
             Assert.ArgumentIsDefined(state, nameof(state));

@@ -2,21 +2,21 @@
 using System.Diagnostics;
 
 
-namespace EXBP.Dipren
+namespace EXBP.Dipren.Data
 {
     /// <summary>
-    ///   Implements extension methods for the <see cref="PartitionEntry"/> type.
+    ///   Implements extension methods for the <see cref="Partition"/> type.
     /// </summary>
-    internal static class PartitionEntryExtensions
+    internal static class PartitionExtensions
     {
         /// <summary>
-        ///   Converts a <see cref="PartitionEntry"/> object to a <see cref="Partition{TKey}"/> object.
+        ///   Converts a <see cref="Partition"/> object to a <see cref="Partition{TKey}"/> object.
         /// </summary>
         /// <typeparam name="TKey">
         ///   The type of keys.
         /// </typeparam>
         /// <param name="source">
-        ///   The <see cref="PartitionEntry"/> object to convert.
+        ///   The <see cref="Partition"/> object to convert.
         /// </param>
         /// <param name="serializer">
         ///   The key serializer to use.
@@ -24,7 +24,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Partition{TKey}"/> object that is equivalent to <paramref name="source"/>.
         /// </returns>
-        internal static Partition<TKey> ToPartition<TKey>(this PartitionEntry source, IKeySerializer<TKey> serializer) where TKey : IComparable<TKey>
+        internal static Partition<TKey> ToPartition<TKey>(this Partition source, IKeySerializer<TKey> serializer) where TKey : IComparable<TKey>
         {
             Debug.Assert(source != null);
             Debug.Assert(serializer != null);

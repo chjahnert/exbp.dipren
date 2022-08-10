@@ -1,6 +1,8 @@
 ﻿
 using System.Diagnostics;
 
+using EXBP.Dipren.Data;
+
 
 namespace EXBP.Dipren
 {
@@ -11,7 +13,7 @@ namespace EXBP.Dipren
     internal static class PartitionExtensions
     {
         /// <summary>
-        ///   Converts a <see cref="Partition{TKey}"/> object to a <see cref="PartitionEntry"/> object.
+        ///   Converts a <see cref="Partition{TKey}"/> object to a <see cref="Partition"/> object.
         /// </summary>
         /// <typeparam name="TKey">
         ///   The type of keys.
@@ -23,9 +25,9 @@ namespace EXBP.Dipren
         ///   The key serializer to use.
         /// </param>
         /// <returns>
-        ///   A <see cref="PartitionEntry"/> object that is equivalent to <paramref name="source"/>.
+        ///   A <see cref="Partition"/> object that is equivalent to <paramref name="source"/>.
         /// </returns>
-        internal static PartitionEntry ToEntry<TKey>(this Partition<TKey> source, IKeySerializer<TKey> serializer) where TKey : IComparable<TKey>
+        internal static Partition ToEntry<TKey>(this Partition<TKey> source, IKeySerializer<TKey> serializer) where TKey : IComparable<TKey>
         {
             Debug.Assert(source != null);
             Debug.Assert(serializer != null);
@@ -34,7 +36,7 @@ namespace EXBP.Dipren
             string last = serializer.Serialize(source.Range.Last);
             string position = serializer.Serialize(source.Position);
 
-            PartitionEntry result = new PartitionEntry(source.Id, source.JobId, source.Owner, source.Created, source.Updated, first, last, source.Range.IsInclusive, position, source.Processed, source.Remaining, source.IsSplitRequested);
+            Partition result = new Partition(source.Id, source.JobId, source.Owner, source.Created, source.Updated, first, last, source.Range.IsInclusive, position, source.Processed, source.Remaining, source.IsSplitRequested);
 
             return result;
         }

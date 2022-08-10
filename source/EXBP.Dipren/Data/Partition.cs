@@ -2,12 +2,12 @@
 using EXBP.Dipren.Diagnostics;
 
 
-namespace EXBP.Dipren
+namespace EXBP.Dipren.Data
 {
     /// <summary>
     ///   Represents a persisted <see cref="Partition{TKey}"/> object.
     /// </summary>
-    public record PartitionEntry
+    public record Partition
     {
         private readonly Guid _id;
         private readonly Guid _jobId;
@@ -29,7 +29,7 @@ namespace EXBP.Dipren
         /// <value>
         ///   A <see cref="Guid"/> value that is the unique identifier of the current partition.
         /// </value>
-        public Guid Id =>  this._id;
+        public Guid Id => this._id;
 
         /// <summary>
         ///   Gets the unique identifier of the distributed processing job the current partition belongs to.
@@ -138,7 +138,7 @@ namespace EXBP.Dipren
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="PartitionEntry"/> record.
+        ///   Initializes a new instance of the <see cref="Partition"/> record.
         /// </summary>
         /// <param name="id">
         ///   The unique identifier of the partition.
@@ -176,7 +176,7 @@ namespace EXBP.Dipren
         /// <param name="split">
         ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
         /// </param>
-        public PartitionEntry(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, bool split = false)
+        public Partition(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, bool split = false)
         {
             Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(first, nameof(first));

@@ -1,6 +1,8 @@
 ﻿
 using System.Globalization;
 
+using EXBP.Dipren.Data;
+
 using NSubstitute;
 
 using NUnit.Framework;
@@ -33,7 +35,7 @@ namespace EXBP.Dipren.Tests
             Range<int> range = new Range<int>(1, 1024, true);
 
             Partition<int> source = new Partition<int>(partitionId, jobId, "machine-name/251/1/1442", created, updated, range, 621, 621, 403, true);
-            PartitionEntry target = source.ToEntry(this._serializer);
+            Partition target = source.ToEntry(this._serializer);
 
             Assert.That(target.Id, Is.EqualTo(source.Id));
             Assert.That(target.JobId, Is.EqualTo(source.JobId));
