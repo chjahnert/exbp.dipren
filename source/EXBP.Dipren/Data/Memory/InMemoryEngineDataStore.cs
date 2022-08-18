@@ -97,9 +97,32 @@ namespace EXBP.Dipren.Data.Memory
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="DuplicateIdentifierException">
+        ///   A partition with the specified unique identifier already exists in the data store.
+        /// </exception>
+        /// <exception cref="InvalidReferenceException">
+        ///   The job referenced by the partition does not exist within the data store.
+        /// </exception>
         public Task InsertAsync(Partition partition, CancellationToken cancellation)
         {
-            throw new NotImplementedException();
+            Assert.ArgumentIsNotNull(partition, nameof(partition));
+
+            lock (this._syncRoot)
+            {
+                if (this._partitions.Contains(partition.Id) == true)
+                {
+                    throw new DuplicateIdentifierException(InMemoryEngineDataStoreResources.PartitionWithSameIdentifierAlreadyExists);
+                }
+
+                if (this._jobs.Contains(partition.JobId) == false)
+                {
+                    throw new InvalidReferenceException(InMemoryEngineDataStoreResources.ReferencedJobDoesNotExist);
+                }
+
+                this._partitions.Add(partition);
+            }
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
