@@ -63,7 +63,7 @@ namespace EXBP.Dipren.Data.Memory
         ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
         /// </exception>
         /// <exception cref="DuplicateIdentifierException">
-        ///   A job with the specified unique identifier already exists in the store.
+        ///   A job with the specified unique identifier already exists in the data store.
         /// </exception>
         public Task InsertAsync(Job job, CancellationToken cancellation)
         {
@@ -138,13 +138,34 @@ namespace EXBP.Dipren.Data.Memory
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
         public Task UpdateAsync(Job job, CancellationToken cancellation)
         {
-            throw new NotImplementedException();
+            Assert.ArgumentIsNotNull(job, nameof(job));
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._jobs.Contains(job.Id);
+
+                if (exists == false)
+                {
+                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.JobWithSpecifiedIdentifierDoesNotExist);
+                }
+
+                this._jobs.Remove(job.Id);
+                this._jobs.Add(job);
+            }
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
-        ///   Implements a collection of <see cref="Job"/> objects.
+        ///   Implements a collection of <see cref="Partition"/> records.
         /// </summary>
         private class PartitionCollection : KeyedCollection<Guid, Partition>
         {
@@ -169,7 +190,7 @@ namespace EXBP.Dipren.Data.Memory
         }
 
         /// <summary>
-        ///   Implements a collection of <see cref="Job"/> objects.
+        ///   Implements a collection of <see cref="Job"/> records.
         /// </summary>
         private class JobCollection : KeyedCollection<Guid, Job>
         {

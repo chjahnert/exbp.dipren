@@ -120,6 +120,9 @@
   <data name="JobWithSameIdentiferAlreadyExists" xml:space="preserve">
     <value>A job with the specified unique identifier already exists in the data store.</value>
   </data>
+  <data name="JobWithSpecifiedIdentifierDoesNotExist" xml:space="preserve">
+    <value>A job with the specified unique identifier does not exist in the data store.</value>
+  </data>
   <data name="PartitionWithSameIdentifierAlreadyExists" xml:space="preserve">
     <value>A partition with the specified unique identifier already exists in the data store.</value>
   </data>

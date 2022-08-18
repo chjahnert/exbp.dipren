@@ -70,6 +70,15 @@ namespace EXBP.Dipren.Data.Memory {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A job with the specified unique identifier does not exist in the data store..
+        /// </summary>
+        internal static string JobWithSpecifiedIdentifierDoesNotExist {
+            get {
+                return ResourceManager.GetString("JobWithSpecifiedIdentifierDoesNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A partition with the specified unique identifier already exists in the data store..
         /// </summary>
         internal static string PartitionWithSameIdentifierAlreadyExists {
