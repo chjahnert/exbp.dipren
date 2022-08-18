@@ -1,6 +1,8 @@
 ﻿
 using System.Collections.ObjectModel;
 
+using EXBP.Dipren.Diagnostics;
+
 
 namespace EXBP.Dipren.Data.Memory
 {
@@ -11,6 +13,7 @@ namespace EXBP.Dipren.Data.Memory
     {
         private readonly object _syncRoot = new object();
         private readonly JobCollection _jobs = new JobCollection();
+        private readonly PartitionCollection _partitions = new PartitionCollection();
 
 
         /// <summary>
@@ -56,9 +59,29 @@ namespace EXBP.Dipren.Data.Memory
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="JobAlreadyExistsException">
+        ///   A job with the specified unique identifier already exists in the store.
+        /// </exception>
         public Task InsertAsync(Job job, CancellationToken cancellation)
         {
-            throw new NotImplementedException();
+            Assert.ArgumentIsNotNull(job, nameof(job));
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._jobs.Contains(job.Id);
+
+                if (exists == true)
+                {
+                    throw new JobAlreadyExistsException(InMemoryEngineDataStoreResources.JobWithSameIdentiferAlreadyExists);
+                }
+
+                this._jobs.Add(job);
+            }
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -100,12 +123,12 @@ namespace EXBP.Dipren.Data.Memory
         /// <summary>
         ///   Implements a collection of <see cref="Job"/> objects.
         /// </summary>
-        private class JobCollection : KeyedCollection<string, Job>
+        private class PartitionCollection : KeyedCollection<Guid, Partition>
         {
             /// <summary>
-            ///   Initializes a new and empty instance of the <see cref="JobCollection"/> type.
+            ///   Initializes a new and empty instance of the <see cref="PartitionCollection"/> type.
             /// </summary>
-            public JobCollection() : base(StringComparer.Ordinal)
+            public PartitionCollection()
             {
             }
 
@@ -118,8 +141,33 @@ namespace EXBP.Dipren.Data.Memory
             /// <returns>
             ///   The key of the specified item.
             /// </returns>
-            protected override string GetKeyForItem(Job item)
-                => item.Name;
+            protected override Guid GetKeyForItem(Partition item)
+                => item.Id;
+        }
+
+        /// <summary>
+        ///   Implements a collection of <see cref="Job"/> objects.
+        /// </summary>
+        private class JobCollection : KeyedCollection<Guid, Job>
+        {
+            /// <summary>
+            ///   Initializes a new and empty instance of the <see cref="JobCollection"/> type.
+            /// </summary>
+            public JobCollection()
+            {
+            }
+
+            /// <summary>
+            ///   Returns the key for the specified item.
+            /// </summary>
+            /// <param name="item">
+            ///   The item for which to return the key.
+            /// </param>
+            /// <returns>
+            ///   The key of the specified item.
+            /// </returns>
+            protected override Guid GetKeyForItem(Job item)
+                => item.Id;
         }
     }
 }
