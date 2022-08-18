@@ -1,16 +1,13 @@
 ﻿
 using System.Collections.ObjectModel;
 
-using EXBP.Dipren.Data;
-using EXBP.Dipren.Diagnostics;
 
-
-namespace EXBP.Dipren
+namespace EXBP.Dipren.Data.Memory
 {
     /// <summary>
     ///   Implements an in-memory <see cref="IEngineDataStore"/> that can be used for testing.
     /// </summary>
-    public class InMemoryEngineDataStore
+    public class InMemoryEngineDataStore : IEngineDataStore
     {
         private readonly object _syncRoot = new object();
         private readonly JobCollection _jobs = new JobCollection();
@@ -47,6 +44,60 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
+        ///   Inserts a new job entry into the data store.
+        /// </summary>
+        /// <param name="job">
+        ///   The job entry to insert.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
+        public Task InsertAsync(Job job, CancellationToken cancellation)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///   Inserts a new partition entry into the data store.
+        /// </summary>
+        /// <param name="partition">
+        ///   The new partition entry to insert.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
+        public Task InsertAsync(Partition partition, CancellationToken cancellation)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///   Updates an existing job entry in the data store.
+        /// </summary>
+        /// <param name="job">
+        ///   The job entry to update.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
+        public Task UpdateAsync(Job job, CancellationToken cancellation)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         ///   Implements a collection of <see cref="Job"/> objects.
         /// </summary>
         private class JobCollection : KeyedCollection<string, Job>
@@ -69,32 +120,6 @@ namespace EXBP.Dipren
             /// </returns>
             protected override string GetKeyForItem(Job item)
                 => item.Name;
-        }
-
-        /// <summary>
-        ///   Represents a distributed processing job in an <see cref="InMemoryEngineDataStore"/> instance.
-        /// </summary>
-        private sealed class Job
-        {
-            /// <summary>
-            ///   Gets the unique name of the current distributed processing job.
-            /// </summary>
-            /// <value>
-            ///   A <see cref="string"/> value containing the unique name of the current distributed processing job.
-            /// </value>
-            public string Name { get; }
-
-
-            /// <summary>
-            ///   Initializes a new instance of the <see cref="Job"/> class.
-            /// </summary>
-            /// <param name="name">
-            ///   The unique name of the job.
-            /// </param>
-            public Job(string name)
-            {
-                this.Name = name;
-            }   
         }
     }
 }
