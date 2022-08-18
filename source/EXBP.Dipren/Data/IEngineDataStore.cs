@@ -31,7 +31,7 @@
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        /// <exception cref="JobAlreadyExistsException">
+        /// <exception cref="DuplicateIdentifierException">
         ///   A job with the specified unique identifier already exists in the store.
         /// </exception>
         Task InsertAsync(Job job, CancellationToken cancellation);

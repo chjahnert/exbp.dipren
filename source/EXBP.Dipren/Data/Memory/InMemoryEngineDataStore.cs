@@ -62,7 +62,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="ArgumentNullException">
         ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
         /// </exception>
-        /// <exception cref="JobAlreadyExistsException">
+        /// <exception cref="DuplicateIdentifierException">
         ///   A job with the specified unique identifier already exists in the store.
         /// </exception>
         public Task InsertAsync(Job job, CancellationToken cancellation)
@@ -75,7 +75,7 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (exists == true)
                 {
-                    throw new JobAlreadyExistsException(InMemoryEngineDataStoreResources.JobWithSameIdentiferAlreadyExists);
+                    throw new DuplicateIdentifierException(InMemoryEngineDataStoreResources.JobWithSameIdentiferAlreadyExists);
                 }
 
                 this._jobs.Add(job);
