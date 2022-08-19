@@ -162,7 +162,8 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="bool"/> value indicating whether <paramref name="last"/> is included in the key range.
         /// </param>
         /// <param name="position">
-        ///   The string representation of the key of the last item that was processed in the partition.
+        ///   The string representation of the key of the last item that was processed in the partition or
+        ///   <see langword="null"/> if no item was process yet.
         /// </param>
         /// <param name="processed">
         ///   The number of items processed in the partition so far.
@@ -180,7 +181,6 @@ namespace EXBP.Dipren.Data
         {
             Assert.ArgumentIsNotNull(first, nameof(first));
             Assert.ArgumentIsNotNull(last, nameof(last));
-            Assert.ArgumentIsNotNull(position, nameof(position));
             Assert.ArgumentIsGreaterOrEqual(processed, 0L, nameof(processed));
             Assert.ArgumentIsGreaterOrEqual(remaining, 0L, nameof(remaining));
 

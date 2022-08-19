@@ -31,7 +31,7 @@ namespace EXBP.Dipren.Data
 
             TKey first = serializer.Deserialize(source.First);
             TKey last = serializer.Deserialize(source.Last);
-            TKey position = serializer.Deserialize(source.Position);
+            TKey position = (source.Position != null) ? serializer.Deserialize(source.Position) : default;
 
             Range<TKey> range = new Range<TKey>(first, last, source.IsInclusive);
 
