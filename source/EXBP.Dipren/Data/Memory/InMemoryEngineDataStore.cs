@@ -17,6 +17,25 @@ namespace EXBP.Dipren.Data.Memory
 
 
         /// <summary>
+        ///   Gets the read-only collection of jobs held by the current data store.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="IReadOnlyCollection{T}"/> of <see cref="Job"/> records containing all jobs in the current
+        ///   data store. 
+        /// </value>
+        internal IReadOnlyCollection<Job> Jobs => this._jobs;
+
+        /// <summary>
+        ///   Gets the read-only collection of partitions held by the current data store.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="IReadOnlyCollection{T}"/> of <see cref="Partition"/> records containing all jobs in the
+        ///   current data store. 
+        /// </value>
+        internal IReadOnlyCollection<Partition> Partitions => this._partitions;
+
+
+        /// <summary>
         ///   Initializes a new and empty instance of the <see cref="InMemoryEngineDataStore"/> class.
         /// </summary>
         public InMemoryEngineDataStore()
@@ -163,6 +182,7 @@ namespace EXBP.Dipren.Data.Memory
 
             return Task.CompletedTask;
         }
+
 
         /// <summary>
         ///   Implements a collection of <see cref="Partition"/> records.
