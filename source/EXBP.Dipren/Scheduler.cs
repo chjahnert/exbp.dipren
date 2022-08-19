@@ -12,13 +12,6 @@ namespace EXBP.Dipren
     {
         private readonly IEngineDataStore _store;
         private readonly IDateTimeProvider _clock;
-        private readonly Configuration _configuration;
-
-
-        /// <summary>
-        ///   Gets the configuration settings for the current distributed processing engine instance.
-        /// </summary>
-        public Configuration Configuration => this._configuration;
 
 
         /// <summary>
@@ -27,18 +20,13 @@ namespace EXBP.Dipren
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
-        /// <param name="configuration">
-        ///   The configuration settings to use.
-        /// </param>
-        internal Scheduler(IEngineDataStore store, IDateTimeProvider clock, Configuration configuration)
+        internal Scheduler(IEngineDataStore store, IDateTimeProvider clock)
         {
             Assert.ArgumentIsNotNull(store, nameof(store));
             Assert.ArgumentIsNotNull(clock, nameof(clock));
-            Assert.ArgumentIsNotNull(configuration, nameof(configuration));
 
             this._store = store;
             this._clock = clock;
-            this._configuration = configuration;
         }
 
         /// <summary>
@@ -47,10 +35,7 @@ namespace EXBP.Dipren
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
-        /// <param name="configuration">
-        ///   The configuration settings to use.
-        /// </param>
-        public Scheduler(IEngineDataStore store, Configuration configuration) : this(store, UtcDateTimeProvider.Default, configuration)
+        public Scheduler(IEngineDataStore store) : this(store, UtcDateTimeProvider.Default)
         {
         }
 
