@@ -71,7 +71,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Guid partitionId = Guid.NewGuid();
             DateTime timestamp = DateTime.UtcNow;
 
-            Partition partition = new Partition(partitionId, jobId, "1", timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
+            Partition partition = new Partition(partitionId, jobId, timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
 
             Assert.ThrowsAsync<InvalidReferenceException>(() => store.InsertPartitionAsync(partition, CancellationToken.None));
         }
@@ -88,7 +88,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             await store.InsertJobAsync(job, CancellationToken.None);
 
             Guid partitionId = Guid.NewGuid();
-            Partition first = new Partition(partitionId, jobId, "1", timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
+            Partition first = new Partition(partitionId, jobId, timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
 
             await store.InsertPartitionAsync(first, CancellationToken.None);
 
@@ -109,7 +109,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             await store.InsertJobAsync(job, CancellationToken.None);
 
             Guid partitionId = Guid.NewGuid();
-            Partition partition = new Partition(partitionId, jobId, "1", timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
+            Partition partition = new Partition(partitionId, jobId, timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 

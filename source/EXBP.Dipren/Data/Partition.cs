@@ -146,9 +146,6 @@ namespace EXBP.Dipren.Data
         /// <param name="jobId">
         ///   The unique identifier of the distributed processing job.
         /// </param>
-        /// <param name="owner">
-        ///   The owner of the partition.
-        /// </param>
         /// <param name="created">
         ///   The date and time when the partition was created.
         /// </param>
@@ -173,12 +170,14 @@ namespace EXBP.Dipren.Data
         /// <param name="remaining">
         ///   The estimated number of unprocessed items in the partition.
         /// </param>
+        /// <param name="owner">
+        ///   The owner of the partition or <see langword="null"/>.
+        /// </param>
         /// <param name="split">
         ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
         /// </param>
-        public Partition(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, bool split = false)
+        public Partition(Guid id, Guid jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool split = false)
         {
-            Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(first, nameof(first));
             Assert.ArgumentIsNotNull(last, nameof(last));
             Assert.ArgumentIsNotNull(position, nameof(position));
