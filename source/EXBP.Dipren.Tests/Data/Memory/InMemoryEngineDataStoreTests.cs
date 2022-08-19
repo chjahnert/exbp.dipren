@@ -11,7 +11,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
     public class InMemoryEngineDataStoreTests
     {
         [Test]
-        public void AddAsync_ArgumentJobIsNull_ThrowsException()
+        public void InsertAsync_ArgumentJobIsNull_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
             Job job = null;
@@ -20,7 +20,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public async Task AddAsync_ArgumentJobIsValid_InsertsJob()
+        public async Task InsertAsync_ArgumentJobIsValid_InsertsJob()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
@@ -37,7 +37,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public async Task AddAsync_JobWithSameIdentifierAlreadyExists_ThrowsException()
+        public async Task InsertAsync_JobWithSameIdentifierAlreadyExists_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
@@ -54,7 +54,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void AddAsync_ArgumentPartitionIsNull_ThrowsException()
+        public void InsertAsync_ArgumentPartitionIsNull_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
             Partition partition = null;
@@ -63,7 +63,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void AddAsync_ReferencedJobDoesNotExist_ThrowsException()
+        public void InsertAsync_ReferencedJobDoesNotExist_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
@@ -77,7 +77,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public async Task AddAsync_PartitionWithSameIdentifierAlreadyExists_ThrowsException()
+        public async Task InsertAsync_PartitionWithSameIdentifierAlreadyExists_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
@@ -98,7 +98,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public async Task AddAsync_ArgumentPartitionIsValid_InsertsPartition()
+        public async Task InsertAsync_ArgumentPartitionIsValid_InsertsPartition()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
