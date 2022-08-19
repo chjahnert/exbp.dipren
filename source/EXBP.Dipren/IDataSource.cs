@@ -24,7 +24,7 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="Range{TKey}"/> that represents the asynchronous operation and
         ///   can be used to access the result.
         /// </returns>
-        Task<Range<TKey>> GetRangeAsync(CancellationToken cancellation);
+        Task<Range<TKey>> GetEntireRangeAsync(CancellationToken cancellation);
 
         /// <summary>
         ///   Returns the estimated number of keys in the specified range.

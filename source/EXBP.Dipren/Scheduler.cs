@@ -130,7 +130,7 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Partition> CreatePartitionEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
-            Range<TKey> range = await job.Source.GetRangeAsync(cancellation);
+            Range<TKey> range = await job.Source.GetEntireRangeAsync(cancellation);
             long remaining = await job.Source.EstimateRangeSizeAsync(range, cancellation);
 
             Guid id = Guid.NewGuid();
