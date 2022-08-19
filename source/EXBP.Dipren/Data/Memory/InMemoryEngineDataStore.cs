@@ -84,7 +84,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="DuplicateIdentifierException">
         ///   A job with the specified unique identifier already exists in the data store.
         /// </exception>
-        public Task InsertAsync(Job job, CancellationToken cancellation)
+        public Task InsertJobAsync(Job job, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
@@ -122,7 +122,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="InvalidReferenceException">
         ///   The job referenced by the partition does not exist within the data store.
         /// </exception>
-        public Task InsertAsync(Partition partition, CancellationToken cancellation)
+        public Task InsertPartitionAsync(Partition partition, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(partition, nameof(partition));
 
@@ -163,7 +163,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task UpdateAsync(Job job, CancellationToken cancellation)
+        public Task UpdateJobAsync(Job job, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 

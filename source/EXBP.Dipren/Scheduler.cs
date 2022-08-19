@@ -118,7 +118,7 @@ namespace EXBP.Dipren
             DateTime timestamp = this._clock.GetDateTime();
             Job result = new Job(job.Id, job.Name, timestamp, timestamp, JobState.Initializing);
 
-            await this._store.InsertAsync(result, cancellation);
+            await this._store.InsertJobAsync(result, cancellation);
 
             return result;
         }
@@ -153,7 +153,7 @@ namespace EXBP.Dipren
             Partition<TKey> partition = new Partition<TKey>(id, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false);
             Partition result = partition.ToEntry(job.Serializer);
 
-            await this._store.InsertAsync(result, cancellation);
+            await this._store.InsertPartitionAsync(result, cancellation);
 
             return result;
         }
@@ -177,7 +177,7 @@ namespace EXBP.Dipren
             DateTime timetamp = this._clock.GetDateTime();
             Job result = new Job(template.Id, template.Name, template.Created, timetamp, JobState.Ready);
 
-            await this._store.UpdateAsync(result, cancellation);
+            await this._store.UpdateJobAsync(result, cancellation);
 
             return result;
         }
@@ -204,7 +204,7 @@ namespace EXBP.Dipren
             DateTime timetamp = this._clock.GetDateTime();
             Job result = new Job(template.Id, template.Name, template.Created, timetamp, JobState.Failed, exception);
 
-            await this._store.UpdateAsync(result, cancellation);
+            await this._store.UpdateJobAsync(result, cancellation);
 
             return result;
         }

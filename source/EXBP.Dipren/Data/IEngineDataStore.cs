@@ -34,7 +34,7 @@
         /// <exception cref="DuplicateIdentifierException">
         ///   A job with the specified unique identifier already exists in the store.
         /// </exception>
-        Task InsertAsync(Job job, CancellationToken cancellation);
+        Task InsertJobAsync(Job job, CancellationToken cancellation);
 
         /// <summary>
         ///   Updates an existing job entry in the data store.
@@ -49,7 +49,7 @@
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        Task UpdateAsync(Job job, CancellationToken cancellation);
+        Task UpdateJobAsync(Job job, CancellationToken cancellation);
 
         /// <summary>
         ///   Inserts a new partition entry into the data store.
@@ -64,6 +64,6 @@
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        Task InsertAsync(Partition partition, CancellationToken cancellation);
+        Task InsertPartitionAsync(Partition partition, CancellationToken cancellation);
     }
 }

@@ -11,16 +11,16 @@ namespace EXBP.Dipren.Tests.Data.Memory
     public class InMemoryEngineDataStoreTests
     {
         [Test]
-        public void InsertAsync_ArgumentJobIsNull_ThrowsException()
+        public void InsertJobAsync_ArgumentJobIsNull_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
             Job job = null;
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertAsync(job, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertJobAsync(job, CancellationToken.None));
         }
 
         [Test]
-        public async Task InsertAsync_ArgumentJobIsValid_InsertsJob()
+        public async Task InsertJobAsync_ArgumentJobIsValid_InsertsJob()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
@@ -29,7 +29,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             Job job = new Job(id, "Dummy", timestamp, timestamp, JobState.Initializing);
 
-            await store.InsertAsync(job, CancellationToken.None);
+            await store.InsertJobAsync(job, CancellationToken.None);
 
             Job retrieved = store.Jobs.First(j => j.Id == id);
 
@@ -37,7 +37,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public async Task InsertAsync_JobWithSameIdentifierAlreadyExists_ThrowsException()
+        public async Task InsertJobAsync_JobWithSameIdentifierAlreadyExists_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
@@ -46,24 +46,24 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             Job first = new Job(id, "Dummy", timestamp, timestamp, JobState.Initializing);
 
-            await store.InsertAsync(first, CancellationToken.None);
+            await store.InsertJobAsync(first, CancellationToken.None);
 
             Job second = first with { };
 
-            Assert.ThrowsAsync<DuplicateIdentifierException>(() => store.InsertAsync(second, CancellationToken.None));
+            Assert.ThrowsAsync<DuplicateIdentifierException>(() => store.InsertJobAsync(second, CancellationToken.None));
         }
 
         [Test]
-        public void InsertAsync_ArgumentPartitionIsNull_ThrowsException()
+        public void InsertPartitionAsync_ArgumentPartitionIsNull_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
             Partition partition = null;
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertAsync(partition, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertPartitionAsync(partition, CancellationToken.None));
         }
 
         [Test]
-        public void InsertAsync_ReferencedJobDoesNotExist_ThrowsException()
+        public void InsertPartitionAsync_ReferencedJobDoesNotExist_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
@@ -73,11 +73,11 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             Partition partition = new Partition(partitionId, jobId, "1", timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
 
-            Assert.ThrowsAsync<InvalidReferenceException>(() => store.InsertAsync(partition, CancellationToken.None));
+            Assert.ThrowsAsync<InvalidReferenceException>(() => store.InsertPartitionAsync(partition, CancellationToken.None));
         }
 
         [Test]
-        public async Task InsertAsync_PartitionWithSameIdentifierAlreadyExists_ThrowsException()
+        public async Task InsertPartitionAsync_PartitionWithSameIdentifierAlreadyExists_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
@@ -85,20 +85,20 @@ namespace EXBP.Dipren.Tests.Data.Memory
             DateTime timestamp = DateTime.UtcNow;
             Job job = new Job(jobId, "Dummy", timestamp, timestamp, JobState.Initializing);
 
-            await store.InsertAsync(job, CancellationToken.None);
+            await store.InsertJobAsync(job, CancellationToken.None);
 
             Guid partitionId = Guid.NewGuid();
             Partition first = new Partition(partitionId, jobId, "1", timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
 
-            await store.InsertAsync(first, CancellationToken.None);
+            await store.InsertPartitionAsync(first, CancellationToken.None);
 
             Partition second = first with { };
 
-            Assert.ThrowsAsync<DuplicateIdentifierException>(() => store.InsertAsync(second, CancellationToken.None));
+            Assert.ThrowsAsync<DuplicateIdentifierException>(() => store.InsertPartitionAsync(second, CancellationToken.None));
         }
 
         [Test]
-        public async Task InsertAsync_ArgumentPartitionIsValid_InsertsPartition()
+        public async Task InsertPartitionAsync_ArgumentPartitionIsValid_InsertsPartition()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
@@ -106,12 +106,12 @@ namespace EXBP.Dipren.Tests.Data.Memory
             DateTime timestamp = DateTime.UtcNow;
             Job job = new Job(jobId, "Dummy", timestamp, timestamp, JobState.Initializing);
 
-            await store.InsertAsync(job, CancellationToken.None);
+            await store.InsertJobAsync(job, CancellationToken.None);
 
             Guid partitionId = Guid.NewGuid();
             Partition partition = new Partition(partitionId, jobId, "1", timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
 
-            await store.InsertAsync(partition, CancellationToken.None);
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             Partition retrieved = store.Partitions.First(p => p.Id == partitionId);
 
