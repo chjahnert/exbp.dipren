@@ -69,6 +69,72 @@ namespace EXBP.Dipren.Tests
             Assert.That(sp.IsSplitRequested, Is.False);
         }
 
+        [Test]
+        public void ScheduleAsync_RangeQueryFails_CreatesJobInFailedState()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            Scheduler scheduler = new Scheduler(store);
+
+            IDataSource<int, int> source = Substitute.For<IDataSource<int,int>>();
+
+            source
+                .When(x => x.GetEntireRangeAsync(Arg.Any<CancellationToken>()))
+                .Do(x => { throw new ArgumentOutOfRangeException(); });
+
+            source
+                .When(x => x.EstimateRangeSizeAsync(Arg.Any<Range<int>>(), Arg.Any<CancellationToken>()))
+                .Do(x => Task.FromResult(1000L));
+
+            IKeyArithmetics<int> arithmetics = Substitute.For<IKeyArithmetics<int>>();
+            Int32KeySerializer serializer = new Int32KeySerializer();
+            IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
+            TimeSpan timeout = TimeSpan.FromMinutes(3);
+
+            Job<int, int> job = new Job<int, int>("Dummy", source, arithmetics, serializer, processor, timeout, 16);
+
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => scheduler.ScheduleAsync(job, CancellationToken.None));
+
+            Job sj = store.Jobs.First(j => j.Id == job.Id);
+
+            Assert.That(sj.Name, Is.EqualTo(job.Name));
+            Assert.That(sj.Exception, Is.InstanceOf<ArgumentOutOfRangeException>());
+
+            Assert.That(store.Partitions.Any(p => p.JobId == job.Id), Is.False);
+        }
+
+        [Test]
+        public void ScheduleAsync_RangeSizeEstimationFails_CreatesJobInFailedState()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            Scheduler scheduler = new Scheduler(store);
+
+            IDataSource<int, int> source = Substitute.For<IDataSource<int, int>>();
+
+            source
+                .When(x => x.GetEntireRangeAsync(Arg.Any<CancellationToken>()))
+                .Do(x => new Range<int>(1, 1000, true));
+
+            source
+                .When(x => x.EstimateRangeSizeAsync(Arg.Any<Range<int>>(), Arg.Any<CancellationToken>()))
+                .Do(x => { throw new KeyNotFoundException(); });
+
+            IKeyArithmetics<int> arithmetics = Substitute.For<IKeyArithmetics<int>>();
+            Int32KeySerializer serializer = new Int32KeySerializer();
+            IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
+            TimeSpan timeout = TimeSpan.FromMinutes(3);
+
+            Job<int, int> job = new Job<int, int>("Dummy", source, arithmetics, serializer, processor, timeout, 16);
+
+            Assert.ThrowsAsync<KeyNotFoundException>(() => scheduler.ScheduleAsync(job, CancellationToken.None));
+
+            Job sj = store.Jobs.First(j => j.Id == job.Id);
+
+            Assert.That(sj.Name, Is.EqualTo(job.Name));
+            Assert.That(sj.Exception, Is.InstanceOf<KeyNotFoundException>());
+
+            Assert.That(store.Partitions.Any(p => p.JobId == job.Id), Is.False);
+        }
+
         private class DummyDataSource : IDataSource<int, int>
         {
             private readonly int _minimum;
