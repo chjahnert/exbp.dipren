@@ -86,6 +86,25 @@ namespace EXBP.Dipren
         public Task ExecuteAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
             throw new NotImplementedException();
+
+            //
+            // Flow:
+            //
+            // 1. Check if there are any pending ranges.
+            // 2. If there are no pending ranges, request the largest partition to be split.
+            // 3. Take ownership of the partition.
+            // 4. Start processing the partition in a loop.
+            //    a. Process the next batch of keys
+            //    b. Record progress
+            //    c. If requested, split the current partition
+            // 5. Once the current partition is completed, repeat from step 1 until all keys are processed.
+            // 6. Mark the job completed.
+            //
+            // Questions:
+            //
+            //  - Should partitions smaller than the batch size be split?
+            //    Could be a configuration opition.
+            //
         }
     }
 }
