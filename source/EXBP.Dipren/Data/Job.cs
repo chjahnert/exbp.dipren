@@ -9,7 +9,7 @@ namespace EXBP.Dipren.Data
     /// </summary>
     public record Job
     {
-        private readonly Guid _id;
+        private readonly string _id;
         private readonly string _name;
         private readonly DateTime _created;
         private readonly DateTime _updated;
@@ -21,9 +21,9 @@ namespace EXBP.Dipren.Data
         ///   Gets the unique identifier of the current partition.
         /// </summary>
         /// <value>
-        ///   A <see cref="Guid"/> value that is the unique identifier of the current partition.
+        ///   A <see cref="string"/> value that is the unique identifier of the current job.
         /// </value>
-        public Guid Id => this._id;
+        public string Id => this._id;
 
         /// <summary>
         ///   Gets the name of the current job.
@@ -88,8 +88,9 @@ namespace EXBP.Dipren.Data
         /// <param name="exception">
         ///   The exception that is the reason the job failed.
         /// </param>
-        public Job(Guid id, string name, DateTime created, DateTime updated, JobState state, Exception exception = null)
+        public Job(string id, string name, DateTime created, DateTime updated, JobState state, Exception exception = null)
         {
+            Assert.ArgumentIsNotNull(id, nameof(id));
             Assert.ArgumentIsNotNull(name, nameof(name));
             Assert.ArgumentIsDefined(state, nameof(state));
 

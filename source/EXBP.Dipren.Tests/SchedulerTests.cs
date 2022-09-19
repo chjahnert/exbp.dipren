@@ -48,7 +48,7 @@ namespace EXBP.Dipren.Tests
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("Dummy", source, arithmetics, serializer, processor, timeout, 16);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", "Dummy", source, arithmetics, serializer, processor, timeout, 16);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);
 
@@ -90,7 +90,7 @@ namespace EXBP.Dipren.Tests
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("Dummy", source, arithmetics, serializer, processor, timeout, 16);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", "Dummy", source, arithmetics, serializer, processor, timeout, 16);
 
             Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => scheduler.ScheduleAsync(job, CancellationToken.None));
 
@@ -123,7 +123,7 @@ namespace EXBP.Dipren.Tests
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("Dummy", source, arithmetics, serializer, processor, timeout, 16);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", "Dummy", source, arithmetics, serializer, processor, timeout, 16);
 
             Assert.ThrowsAsync<KeyNotFoundException>(() => scheduler.ScheduleAsync(job, CancellationToken.None));
 

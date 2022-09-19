@@ -14,7 +14,7 @@ namespace EXBP.Dipren
     internal class Partition<TKey> where TKey : IComparable<TKey>
     {
         private readonly Guid _id;
-        private readonly Guid _jobId;
+        private readonly string _jobId;
         private readonly string _owner;
         private readonly DateTime _created;
         private readonly DateTime _updated;
@@ -37,10 +37,10 @@ namespace EXBP.Dipren
         ///   Gets the unique identifier of the distributed processing job the current partition belongs to.
         /// </summary>
         /// <value>
-        ///   A <see cref="Guid"/> value that contains the unique identifier of the distributed processing job the
+        ///   A <see cref="string"/> value that contains the unique identifier of the distributed processing job the
         ///   current partition belongs to.
         /// </value>
-        public Guid JobId => this._jobId;
+        public string JobId => this._jobId;
 
         /// <summary>
         ///   Gets a value that identifies the owner of the current partition. The owner is the node processing the
@@ -149,8 +149,9 @@ namespace EXBP.Dipren
         /// <param name="split">
         ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
         /// </param>
-        internal Partition(Guid id, Guid jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool split)
+        internal Partition(Guid id, string jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool split)
         {
+            Debug.Assert(jobId != null);
             Debug.Assert(created.Kind == DateTimeKind.Utc);
             Debug.Assert(updated.Kind == DateTimeKind.Utc);
             Debug.Assert(range != null);
