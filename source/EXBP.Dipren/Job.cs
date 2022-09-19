@@ -28,7 +28,7 @@ namespace EXBP.Dipren
 
 
         /// <summary>
-        ///   Gets the unique identifier of the current distributed processing job.
+        ///   Gets the unique identifier (or name) of the current distributed processing job.
         /// </summary>
         /// <value>
         ///   A <see cref="string"/> value that contains the unique identifier of the current distributed processing
@@ -91,7 +91,8 @@ namespace EXBP.Dipren
         ///   Initializes a new instance of the <see cref="Job{TKey, TValue}"/> class.
         /// </summary>
         /// <param name="id">
-        ///   A <see cref="string"/> value that contains the unique identifier of the distributed processing job.
+        ///   A <see cref="string"/> value that contains the unique identifier (or name) of the distributed processing
+        ///   job.
         /// </param>
         /// <param name="source">
         ///   The <see cref="IDataSource{TKey, TValue}"/> object to use to access the entries to be processed.

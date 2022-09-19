@@ -17,10 +17,11 @@ namespace EXBP.Dipren.Data
 
 
         /// <summary>
-        ///   Gets the unique identifier of the current partition.
+        ///   Gets the unique identifier (or name) of the current distributed processing job.
         /// </summary>
         /// <value>
-        ///   A <see cref="string"/> value that is the unique identifier of the current job.
+        ///   A <see cref="string"/> value that is the unique identifier (or name) of the current distributed
+        ///   processing job.
         /// </value>
         public string Id => this._id;
 
@@ -59,10 +60,10 @@ namespace EXBP.Dipren.Data
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Partition"/> record.
+        ///   Initializes a new instance of the <see cref="Job"/> record.
         /// </summary>
         /// <param name="id">
-        ///   The unique identifier of the job.
+        ///   The unique identifier (or name) of the job.
         /// </param>
         /// <param name="created">
         ///   The date and time when the job was created.
