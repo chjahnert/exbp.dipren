@@ -101,7 +101,7 @@ namespace EXBP.Dipren
         private async Task<Job> CreateJobEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
             DateTime timestamp = this._clock.GetDateTime();
-            Job result = new Job(job.Id, job.Name, timestamp, timestamp, JobState.Initializing);
+            Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing);
 
             await this._store.InsertJobAsync(result, cancellation);
 
@@ -160,7 +160,7 @@ namespace EXBP.Dipren
         private async Task<Job> MarkJobAsReadyAsync(Job template, CancellationToken cancellation)
         {
             DateTime timetamp = this._clock.GetDateTime();
-            Job result = new Job(template.Id, template.Name, template.Created, timetamp, JobState.Ready);
+            Job result = new Job(template.Id, template.Created, timetamp, JobState.Ready);
 
             await this._store.UpdateJobAsync(result, cancellation);
 
@@ -187,7 +187,7 @@ namespace EXBP.Dipren
         private async Task<Job> MarkJobAsFailedAsync(Job template, Exception exception, CancellationToken cancellation)
         {
             DateTime timetamp = this._clock.GetDateTime();
-            Job result = new Job(template.Id, template.Name, template.Created, timetamp, JobState.Failed, exception);
+            Job result = new Job(template.Id, template.Created, timetamp, JobState.Failed, exception);
 
             await this._store.UpdateJobAsync(result, cancellation);
 

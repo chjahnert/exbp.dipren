@@ -10,7 +10,6 @@ namespace EXBP.Dipren.Data
     public record Job
     {
         private readonly string _id;
-        private readonly string _name;
         private readonly DateTime _created;
         private readonly DateTime _updated;
         private readonly JobState _state;
@@ -24,14 +23,6 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="string"/> value that is the unique identifier of the current job.
         /// </value>
         public string Id => this._id;
-
-        /// <summary>
-        ///   Gets the name of the current job.
-        /// </summary>
-        /// <value>
-        ///   A <see cref="string"/> value that contains the name of the current job.
-        /// </value>
-        public string Name => this._name;
 
         /// <summary>
         ///   Gets the date and time when the current job was created.
@@ -73,9 +64,6 @@ namespace EXBP.Dipren.Data
         /// <param name="id">
         ///   The unique identifier of the job.
         /// </param>
-        /// <param name="name">
-        ///   The name of the job.
-        /// </param>
         /// <param name="created">
         ///   The date and time when the job was created.
         /// </param>
@@ -88,14 +76,12 @@ namespace EXBP.Dipren.Data
         /// <param name="exception">
         ///   The exception that is the reason the job failed.
         /// </param>
-        public Job(string id, string name, DateTime created, DateTime updated, JobState state, Exception exception = null)
+        public Job(string id, DateTime created, DateTime updated, JobState state, Exception exception = null)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
-            Assert.ArgumentIsNotNull(name, nameof(name));
             Assert.ArgumentIsDefined(state, nameof(state));
 
             this._id = id;
-            this._name = name;
             this._created = created;
             this._updated = updated;
             this._state = state;

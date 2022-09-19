@@ -48,13 +48,12 @@ namespace EXBP.Dipren.Tests
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("DPJ-0001", "Dummy", source, arithmetics, serializer, processor, timeout, 16);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor, timeout, 16);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
-            Assert.That(sj.Name, Is.EqualTo(job.Name));
             Assert.That(sj.Exception, Is.Null);
 
             Partition sp = store.Partitions.First(p => p.JobId == job.Id);
@@ -90,13 +89,12 @@ namespace EXBP.Dipren.Tests
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("DPJ-0001", "Dummy", source, arithmetics, serializer, processor, timeout, 16);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor, timeout, 16);
 
             Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => scheduler.ScheduleAsync(job, CancellationToken.None));
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
-            Assert.That(sj.Name, Is.EqualTo(job.Name));
             Assert.That(sj.Exception, Is.InstanceOf<ArgumentOutOfRangeException>());
 
             Assert.That(store.Partitions.Any(p => p.JobId == job.Id), Is.False);
@@ -123,13 +121,12 @@ namespace EXBP.Dipren.Tests
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("DPJ-0001", "Dummy", source, arithmetics, serializer, processor, timeout, 16);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor, timeout, 16);
 
             Assert.ThrowsAsync<KeyNotFoundException>(() => scheduler.ScheduleAsync(job, CancellationToken.None));
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
-            Assert.That(sj.Name, Is.EqualTo(job.Name));
             Assert.That(sj.Exception, Is.InstanceOf<KeyNotFoundException>());
 
             Assert.That(store.Partitions.Any(p => p.JobId == job.Id), Is.False);

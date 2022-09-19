@@ -27,7 +27,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             const string jobId = "DPJ-0001";
             DateTime timestamp = DateTime.UtcNow;
 
-            Job job = new Job(jobId, "Dummy", timestamp, timestamp, JobState.Initializing);
+            Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
 
             await store.InsertJobAsync(job, CancellationToken.None);
 
@@ -44,7 +44,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             const string id = "DPJ-0001";
             DateTime timestamp = DateTime.UtcNow;
 
-            Job first = new Job(id, "Dummy", timestamp, timestamp, JobState.Initializing);
+            Job first = new Job(id, timestamp, timestamp, JobState.Initializing);
 
             await store.InsertJobAsync(first, CancellationToken.None);
 
@@ -83,7 +83,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             const string jobId = "DPJ-0001";
             DateTime timestamp = DateTime.UtcNow;
-            Job job = new Job(jobId, "Dummy", timestamp, timestamp, JobState.Initializing);
+            Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
 
             await store.InsertJobAsync(job, CancellationToken.None);
 
@@ -104,7 +104,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             const string jobId = "DPJ-0001";
             DateTime timestamp = DateTime.UtcNow;
-            Job job = new Job(jobId, "Dummy", timestamp, timestamp, JobState.Initializing);
+            Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
 
             await store.InsertJobAsync(job, CancellationToken.None);
 

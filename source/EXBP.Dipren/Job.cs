@@ -19,7 +19,6 @@ namespace EXBP.Dipren
     public class Job<TKey, TItem> where TKey : IComparable<TKey>
     {
         private readonly string _id;
-        private readonly string _name;
         private readonly IDataSource<TKey, TItem> _source;
         private readonly IKeyArithmetics<TKey> _arithmetics;
         private readonly IKeySerializer<TKey> _serializer;
@@ -36,17 +35,6 @@ namespace EXBP.Dipren
         ///   job.
         /// </value>
         public string Id => this._id;
-
-        /// <summary>
-        ///   Gets the name of the current distributed processing job.
-        /// </summary>
-        /// <value>
-        ///   A <see cref="string"/> value that is the name of the current distributed processing job.
-        /// </value>
-        /// <remarks>
-        ///   The name is used to uniquely identify the ranges in the range set that are related to the current job.
-        /// </remarks>
-        public string Name => this._name;
 
         /// <summary>
         ///   Gets the data source that is used to access the entries to be processed.
@@ -105,9 +93,6 @@ namespace EXBP.Dipren
         /// <param name="id">
         ///   A <see cref="string"/> value that contains the unique identifier of the distributed processing job.
         /// </param>
-        /// <param name="name">
-        ///   The unique name of the distributed processing job.
-        /// </param>
         /// <param name="source">
         ///   The <see cref="IDataSource{TKey, TValue}"/> object to use to access the entries to be processed.
         /// </param>
@@ -127,11 +112,9 @@ namespace EXBP.Dipren
         /// <param name="batchSize">
         ///   The maximum number of entries to include in a batch.
         /// </param>
-        public Job(string id, string name, IDataSource<TKey, TItem> source, IKeyArithmetics<TKey> arithmetics, IKeySerializer<TKey> serializer, IBatchProcessor<TItem> processor, TimeSpan timeout, int batchSize)
+        public Job(string id, IDataSource<TKey, TItem> source, IKeyArithmetics<TKey> arithmetics, IKeySerializer<TKey> serializer, IBatchProcessor<TItem> processor, TimeSpan timeout, int batchSize)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
-            Assert.ArgumentIsNotNull(name, nameof(name));
-            Assert.ArgumentIsNotEmpty(name, false, nameof(name));
             Assert.ArgumentIsNotNull(source, nameof(source));
             Assert.ArgumentIsNotNull(arithmetics, nameof(arithmetics));
             Assert.ArgumentIsNotNull(serializer, nameof(serializer));
@@ -140,7 +123,6 @@ namespace EXBP.Dipren
             Assert.ArgumentIsGreater(batchSize, 0, nameof(batchSize));
 
             this._id = id;
-            this._name = name;
             this._source = source;
             this._arithmetics = arithmetics;
             this._serializer = serializer;
