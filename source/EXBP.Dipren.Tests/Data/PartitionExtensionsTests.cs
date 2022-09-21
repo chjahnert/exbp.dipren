@@ -29,7 +29,7 @@ namespace EXBP.Dipren.Tests.Data
         public void ToPartition_FlattenedPartiton_RetrunsCorrectValue()
         {
             Guid partitionId = Guid.NewGuid();
-            Guid jobId = Guid.NewGuid();
+            const string jobId = "DPJ-0001";
             DateTime created = new DateTime(2022, 8, 1, 11, 32, 17, DateTimeKind.Utc);
             DateTime updated = new DateTime(2022, 8, 1, 11, 36, 43, DateTimeKind.Utc);
 

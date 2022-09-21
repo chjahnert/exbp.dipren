@@ -15,11 +15,10 @@ namespace EXBP.Dipren
     /// <typeparam name="TItem">
     ///   The type of the items to process.
     /// </typeparam>
-    [DebuggerDisplay("Name = {Name}")]
+    [DebuggerDisplay("ID = {Id}")]
     public class Job<TKey, TItem> where TKey : IComparable<TKey>
     {
-        private readonly Guid _id;
-        private readonly string _name;
+        private readonly string _id;
         private readonly IDataSource<TKey, TItem> _source;
         private readonly IKeyArithmetics<TKey> _arithmetics;
         private readonly IKeySerializer<TKey> _serializer;
@@ -29,23 +28,13 @@ namespace EXBP.Dipren
 
 
         /// <summary>
-        ///   Gets the unique identifier of the current distributed processing job.
+        ///   Gets the unique identifier (or name) of the current distributed processing job.
         /// </summary>
         /// <value>
-        ///   A <see cref="Guid"/> value that contains the unique identifier of the current distributed processing job.
+        ///   A <see cref="string"/> value that contains the unique identifier of the current distributed processing
+        ///   job.
         /// </value>
-        public Guid Id => this._id;
-
-        /// <summary>
-        ///   Gets the name of the current distributed processing job.
-        /// </summary>
-        /// <value>
-        ///   A <see cref="string"/> value that is the name of the current distributed processing job.
-        /// </value>
-        /// <remarks>
-        ///   The name is used to uniquely identify the ranges in the range set that are related to the current job.
-        /// </remarks>
-        public string Name => this._name;
+        public string Id => this._id;
 
         /// <summary>
         ///   Gets the data source that is used to access the entries to be processed.
@@ -101,8 +90,9 @@ namespace EXBP.Dipren
         /// <summary>
         ///   Initializes a new instance of the <see cref="Job{TKey, TValue}"/> class.
         /// </summary>
-        /// <param name="name">
-        ///   The unique name of the distributed processing job.
+        /// <param name="id">
+        ///   A <see cref="string"/> value that contains the unique identifier (or name) of the distributed processing
+        ///   job.
         /// </param>
         /// <param name="source">
         ///   The <see cref="IDataSource{TKey, TValue}"/> object to use to access the entries to be processed.
@@ -123,10 +113,9 @@ namespace EXBP.Dipren
         /// <param name="batchSize">
         ///   The maximum number of entries to include in a batch.
         /// </param>
-        public Job(string name, IDataSource<TKey, TItem> source, IKeyArithmetics<TKey> arithmetics, IKeySerializer<TKey> serializer, IBatchProcessor<TItem> processor, TimeSpan timeout, int batchSize)
+        public Job(string id, IDataSource<TKey, TItem> source, IKeyArithmetics<TKey> arithmetics, IKeySerializer<TKey> serializer, IBatchProcessor<TItem> processor, TimeSpan timeout, int batchSize)
         {
-            Assert.ArgumentIsNotNull(name, nameof(name));
-            Assert.ArgumentIsNotEmpty(name, false, nameof(name));
+            Assert.ArgumentIsNotNull(id, nameof(id));
             Assert.ArgumentIsNotNull(source, nameof(source));
             Assert.ArgumentIsNotNull(arithmetics, nameof(arithmetics));
             Assert.ArgumentIsNotNull(serializer, nameof(serializer));
@@ -134,8 +123,7 @@ namespace EXBP.Dipren
             Assert.ArgumentIsGreater(timeout, TimeSpan.Zero, nameof(timeout));
             Assert.ArgumentIsGreater(batchSize, 0, nameof(batchSize));
 
-            this._id = Guid.NewGuid();
-            this._name = name;
+            this._id = id;
             this._source = source;
             this._arithmetics = arithmetics;
             this._serializer = serializer;

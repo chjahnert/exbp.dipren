@@ -9,8 +9,7 @@ namespace EXBP.Dipren.Data
     /// </summary>
     public record Job
     {
-        private readonly Guid _id;
-        private readonly string _name;
+        private readonly string _id;
         private readonly DateTime _created;
         private readonly DateTime _updated;
         private readonly JobState _state;
@@ -18,20 +17,13 @@ namespace EXBP.Dipren.Data
 
 
         /// <summary>
-        ///   Gets the unique identifier of the current partition.
+        ///   Gets the unique identifier (or name) of the current distributed processing job.
         /// </summary>
         /// <value>
-        ///   A <see cref="Guid"/> value that is the unique identifier of the current partition.
+        ///   A <see cref="string"/> value that is the unique identifier (or name) of the current distributed
+        ///   processing job.
         /// </value>
-        public Guid Id => this._id;
-
-        /// <summary>
-        ///   Gets the name of the current job.
-        /// </summary>
-        /// <value>
-        ///   A <see cref="string"/> value that contains the name of the current job.
-        /// </value>
-        public string Name => this._name;
+        public string Id => this._id;
 
         /// <summary>
         ///   Gets the date and time when the current job was created.
@@ -68,13 +60,10 @@ namespace EXBP.Dipren.Data
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Partition"/> record.
+        ///   Initializes a new instance of the <see cref="Job"/> record.
         /// </summary>
         /// <param name="id">
-        ///   The unique identifier of the job.
-        /// </param>
-        /// <param name="name">
-        ///   The name of the job.
+        ///   The unique identifier (or name) of the job.
         /// </param>
         /// <param name="created">
         ///   The date and time when the job was created.
@@ -88,13 +77,12 @@ namespace EXBP.Dipren.Data
         /// <param name="exception">
         ///   The exception that is the reason the job failed.
         /// </param>
-        public Job(Guid id, string name, DateTime created, DateTime updated, JobState state, Exception exception = null)
+        public Job(string id, DateTime created, DateTime updated, JobState state, Exception exception = null)
         {
-            Assert.ArgumentIsNotNull(name, nameof(name));
+            Assert.ArgumentIsNotNull(id, nameof(id));
             Assert.ArgumentIsDefined(state, nameof(state));
 
             this._id = id;
-            this._name = name;
             this._created = created;
             this._updated = updated;
             this._state = state;
