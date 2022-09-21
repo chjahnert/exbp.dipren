@@ -10,7 +10,7 @@ namespace EXBP.Dipren.Data
     public record Partition
     {
         private readonly Guid _id;
-        private readonly Guid _jobId;
+        private readonly string _jobId;
         private readonly string _owner;
         private readonly DateTime _created;
         private readonly DateTime _updated;
@@ -35,10 +35,10 @@ namespace EXBP.Dipren.Data
         ///   Gets the unique identifier of the distributed processing job the current partition belongs to.
         /// </summary>
         /// <value>
-        ///   A <see cref="Guid"/> value that contains the unique identifier of the distributed processing job the
+        ///   A <see cref="string"/> value that contains the unique identifier of the distributed processing job the
         ///   current partition belongs to.
         /// </value>
-        public Guid JobId => this._jobId;
+        public string JobId => this._jobId;
 
         /// <summary>
         ///   Gets a value that identifies the owner of the current partition. The owner is the node processing the
@@ -177,8 +177,9 @@ namespace EXBP.Dipren.Data
         /// <param name="split">
         ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
         /// </param>
-        public Partition(Guid id, Guid jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool split = false)
+        public Partition(Guid id, string jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool split = false)
         {
+            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsNotNull(first, nameof(first));
             Assert.ArgumentIsNotNull(last, nameof(last));
             Assert.ArgumentIsGreaterOrEqual(processed, 0L, nameof(processed));

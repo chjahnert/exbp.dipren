@@ -212,7 +212,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <summary>
         ///   Implements a collection of <see cref="Job"/> records.
         /// </summary>
-        private class JobCollection : KeyedCollection<Guid, Job>
+        private class JobCollection : KeyedCollection<string, Job>
         {
             /// <summary>
             ///   Initializes a new and empty instance of the <see cref="JobCollection"/> type.
@@ -230,7 +230,7 @@ namespace EXBP.Dipren.Data.Memory
             /// <returns>
             ///   The key of the specified item.
             /// </returns>
-            protected override Guid GetKeyForItem(Job item)
+            protected override string GetKeyForItem(Job item)
                 => item.Id;
         }
     }
