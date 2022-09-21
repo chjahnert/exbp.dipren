@@ -22,6 +22,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AssertResources.resx</DependentUpon>
     </Compile>
+    <Compile Update="EngineResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>EngineResources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +41,10 @@
     <EmbeddedResource Update="Diagnostics\AssertResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AssertResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="EngineResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>EngineResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

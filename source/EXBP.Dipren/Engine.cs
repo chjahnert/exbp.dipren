@@ -76,6 +76,9 @@ namespace EXBP.Dipren
         /// <param name="job">
         ///   The job to start.
         /// </param>
+        /// <param name="wait">
+        ///   <see langword="true"/> to wait for the job to be ready; otherwise, <see langword="false"/>.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -83,42 +86,116 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Task"/> that represents the asynchronous operation and can be used to access the result.
         /// </returns>
-        public Task RunAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
+        /// <exception cref="JobNotScheduledException">
+        ///   Argument <paramref name="wait"/> is <see langword="false"/> and the job has not yet been scheduled for
+        ///   processing.
+        /// </exception>
+        /// <remarks>
+        ///   <para>
+        ///     If <paramref name="wait"/> is <see langword="true"/> and the job is not yet scheduled, the method will
+        ///     wait for the job to be scheduled.
+        ///   </para>
+        /// </remarks>
+        public async Task RunAsync<TKey, TItem>(Job<TKey, TItem> job, bool wait, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
+            Job retrieved = null;
+
+            try
+            {
+                retrieved = await this._store.RetrieveJobAsync(job.Id, cancellation);
+            }
+            catch (UnknownIdentifierException ex)
+            {
+                if (wait == false)
+                {
+                    throw new JobNotScheduledException(EngineResources.NoJobScheduledWithSpecifiedIdentifier, job.Id, ex);
+                }
+            }
+
             //
-            // Add support for waiting for the job to be scheduled. Accept a timeout parameter:
-            //
-            //   0 - Do not wait
-            //   N - Wait for N
-            //   I - Wait indefinitely
-            //
-            // How should a cancellation be handled in during the wait?
+            // If waiting was requested or the job is still initializing, wait for the job to become ready for
+            // processing. The 'scheduled' variable receives the last observed state of the job.
             //
 
-            throw new NotImplementedException();
+            if ((retrieved == null) || (retrieved.State == JobState.Initializing))
+            {
+                retrieved = await this.WaitForJobToBeReadyAsync(job.Id, cancellation);
+            }
 
             //
-            // Flow:
+            // Processing is only started if the job is either in Ready or Processing state.
             //
-            // 1. Check if there are any pending ranges.
-            // 2. If there are no pending ranges, request the largest partition to be split.
-            // 3. Take ownership of the partition.
-            // 4. Start processing the partition in a loop.
-            //    a. Process the next batch of keys
-            //    b. Record progress
-            //    c. If requested, split the current partition
-            // 5. Once the current partition is completed, repeat from step 1 until all keys are processed.
-            // 6. Mark the job completed.
-            //
-            // Questions:
-            //
-            //  - Should partitions smaller than the batch size be split?
-            //    Could be a configuration option. Default: yes.
-            //  - How long to wait after a split was requested?
-            //    Could be a configuration option. Default: 2 seconds.
-            //
+
+            if (retrieved.State == JobState.Ready || retrieved.State == JobState.Processing)
+            {
+                throw new NotImplementedException();
+
+                //
+                // Flow:
+                //
+                // 1. Check if there are any pending ranges.
+                // 2. If there are no pending ranges, request the largest partition to be split.
+                // 3. Take ownership of the partition.
+                // 4. Start processing the partition in a loop.
+                //    a. Process the next batch of keys
+                //    b. Record progress
+                //    c. If requested, split the current partition
+                // 5. Once the current partition is completed, repeat from step 1 until all keys are processed.
+                // 6. Mark the job completed.
+                //
+                // Questions:
+                //
+                //  - Should partitions smaller than the batch size be split?
+                //    Could be a configuration option. Default: yes.
+                //  - How long to wait after a split was requested?
+                //    Could be a configuration option. Default: 2 seconds.
+                //
+            }
+        }
+
+        /// <summary>
+        ///   Waits until the specified job is ready to be processed.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job to wait for.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="JobState"/> that represents the asynchronous operation and
+        ///   can be used to access the result. The <see cref="Task{TResult}.Result"/> property contains the last
+        ///   observed state of the job.
+        /// </returns>
+        private async Task<Job> WaitForJobToBeReadyAsync(string id, CancellationToken cancellation)
+        {
+            Job result = null;
+
+            try
+            {
+                result = await this._store.RetrieveJobAsync(id, cancellation);
+            }
+            catch (JobNotScheduledException)
+            {
+            }
+
+            while ((result == null) || (result.State == JobState.Initializing))
+            {
+                await Task.Delay(this._configuration.PollingInterval, cancellation);
+
+                try
+                {
+                    result = await this._store.RetrieveJobAsync(id, cancellation);
+                }
+                catch (JobNotScheduledException)
+                {
+                }
+            }
+
+            return result;
         }
     }
 }
