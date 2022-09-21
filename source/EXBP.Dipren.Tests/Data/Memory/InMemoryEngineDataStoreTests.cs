@@ -54,6 +54,44 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
+        public void RetirveJobAsync_ArgumentIdIsNull_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.RetrieveJobAsync(null, CancellationToken.None));
+        }
+
+        [Test]
+        public void RetirveJobAsync_JobDoesNotExist_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrieveJobAsync("DPJ-0001", CancellationToken.None));
+        }
+
+        [Test]
+        public async Task RetirveJobAsync_JobExist_ReturnsJob()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string id = "DPJ-0001";
+            DateTime timestamp = DateTime.UtcNow;
+
+            Job inserted = new Job(id, timestamp, timestamp, JobState.Initializing);
+
+            await store.InsertJobAsync(inserted, CancellationToken.None);
+
+            Job retrieved = await store.RetrieveJobAsync("DPJ-0001", CancellationToken.None);
+
+            Assert.That(retrieved, Is.Not.Null);
+            Assert.That(retrieved.Id, Is.EqualTo(id));
+            Assert.That(retrieved.Created, Is.EqualTo(timestamp));
+            Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
+            Assert.That(retrieved.State, Is.EqualTo(JobState.Initializing));
+            Assert.That(retrieved.Exception, Is.Null);
+        }
+
+        [Test]
         public void InsertPartitionAsync_ArgumentPartitionIsNull_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();

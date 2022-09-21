@@ -52,6 +52,21 @@
         Task UpdateJobAsync(Job job, CancellationToken cancellation);
 
         /// <summary>
+        ///   Retrieves the job with the specified identifier from the data store.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation.
+        /// </returns>
+        Task<Job> RetrieveJobAsync(string id, CancellationToken cancellation);
+
+        /// <summary>
         ///   Inserts a new partition entry into the data store.
         /// </summary>
         /// <param name="partition">
