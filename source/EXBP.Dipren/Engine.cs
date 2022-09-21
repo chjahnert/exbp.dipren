@@ -87,6 +87,16 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
+            //
+            // Add support for waiting for the job to be scheduled. Accept a timeout parameter:
+            //
+            //   0 - Do not wait
+            //   N - Wait for N
+            //   I - Wait indefinitely
+            //
+            // How should a cancellation be handled in during the wait?
+            //
+
             throw new NotImplementedException();
 
             //
