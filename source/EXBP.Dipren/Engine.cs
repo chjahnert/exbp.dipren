@@ -103,9 +103,9 @@ namespace EXBP.Dipren
             // Questions:
             //
             //  - Should partitions smaller than the batch size be split?
-            //    Could be a configuration opition. Default: yes.
+            //    Could be a configuration option. Default: yes.
             //  - How long to wait after a split was requested?
-            //    Could be a configuration opition. Default: 2 seconds.
+            //    Could be a configuration option. Default: 2 seconds.
             //
         }
     }
