@@ -83,8 +83,10 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Task"/> that represents the asynchronous operation and can be used to access the result.
         /// </returns>
-        public Task ExecuteAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
+        public Task RunAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
+            Assert.ArgumentIsNotNull(job, nameof(job));
+
             throw new NotImplementedException();
 
             //
