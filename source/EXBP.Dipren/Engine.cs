@@ -115,17 +115,25 @@ namespace EXBP.Dipren
             }
 
             //
-            // If waiting was requested or the job is still initializing, wait for the job to become ready for
-            // processing. The 'scheduled' variable receives the last observed state of the job.
+            // If waiting was requested or the job is still initializing, we wait for the job to be scheduled and
+            // become ready for processing.
             //
 
-            if ((retrieved == null) || (retrieved.State == JobState.Initializing))
+            while ((retrieved == null) || (retrieved.State == JobState.Initializing))
             {
-                retrieved = await this.WaitForJobToBeReadyAsync(job.Id, cancellation);
+                await Task.Delay(this._configuration.PollingInterval, cancellation);
+
+                try
+                {
+                    retrieved = await this._store.RetrieveJobAsync(job.Id, cancellation);
+                }
+                catch (JobNotScheduledException)
+                {
+                }
             }
 
             //
-            // Processing is only started if the job is either in Ready or Processing state.
+            // Processing is only started if the scheduled job is in either Ready or Processing state.
             //
 
             if (retrieved.State == JobState.Ready || retrieved.State == JobState.Processing)
@@ -153,49 +161,6 @@ namespace EXBP.Dipren
                 //    Could be a configuration option. Default: 2 seconds.
                 //
             }
-        }
-
-        /// <summary>
-        ///   Waits until the specified job is ready to be processed.
-        /// </summary>
-        /// <param name="id">
-        ///   The unique identifier of the job to wait for.
-        /// </param>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="JobState"/> that represents the asynchronous operation and
-        ///   can be used to access the result. The <see cref="Task{TResult}.Result"/> property contains the last
-        ///   observed state of the job.
-        /// </returns>
-        private async Task<Job> WaitForJobToBeReadyAsync(string id, CancellationToken cancellation)
-        {
-            Job result = null;
-
-            try
-            {
-                result = await this._store.RetrieveJobAsync(id, cancellation);
-            }
-            catch (JobNotScheduledException)
-            {
-            }
-
-            while ((result == null) || (result.State == JobState.Initializing))
-            {
-                await Task.Delay(this._configuration.PollingInterval, cancellation);
-
-                try
-                {
-                    result = await this._store.RetrieveJobAsync(id, cancellation);
-                }
-                catch (JobNotScheduledException)
-                {
-                }
-            }
-
-            return result;
         }
     }
 }
