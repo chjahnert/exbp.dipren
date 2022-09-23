@@ -97,7 +97,7 @@ namespace EXBP.Dipren
         ///   Initializes a new instance of the <see cref="Configuration"/> class.
         /// </summary>
         /// <param name="maximumClockDrift">
-        ///   The maximum time divergence between processing nodes.
+        ///   The maximum system time difference between processing nodes.
         /// </param>
         /// <param name="pollingInterval">
         ///   The interval at which changes are read from the engine data store.
