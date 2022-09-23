@@ -143,8 +143,9 @@ namespace EXBP.Dipren
                 //
                 // Flow:
                 //
-                // 1. Check if there are any pending ranges.
-                // 2. If there are no pending ranges, request the largest partition to be split.
+                // 1. Check if there are any free partitions.
+                // 2. If there are no free partitions, check if there are any abandoned partitions.
+                // 2. If there are no abandoned partitions, request the largest partition to be split.
                 // 3. Take ownership of the partition.
                 // 4. Start processing the partition in a loop.
                 //    a. Process the next batch of keys
