@@ -80,5 +80,62 @@
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
         Task InsertPartitionAsync(Partition partition, CancellationToken cancellation);
+
+        /// <summary>
+        ///   Acquires a free partition if it exists.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the distributed processing job.
+        /// </param>
+        /// <param name="node">
+        ///   The identifier of the processing node.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
+        ///   otherwise, <see langword="null"/>.
+        /// </returns>
+        Task<Partition> TryAcquireFreePartitionsAsync(string id, string node, CancellationToken cancellation);
+
+        /// <summary>
+        ///   Acquires an abandoned partition if it exists.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the distributed processing job.
+        /// </param>
+        /// <param name="node">
+        ///   The identifier of the processing node.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
+        ///   otherwise, <see langword="null"/>.
+        /// </returns>
+        Task<Partition> TryAcquireAbandonedPartitionAsync(string id, string node, CancellationToken cancellation);
+
+        /// <summary>
+        ///   Requests an existing partition to be split.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the distributed processing job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="bool"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains a value indicating whether a split
+        ///   was requested.
+        /// </returns>
+        Task<bool> RequestSplitAsync(string id, CancellationToken cancellation);
     }
 }

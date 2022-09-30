@@ -136,23 +136,36 @@ namespace EXBP.Dipren
             // Processing is only started if the scheduled job is in either Ready or Processing state.
             //
 
-            if (retrieved.State == JobState.Ready || retrieved.State == JobState.Processing)
+            while ((retrieved.State == JobState.Ready) || (retrieved.State == JobState.Processing))
             {
-                throw new NotImplementedException();
+                //
+                // Acquire a partition that is ready to be processed or request an existing partition to be split.
+                //
+
+                Partition<TKey> partition = await this.TryAcquirePartitionAsync(job, cancellation);
+
+                if (partition != null)
+                {
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    await Task.Delay(this._configuration.PollingInterval, cancellation);
+                }
 
                 //
                 // Flow:
                 //
                 // 1. Check if there are any free partitions.
                 // 2. If there are no free partitions, check if there are any abandoned partitions.
-                // 2. If there are no abandoned partitions, request the largest partition to be split.
-                // 3. Take ownership of the partition.
-                // 4. Start processing the partition in a loop.
+                // 3. If there are no free or abandoned partitions, request (the largest) partition to be split.
+                // 4. Take ownership of the partition.
+                // 5. Start processing the partition in a loop.
                 //    a. Process the next batch of keys
                 //    b. Record progress
                 //    c. If requested, split the current partition
-                // 5. Once the current partition is completed, repeat from step 1 until all keys are processed.
-                // 6. Mark the job completed.
+                // 6. Once the current partition is completed, repeat from step 1 until all keys are processed.
+                // 7. Mark the job completed.
                 //
                 // Questions:
                 //
@@ -162,6 +175,48 @@ namespace EXBP.Dipren
                 //    Could be a configuration option. Default: 2 seconds.
                 //
             }
+        }
+
+        /// <summary>
+        ///   Tries to acquire a partition to be processed.
+        /// </summary>
+        /// <typeparam name="TKey">
+        ///   The type of the item key.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        ///   The type of items to process.
+        /// </typeparam>
+        /// <param name="job">
+        ///   The job being processed.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Partition{TKey}"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
+        ///   otherwise, <see langword="null"/>.
+        /// </returns>
+        private async Task<Partition<TKey>> TryAcquirePartitionAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
+        {
+            Assert.ArgumentIsNotNull(job, nameof(job));
+
+            Partition acquired = await this._store.TryAcquireFreePartitionsAsync(job.Id, this.Identity, cancellation);
+
+            if (acquired == null)
+            {
+                acquired = await this._store.TryAcquireAbandonedPartitionAsync(job.Id, this.Identity, cancellation);
+
+                if (acquired == null)
+                {
+                    await this._store.RequestSplitAsync(job.Id, cancellation);
+                }
+            }
+
+            Partition<TKey> result = acquired?.ToPartition<TKey>(job.Serializer);
+
+            return result;
         }
     }
 }
