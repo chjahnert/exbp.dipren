@@ -218,13 +218,16 @@ namespace EXBP.Dipren.Data.Memory
         }
 
         /// <summary>
-        ///   Acquires a free partition if it exists.
+        ///   Tries to acquire a free or abandoned partition.
         /// </summary>
         /// <param name="id">
         ///   The unique identifier of the distributed processing job.
         /// </param>
-        /// <param name="node">
-        ///   The identifier of the processing node.
+        /// <param name="owner">
+        ///   The identifier of the processing node trying to acquire a partition.
+        /// </param>
+        /// <param name="activity">
+        ///   A <see cref="DateTime"/> value that is used to determine if a partition is actively being processed.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
@@ -235,32 +238,39 @@ namespace EXBP.Dipren.Data.Memory
         ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
         ///   otherwise, <see langword="null"/>.
         /// </returns>
-        public Task<Partition> TryAcquireFreePartitionsAsync(string id, string node, CancellationToken cancellation)
+        public Task<Partition> TryAcquirePartitionsAsync(string id, string owner, DateTime activity, CancellationToken cancellation)
         {
-            throw new NotImplementedException();
-        }
+            Assert.ArgumentIsNotNull(id, nameof(id));
+            Assert.ArgumentIsNotNull(owner, nameof(owner));
 
-        /// <summary>
-        ///   Acquires an abandoned partition if it exists.
-        /// </summary>
-        /// <param name="id">
-        ///   The unique identifier of the distributed processing job.
-        /// </param>
-        /// <param name="node">
-        ///   The identifier of the processing node.
-        /// </param>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
-        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
-        ///   otherwise, <see langword="null"/>.
-        /// </returns>
-        public Task<Partition> TryAcquireAbandonedPartitionAsync(string id, string node, CancellationToken cancellation)
-        {
-            throw new NotImplementedException();
+            Partition result = null;
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._jobs.Contains(id);
+
+                if (exists == false)
+                {
+                    throw new InvalidReferenceException(InMemoryEngineDataStoreResources.ReferencedJobDoesNotExist);
+                }
+
+                Partition current = this._partitions
+                    .Where(p => (p.JobId == id) && ((p.Owner == null) || (p.Updated < activity)) && (p.Remaining > 0L))
+                    .OrderByDescending(p => p.Remaining)
+                    .FirstOrDefault();
+
+                result = current with
+                {
+                    Owner = owner,
+                    Updated = DateTime.Now,
+                    IsSplitRequested = false
+                };
+
+                this._partitions.Remove(current.Id);
+                this._partitions.Add(result);
+            }
+
+            return Task.FromResult(result);
         }
 
         /// <summary>

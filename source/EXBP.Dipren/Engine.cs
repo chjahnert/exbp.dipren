@@ -202,19 +202,23 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
-            Partition acquired = await this._store.TryAcquireFreePartitionsAsync(job.Id, this.Identity, cancellation);
+            DateTime cut = this._clock.GetDateTime();
 
-            if (acquired == null)
+            cut -= this._configuration.BatchProcessingTimeout;
+            cut -= this._configuration.MaximumClockDrift;
+
+            Partition acquired = await this._store.TryAcquirePartitionsAsync(job.Id, this.Identity, cut, cancellation);
+
+            Partition<TKey> result = null;
+
+            if (acquired != null)
             {
-                acquired = await this._store.TryAcquireAbandonedPartitionAsync(job.Id, this.Identity, cancellation);
-
-                if (acquired == null)
-                {
-                    await this._store.RequestSplitAsync(job.Id, cancellation);
-                }
+                result = acquired.ToPartition(job.Serializer);
             }
-
-            Partition<TKey> result = acquired?.ToPartition<TKey>(job.Serializer);
+            else
+            {
+                await this._store.RequestSplitAsync(job.Id, cancellation);
+            }
 
             return result;
         }

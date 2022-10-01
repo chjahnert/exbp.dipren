@@ -1,4 +1,5 @@
-﻿namespace EXBP.Dipren.Data
+﻿
+namespace EXBP.Dipren.Data
 {
     /// <summary>
     ///   Allows a class to implement a data store for the distributed processing engine.
@@ -82,13 +83,16 @@
         Task InsertPartitionAsync(Partition partition, CancellationToken cancellation);
 
         /// <summary>
-        ///   Acquires a free partition if it exists.
+        ///   Tries to acquire a free or abandoned partition.
         /// </summary>
         /// <param name="id">
         ///   The unique identifier of the distributed processing job.
         /// </param>
-        /// <param name="node">
-        ///   The identifier of the processing node.
+        /// <param name="owner">
+        ///   The identifier of the processing node trying to acquire a partition.
+        /// </param>
+        /// <param name="activity">
+        ///   A <see cref="DateTime"/> value that is used to determine if a partition is actively being processed.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
@@ -99,27 +103,7 @@
         ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
         ///   otherwise, <see langword="null"/>.
         /// </returns>
-        Task<Partition> TryAcquireFreePartitionsAsync(string id, string node, CancellationToken cancellation);
-
-        /// <summary>
-        ///   Acquires an abandoned partition if it exists.
-        /// </summary>
-        /// <param name="id">
-        ///   The unique identifier of the distributed processing job.
-        /// </param>
-        /// <param name="node">
-        ///   The identifier of the processing node.
-        /// </param>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
-        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
-        ///   otherwise, <see langword="null"/>.
-        /// </returns>
-        Task<Partition> TryAcquireAbandonedPartitionAsync(string id, string node, CancellationToken cancellation);
+        Task<Partition> TryAcquirePartitionsAsync(string id, string owner, DateTime activity, CancellationToken cancellation);
 
         /// <summary>
         ///   Requests an existing partition to be split.
