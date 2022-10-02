@@ -215,7 +215,7 @@ namespace EXBP.Dipren
             }
             else
             {
-                await this._store.RequestSplitAsync(job.Id, cut, cancellation);
+                await this._store.TryRequestSplitAsync(job.Id, cut, cancellation);
             }
 
             return result;

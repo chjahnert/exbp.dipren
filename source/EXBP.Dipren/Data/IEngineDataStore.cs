@@ -132,6 +132,6 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        Task<bool> RequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation);
+        Task<bool> TryRequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation);
     }
 }

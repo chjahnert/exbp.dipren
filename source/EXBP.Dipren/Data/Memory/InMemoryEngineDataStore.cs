@@ -303,7 +303,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<bool> RequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation)
+        public Task<bool> TryRequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
