@@ -288,6 +288,9 @@ namespace EXBP.Dipren.Data.Memory
         /// <param name="id">
         ///   The unique identifier of the distributed processing job.
         /// </param>
+        /// <param name="active">
+        ///   A <see cref="DateTime"/> value that is used to determine whether a partition is being processed.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -297,9 +300,44 @@ namespace EXBP.Dipren.Data.Memory
         ///   operation. The <see cref="Task{TResult}.Result"/> property contains a value indicating whether a split
         ///   was requested.
         /// </returns>
-        public Task<bool> RequestSplitAsync(string id, CancellationToken cancellation)
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public Task<bool> RequestSplitAsync(string id, DateTime active, CancellationToken cancellation)
         {
-            throw new NotImplementedException();
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            bool result = false;
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._jobs.Contains(id);
+
+                if (exists == false)
+                {
+                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.JobWithSpecifiedIdentifierDoesNotExist);
+                }
+
+                Partition candidate = this._partitions
+                    .Where(p => (p.JobId == id) && (p.Owner != null) && (p.Updated >= active) && (p.Remaining > 0L))
+                    .OrderByDescending(p => p.Remaining)
+                    .FirstOrDefault();
+
+                if (candidate != null)
+                {
+                    Partition updated = candidate with
+                    {
+                        IsSplitRequested = true
+                    };
+
+                    this._partitions.Remove(updated.Id);
+                    this._partitions.Add(updated);
+
+                    result = true;
+                }
+            }
+
+            return Task.FromResult(result);
         }
 
 
