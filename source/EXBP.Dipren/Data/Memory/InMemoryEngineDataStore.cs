@@ -238,6 +238,9 @@ namespace EXBP.Dipren.Data.Memory
         ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
         ///   otherwise, <see langword="null"/>.
         /// </returns>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
         public Task<Partition> TryAcquirePartitionsAsync(string id, string owner, DateTime activity, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
@@ -251,7 +254,7 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (exists == false)
                 {
-                    throw new InvalidReferenceException(InMemoryEngineDataStoreResources.ReferencedJobDoesNotExist);
+                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.JobWithSpecifiedIdentifierDoesNotExist);
                 }
 
                 Partition current = this._partitions
