@@ -100,11 +100,34 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
-            Job retrieved = null;
+            //
+            // Flow:
+            //
+            // 1. Check if there are any free partitions.
+            // 2. If there are no free partitions, check if there are any abandoned partitions.
+            // 3. If there are no free or abandoned partitions, request (the largest) partition to be split.
+            // 4. Take ownership of the partition.
+            // 5. Start processing the partition in a loop.
+            //    a. Process the next batch of keys
+            //    b. Record progress
+            //    c. Check job state.
+            //    d. If requested, split the current partition
+            // 6. Once the current partition is completed, repeat from step 1 until all keys are processed.
+            // 7. Mark the job completed.
+            //
+            // Questions:
+            //
+            //  - Should partitions smaller than the batch size be split?
+            //    Could be a configuration option. Default: yes.
+            //  - How to handle the condition when the scheduler crashed right after the job was inserted?
+            //    Could be a configuration option like job initialization timeout with a default of 15 minutes.
+            //
+
+            Job persisted = null;
 
             try
             {
-                retrieved = await this._store.RetrieveJobAsync(job.Id, cancellation);
+                persisted = await this._store.RetrieveJobAsync(job.Id, cancellation);
             }
             catch (UnknownIdentifierException ex)
             {
@@ -119,15 +142,15 @@ namespace EXBP.Dipren
             // become ready for processing.
             //
 
-            while ((retrieved == null) || (retrieved.State == JobState.Initializing))
+            while ((persisted == null) || (persisted.State == JobState.Initializing))
             {
                 await Task.Delay(this._configuration.PollingInterval, cancellation);
 
                 try
                 {
-                    retrieved = await this._store.RetrieveJobAsync(job.Id, cancellation);
+                    persisted = await this._store.RetrieveJobAsync(job.Id, cancellation);
                 }
-                catch (JobNotScheduledException)
+                catch (UnknownIdentifierException)
                 {
                 }
             }
@@ -136,7 +159,7 @@ namespace EXBP.Dipren
             // Processing is only started if the scheduled job is in either Ready or Processing state.
             //
 
-            while ((retrieved.State == JobState.Ready) || (retrieved.State == JobState.Processing))
+            while ((persisted?.State == JobState.Ready) || (persisted?.State == JobState.Processing))
             {
                 //
                 // Acquire a partition that is ready to be processed or request an existing partition to be split.
@@ -150,30 +173,21 @@ namespace EXBP.Dipren
                 }
                 else
                 {
-                    await Task.Delay(this._configuration.PollingInterval, cancellation);
-                }
+                    //
+                    // If a partition could not be acquired, wait the configured amount of time and check if the job
+                    // has not completed, failed, or was deleted in the meanwhile.
+                    //
 
-                //
-                // Flow:
-                //
-                // 1. Check if there are any free partitions.
-                // 2. If there are no free partitions, check if there are any abandoned partitions.
-                // 3. If there are no free or abandoned partitions, request (the largest) partition to be split.
-                // 4. Take ownership of the partition.
-                // 5. Start processing the partition in a loop.
-                //    a. Process the next batch of keys
-                //    b. Record progress
-                //    c. If requested, split the current partition
-                // 6. Once the current partition is completed, repeat from step 1 until all keys are processed.
-                // 7. Mark the job completed.
-                //
-                // Questions:
-                //
-                //  - Should partitions smaller than the batch size be split?
-                //    Could be a configuration option. Default: yes.
-                //  - How long to wait after a split was requested?
-                //    Could be a configuration option. Default: 2 seconds.
-                //
+                    await Task.Delay(this._configuration.PollingInterval, cancellation);
+
+                    try
+                    {
+                        persisted = await this._store.RetrieveJobAsync(job.Id, cancellation);
+                    }
+                    catch (UnknownIdentifierException)
+                    {
+                    }
+                }
             }
         }
 
