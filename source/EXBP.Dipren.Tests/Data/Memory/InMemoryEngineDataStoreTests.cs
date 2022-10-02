@@ -238,6 +238,33 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
+        public async Task TryAcquirePartitionsAsync_OnlyCompletedPartitionsExist_ReturnsNull()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionId = Guid.NewGuid();
+            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "z", 24L, 0L, null, false);
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
+            DateTime cut = new DateTime(2022, 9, 12, 16, 23, 32, DateTimeKind.Utc);
+
+            Partition acquired = await store.TryAcquirePartitionsAsync(jobId, "owner", now, cut, CancellationToken.None);
+
+            Assert.That(acquired, Is.Null);
+        }
+
+        [Test]
         public async Task TryAcquirePartitionsAsync_FreePartitionsExist_ReturnsPartition()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
@@ -293,6 +320,180 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Assert.That(acquired, Is.Not.Null);
             Assert.That(acquired.Owner, Is.EqualTo("owner"));
             Assert.That(acquired.Updated, Is.EqualTo(now));
+        }
+
+        [Test]
+        public void TryRequestSplitAsync_ArgumentJobIdIsNull_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            DateTime cut = DateTime.UtcNow.AddMinutes(-2);
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.TryRequestSplitAsync(null, cut, CancellationToken.None));
+        }
+
+        [Test]
+        public void TryRequestSplitAsync_SpecifiedJobDoesNotExist_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            DateTime now = DateTime.UtcNow;
+            DateTime cut = now.AddMinutes(-2);
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.TryRequestSplitAsync("DPJ-0001", cut, CancellationToken.None));
+        }
+
+
+        [Test]
+        public async Task TryRequestSplitAsync_NoPartitionsExist_ReturnsFalse()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime now = DateTime.UtcNow;
+            Job job = new Job(jobId, now, now, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            DateTime cut = now.AddMinutes(-2);
+
+            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public async Task TryRequestSplitAsync_OnlyFreePartitionsExist_ReturnsFalse()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionId = Guid.NewGuid();
+            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "a", 0L, 24L, null, false);
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
+
+            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public async Task TryRequestSplitAsync_OnlyAbandonedPartitionsExist_ReturnsFalse()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionId = Guid.NewGuid();
+            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
+
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "b", 1L, 23L, "owner", false);
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            DateTime cut = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public async Task TryRequestSplitAsync_OnlyCompletedPartitionsExist_ReturnsFalse()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionId = Guid.NewGuid();
+            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "z", 24L, 0L, "owner", false);
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
+
+            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public async Task TryRequestSplitAsync_OnlyPartitionsWithSplitRequestExist_ReturnsFalse()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionId = Guid.NewGuid();
+            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", true);
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
+
+            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public async Task TryRequestSplitAsync_ActivePartitionsExist_ReturnsTrue()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionId = Guid.NewGuid();
+            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false);
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
+
+            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+
+            Assert.That(result, Is.True);
+
+            Partition updated = store.Partitions.First(p => p.Id == partitionId);
+
+            Assert.That(updated.IsSplitRequested, Is.True);
         }
     }
 }
