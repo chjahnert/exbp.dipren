@@ -85,16 +85,16 @@ namespace EXBP.Dipren.Data
         /// <summary>
         ///   Tries to acquire a free or abandoned partition.
         /// </summary>
-        /// <param name="id">
+        /// <param name="jobId">
         ///   The unique identifier of the distributed processing job.
         /// </param>
-        /// <param name="owner">
+        /// <param name="requester">
         ///   The identifier of the processing node trying to acquire a partition.
         /// </param>
         /// <param name="now">
         ///   The current timestamp.
         /// </param>
-        /// <param name="activity">
+        /// <param name="active">
         ///   A <see cref="DateTime"/> value that is used to determine if a partition is actively being processed.
         /// </param>
         /// <param name="cancellation">
@@ -106,12 +106,15 @@ namespace EXBP.Dipren.Data
         ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
         ///   otherwise, <see langword="null"/>.
         /// </returns>
-        Task<Partition> TryAcquirePartitionsAsync(string id, string owner, DateTime now, DateTime activity, CancellationToken cancellation);
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        Task<Partition> TryAcquirePartitionsAsync(string jobId, string requester, DateTime now, DateTime active, CancellationToken cancellation);
 
         /// <summary>
         ///   Requests an existing partition to be split.
         /// </summary>
-        /// <param name="id">
+        /// <param name="jobId">
         ///   The unique identifier of the distributed processing job.
         /// </param>
         /// <param name="active">
@@ -129,6 +132,6 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        Task<bool> RequestSplitAsync(string id, DateTime active, CancellationToken cancellation);
+        Task<bool> RequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation);
     }
 }

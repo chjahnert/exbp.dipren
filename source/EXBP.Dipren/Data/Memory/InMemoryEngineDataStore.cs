@@ -220,16 +220,16 @@ namespace EXBP.Dipren.Data.Memory
         /// <summary>
         ///   Tries to acquire a free or abandoned partition.
         /// </summary>
-        /// <param name="id">
+        /// <param name="jobId">
         ///   The unique identifier of the distributed processing job.
         /// </param>
-        /// <param name="owner">
+        /// <param name="requester">
         ///   The identifier of the processing node trying to acquire a partition.
         /// </param>
         /// <param name="now">
         ///   The current timestamp.
         /// </param>
-        /// <param name="activity">
+        /// <param name="active">
         ///   A <see cref="DateTime"/> value that is used to determine if a partition is actively being processed.
         /// </param>
         /// <param name="cancellation">
@@ -244,16 +244,16 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<Partition> TryAcquirePartitionsAsync(string id, string owner, DateTime now, DateTime activity, CancellationToken cancellation)
+        public Task<Partition> TryAcquirePartitionsAsync(string jobId, string requester, DateTime now, DateTime active, CancellationToken cancellation)
         {
-            Assert.ArgumentIsNotNull(id, nameof(id));
-            Assert.ArgumentIsNotNull(owner, nameof(owner));
+            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+            Assert.ArgumentIsNotNull(requester, nameof(requester));
 
             Partition result = null;
 
             lock (this._syncRoot)
             {
-                bool exists = this._jobs.Contains(id);
+                bool exists = this._jobs.Contains(jobId);
 
                 if (exists == false)
                 {
@@ -261,7 +261,7 @@ namespace EXBP.Dipren.Data.Memory
                 }
 
                 Partition current = this._partitions
-                    .Where(p => (p.JobId == id) && ((p.Owner == null) || (p.Updated < activity)) && (p.Remaining > 0L))
+                    .Where(p => (p.JobId == jobId) && ((p.Owner == null) || (p.Updated < active)) && (p.Remaining > 0L))
                     .OrderByDescending(p => p.Remaining)
                     .FirstOrDefault();
 
@@ -269,7 +269,7 @@ namespace EXBP.Dipren.Data.Memory
                 {
                     result = current with
                     {
-                        Owner = owner,
+                        Owner = requester,
                         Updated = now,
                         IsSplitRequested = false
                     };
@@ -285,7 +285,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <summary>
         ///   Requests an existing partition to be split.
         /// </summary>
-        /// <param name="id">
+        /// <param name="jobId">
         ///   The unique identifier of the distributed processing job.
         /// </param>
         /// <param name="active">
@@ -303,15 +303,15 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<bool> RequestSplitAsync(string id, DateTime active, CancellationToken cancellation)
+        public Task<bool> RequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation)
         {
-            Assert.ArgumentIsNotNull(id, nameof(id));
+            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
             bool result = false;
 
             lock (this._syncRoot)
             {
-                bool exists = this._jobs.Contains(id);
+                bool exists = this._jobs.Contains(jobId);
 
                 if (exists == false)
                 {
@@ -319,7 +319,7 @@ namespace EXBP.Dipren.Data.Memory
                 }
 
                 Partition candidate = this._partitions
-                    .Where(p => (p.JobId == id) && (p.Owner != null) && (p.Updated >= active) && (p.Remaining > 0L))
+                    .Where(p => (p.JobId == jobId) && (p.Owner != null) && (p.Updated >= active) && (p.Remaining > 0L))
                     .OrderByDescending(p => p.Remaining)
                     .FirstOrDefault();
 

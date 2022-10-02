@@ -160,7 +160,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void TryAcquirePartitionsAsync_ArgumentIdIsNull_ThrowsException()
+        public void TryAcquirePartitionsAsync_ArgumentJobIdIsNull_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
@@ -171,7 +171,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void TryAcquirePartitionsAsync_ArgumentOwnerIsNull_ThrowsException()
+        public void TryAcquirePartitionsAsync_ArgumentRequesterIsNull_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
 
