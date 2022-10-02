@@ -91,6 +91,9 @@ namespace EXBP.Dipren.Data
         /// <param name="owner">
         ///   The identifier of the processing node trying to acquire a partition.
         /// </param>
+        /// <param name="now">
+        ///   The current timestamp.
+        /// </param>
         /// <param name="activity">
         ///   A <see cref="DateTime"/> value that is used to determine if a partition is actively being processed.
         /// </param>
@@ -103,7 +106,7 @@ namespace EXBP.Dipren.Data
         ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
         ///   otherwise, <see langword="null"/>.
         /// </returns>
-        Task<Partition> TryAcquirePartitionsAsync(string id, string owner, DateTime activity, CancellationToken cancellation);
+        Task<Partition> TryAcquirePartitionsAsync(string id, string owner, DateTime now, DateTime activity, CancellationToken cancellation);
 
         /// <summary>
         ///   Requests an existing partition to be split.

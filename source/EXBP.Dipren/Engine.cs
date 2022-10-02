@@ -202,12 +202,10 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
-            DateTime cut = this._clock.GetDateTime();
+            DateTime now = this._clock.GetDateTime();
+            DateTime cut = (now - this._configuration.BatchProcessingTimeout - this._configuration.MaximumClockDrift);
 
-            cut -= this._configuration.BatchProcessingTimeout;
-            cut -= this._configuration.MaximumClockDrift;
-
-            Partition acquired = await this._store.TryAcquirePartitionsAsync(job.Id, this.Identity, cut, cancellation);
+            Partition acquired = await this._store.TryAcquirePartitionsAsync(job.Id, this.Identity, now, cut, cancellation);
 
             Partition<TKey> result = null;
 

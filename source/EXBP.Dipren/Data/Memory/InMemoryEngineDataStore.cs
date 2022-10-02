@@ -226,6 +226,9 @@ namespace EXBP.Dipren.Data.Memory
         /// <param name="owner">
         ///   The identifier of the processing node trying to acquire a partition.
         /// </param>
+        /// <param name="now">
+        ///   The current timestamp.
+        /// </param>
         /// <param name="activity">
         ///   A <see cref="DateTime"/> value that is used to determine if a partition is actively being processed.
         /// </param>
@@ -241,7 +244,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<Partition> TryAcquirePartitionsAsync(string id, string owner, DateTime activity, CancellationToken cancellation)
+        public Task<Partition> TryAcquirePartitionsAsync(string id, string owner, DateTime now, DateTime activity, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
             Assert.ArgumentIsNotNull(owner, nameof(owner));
@@ -262,15 +265,18 @@ namespace EXBP.Dipren.Data.Memory
                     .OrderByDescending(p => p.Remaining)
                     .FirstOrDefault();
 
-                result = current with
+                if (current != null)
                 {
-                    Owner = owner,
-                    Updated = DateTime.Now,
-                    IsSplitRequested = false
-                };
+                    result = current with
+                    {
+                        Owner = owner,
+                        Updated = now,
+                        IsSplitRequested = false
+                    };
 
-                this._partitions.Remove(current.Id);
-                this._partitions.Add(result);
+                    this._partitions.Remove(current.Id);
+                    this._partitions.Add(result);
+                }
             }
 
             return Task.FromResult(result);
