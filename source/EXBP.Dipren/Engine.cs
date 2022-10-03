@@ -169,7 +169,7 @@ namespace EXBP.Dipren
 
                 if (partition != null)
                 {
-                    throw new NotImplementedException();
+                    await this.ProcessPartitionAsync(job, partition, cancellation);
                 }
                 else
                 {
@@ -233,6 +233,27 @@ namespace EXBP.Dipren
             }
 
             return result;
+        }
+
+        private Task ProcessPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, CancellationToken cancellation) where TKey : IComparable<TKey>
+        {
+            Assert.ArgumentIsNotNull(job, nameof(job));
+            Assert.ArgumentIsNotNull(partition, nameof(partition));
+
+            //
+            // 1. Calculate the key range for the next batch.
+            // 2. Fetch the next batch of items to be processed from the data source.
+            // 3. Process the batch.
+            // 4. Try updating the partition with the progress made while reading the split request flag.
+            //    The partition can only be updated if it is still owned by the current processing node.
+            // 5. If a split was requested, create a new partition and save it along with the current partition in an
+            //    atomic fashion. Must not update and insert if the current node no longer owns the partition.
+            // 6. Repeat from step 1 until completed.
+            //
+
+            throw new NotImplementedException();
+
+            // return Task.CompletedTask;
         }
     }
 }
