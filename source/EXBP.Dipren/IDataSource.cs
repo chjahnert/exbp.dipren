@@ -45,10 +45,13 @@ namespace EXBP.Dipren
         /// <summary>
         ///   Returns the next batch of items.
         /// </summary>
-        /// <param name="last">
-        ///   The last key processed.
+        /// <param name="range">
+        ///   The range of keys from which to retrieve the next batch of items.
         /// </param>
-        /// <param name="limit">
+        /// <param name="skip">
+        ///   The number of items to skip.
+        /// </param>
+        /// <param name="take">
         ///   The maximum number of items to return.
         /// </param>
         /// <param name="canellation">
@@ -59,6 +62,6 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="IEnumerable{T}"/> that represents the asynchronous operation
         ///   and can be used to access the result.
         /// </returns>
-        Task<IEnumerable<KeyValuePair<TKey, TItem>>> GetNextBatchAsync(TKey last, int limit, CancellationToken canellation);
+        Task<IEnumerable<KeyValuePair<TKey, TItem>>> GetNextBatchAsync(Range<TKey> range, int skip, int take, CancellationToken canellation);
     }
 }

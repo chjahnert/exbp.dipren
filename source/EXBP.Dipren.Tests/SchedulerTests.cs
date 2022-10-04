@@ -164,7 +164,7 @@ namespace EXBP.Dipren.Tests
                 return Task.FromResult(result);
             }
 
-            public Task<IEnumerable<KeyValuePair<int, int>>> GetNextBatchAsync(int last, int limit, CancellationToken canellation)
+            public Task<IEnumerable<KeyValuePair<int, int>>> GetNextBatchAsync(Range<int> range, int skip, int take, CancellationToken canellation)
             {
                 throw new NotImplementedException();
             }
