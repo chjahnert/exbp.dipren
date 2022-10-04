@@ -340,6 +340,72 @@ namespace EXBP.Dipren.Data.Memory
             return Task.FromResult(result);
         }
 
+        /// <summary>
+        ///   Updates a partition with the progress made.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the partition.
+        /// </param>
+        /// <param name="owner">
+        ///   The unique identifier of the processing node reporting the progress.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current timestamp.
+        /// </param>
+        /// <param name="position">
+        ///   The key of the last item processed in the key range of the partition.
+        /// </param>
+        /// <param name="progress">
+        ///   The number of items processed since the last progress update.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the updated partition.
+        /// </returns>
+        /// <exception cref="LockException">
+        ///   The specified <paramref name="owner"/> no longer holds the lock on the partition.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A partition with the specified unique identifier does not exist.
+        /// </exception>
+        public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, CancellationToken cancellation)
+        {
+            Partition result = null;
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._partitions.TryGetValue(id, out Partition persisted);
+
+                if (exists == false)
+                {
+                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.PartitionWithSpecifiedIdentifierDoesNotExist);
+                }
+
+                if (persisted.Owner != owner)
+                {
+                    throw new LockException(InMemoryEngineDataStoreResources.PartitionLockNoLongerHeld);
+                }
+
+                result = persisted with
+                {
+                    Updated = timestamp,
+                    Position = position,
+                    Processed = (persisted.Processed + progress),
+                    Remaining = (persisted.Remaining - progress)
+                };
+
+                this._partitions.Remove(result.Id);
+                this._partitions.Add(result);
+            }
+
+
+            return Task.FromResult(result);
+        }
+
 
         /// <summary>
         ///   Implements a collection of <see cref="Partition"/> records.
