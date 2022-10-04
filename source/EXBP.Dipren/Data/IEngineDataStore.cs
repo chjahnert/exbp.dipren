@@ -91,7 +91,7 @@ namespace EXBP.Dipren.Data
         /// <param name="requester">
         ///   The identifier of the processing node trying to acquire a partition.
         /// </param>
-        /// <param name="now">
+        /// <param name="timestamp">
         ///   The current timestamp.
         /// </param>
         /// <param name="active">
@@ -109,7 +109,7 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        Task<Partition> TryAcquirePartitionsAsync(string jobId, string requester, DateTime now, DateTime active, CancellationToken cancellation);
+        Task<Partition> TryAcquirePartitionsAsync(string jobId, string requester, DateTime timestamp, DateTime active, CancellationToken cancellation);
 
         /// <summary>
         ///   Requests an existing partition to be split.
