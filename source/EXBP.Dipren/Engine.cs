@@ -235,25 +235,44 @@ namespace EXBP.Dipren
             return result;
         }
 
+        /// <summary>
+        ///   Processes the specified partition until it is completed.
+        /// </summary>
+        /// <typeparam name="TKey">
+        ///   The type of the item key.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        ///   The type of items to process.
+        /// </typeparam>
+        /// <param name="job">
+        ///   The job being processed.
+        /// </param>
+        /// <param name="partition">
+        ///   The partition to process.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
         private Task ProcessPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
             Assert.ArgumentIsNotNull(partition, nameof(partition));
 
             //
-            // 1. Calculate the key range for the next batch.
-            // 2. Fetch the next batch of items to be processed from the data source.
-            // 3. Process the batch.
-            // 4. Try updating the partition with the progress made while reading the split request flag.
+            // 1. Fetch the next batch of items to be processed from the data source.
+            // 2. Process the batch.
+            // 3. Try updating the partition with the progress made while reading the split request flag.
             //    The partition can only be updated if it is still owned by the current processing node.
-            // 5. If a split was requested, create a new partition and save it along with the current partition in an
+            // 4. If a split was requested, create a new partition and save it along with the current partition in an
             //    atomic fashion. Must not update and insert if the current node no longer owns the partition.
-            // 6. Repeat from step 1 until completed.
+            // 5. Repeat from step 1 until completed.
             //
 
             throw new NotImplementedException();
-
-            // return Task.CompletedTask;
         }
     }
 }
