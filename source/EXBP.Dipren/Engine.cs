@@ -1,4 +1,6 @@
 ﻿
+using System.Diagnostics;
+
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Diagnostics;
 
@@ -169,7 +171,16 @@ namespace EXBP.Dipren
 
                 if (partition != null)
                 {
-                    await this.ProcessPartitionAsync(job, partition, cancellation);
+                    try
+                    {
+                        await this.ProcessPartitionAsync(job, partition, cancellation);
+                    }
+                    catch (LockException)
+                    {
+                        //
+                        // The partition being processed was stolen by another processing node.
+                        //
+                    }
                 }
                 else
                 {
@@ -187,6 +198,67 @@ namespace EXBP.Dipren
                     catch (UnknownIdentifierException)
                     {
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        ///   Processes the specified partition until it is completed.
+        /// </summary>
+        /// <typeparam name="TKey">
+        ///   The type of the item key.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        ///   The type of items to process.
+        /// </typeparam>
+        /// <param name="job">
+        ///   The job being processed.
+        /// </param>
+        /// <param name="partition">
+        ///   The partition to process.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
+        private async Task ProcessPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, CancellationToken cancellation) where TKey : IComparable<TKey>
+        {
+            Assert.ArgumentIsNotNull(job, nameof(job));
+            Assert.ArgumentIsNotNull(partition, nameof(partition));
+
+            //
+            // 1. Fetch the next batch of items to be processed from the data source.
+            // 2. Process the batch.
+            // 3. Try updating the partition with the progress made while reading the split request flag.
+            //    The partition can only be updated if it is still owned by the current processing node.
+            // 4. If a split was requested, create a new partition and save it along with the current partition in an
+            //    atomic fashion. Must not update and insert if the current node no longer owns the partition.
+            // 5. Repeat from step 1 until completed.
+            //
+
+            while (partition.Remaining > 0L)
+            {
+                Range<TKey> range = new Range<TKey>(partition.Position, partition.Range.Last, partition.Range.IsInclusive);
+                int skip = ((partition.Processed == 0L) ? 0 : 1);
+
+                IEnumerable<KeyValuePair<TKey, TItem>> batch = await job.Source.GetNextBatchAsync(range, skip, job.BatchSize, cancellation);
+
+                IEnumerable<TItem> items = batch.Select(kvp => kvp.Value);
+
+                await job.Processor.ProcessAsync(items, cancellation);
+
+                long progress = batch.Count();
+                TKey position = batch.Last().Key;
+                DateTime timestamp = this._clock.GetDateTime();
+
+                partition = await this.ReportProgressAsync(job, partition, timestamp, position, progress, cancellation);
+
+                if (partition.IsSplitRequested == true)
+                {
+                    throw new NotImplementedException();
                 }
             }
         }
@@ -214,7 +286,7 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Partition<TKey>> TryAcquirePartitionAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
-            Assert.ArgumentIsNotNull(job, nameof(job));
+            Debug.Assert(job != null);
 
             DateTime now = this._clock.GetDateTime();
             DateTime cut = (now - this._configuration.BatchProcessingTimeout - this._configuration.MaximumClockDrift);
@@ -236,7 +308,7 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
-        ///   Processes the specified partition until it is completed.
+        ///   Updates a partition with the progress made.
         /// </summary>
         /// <typeparam name="TKey">
         ///   The type of the item key.
@@ -248,31 +320,43 @@ namespace EXBP.Dipren
         ///   The job being processed.
         /// </param>
         /// <param name="partition">
-        ///   The partition to process.
+        ///   The partition to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current timestamp.
+        /// </param>
+        /// <param name="position">
+        ///   The key of the last item processed in the key range of the partition.
+        /// </param>
+        /// <param name="progress">
+        ///   The number of items processed since the last progress update.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the updated partition.
         /// </returns>
-        private Task ProcessPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, CancellationToken cancellation) where TKey : IComparable<TKey>
+        /// <exception cref="LockException">
+        ///   The current processing node no longer holds the lock on the partition.
+        /// </exception>
+        private async Task<Partition<TKey>> ReportProgressAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, DateTime timestamp, TKey position, long progress, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
-            Assert.ArgumentIsNotNull(job, nameof(job));
-            Assert.ArgumentIsNotNull(partition, nameof(partition));
+            Debug.Assert(job != null);
+            Debug.Assert(partition != null);
+            Debug.Assert(partition.Owner == this.Identity);
+            Debug.Assert(position != null);
+            Debug.Assert(progress >= 0L);
 
-            //
-            // 1. Fetch the next batch of items to be processed from the data source.
-            // 2. Process the batch.
-            // 3. Try updating the partition with the progress made while reading the split request flag.
-            //    The partition can only be updated if it is still owned by the current processing node.
-            // 4. If a split was requested, create a new partition and save it along with the current partition in an
-            //    atomic fashion. Must not update and insert if the current node no longer owns the partition.
-            // 5. Repeat from step 1 until completed.
-            //
+            string sp = job.Serializer.Serialize(position);
 
-            throw new NotImplementedException();
+            Partition updated = await this._store.ReportProgressAsync(partition.Id, this.Identity, timestamp, sp, progress, cancellation);
+
+            Partition<TKey> result = updated.ToPartition(job.Serializer);
+
+            return result;
         }
     }
 }
