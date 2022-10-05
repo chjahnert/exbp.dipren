@@ -154,9 +154,43 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
-            Partition retrieved = store.Partitions.First(p => p.Id == partitionId);
+            Partition retrieved = await store.RetrievePartitionAsync(partitionId, CancellationToken.None);
 
             Assert.That(retrieved, Is.EqualTo(partition));
+        }
+
+        [Test]
+        public void RetirvePartitionAsync_PartitionDoesNotExist_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            Guid id = Guid.NewGuid();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrievePartitionAsync(id, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task RetirvePartitionAsync_PartitionExists_ReturnsPartition()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionId = Guid.NewGuid();
+            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false);
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            Partition persisted = await store.RetrievePartitionAsync(partitionId, CancellationToken.None);
+
+            Assert.That(persisted, Is.EqualTo(partition));
         }
 
         [Test]
@@ -490,7 +524,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             Assert.That(result, Is.True);
 
-            Partition updated = store.Partitions.First(p => p.Id == partitionId);
+            Partition updated = await store.RetrievePartitionAsync(partitionId, CancellationToken.None);
 
             Assert.That(updated.IsSplitRequested, Is.True);
         }
@@ -575,7 +609,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             await store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3L, CancellationToken.None);
 
-            Partition persisted = store.Partitions.First(p => p.Id == partitionId);
+            Partition persisted = await store.RetrievePartitionAsync(partitionId, CancellationToken.None);
 
             Assert.That(persisted.JobId, Is.EqualTo(partition.JobId));
             Assert.That(persisted.Created, Is.EqualTo(partition.Created));
@@ -611,19 +645,19 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
 
-            Partition persisted = await store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3L, CancellationToken.None);
+            Partition returned = await store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3L, CancellationToken.None);
 
-            Assert.That(persisted.JobId, Is.EqualTo(partition.JobId));
-            Assert.That(persisted.Created, Is.EqualTo(partition.Created));
-            Assert.That(persisted.Updated, Is.EqualTo(progressUpdated));
-            Assert.That(persisted.Owner, Is.EqualTo("owner"));
-            Assert.That(persisted.First, Is.EqualTo(partition.First));
-            Assert.That(persisted.Last, Is.EqualTo(partition.Last));
-            Assert.That(persisted.IsInclusive, Is.EqualTo(partition.IsInclusive));
-            Assert.That(persisted.Position, Is.EqualTo("g"));
-            Assert.That(persisted.Processed, Is.EqualTo(partition.Processed + 3L));
-            Assert.That(persisted.Remaining, Is.EqualTo(partition.Remaining - 3L));
-            Assert.That(persisted.IsSplitRequested, Is.EqualTo(partition.IsSplitRequested));
+            Assert.That(returned.JobId, Is.EqualTo(partition.JobId));
+            Assert.That(returned.Created, Is.EqualTo(partition.Created));
+            Assert.That(returned.Updated, Is.EqualTo(progressUpdated));
+            Assert.That(returned.Owner, Is.EqualTo("owner"));
+            Assert.That(returned.First, Is.EqualTo(partition.First));
+            Assert.That(returned.Last, Is.EqualTo(partition.Last));
+            Assert.That(returned.IsInclusive, Is.EqualTo(partition.IsInclusive));
+            Assert.That(returned.Position, Is.EqualTo("g"));
+            Assert.That(returned.Processed, Is.EqualTo(partition.Processed + 3L));
+            Assert.That(returned.Remaining, Is.EqualTo(partition.Remaining - 3L));
+            Assert.That(returned.IsSplitRequested, Is.EqualTo(partition.IsSplitRequested));
         }
     }
 }

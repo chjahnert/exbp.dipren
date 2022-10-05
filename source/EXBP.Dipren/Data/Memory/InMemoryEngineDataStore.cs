@@ -218,6 +218,41 @@ namespace EXBP.Dipren.Data.Memory
         }
 
         /// <summary>
+        ///   Retrieves the partition with the specified identifier from the data store.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the partition.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        public Task<Partition> RetrievePartitionAsync(Guid id, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            Partition result = null;
+
+            lock (this._syncRoot)
+            {
+                try
+                {
+                    result = this._partitions[id];
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.JobWithSpecifiedIdentifierDoesNotExist, ex);
+                }
+            }
+
+            return Task.FromResult(result);
+        }
+
+        /// <summary>
         ///   Tries to acquire a free or abandoned partition.
         /// </summary>
         /// <param name="jobId">

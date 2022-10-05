@@ -83,6 +83,22 @@ namespace EXBP.Dipren.Data
         Task InsertPartitionAsync(Partition partition, CancellationToken cancellation);
 
         /// <summary>
+        ///   Retrieves the partition with the specified identifier from the data store.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the partition.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        Task<Partition> RetrievePartitionAsync(Guid id, CancellationToken cancellation);
+
+        /// <summary>
         ///   Tries to acquire a free or abandoned partition.
         /// </summary>
         /// <param name="jobId">
