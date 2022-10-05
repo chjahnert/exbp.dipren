@@ -343,7 +343,6 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Assert.ThrowsAsync<UnknownIdentifierException>(() => store.TryRequestSplitAsync("DPJ-0001", cut, CancellationToken.None));
         }
 
-
         [Test]
         public async Task TryRequestSplitAsync_NoPartitionsExist_ReturnsFalse()
         {
