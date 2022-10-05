@@ -374,6 +374,9 @@ namespace EXBP.Dipren.Data.Memory
         /// </exception>
         public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, CancellationToken cancellation)
         {
+            Assert.ArgumentIsNotNull(owner, nameof(owner));
+            Assert.ArgumentIsNotNull(position, nameof(position));
+
             Partition result = null;
 
             lock (this._syncRoot)
