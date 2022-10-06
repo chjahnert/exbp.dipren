@@ -198,7 +198,7 @@ namespace EXBP.Dipren.Data.Memory
 
                 Partition updated = this._partitions[partitionToUpdate.Id] with
                 {
-                    Owner = partitionToInsert.Owner,
+                    Owner = partitionToUpdate.Owner,
                     Updated = partitionToUpdate.Updated,
                     Last = partitionToUpdate.Last,
                     IsInclusive = partitionToUpdate.IsInclusive,
