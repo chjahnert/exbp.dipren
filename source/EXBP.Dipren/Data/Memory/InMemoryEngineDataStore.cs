@@ -178,7 +178,7 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (partitionToInsertExists == true)
                 {
-                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.PartitionWithSameIdentifierAlreadyExists);
+                    throw new DuplicateIdentifierException(InMemoryEngineDataStoreResources.PartitionWithSameIdentifierAlreadyExists);
                 }
 
                 //
