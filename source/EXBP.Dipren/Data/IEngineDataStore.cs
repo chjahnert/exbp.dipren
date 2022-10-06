@@ -98,6 +98,12 @@ namespace EXBP.Dipren.Data
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="UnknownIdentifierException">
+        ///   The partition to update does not exist in the data store.
+        /// </exception>
+        /// <exception cref="DuplicateIdentifierException">
+        ///   The partition to insert already exists in the data store.
+        /// </exception>
         Task InsertSplitPartitionAsync(Partition partitionToUpdate, Partition partitionToInsert, CancellationToken cancellation);
 
         /// <summary>

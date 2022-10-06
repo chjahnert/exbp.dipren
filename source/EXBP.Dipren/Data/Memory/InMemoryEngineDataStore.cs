@@ -160,6 +160,16 @@ namespace EXBP.Dipren.Data.Memory
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="partitionToUpdate"/> or argument <paramref name="partitionToInsert"/> is a
+        ///   <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   The partition to update does not exist in the data store.
+        /// </exception>
+        /// <exception cref="DuplicateIdentifierException">
+        ///   The partition to insert already exists in the data store.
+        /// </exception>
         public Task InsertSplitPartitionAsync(Partition partitionToUpdate, Partition partitionToInsert, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(partitionToUpdate, nameof(partitionToUpdate));
@@ -182,7 +192,8 @@ namespace EXBP.Dipren.Data.Memory
                 }
 
                 //
-                // Only update fields that are valid to update. E.g. the job identifier cannot be updated.
+                // Only update fields that are valid to update. The job identifier and the creation date should never
+                // be changed.
                 //
 
                 Partition updated = this._partitions[partitionToUpdate.Id] with
