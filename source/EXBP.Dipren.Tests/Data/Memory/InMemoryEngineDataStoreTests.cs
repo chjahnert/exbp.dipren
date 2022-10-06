@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Concurrent;
+
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Data.Memory;
 
@@ -658,6 +660,138 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Assert.That(returned.Processed, Is.EqualTo(partition.Processed + 3L));
             Assert.That(returned.Remaining, Is.EqualTo(partition.Remaining - 3L));
             Assert.That(returned.IsSplitRequested, Is.EqualTo(partition.IsSplitRequested));
+        }
+
+        [Test]
+        public async Task InsertSplitPartition_ArgumentPartitionToUpdateIsNull_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionId = Guid.NewGuid();
+            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false);
+
+            Assert.Throws<ArgumentNullException>(() => store.InsertSplitPartitionAsync(null, partition, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task InsertSplitPartition_ArgumentPartitionToInsertIsNull_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime timestamp = DateTime.UtcNow;
+            Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionId = Guid.NewGuid();
+            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "g", 7L, 18L, "owner", false);
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            Assert.Throws<ArgumentNullException>(() => store.InsertSplitPartitionAsync(partition, null, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task InsertSplitPartition_PartitionToUpdateDoesNotExist_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionToUpdateId = Guid.NewGuid();
+            DateTime partitionToUpdateCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionToUpdateUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partitionToUpdate = new Partition(partitionToUpdateId, jobId, partitionToUpdateCreated, partitionToUpdateUpdated, "a", "m", true, "c", 2L, 12L, "owner", false);
+
+            Guid partitionToInsertId = Guid.NewGuid();
+            DateTime partitionToInsertCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionToInsertUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partitionToInsert = new Partition(partitionToInsertId, jobId, partitionToInsertCreated, partitionToInsertUpdated, "n", "z", true, null, 0L, 12L, null, false);
+
+            Assert.Throws<UnknownIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task InsertSplitPartition_PartitionToInsertAlreadyExists_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionToUpdateId = Guid.NewGuid();
+            DateTime partitionToUpdateCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionToUpdateUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partitionToUpdate = new Partition(partitionToUpdateId, jobId, partitionToUpdateCreated, partitionToUpdateUpdated, "a", "m", true, "c", 2L, 12L, "owner", false);
+
+            await store.InsertPartitionAsync(partitionToUpdate, CancellationToken.None);
+
+            Guid partitionToInsertId = Guid.NewGuid();
+            DateTime partitionToInsertCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionToInsertUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partitionToInsert = new Partition(partitionToInsertId, jobId, partitionToInsertCreated, partitionToInsertUpdated, "n", "z", true, null, 0L, 12L, null, false);
+
+            await store.InsertPartitionAsync(partitionToInsert, CancellationToken.None);
+
+            Assert.Throws<DuplicateIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task InsertSplitPartition_ArgumensAreValid_UpdatesExistingAndInsertsNewPartition()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionToUpdateId = Guid.NewGuid();
+            DateTime partitionToUpdateCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionToUpdateUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partitionToUpdate = new Partition(partitionToUpdateId, jobId, partitionToUpdateCreated, partitionToUpdateUpdated, "a", "m", true, "c", 2L, 12L, "owner", false);
+
+            await store.InsertPartitionAsync(partitionToUpdate, CancellationToken.None);
+
+            Guid partitionToInsertId = Guid.NewGuid();
+            DateTime partitionToInsertCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionToInsertUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partitionToInsert = new Partition(partitionToInsertId, jobId, partitionToInsertCreated, partitionToInsertUpdated, "n", "z", true, null, 0L, 12L, null, false);
+
+            await store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None);
+
+            Partition updated = await store.RetrievePartitionAsync(partitionToUpdateId, CancellationToken.None);
+            Partition inserted = await store.RetrievePartitionAsync(partitionToInsertId, CancellationToken.None);
+
+            Assert.That(updated, Is.EqualTo(partitionToUpdate));
+            Assert.That(inserted, Is.EqualTo(partitionToInsert));
         }
     }
 }
