@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 
 using EXBP.Dipren.Diagnostics;
@@ -139,6 +140,52 @@ namespace EXBP.Dipren.Data.Memory
                 }
 
                 this._partitions.Add(partition);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        ///   Inserts a split off partition while updating the split partition as an atomic operation.
+        /// </summary>
+        /// <param name="partitionToUpdate">
+        ///   The partition to update.
+        /// </param>
+        /// <param name="partitionToInsert">
+        ///   The partition to insert.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
+        public Task InsertSplitPartitionAsync(Partition partitionToUpdate, Partition partitionToInsert, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(partitionToUpdate, nameof(partitionToUpdate));
+            Assert.ArgumentIsNotNull(partitionToInsert, nameof(partitionToInsert));
+
+            lock (this._syncRoot)
+            {
+                bool partitionToUpdateExists = this._partitions.Contains(partitionToUpdate.Id);
+
+                if (partitionToUpdateExists == false)
+                {
+                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.PartitionWithSpecifiedIdentifierDoesNotExist);
+                }
+
+                bool partitionToInsertExists = this._partitions.Contains(partitionToInsert.Id);
+
+                if (partitionToInsertExists == true)
+                {
+                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.PartitionWithSameIdentifierAlreadyExists);
+                }
+
+                this._partitions.Remove(partitionToUpdate.Id);
+
+                this._partitions.Add(partitionToUpdate);
+                this._partitions.Add(partitionToInsert);
             }
 
             return Task.CompletedTask;

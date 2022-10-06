@@ -83,6 +83,24 @@ namespace EXBP.Dipren.Data
         Task InsertPartitionAsync(Partition partition, CancellationToken cancellation);
 
         /// <summary>
+        ///   Inserts a split off partition while updating the split partition as an atomic operation.
+        /// </summary>
+        /// <param name="partitionToUpdate">
+        ///   The partition to update.
+        /// </param>
+        /// <param name="partitionToInsert">
+        ///   The partition to insert.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
+        Task InsertSplitPartitionAsync(Partition partitionToUpdate, Partition partitionToInsert, CancellationToken cancellation);
+
+        /// <summary>
         ///   Retrieves the partition with the specified identifier from the data store.
         /// </summary>
         /// <param name="id">
