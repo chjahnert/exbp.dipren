@@ -1,5 +1,4 @@
 ﻿
-using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 
 using EXBP.Dipren.Diagnostics;
@@ -182,9 +181,25 @@ namespace EXBP.Dipren.Data.Memory
                     throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.PartitionWithSameIdentifierAlreadyExists);
                 }
 
+                //
+                // Only update fields that are valid to update. E.g. the job identifier cannot be updated.
+                //
+
+                Partition updated = this._partitions[partitionToUpdate.Id] with
+                {
+                    Owner = partitionToInsert.Owner,
+                    Updated = partitionToUpdate.Updated,
+                    Last = partitionToUpdate.Last,
+                    IsInclusive = partitionToUpdate.IsInclusive,
+                    Position = partitionToUpdate.Position,
+                    Processed = partitionToUpdate.Processed,
+                    Remaining = partitionToUpdate.Remaining,
+                    IsSplitRequested = partitionToUpdate.IsSplitRequested
+                };
+
                 this._partitions.Remove(partitionToUpdate.Id);
 
-                this._partitions.Add(partitionToUpdate);
+                this._partitions.Add(updated);
                 this._partitions.Add(partitionToInsert);
             }
 
