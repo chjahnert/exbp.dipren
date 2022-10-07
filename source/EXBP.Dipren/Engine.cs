@@ -258,7 +258,7 @@ namespace EXBP.Dipren
 
                 if (partition.IsSplitRequested == true)
                 {
-                    throw new NotImplementedException();
+                    partition = await this.SplitPartitionAsync(job, partition, cancellation);
                 }
             }
         }
@@ -355,6 +355,60 @@ namespace EXBP.Dipren
             Partition updated = await this._store.ReportProgressAsync(partition.Id, this.Identity, timestamp, sp, progress, cancellation);
 
             Partition<TKey> result = updated.ToPartition(job.Serializer);
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Splits the specified partition.
+        /// </summary>
+        /// <typeparam name="TKey">
+        ///   The type of the item key.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        ///   The type of items to process.
+        /// </typeparam>
+        /// <param name="job">
+        ///   The job being processed.
+        /// </param>
+        /// <param name="partition">
+        ///   The partition to split.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the updated partition.
+        /// </returns>
+        private async Task<Partition<TKey>> SplitPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, CancellationToken cancellation) where TKey : IComparable<TKey>
+        {
+            Debug.Assert(partition != null);
+
+            Range<TKey> remainingKeyRange = partition.GetRemainingKeyRange();
+            Range<TKey> updatedKeyRange = job.Arithmetics.Split(remainingKeyRange, out Range<TKey> excludedKeyRange);
+
+            Partition<TKey> result = partition;
+
+            if (excludedKeyRange != null)
+            {
+                Task<long> remainingKeyRangeSize = job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
+                Task<long> excludedKeyRangeSize = job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
+
+                DateTime timestamp = this._clock.GetDateTime();
+
+                Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, remainingKeyRange, partition.Position, partition.Processed, await remainingKeyRangeSize, false);
+                Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
+
+                Guid id = Guid.NewGuid();
+                Partition<TKey> expludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, await excludedKeyRangeSize, false);
+                Partition excludedEntry = expludedPartition.ToEntry(job.Serializer);
+
+                await this._store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);
+
+                result = updatedPartition;
+            }
 
             return result;
         }
