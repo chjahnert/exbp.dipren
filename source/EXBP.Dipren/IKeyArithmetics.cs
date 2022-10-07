@@ -10,17 +10,17 @@ namespace EXBP.Dipren
     public interface IKeyArithmetics<TKey> where TKey : IComparable<TKey>
     {
         /// <summary>
-        ///   Splits the specified range into two or more ranges.
+        ///   Splits the specified range into two ranges.
         /// </summary>
         /// <param name="range">
         ///   The <see cref="Range{TKey}"/> to split.
         /// </param>
-        /// <param name="updated">
-        ///   A variable that receives the updated <paramref name="range"/> object.
+        /// <param name="created">
+        ///   A variable that receives the new <paramref name="range"/> object created.
         /// </param>
         /// <returns>
-        ///   An array of <see cref="Range{TKey}"/> objects that are the new ranges created.
+        ///   A <see cref="Range{TKey}"/> objects that is the updated value of <paramref name="range"/>.
         /// </returns>
-        Range<TKey>[] Split(Range<TKey> range, out Range<TKey> updated);
+        Range<TKey> Split(Range<TKey> range, out Range<TKey> created);
     }
 }
