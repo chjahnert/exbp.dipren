@@ -10,7 +10,7 @@ namespace EXBP.Dipren
     public interface IKeyArithmetics<TKey> where TKey : IComparable<TKey>
     {
         /// <summary>
-        ///   Splits the specified range into two ranges.
+        ///   Splits the specified range into two or more ranges.
         /// </summary>
         /// <param name="range">
         ///   The <see cref="Range{TKey}"/> to split.
