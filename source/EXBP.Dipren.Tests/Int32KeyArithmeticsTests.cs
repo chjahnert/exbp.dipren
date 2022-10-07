@@ -7,6 +7,14 @@ namespace EXBP.Dipren.Tests
     [TestFixture]
     internal class Int32KeyArithmeticsTests
     {
+        [Test]
+        public void Split_ArgumentRangeIsNull_ThrowsException()
+        {
+            Int32KeyArithmetics arithmetics = new Int32KeyArithmetics();
+
+            Assert.Throws<ArgumentNullException>(() => arithmetics.Split(null, out Range<int> _));
+        }
+
         [TestCase(1, 8, true, 1, 5, 5, 8)]
         [TestCase(8, 1, true, 8, 4, 4, 1)]
         [TestCase(-7, 5, true, -7, -1, -1, 5)]
