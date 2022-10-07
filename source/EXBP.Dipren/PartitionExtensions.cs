@@ -40,5 +40,26 @@ namespace EXBP.Dipren
 
             return result;
         }
+
+        /// <summary>
+        ///   Returns the key range left to process.
+        /// </summary>
+        /// <typeparam name="TKey">
+        ///   The type of keys.
+        /// </typeparam>
+        /// <param name="source">
+        ///   The <see cref="Partition{TKey}"/> object for which to get the remaining key range.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Range{TKey}"/> of <typeparamref name="TKey"/> representing the key range left to process.
+        /// </returns>
+        internal static Range<TKey> GetRemainingKeyRange<TKey>(this Partition<TKey> source) where TKey : IComparable<TKey>
+        {
+            Debug.Assert(source != null);
+
+            Range<TKey> result = new Range<TKey>(source.Position, source.Range.Last, source.Range.IsInclusive);
+
+            return result;
+        }
     }
 }
