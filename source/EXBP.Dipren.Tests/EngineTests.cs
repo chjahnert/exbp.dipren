@@ -1,6 +1,4 @@
 ﻿
-using Castle.Components.DictionaryAdapter;
-
 using EXBP.Dipren.Data.Memory;
 
 using NUnit.Framework;
