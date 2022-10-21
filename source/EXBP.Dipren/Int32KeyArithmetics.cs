@@ -10,11 +10,10 @@ namespace EXBP.Dipren
     public class Int32KeyArithmetics : IKeyArithmetics<int>
     {
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Int32KeyArithmetics"/> class.
+        ///   A ready to be used instance of the <see cref="Int32KeyArithmetics"/> class.
         /// </summary>
-        public Int32KeyArithmetics()
-        {
-        }
+        public static readonly Int32KeyArithmetics Default = new Int32KeyArithmetics();
+
 
         /// <summary>
         ///   Splits the specified range into two ranges.

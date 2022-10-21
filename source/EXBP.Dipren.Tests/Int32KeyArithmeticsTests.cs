@@ -10,9 +10,7 @@ namespace EXBP.Dipren.Tests
         [Test]
         public void Split_ArgumentRangeIsNull_ThrowsException()
         {
-            Int32KeyArithmetics arithmetics = new Int32KeyArithmetics();
-
-            Assert.Throws<ArgumentNullException>(() => arithmetics.Split(null, out Range<int> _));
+            Assert.Throws<ArgumentNullException>(() => Int32KeyArithmetics.Default.Split(null, out Range<int> _));
         }
 
         [TestCase(1, 8, true, 1, 5, 5, 8)]
@@ -25,11 +23,9 @@ namespace EXBP.Dipren.Tests
         [TestCase(5, -7, false, 5, -1, -1, -7)]
         public void Split_ValidArguments_SplitsRangeCorrectly(int inputFirst, int inputLast, bool inputInclusive, int returnedFirst, int returnedLast, int createdFirst, int createdLast)
         {
-            Int32KeyArithmetics arithmetics = new Int32KeyArithmetics();
-
             Range<int> input = new Range<int>(inputFirst, inputLast, inputInclusive);
 
-            Range<int> returned = arithmetics.Split(input, out Range<int> created);
+            Range<int> returned = Int32KeyArithmetics.Default.Split(input, out Range<int> created);
 
             Assert.That(returned.First, Is.EqualTo(returnedFirst));
             Assert.That(returned.Last, Is.EqualTo(returnedLast));
