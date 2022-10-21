@@ -45,7 +45,6 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(store, nameof(store));
             Assert.ArgumentIsNotNull(clock, nameof(clock));
-            Assert.ArgumentIsNotNull(configuration, nameof(configuration));
 
             this._store = store;
             this._clock = clock;
