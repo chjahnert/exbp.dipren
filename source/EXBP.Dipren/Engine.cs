@@ -41,7 +41,7 @@ namespace EXBP.Dipren
         /// <param name="configuration">
         ///   The configuration settings to use.
         /// </param>
-        internal Engine(IEngineDataStore store, IDateTimeProvider clock, Configuration configuration)
+        internal Engine(IEngineDataStore store, IDateTimeProvider clock, Configuration configuration = null)
         {
             Assert.ArgumentIsNotNull(store, nameof(store));
             Assert.ArgumentIsNotNull(clock, nameof(clock));
@@ -49,7 +49,7 @@ namespace EXBP.Dipren
 
             this._store = store;
             this._clock = clock;
-            this._configuration = configuration;
+            this._configuration = (configuration ?? new Configuration());
             this._id = EngineIdentifier.Generate();
         }
 
@@ -62,7 +62,7 @@ namespace EXBP.Dipren
         /// <param name="configuration">
         ///   The configuration settings to use.
         /// </param>
-        public Engine(IEngineDataStore store, Configuration configuration) : this(store, UtcDateTimeProvider.Default, configuration)
+        public Engine(IEngineDataStore store, Configuration configuration = null) : this(store, UtcDateTimeProvider.Default, configuration)
         {
         }
 
