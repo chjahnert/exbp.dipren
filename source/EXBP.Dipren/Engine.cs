@@ -184,6 +184,10 @@ namespace EXBP.Dipren
                 else
                 {
                     //
+                    // TODO: Is any work left?
+                    //
+
+                    //
                     // If a partition could not be acquired, wait the configured amount of time and check if the job
                     // has not completed, failed, or was deleted in the meanwhile.
                     //
