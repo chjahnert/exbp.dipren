@@ -297,7 +297,7 @@ namespace EXBP.Dipren
             Debug.Assert(job != null);
 
             DateTime now = this._clock.GetDateTime();
-            DateTime cut = (now - this._configuration.BatchProcessingTimeout - this._configuration.MaximumClockDrift);
+            DateTime cut = (now - job.Timeout - this._configuration.MaximumClockDrift);
 
             Partition acquired = await this._store.TryAcquirePartitionsAsync(job.Id, this.Identity, now, cut, cancellation);
 
