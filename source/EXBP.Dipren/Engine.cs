@@ -187,19 +187,30 @@ namespace EXBP.Dipren
                     // TODO: Is any work left?
                     //
 
-                    //
-                    // If a partition could not be acquired, wait the configured amount of time and check if the job
-                    // has not completed, failed, or was deleted in the meanwhile.
-                    //
+                    bool completed = false;
 
-                    await Task.Delay(this._configuration.PollingInterval, cancellation);
-
-                    try
+                    if (completed == true)
                     {
-                        persisted = await this._store.RetrieveJobAsync(job.Id, cancellation);
+                        //
+                        // TODO: Mark the job as completed.
+                        //
                     }
-                    catch (UnknownIdentifierException)
+                    else
                     {
+                        //
+                        // If a partition could not be acquired, wait the configured amount of time and check if the job
+                        // has not completed, failed, or was deleted in the meanwhile.
+                        //
+
+                        await Task.Delay(this._configuration.PollingInterval, cancellation);
+
+                        try
+                        {
+                            persisted = await this._store.RetrieveJobAsync(job.Id, cancellation);
+                        }
+                        catch (UnknownIdentifierException)
+                        {
+                        }
                     }
                 }
             }
@@ -242,12 +253,7 @@ namespace EXBP.Dipren
             // 5. Repeat from step 1 until completed.
             //
 
-            //
-            // TODO: The partition is completed once the data source returns a batch of zero items. Introduce a flag
-            //       in the partition structures to indicate that processing is completed.
-            //
-
-            while (partition.Remaining > 0L)
+            while (partition.IsCompleted == false)
             {
                 Range<TKey> range = new Range<TKey>(partition.Position, partition.Range.Last, partition.Range.IsInclusive);
                 int skip = ((partition.Processed == 0L) ? 0 : 1);
@@ -259,10 +265,11 @@ namespace EXBP.Dipren
                 await job.Processor.ProcessAsync(items, cancellation);
 
                 long progress = batch.Count();
+                bool completed = (progress < job.BatchSize);
                 TKey position = batch.Last().Key;
                 DateTime timestamp = this._clock.GetDateTime();
 
-                partition = await this.ReportProgressAsync(job, partition, timestamp, position, progress, cancellation);
+                partition = await this.ReportProgressAsync(job, partition, timestamp, position, progress, completed, cancellation);
 
                 if (partition.IsSplitRequested == true)
                 {
@@ -339,6 +346,9 @@ namespace EXBP.Dipren
         /// <param name="progress">
         ///   The number of items processed since the last progress update.
         /// </param>
+        /// <param name="completed">
+        ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -350,7 +360,7 @@ namespace EXBP.Dipren
         /// <exception cref="LockException">
         ///   The current processing node no longer holds the lock on the partition.
         /// </exception>
-        private async Task<Partition<TKey>> ReportProgressAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, DateTime timestamp, TKey position, long progress, CancellationToken cancellation) where TKey : IComparable<TKey>
+        private async Task<Partition<TKey>> ReportProgressAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, DateTime timestamp, TKey position, long progress, bool completed, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
             Debug.Assert(job != null);
             Debug.Assert(partition != null);
@@ -360,7 +370,7 @@ namespace EXBP.Dipren
 
             string sp = job.Serializer.Serialize(position);
 
-            Partition updated = await this._store.ReportProgressAsync(partition.Id, this.Identity, timestamp, sp, progress, cancellation);
+            Partition updated = await this._store.ReportProgressAsync(partition.Id, this.Identity, timestamp, sp, progress, completed, cancellation);
 
             Partition<TKey> result = updated.ToPartition(job.Serializer);
 
@@ -406,11 +416,11 @@ namespace EXBP.Dipren
 
                 DateTime timestamp = this._clock.GetDateTime();
 
-                Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, remainingKeyRange, partition.Position, partition.Processed, await remainingKeyRangeSize, false);
+                Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, remainingKeyRange, partition.Position, partition.Processed, await remainingKeyRangeSize, false, false);
                 Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
 
                 Guid id = Guid.NewGuid();
-                Partition<TKey> expludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, await excludedKeyRangeSize, false);
+                Partition<TKey> expludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, await excludedKeyRangeSize, false, false);
                 Partition excludedEntry = expludedPartition.ToEntry(job.Serializer);
 
                 await this._store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);

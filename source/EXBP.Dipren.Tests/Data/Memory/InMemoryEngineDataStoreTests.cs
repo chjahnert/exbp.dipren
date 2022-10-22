@@ -288,7 +288,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "z", 24L, 0L, null, false);
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "z", 24L, 0L, null, true, false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
@@ -490,7 +490,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", true);
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false, true);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
@@ -539,7 +539,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Guid id = Guid.NewGuid();
             DateTime timestamp = DateTime.UtcNow;
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.ReportProgressAsync(id, null, timestamp, "d", 4, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.ReportProgressAsync(id, null, timestamp, "d", 4, false, CancellationToken.None));
         }
 
         [Test]
@@ -550,7 +550,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Guid id = Guid.NewGuid();
             DateTime timestamp = DateTime.UtcNow;
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.ReportProgressAsync(id, "owner", timestamp, null, 4, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.ReportProgressAsync(id, "owner", timestamp, null, 4, false, CancellationToken.None));
         }
 
         [Test]
@@ -561,7 +561,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Guid id = Guid.NewGuid();
             DateTime timestamp = DateTime.UtcNow;
 
-            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.ReportProgressAsync(id, "owner", timestamp, "d", 4, CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.ReportProgressAsync(id, "owner", timestamp, "d", 4, false, CancellationToken.None));
         }
 
         [Test]
@@ -585,7 +585,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
 
-            Assert.ThrowsAsync<LockException>(() => store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3, CancellationToken.None));
+            Assert.ThrowsAsync<LockException>(() => store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3, false, CancellationToken.None));
         }
 
         [Test]
@@ -603,13 +603,13 @@ namespace EXBP.Dipren.Tests.Data.Memory
             DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false);
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false, false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
 
-            await store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3L, CancellationToken.None);
+            await store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3L, true, CancellationToken.None);
 
             Partition persisted = await store.RetrievePartitionAsync(partitionId, CancellationToken.None);
 
@@ -623,6 +623,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Assert.That(persisted.Position, Is.EqualTo("g"));
             Assert.That(persisted.Processed, Is.EqualTo(partition.Processed + 3L));
             Assert.That(persisted.Remaining, Is.EqualTo(partition.Remaining - 3L));
+            Assert.That(persisted.IsCompleted, Is.True);
             Assert.That(persisted.IsSplitRequested, Is.EqualTo(partition.IsSplitRequested));
         }
 
@@ -647,7 +648,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
 
-            Partition returned = await store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3L, CancellationToken.None);
+            Partition returned = await store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3L, true, CancellationToken.None);
 
             Assert.That(returned.JobId, Is.EqualTo(partition.JobId));
             Assert.That(returned.Created, Is.EqualTo(partition.Created));
@@ -659,6 +660,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Assert.That(returned.Position, Is.EqualTo("g"));
             Assert.That(returned.Processed, Is.EqualTo(partition.Processed + 3L));
             Assert.That(returned.Remaining, Is.EqualTo(partition.Remaining - 3L));
+            Assert.That(returned.IsCompleted, Is.True);
             Assert.That(returned.IsSplitRequested, Is.EqualTo(partition.IsSplitRequested));
         }
 

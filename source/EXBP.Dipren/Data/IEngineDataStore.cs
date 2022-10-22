@@ -192,6 +192,9 @@ namespace EXBP.Dipren.Data
         /// <param name="progress">
         ///   The number of items processed since the last progress update.
         /// </param>
+        /// <param name="completed">
+        ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -206,6 +209,6 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A partition with the specified unique identifier does not exist.
         /// </exception>
-        Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, CancellationToken cancellation);
+        Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, CancellationToken cancellation);
     }
 }

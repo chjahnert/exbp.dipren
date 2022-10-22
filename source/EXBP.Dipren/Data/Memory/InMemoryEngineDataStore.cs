@@ -369,7 +369,7 @@ namespace EXBP.Dipren.Data.Memory
                 }
 
                 Partition current = this._partitions
-                    .Where(p => (p.JobId == jobId) && ((p.Owner == null) || (p.Updated < active)) && (p.Remaining > 0L))
+                    .Where(p => (p.JobId == jobId) && ((p.Owner == null) || (p.Updated < active)) && (p.IsCompleted == false))
                     .OrderByDescending(p => p.Remaining)
                     .FirstOrDefault();
 
@@ -466,6 +466,9 @@ namespace EXBP.Dipren.Data.Memory
         /// <param name="progress">
         ///   The number of items processed since the last progress update.
         /// </param>
+        /// <param name="completed">
+        ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -480,7 +483,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A partition with the specified unique identifier does not exist.
         /// </exception>
-        public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, CancellationToken cancellation)
+        public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(position, nameof(position));
@@ -506,7 +509,8 @@ namespace EXBP.Dipren.Data.Memory
                     Updated = timestamp,
                     Position = position,
                     Processed = (persisted.Processed + progress),
-                    Remaining = (persisted.Remaining - progress)
+                    Remaining = (persisted.Remaining - progress),
+                    IsCompleted = completed
                 };
 
                 this._partitions.Remove(result.Id);

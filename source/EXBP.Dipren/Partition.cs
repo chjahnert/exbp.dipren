@@ -22,6 +22,7 @@ namespace EXBP.Dipren
         private readonly TKey _position;
         private readonly long _processed;
         private readonly long _remaining;
+        private readonly bool _completed;
         private readonly bool _split;
 
 
@@ -108,6 +109,14 @@ namespace EXBP.Dipren
         public long Remaining => this._remaining;
 
         /// <summary>
+        ///   Gets a value indicating whether the current partition has been processed.
+        /// </summary>
+        /// <value>
+        ///  <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
+        /// </value>
+        public bool IsCompleted => this._completed;
+
+        /// <summary>
         ///   Gets a value indicating whether a split was requested.
         /// </summary>
         /// <value>
@@ -146,10 +155,13 @@ namespace EXBP.Dipren
         /// <param name="remaining">
         ///   The estimated number of unprocessed items.
         /// </param>
+        /// <param name="completed">
+        ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
+        /// </param>
         /// <param name="split">
         ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
         /// </param>
-        internal Partition(Guid id, string jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool split)
+        internal Partition(Guid id, string jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool completed, bool split)
         {
             Debug.Assert(jobId != null);
             Debug.Assert(created.Kind == DateTimeKind.Utc);
@@ -167,6 +179,7 @@ namespace EXBP.Dipren
             this._position = position;
             this._processed = processed;
             this._remaining = remaining;
+            this._completed = completed;
             this._split = split;
         }
     }

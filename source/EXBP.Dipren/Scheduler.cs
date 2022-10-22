@@ -135,7 +135,7 @@ namespace EXBP.Dipren
 
             Guid id = Guid.NewGuid();
             DateTime timestampPartitionCreated = this._clock.GetDateTime();
-            Partition<TKey> partition = new Partition<TKey>(id, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false);
+            Partition<TKey> partition = new Partition<TKey>(id, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false, false);
             Partition result = partition.ToEntry(job.Serializer);
 
             await this._store.InsertPartitionAsync(result, cancellation);

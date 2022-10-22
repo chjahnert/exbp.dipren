@@ -156,6 +156,14 @@ namespace EXBP.Dipren.Data
         }
 
         /// <summary>
+        ///   Gets a value indicating whether the current partition has been processed.
+        /// </summary>
+        /// <value>
+        ///  <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
+        /// </value>
+        public bool IsCompleted { get; init; }
+
+        /// <summary>
         ///   Gets a value indicating whether a split was requested.
         /// </summary>
         /// <value>
@@ -201,10 +209,13 @@ namespace EXBP.Dipren.Data
         /// <param name="owner">
         ///   The owner of the partition or <see langword="null"/>.
         /// </param>
+        /// <param name="completed">
+        ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
+        /// </param>
         /// <param name="split">
         ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
         /// </param>
-        public Partition(Guid id, string jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool split = false)
+        public Partition(Guid id, string jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool completed = false, bool split = false)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsNotNull(first, nameof(first));
@@ -223,6 +234,7 @@ namespace EXBP.Dipren.Data
             this.Position = position;
             this.Processed = processed;
             this.Remaining = remaining;
+            this.IsCompleted = completed;
             this.IsSplitRequested = split;
         }
     }
