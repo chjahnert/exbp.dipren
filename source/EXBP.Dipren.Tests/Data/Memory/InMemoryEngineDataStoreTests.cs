@@ -795,5 +795,53 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Assert.That(updated, Is.EqualTo(partitionToUpdate));
             Assert.That(inserted, Is.EqualTo(partitionToInsert));
         }
+
+        [Test]
+        public void CountIncompletePartitionsAsync_ArgumentJobIdIsNull_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.CountIncompletePartitionsAsync(null, CancellationToken.None));
+        }
+
+        [Test]
+        public void CountIncompletePartitionsAsync_JobDoesNotExist_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.CountIncompletePartitionsAsync("DPJ-0001", CancellationToken.None));
+        }
+
+        [Test]
+        public async Task CountIncompletePartitionsAsync_ContainsInclompletePartitions_ReturnsCount()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid completedId = Guid.NewGuid();
+            DateTime completedCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime completedUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition completed = new Partition(completedId, jobId, completedCreated, completedUpdated, "a", "m", false, "l", 13L, 0L, "owner1", true, false);
+
+            await store.InsertPartitionAsync(completed, CancellationToken.None);
+
+            Guid pendingId = Guid.NewGuid();
+            DateTime pendingCreated = new DateTime(2022, 9, 12, 16, 23, 12, DateTimeKind.Utc);
+            DateTime pendingUpdated = new DateTime(2022, 9, 12, 16, 24, 32, DateTimeKind.Utc);
+
+            Partition pending = new Partition(pendingId, jobId, pendingCreated, pendingUpdated, "n", "z", true, "x", 8L, 2L, "owner2", false, false);
+
+            await store.InsertPartitionAsync(pending, CancellationToken.None);
+
+            long count = await store.CountIncompletePartitionsAsync(jobId, CancellationToken.None);
+
+            Assert.That(count, Is.EqualTo(1L));
+        }
     }
 }

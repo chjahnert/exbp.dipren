@@ -66,6 +66,41 @@ namespace EXBP.Dipren.Data.Memory
         }
 
         /// <summary>
+        ///   Returns the number of incomplete partitions for the specified job.
+        /// </summary>
+        /// <param name="jobId">
+        ///   The unique identifier of the job for which to retrieve the number of incomplete partitions.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and can
+        ///   be used to access the result.
+        /// </returns>
+        public Task<long> CountIncompletePartitionsAsync(string jobId, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+
+            long result = 0L;
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._jobs.Contains(jobId);
+
+                if (exists == false)
+                {
+                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.JobWithSpecifiedIdentifierDoesNotExist);
+                }
+
+                result = this._partitions.Count(p => (p.JobId == jobId) && (p.IsCompleted == false));
+            }
+
+            return Task.FromResult(result);
+        }
+
+        /// <summary>
         ///   Inserts a new job entry into the data store.
         /// </summary>
         /// <param name="job">

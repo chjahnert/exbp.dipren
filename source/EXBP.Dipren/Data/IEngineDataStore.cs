@@ -20,6 +20,22 @@ namespace EXBP.Dipren.Data
         Task<long> CountJobsAsync(CancellationToken cancellation);
 
         /// <summary>
+        ///   Returns the number of incomplete partitions for the specified job.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job for which to retrieve the number of incomplete partitions.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and can
+        ///   be used to access the result.
+        /// </returns>
+        Task<long> CountIncompletePartitionsAsync(string id, CancellationToken cancellation);
+
+        /// <summary>
         ///   Inserts a new job entry into the data store.
         /// </summary>
         /// <param name="job">
