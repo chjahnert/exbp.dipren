@@ -1,4 +1,5 @@
 ﻿
+using EXBP.Dipren.Data;
 using EXBP.Dipren.Data.Memory;
 
 using NUnit.Framework;
@@ -24,6 +25,26 @@ namespace EXBP.Dipren.Tests
             Assert.ThrowsAsync<ArgumentNullException>(() => engine.RunAsync<int, int>(null, false, CancellationToken.None));
         }
 
+        [Test]
+        public async Task RunAsync_ValidJob_ProcessesAllItems()
+        {
+            Int32SequenceDataSource source = new Int32SequenceDataSource(1, 128);
+            CollectingBatchProcessor processor = new CollectingBatchProcessor();
+            TimeSpan timeout = TimeSpan.FromSeconds(2);
+            Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
+
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            Scheduler scheduler = new Scheduler(store);
+
+            await scheduler.ScheduleAsync(job, CancellationToken.None);
+
+            Engine engine = new Engine(store);
+
+            await engine.RunAsync(job, false, CancellationToken.None);
+
+            Assert.That(processor.Items.Count, Is.EqualTo(128));
+        }
+
 
         private class Int32SequenceDataSource : IDataSource<int, string>
         {
@@ -39,7 +60,7 @@ namespace EXBP.Dipren.Tests
 
 
             public Task<long> EstimateRangeSizeAsync(Range<int> range, CancellationToken canellation)
-                => Task.FromResult<long>(Math.Abs(range.Last - range.First));
+                => Task.FromResult<long>(Math.Abs(range.Last - range.First) + ((range.IsInclusive == true) ? 1 : 0));
 
             public Task<Range<int>> GetEntireRangeAsync(CancellationToken cancellation)
                 => Task.FromResult(new Range<int>(this._minimum, this._maximum, true));
@@ -80,6 +101,20 @@ namespace EXBP.Dipren.Tests
                 KeyValuePair<int, string> result = new KeyValuePair<int, string>(key, value);
 
                 return result;
+            }
+        }
+
+        private class CollectingBatchProcessor : IBatchProcessor<string>
+        {
+            private readonly List<string> _items = new List<string>();
+
+            public IReadOnlyList<string> Items => this._items;
+
+            public Task ProcessAsync(IEnumerable<string> items, CancellationToken cancellation)
+            {
+                this._items.AddRange(items);
+
+                return Task.CompletedTask;
             }
         }
     }
