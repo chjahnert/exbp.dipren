@@ -70,12 +70,20 @@ namespace EXBP.Dipren
         public IBatchProcessor<TItem> Processor => this._processor;
 
         /// <summary>
-        ///   Gets the time after which a range is considered stalled or abandoned.
+        ///   Gets the amount of time after which the processing is considered unsuccessful or stalled.
         /// </summary>
         /// <value>
-        ///   A <see cref="TimeSpan"/> value that contains the time after which a range is considered stalled or
-        ///   abandoned.
+        ///   A <see cref="TimeSpan"/> value that indicates the amount of time after which the processing is considered
+        ///   unsuccessful or stalled.
         /// </value>
+        /// <remarks>
+        ///   <para>
+        ///     When processing a batch takes longer than the specified timeout value, the operation is not canceled
+        ///     automatically, but if another processing node tries to acquire a partition and a partition was not
+        ///     updated for more than this timeout value, the partition is considered abandoned and might be taken over
+        ///     by the other processing node.
+        ///   </para>
+        /// </remarks>
         public TimeSpan Timeout => this._timeout;
 
         /// <summary>
@@ -108,7 +116,7 @@ namespace EXBP.Dipren
         ///   The <see cref="IBatchProcessor{TEntry}"/> object to use to process the entries.
         /// </param>
         /// <param name="timeout">
-        ///   The time after which a range is considered stalled or abandoned.
+        ///   The time after which a partition is considered stalled or abandoned.
         /// </param>
         /// <param name="batchSize">
         ///   The maximum number of entries to include in a batch.
