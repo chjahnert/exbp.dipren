@@ -242,6 +242,11 @@ namespace EXBP.Dipren
             // 5. Repeat from step 1 until completed.
             //
 
+            //
+            // TODO: The partition is completed once the data source returns a batch of zero items. Introduce a flag
+            //       in the partition structures to indicate that processing is completed.
+            //
+
             while (partition.Remaining > 0L)
             {
                 Range<TKey> range = new Range<TKey>(partition.Position, partition.Range.Last, partition.Range.IsInclusive);
