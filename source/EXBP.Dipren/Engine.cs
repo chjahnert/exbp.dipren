@@ -183,17 +183,15 @@ namespace EXBP.Dipren
                 }
                 else
                 {
-                    //
-                    // TODO: Is any work left?
-                    //
+                    long incomplete = await this._store.CountIncompletePartitionsAsync(job.Id, cancellation);
 
-                    bool completed = false;
-
-                    if (completed == true)
+                    if (incomplete == 0L)
                     {
                         //
                         // TODO: Mark the job as completed.
                         //
+
+                        break;
                     }
                     else
                     {
@@ -264,9 +262,9 @@ namespace EXBP.Dipren
 
                 if (progress > 0L)
                 {
-                IEnumerable<TItem> items = batch.Select(kvp => kvp.Value);
+                    IEnumerable<TItem> items = batch.Select(kvp => kvp.Value);
 
-                await job.Processor.ProcessAsync(items, cancellation);
+                    await job.Processor.ProcessAsync(items, cancellation);
                 }
 
                 bool completed = (progress < job.BatchSize);
