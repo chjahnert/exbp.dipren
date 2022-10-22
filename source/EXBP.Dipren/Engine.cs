@@ -255,18 +255,22 @@ namespace EXBP.Dipren
 
             while (partition.IsCompleted == false)
             {
-                Range<TKey> range = new Range<TKey>(partition.Position, partition.Range.Last, partition.Range.IsInclusive);
+                TKey first = ((partition.Processed == 0L) ? partition.Range.First : partition.Position);
+                Range<TKey> range = new Range<TKey>(first, partition.Range.Last, partition.Range.IsInclusive);
                 int skip = ((partition.Processed == 0L) ? 0 : 1);
 
                 IEnumerable<KeyValuePair<TKey, TItem>> batch = await job.Source.GetNextBatchAsync(range, skip, job.BatchSize, cancellation);
+                long progress = batch.Count();
 
+                if (progress > 0L)
+                {
                 IEnumerable<TItem> items = batch.Select(kvp => kvp.Value);
 
                 await job.Processor.ProcessAsync(items, cancellation);
+                }
 
-                long progress = batch.Count();
                 bool completed = (progress < job.BatchSize);
-                TKey position = batch.Last().Key;
+                TKey position = ((progress == 0L) ? partition.Position : batch.Last().Key);
                 DateTime timestamp = this._clock.GetDateTime();
 
                 partition = await this.ReportProgressAsync(job, partition, timestamp, position, progress, completed, cancellation);
