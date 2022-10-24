@@ -219,9 +219,6 @@ namespace EXBP.Dipren.Data
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsNotNull(first, nameof(first));
-            Assert.ArgumentIsNotNull(last, nameof(last));
-            Assert.ArgumentIsGreaterOrEqual(processed, 0L, nameof(processed));
-            Assert.ArgumentIsGreaterOrEqual(remaining, 0L, nameof(remaining));
 
             this.Id = id;
             this.JobId = jobId;
