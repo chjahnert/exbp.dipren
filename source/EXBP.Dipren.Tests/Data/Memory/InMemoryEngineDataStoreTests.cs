@@ -59,6 +59,48 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
+        public void UpdateJobAsync_ArgumentJoIdIsNull_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            Assert.Throws<ArgumentNullException>(() => store.UpdateJobAsync(null, DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
+        }
+
+        [Test]
+        public void UpdateJobAsync_JobDoesNotExist_ThrowsException()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            Assert.Throws<UnknownIdentifierException>(() => store.UpdateJobAsync("DPJ-0001", DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task UpdateJobAsync_JobExists_JobIsUpdated()
+        {
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+
+            const string id = "DPJ-0001";
+            DateTime created = new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc);
+
+            Job job = new Job(id, created, created, JobState.Ready);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            DateTime updated = new DateTime(2022, 9, 11, 13, 21, 49, DateTimeKind.Utc);
+            Exception exception = new NotSupportedException();
+
+            await store.UpdateJobAsync(id, updated, JobState.Failed, exception, CancellationToken.None);
+
+            Job persisted = await store.RetrieveJobAsync(id, CancellationToken.None);
+
+            Assert.That(persisted.Created, Is.EqualTo(created));
+            Assert.That(persisted.Updated, Is.EqualTo(updated));
+            Assert.That(persisted.State, Is.EqualTo(JobState.Failed));
+            Assert.That(persisted.Exception, Is.Not.Null);
+            Assert.That(persisted.Exception, Is.TypeOf<NotSupportedException>());
+        }
+
+        [Test]
         public void RetirveJobAsync_ArgumentIdIsNull_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
