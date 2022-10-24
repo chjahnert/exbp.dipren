@@ -187,11 +187,7 @@ namespace EXBP.Dipren
 
                     if (incomplete == 0L)
                     {
-                        //
-                        // TODO: Mark the job as completed.
-                        //
-
-                        break;
+                        persisted = await this.MarkJobAsCompletedAsync(persisted.Id, cancellation);
                     }
                     else
                     {
@@ -429,6 +425,28 @@ namespace EXBP.Dipren
 
                 result = updatedPartition;
             }
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Marks a job entry as completed.
+        /// </summary>
+        /// <param name="jobId">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        private async Task<Job> MarkJobAsCompletedAsync(string jobId, CancellationToken cancellation)
+        {
+            DateTime timestamp = this._clock.GetDateTime();
+            Job result = await this._store.UpdateJobAsync(jobId, timestamp, JobState.Completed, null, cancellation);
 
             return result;
         }
