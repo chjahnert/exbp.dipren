@@ -9,11 +9,7 @@ namespace EXBP.Dipren.Data
     /// </summary>
     public record Job
     {
-        private readonly string _id;
-        private readonly DateTime _created;
-        private readonly DateTime _updated;
         private readonly JobState _state;
-        private readonly Exception _exception;
 
 
         /// <summary>
@@ -23,7 +19,7 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="string"/> value that is the unique identifier (or name) of the current distributed
         ///   processing job.
         /// </value>
-        public string Id => this._id;
+        public string Id { get; }
 
         /// <summary>
         ///   Gets the date and time when the current job was created.
@@ -31,7 +27,7 @@ namespace EXBP.Dipren.Data
         /// <value>
         ///   A <see cref="DateTime"/> value that contains the date and time, in UTC, the current job was created.
         /// </value>
-        public DateTime Created => this._created;
+        public DateTime Created { get; }
 
         /// <summary>
         ///   Gets the date and time when the current job was last updated.
@@ -39,7 +35,7 @@ namespace EXBP.Dipren.Data
         /// <value>
         ///   A <see cref="DateTime"/> value that contains the date and time, in UTC, the current job was last updated.
         /// </value>
-        public DateTime Updated => this._updated;
+        public DateTime Updated { get; init; }
 
         /// <summary>
         ///   Gets a value indicating the state of the current job.
@@ -47,16 +43,28 @@ namespace EXBP.Dipren.Data
         /// <value>
         ///   A <see cref="JobState"/> value indicating the state of the current job.
         /// </value>
-        public JobState State => this._state;
+        public JobState State
+        {
+            get
+            {
+                return this._state;
+            }
+            init
+            {
+                Assert.ArgumentIsDefined(value, nameof(value));
+
+                this._state = value;
+            }
+        }
 
         /// <summary>
         ///   Gets the exception that is the reason the current job failed.
         /// </summary>
         /// <value>
-        ///   A <see cref="Exception"/> object that provides information about the error that occurred; or
+        ///   A <see cref="System.Exception"/> object that provides information about the error that occurred; or
         ///   <see langword="null"/> if no error occurred.
         /// </value>
-        public Exception Exception => this._exception;
+        public Exception Exception { get; init; }
 
 
         /// <summary>
@@ -80,13 +88,12 @@ namespace EXBP.Dipren.Data
         public Job(string id, DateTime created, DateTime updated, JobState state, Exception exception = null)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
-            Assert.ArgumentIsDefined(state, nameof(state));
 
-            this._id = id;
-            this._created = created;
-            this._updated = updated;
-            this._state = state;
-            this._exception = exception;
+            this.Id = id;
+            this.Created = created;
+            this.Updated = updated;
+            this.State = state;
+            this.Exception = exception;
         }
     }
 }
