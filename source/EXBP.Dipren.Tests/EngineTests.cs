@@ -26,7 +26,32 @@ namespace EXBP.Dipren.Tests
         }
 
         [Test]
-        public async Task RunAsync_ValidJob_ProcessesAllItems()
+        public async Task RunAsync_SingleProcessingNodeAndValidJob_JobIsMarkedCompleted()
+        {
+            const string jobId = "DPJ-001";
+
+            Int32SequenceDataSource source = new Int32SequenceDataSource(1, 8);
+            CollectingBatchProcessor processor = new CollectingBatchProcessor();
+            TimeSpan timeout = TimeSpan.FromSeconds(2);
+            Job<int, string> job = new Job<int, string>(jobId, source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
+
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            Scheduler scheduler = new Scheduler(store);
+
+            await scheduler.ScheduleAsync(job, CancellationToken.None);
+
+            Engine engine = new Engine(store);
+
+            await engine.RunAsync(job, false, CancellationToken.None);
+
+            Job persisted = await store.RetrieveJobAsync(jobId, CancellationToken.None);
+
+            Assert.That(persisted.State, Is.EqualTo(JobState.Completed));
+            Assert.That(persisted.Exception, Is.Null);
+        }
+
+        [Test]
+        public async Task RunAsync_SingleProcessingNodeAndRangeInAscendingOrder_ProcessesAllItems()
         {
             Int32SequenceDataSource source = new Int32SequenceDataSource(1, 128);
             CollectingBatchProcessor processor = new CollectingBatchProcessor();
@@ -43,6 +68,28 @@ namespace EXBP.Dipren.Tests
             await engine.RunAsync(job, false, CancellationToken.None);
 
             Assert.That(processor.Items.Count, Is.EqualTo(128));
+            CollectionAssert.IsOrdered(processor.Items);
+        }
+
+        [Test]
+        public async Task RunAsync_SingleProcessingNodeAndRangeInDescendingOrder_ProcessesAllItems()
+        {
+            Int32SequenceDataSource source = new Int32SequenceDataSource(128, 1);
+            CollectingBatchProcessor processor = new CollectingBatchProcessor();
+            TimeSpan timeout = TimeSpan.FromSeconds(2);
+            Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
+
+            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            Scheduler scheduler = new Scheduler(store);
+
+            await scheduler.ScheduleAsync(job, CancellationToken.None);
+
+            Engine engine = new Engine(store);
+
+            await engine.RunAsync(job, false, CancellationToken.None);
+
+            Assert.That(processor.Items.Count, Is.EqualTo(128));
+            CollectionAssert.IsOrdered(processor.Items.Reverse());
         }
 
 
