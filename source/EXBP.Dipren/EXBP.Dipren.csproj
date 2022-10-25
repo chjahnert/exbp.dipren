@@ -22,6 +22,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AssertResources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Diagnostics\TraceEventLoggerResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TraceEventLoggerResources.resx</DependentUpon>
+    </Compile>
     <Compile Update="EngineResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -41,6 +46,10 @@
     <EmbeddedResource Update="Diagnostics\AssertResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AssertResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Diagnostics\TraceEventLoggerResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TraceEventLoggerResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="EngineResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
