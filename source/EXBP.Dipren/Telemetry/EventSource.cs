@@ -1,5 +1,5 @@
 ﻿
-namespace EXBP.Dipren.Diagnostics
+namespace EXBP.Dipren.Telemetry
 {
     /// <summary>
     ///   Enumerates the sources that can generate events.

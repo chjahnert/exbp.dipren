@@ -1,5 +1,5 @@
 ﻿
-namespace EXBP.Dipren.Diagnostics
+namespace EXBP.Dipren.Telemetry
 {
     /// <summary>
     ///   Allows a class to implement a logger that receives notifications about events during processing.

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EXBP.Dipren.Diagnostics {
+namespace EXBP.Dipren.Telemetry {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace EXBP.Dipren.Diagnostics {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EXBP.Dipren.Diagnostics.TraceEventLoggerResources", typeof(TraceEventLoggerResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EXBP.Dipren.Telemetry.TraceEventLoggerResources", typeof(TraceEventLoggerResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
