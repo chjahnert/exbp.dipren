@@ -7,8 +7,14 @@ namespace EXBP.Dipren.Data
     /// <summary>
     ///   Implements a default key serializer for the <see cref="Int32"/> type.
     /// </summary>
-    public class Int32KeySerializer : IKeySerializer<int>
+    public sealed class Int32KeySerializer : IKeySerializer<int>
     {
+        /// <summary>
+        ///   A ready to be used instance of the <see cref="Int32KeySerializer"/> class.
+        /// </summary>
+        public static readonly Int32KeySerializer Default = new Int32KeySerializer();
+
+
         /// <summary>
         ///   Converts the specified integer value to its string representation.
         /// </summary>

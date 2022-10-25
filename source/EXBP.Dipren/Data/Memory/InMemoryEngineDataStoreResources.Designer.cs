@@ -79,11 +79,29 @@ namespace EXBP.Dipren.Data.Memory {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The lock on the specified partition is no longer held..
+        /// </summary>
+        internal static string PartitionLockNoLongerHeld {
+            get {
+                return ResourceManager.GetString("PartitionLockNoLongerHeld", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A partition with the specified unique identifier already exists in the data store..
         /// </summary>
         internal static string PartitionWithSameIdentifierAlreadyExists {
             get {
                 return ResourceManager.GetString("PartitionWithSameIdentifierAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A partition with the specified unique identifier does not exist in the data store..
+        /// </summary>
+        internal static string PartitionWithSpecifiedIdentifierDoesNotExist {
+            get {
+                return ResourceManager.GetString("PartitionWithSpecifiedIdentifierDoesNotExist", resourceCulture);
             }
         }
         

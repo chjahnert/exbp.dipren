@@ -9,18 +9,9 @@ namespace EXBP.Dipren.Data
     /// </summary>
     public record Partition
     {
-        private readonly Guid _id;
-        private readonly string _jobId;
-        private readonly string _owner;
-        private readonly DateTime _created;
-        private readonly DateTime _updated;
-        private readonly string _first;
         private readonly string _last;
-        private readonly bool _inclusive;
-        private readonly string _position;
         private readonly long _processed;
         private readonly long _remaining;
-        private readonly bool _split;
 
 
         /// <summary>
@@ -29,7 +20,7 @@ namespace EXBP.Dipren.Data
         /// <value>
         ///   A <see cref="Guid"/> value that is the unique identifier of the current partition.
         /// </value>
-        public Guid Id => this._id;
+        public Guid Id { get; }
 
         /// <summary>
         ///   Gets the unique identifier of the distributed processing job the current partition belongs to.
@@ -38,7 +29,7 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="string"/> value that contains the unique identifier of the distributed processing job the
         ///   current partition belongs to.
         /// </value>
-        public string JobId => this._jobId;
+        public string JobId { get; }
 
         /// <summary>
         ///   Gets a value that identifies the owner of the current partition. The owner is the node processing the
@@ -48,7 +39,7 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="string"/> value that uniquely identifies the node that processes the items in the partition;
         ///   or <see langword="null"/> if the partition is not associated with a processing node.
         /// </value>
-        public string Owner => this._owner;
+        public string Owner { get; init; }
 
         /// <summary>
         ///   Gets the date and time when the current partition was created.
@@ -57,7 +48,7 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="DateTime"/> value that contains the date and time, in UTC, the current partition was
         ///   created.
         /// </value>
-        public DateTime Created => this._created;
+        public DateTime Created { get; }
 
         /// <summary>
         ///   Gets the date and time when the current partition was last updated.
@@ -66,7 +57,7 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="DateTime"/> value that contains the date and time, in UTC, the current partition was
         ///   last updated.
         /// </value>
-        public DateTime Updated => this._updated;
+        public DateTime Updated { get; init; }
 
         /// <summary>
         ///   Gets the first key of the current range.
@@ -77,7 +68,7 @@ namespace EXBP.Dipren.Data
         /// <remarks>
         ///   The key does not have to actually exist.
         /// </remarks>
-        public string First => this._first;
+        public string First { get; }
 
         /// <summary>
         ///   Gets the key at which to start processing.
@@ -88,7 +79,19 @@ namespace EXBP.Dipren.Data
         /// <remarks>
         ///   The key does not have to actually exist.
         /// </remarks>
-        public string Last => this._last;
+        public string Last
+        {
+            get
+            {
+                return this._last;
+            }
+            init
+            {
+                Assert.ArgumentIsNotNull(value, nameof(value));
+
+                this._last = value;
+            }
+        }
 
         /// <summary>
         ///   Gets a value indicating whether the current range is including <see cref="Last"/>.
@@ -97,7 +100,7 @@ namespace EXBP.Dipren.Data
         ///   <see langword="true"/> if <see cref="Last"/> is included in the current range; otherwise,
         ///   <see langword="false"/>.
         /// </value>
-        public bool IsInclusive => this._inclusive;
+        public bool IsInclusive { get; init; }
 
         /// <summary>
         ///   Gets the key of the last item that was processed.
@@ -109,7 +112,7 @@ namespace EXBP.Dipren.Data
         ///   This value is only set after at least one item was processed. Check <see cref="Processed"/> to determine
         ///   whether this value is set.
         /// </remarks>
-        public string Position => this._position;
+        public string Position { get; init; }
 
         /// <summary>
         ///   Gets the number of items processed in the current partition.
@@ -117,7 +120,19 @@ namespace EXBP.Dipren.Data
         /// <value>
         ///   A <see cref="long"/> value that contains the number of items processed in the current partition.
         /// </value>
-        public long Processed => this._processed;
+        public long Processed
+        {
+            get
+            {
+                return this._processed;
+            }
+            init
+            {
+                Assert.ArgumentIsGreaterOrEqual(value, 0L, nameof(value));
+
+                this._processed = value;
+            }
+        }
 
         /// <summary>
         ///   Gets the estimated number of unprocessed items in the current partition.
@@ -126,7 +141,27 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="long"/> value that contains the estimated number of unprocessed items in the current
         ///   partition.
         /// </value>
-        public long Remaining => this._remaining;
+        public long Remaining
+        {
+            get
+            {
+                return this._remaining;
+            }
+            init
+            {
+                Assert.ArgumentIsGreaterOrEqual(value, 0L, nameof(value));
+
+                this._remaining = value;
+            }
+        }
+
+        /// <summary>
+        ///   Gets a value indicating whether the current partition has been processed.
+        /// </summary>
+        /// <value>
+        ///  <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
+        /// </value>
+        public bool IsCompleted { get; init; }
 
         /// <summary>
         ///   Gets a value indicating whether a split was requested.
@@ -134,7 +169,7 @@ namespace EXBP.Dipren.Data
         /// <value>
         ///   <see langword="true"/> if a split was requested; otherwise, <see langword="false"/>.
         /// </value>
-        public bool IsSplitRequested => this._split;
+        public bool IsSplitRequested { get; init; }
 
 
         /// <summary>
@@ -174,29 +209,30 @@ namespace EXBP.Dipren.Data
         /// <param name="owner">
         ///   The owner of the partition or <see langword="null"/>.
         /// </param>
+        /// <param name="completed">
+        ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
+        /// </param>
         /// <param name="split">
         ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
         /// </param>
-        public Partition(Guid id, string jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool split = false)
+        public Partition(Guid id, string jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool completed = false, bool split = false)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsNotNull(first, nameof(first));
-            Assert.ArgumentIsNotNull(last, nameof(last));
-            Assert.ArgumentIsGreaterOrEqual(processed, 0L, nameof(processed));
-            Assert.ArgumentIsGreaterOrEqual(remaining, 0L, nameof(remaining));
 
-            this._id = id;
-            this._jobId = jobId;
-            this._owner = owner;
-            this._created = created;
-            this._updated = updated;
-            this._first = first;
-            this._last = last;
-            this._inclusive = inclusive;
-            this._position = position;
-            this._processed = processed;
-            this._remaining = remaining;
-            this._split = split;
+            this.Id = id;
+            this.JobId = jobId;
+            this.Created = created;
+            this.First = first;
+            this.Owner = owner;
+            this.Updated = updated;
+            this.Last = last;
+            this.IsInclusive = inclusive;
+            this.Position = position;
+            this.Processed = processed;
+            this.Remaining = remaining;
+            this.IsCompleted = completed;
+            this.IsSplitRequested = split;
         }
     }
 }

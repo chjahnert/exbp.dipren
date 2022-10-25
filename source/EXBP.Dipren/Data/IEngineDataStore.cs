@@ -1,4 +1,5 @@
-﻿namespace EXBP.Dipren.Data
+﻿
+namespace EXBP.Dipren.Data
 {
     /// <summary>
     ///   Allows a class to implement a data store for the distributed processing engine.
@@ -19,6 +20,22 @@
         Task<long> CountJobsAsync(CancellationToken cancellation);
 
         /// <summary>
+        ///   Returns the number of incomplete partitions for the specified job.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job for which to retrieve the number of incomplete partitions.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and can
+        ///   be used to access the result.
+        /// </returns>
+        Task<long> CountIncompletePartitionsAsync(string id, CancellationToken cancellation);
+
+        /// <summary>
         ///   Inserts a new job entry into the data store.
         /// </summary>
         /// <param name="job">
@@ -37,10 +54,19 @@
         Task InsertJobAsync(Job job, CancellationToken cancellation);
 
         /// <summary>
-        ///   Updates an existing job entry in the data store.
+        ///   Updates the state of an existing job.
         /// </summary>
-        /// <param name="job">
-        ///   The job entry to update.
+        /// <param name="jobId">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
+        /// </param>
+        /// <param name="state">
+        ///   The new state of the job.
+        /// </param>
+        /// <param name="exception">
+        ///   The exception, if available, that provides information about the error.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
@@ -49,7 +75,25 @@
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        Task UpdateJobAsync(Job job, CancellationToken cancellation);
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, Exception exception, CancellationToken cancellation);
+
+        /// <summary>
+        ///   Retrieves the job with the specified identifier from the data store.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation.
+        /// </returns>
+        Task<Job> RetrieveJobAsync(string id, CancellationToken cancellation);
 
         /// <summary>
         ///   Inserts a new partition entry into the data store.
@@ -65,5 +109,134 @@
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
         Task InsertPartitionAsync(Partition partition, CancellationToken cancellation);
+
+        /// <summary>
+        ///   Inserts a split off partition while updating the split partition as an atomic operation.
+        /// </summary>
+        /// <param name="partitionToUpdate">
+        ///   The partition to update.
+        /// </param>
+        /// <param name="partitionToInsert">
+        ///   The partition to insert.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
+        /// <exception cref="UnknownIdentifierException">
+        ///   The partition to update does not exist in the data store.
+        /// </exception>
+        /// <exception cref="DuplicateIdentifierException">
+        ///   The partition to insert already exists in the data store.
+        /// </exception>
+        Task InsertSplitPartitionAsync(Partition partitionToUpdate, Partition partitionToInsert, CancellationToken cancellation);
+
+        /// <summary>
+        ///   Retrieves the partition with the specified identifier from the data store.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the partition.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        Task<Partition> RetrievePartitionAsync(Guid id, CancellationToken cancellation);
+
+        /// <summary>
+        ///   Tries to acquire a free or abandoned partition.
+        /// </summary>
+        /// <param name="jobId">
+        ///   The unique identifier of the distributed processing job.
+        /// </param>
+        /// <param name="requester">
+        ///   The identifier of the processing node trying to acquire a partition.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current timestamp.
+        /// </param>
+        /// <param name="active">
+        ///   A <see cref="DateTime"/> value that is used to determine if a partition is actively being processed.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
+        ///   otherwise, <see langword="null"/>.
+        /// </returns>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        Task<Partition> TryAcquirePartitionsAsync(string jobId, string requester, DateTime timestamp, DateTime active, CancellationToken cancellation);
+
+        /// <summary>
+        ///   Requests an existing partition to be split.
+        /// </summary>
+        /// <param name="jobId">
+        ///   The unique identifier of the distributed processing job.
+        /// </param>
+        /// <param name="active">
+        ///   A <see cref="DateTime"/> value that is used to determine whether a partition is being processed.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="bool"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains a value indicating whether a split
+        ///   was requested.
+        /// </returns>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        Task<bool> TryRequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation);
+
+        /// <summary>
+        ///   Update a partition with the progress made.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the partition.
+        /// </param>
+        /// <param name="owner">
+        ///   The unique identifier of the processing node reporting the progress.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current timestamp.
+        /// </param>
+        /// <param name="position">
+        ///   The key of the last item processed in the key range of the partition.
+        /// </param>
+        /// <param name="progress">
+        ///   The number of items processed since the last progress update.
+        /// </param>
+        /// <param name="completed">
+        ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the updated partition.
+        /// </returns>
+        /// <exception cref="LockException">
+        ///   The specified <paramref name="owner"/> no longer holds the lock on the partition.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A partition with the specified unique identifier does not exist.
+        /// </exception>
+        Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, CancellationToken cancellation);
     }
 }

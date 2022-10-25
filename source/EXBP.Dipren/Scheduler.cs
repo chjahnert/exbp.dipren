@@ -68,11 +68,11 @@ namespace EXBP.Dipren
             try
             {
                 await this.CreatePartitionEntryAsync(job, cancellation);
-                await this.MarkJobAsReadyAsync(entry, cancellation);
+                await this.MarkJobAsReadyAsync(entry.Id, cancellation);
             }
             catch (Exception ex)
             {
-                await this.MarkJobAsFailedAsync(entry, ex, cancellation);
+                await this.MarkJobAsFailedAsync(entry.Id, ex, cancellation);
 
                 throw;
             }
@@ -135,7 +135,7 @@ namespace EXBP.Dipren
 
             Guid id = Guid.NewGuid();
             DateTime timestampPartitionCreated = this._clock.GetDateTime();
-            Partition<TKey> partition = new Partition<TKey>(id, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false);
+            Partition<TKey> partition = new Partition<TKey>(id, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false, false);
             Partition result = partition.ToEntry(job.Serializer);
 
             await this._store.InsertPartitionAsync(result, cancellation);
@@ -146,8 +146,8 @@ namespace EXBP.Dipren
         /// <summary>
         ///   Marks a job entry as ready.
         /// </summary>
-        /// <param name="template">
-        ///   The job entry to use as a template for the updated job entry.
+        /// <param name="jobId">
+        ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
@@ -157,12 +157,10 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
-        private async Task<Job> MarkJobAsReadyAsync(Job template, CancellationToken cancellation)
+        private async Task<Job> MarkJobAsReadyAsync(string jobId, CancellationToken cancellation)
         {
-            DateTime timetamp = this._clock.GetDateTime();
-            Job result = new Job(template.Id, template.Created, timetamp, JobState.Ready);
-
-            await this._store.UpdateJobAsync(result, cancellation);
+            DateTime timestamp = this._clock.GetDateTime();
+            Job result = await this._store.UpdateJobAsync(jobId, timestamp, JobState.Ready, null, cancellation);
 
             return result;
         }
@@ -170,8 +168,8 @@ namespace EXBP.Dipren
         /// <summary>
         ///   Marks a job entry as failed.
         /// </summary>
-        /// <param name="template">
-        ///   The job entry to use as a template for the updated job entry.
+        /// <param name="jobId">
+        ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="exception">
         ///   The exception, if available, that provides information about the error.
@@ -184,12 +182,10 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
-        private async Task<Job> MarkJobAsFailedAsync(Job template, Exception exception, CancellationToken cancellation)
+        private async Task<Job> MarkJobAsFailedAsync(string jobId, Exception exception, CancellationToken cancellation)
         {
-            DateTime timetamp = this._clock.GetDateTime();
-            Job result = new Job(template.Id, template.Created, timetamp, JobState.Failed, exception);
-
-            await this._store.UpdateJobAsync(result, cancellation);
+            DateTime timestamp = this._clock.GetDateTime();
+            Job result = await this._store.UpdateJobAsync(jobId, timestamp, JobState.Failed, exception, cancellation);
 
             return result;
         }

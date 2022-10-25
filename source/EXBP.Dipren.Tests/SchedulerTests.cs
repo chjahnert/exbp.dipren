@@ -32,7 +32,6 @@ namespace EXBP.Dipren.Tests
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store);
 
-
             Assert.ThrowsAsync<ArgumentNullException>( () => scheduler.ScheduleAsync<int, int>(null, CancellationToken.None));
         }
 
@@ -96,7 +95,6 @@ namespace EXBP.Dipren.Tests
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
             Assert.That(sj.Exception, Is.InstanceOf<ArgumentOutOfRangeException>());
-
             Assert.That(store.Partitions.Any(p => p.JobId == job.Id), Is.False);
         }
 
@@ -128,7 +126,6 @@ namespace EXBP.Dipren.Tests
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
             Assert.That(sj.Exception, Is.InstanceOf<KeyNotFoundException>());
-
             Assert.That(store.Partitions.Any(p => p.JobId == job.Id), Is.False);
         }
 
@@ -164,7 +161,7 @@ namespace EXBP.Dipren.Tests
                 return Task.FromResult(result);
             }
 
-            public Task<IEnumerable<KeyValuePair<int, int>>> GetNextBatchAsync(int last, int limit, CancellationToken canellation)
+            public Task<IEnumerable<KeyValuePair<int, int>>> GetNextBatchAsync(Range<int> range, int skip, int take, CancellationToken canellation)
             {
                 throw new NotImplementedException();
             }
