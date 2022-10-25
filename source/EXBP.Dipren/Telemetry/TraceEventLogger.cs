@@ -58,8 +58,8 @@ namespace EXBP.Dipren.Telemetry
         /// <summary>
         ///   Logs an event.
         /// </summary>
-        /// <param name="event">
-        ///   An <see cref="Event"/> object that holds information about the event that occurred.
+        /// <param name="descriptor">
+        ///   An <see cref="EventDescriptor"/> object that holds information about the event that occurred.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
@@ -68,42 +68,42 @@ namespace EXBP.Dipren.Telemetry
         /// <returns>
         ///   A <see cref="Task"/> that represents the asynchronous operation.
         /// </returns>
-        public virtual Task LogAsync(Event @event, CancellationToken cancellation)
+        public virtual Task LogAsync(EventDescriptor descriptor, CancellationToken cancellation)
         {
-            Assert.ArgumentIsNotNull(@event, nameof(@event));
+            Assert.ArgumentIsNotNull(descriptor, nameof(descriptor));
 
-            if (@event.Severity >= this._level)
+            if (descriptor.Severity >= this._level)
             {
                 StringBuilder builder = new StringBuilder();
 
                 builder.Append(TraceEventLoggerResources.Dipren);
 
-                if ((@event.EngineId != null) || (@event.JobId != null) || (@event.PartitionId != null))
+                if ((descriptor.EngineId != null) || (descriptor.JobId != null) || (descriptor.PartitionId != null))
                 {
                     builder.Append(" [");
 
                     bool first = true;
 
-                    if (@event.EngineId != null)
+                    if (descriptor.EngineId != null)
                     {
-                        builder.Append(@event.EngineId);
+                        builder.Append(descriptor.EngineId);
 
                         first = false;
                     }
 
-                    if (@event.JobId != null)
+                    if (descriptor.JobId != null)
                     {
                         if (first == false)
                         {
                             builder.Append("|");
                         }
 
-                        builder.Append(@event.JobId);
+                        builder.Append(descriptor.JobId);
 
-                        if (@event.PartitionId != null)
+                        if (descriptor.PartitionId != null)
                         {
                             builder.Append("|");
-                            builder.AppendFormat("{0}:D", @event.PartitionId.Value);
+                            builder.AppendFormat("{0}:D", descriptor.PartitionId.Value);
                         }
                     }
 
@@ -112,7 +112,7 @@ namespace EXBP.Dipren.Telemetry
 
                 builder.Append(" ");
 
-                switch (@event.Severity)
+                switch (descriptor.Severity)
                 {
                     case EventSeverity.Debug:
                         builder.Append(TraceEventLoggerResources.Debug);
@@ -128,12 +128,12 @@ namespace EXBP.Dipren.Telemetry
                 }
 
                 builder.Append(": ");
-                builder.Append(@event.Description);
+                builder.Append(descriptor.Description);
 
-                if (@event.Exception != null)
+                if (descriptor.Exception != null)
                 {
                     builder.AppendLine();
-                    builder.Append(@event.Exception);
+                    builder.Append(descriptor.Exception);
                 }
 
                 string output = builder.ToString();

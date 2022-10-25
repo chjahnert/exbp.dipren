@@ -9,8 +9,8 @@ namespace EXBP.Dipren.Telemetry
         /// <summary>
         ///   Logs an event.
         /// </summary>
-        /// <param name="event">
-        ///   An <see cref="Event"/> object that holds information about the event that occurred.
+        /// <param name="descriptor">
+        ///   An <see cref="EventDescriptor"/> object that holds information about the event that occurred.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
@@ -19,6 +19,6 @@ namespace EXBP.Dipren.Telemetry
         /// <returns>
         ///   A <see cref="Task"/> that represents the asynchronous operation.
         /// </returns>
-        Task LogAsync(Event @event, CancellationToken cancellation);
+        Task LogAsync(EventDescriptor descriptor, CancellationToken cancellation);
     }
 }

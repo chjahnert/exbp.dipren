@@ -4,7 +4,7 @@ namespace EXBP.Dipren.Telemetry
     /// <summary>
     ///   Holds information about an event that occurred.
     /// </summary>
-    public record Event
+    public record EventDescriptor
     {
         /// <summary>
         ///   Gets the date and time of the current event.
@@ -76,9 +76,9 @@ namespace EXBP.Dipren.Telemetry
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Event"/> record.
+        ///   Initializes a new instance of the <see cref="EventDescriptor"/> record.
         /// </summary>
-        internal Event()
+        internal EventDescriptor()
         {
         }
     }
