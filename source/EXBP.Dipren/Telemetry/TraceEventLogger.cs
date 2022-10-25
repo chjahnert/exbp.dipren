@@ -8,9 +8,9 @@ using EXBP.Dipren.Diagnostics;
 namespace EXBP.Dipren.Telemetry
 {
     /// <summary>
-    ///   Implements an <see cref="IEventLogger"/> that sends log messages to the trace output.
+    ///   Implements an <see cref="IEventHandler"/> that sends log messages about events to the trace output.
     /// </summary>
-    public class TraceEventLogger : IEventLogger
+    public class TraceEventLogger : IEventHandler
     {
         private readonly EventSeverity _level;
 
@@ -56,7 +56,7 @@ namespace EXBP.Dipren.Telemetry
 
 
         /// <summary>
-        ///   Logs an event.
+        ///   Handles events.
         /// </summary>
         /// <param name="descriptor">
         ///   An <see cref="EventDescriptor"/> object that holds information about the event that occurred.
@@ -68,7 +68,7 @@ namespace EXBP.Dipren.Telemetry
         /// <returns>
         ///   A <see cref="Task"/> that represents the asynchronous operation.
         /// </returns>
-        public virtual Task LogAsync(EventDescriptor descriptor, CancellationToken cancellation)
+        public virtual Task HandleEventAsync(EventDescriptor descriptor, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(descriptor, nameof(descriptor));
 
