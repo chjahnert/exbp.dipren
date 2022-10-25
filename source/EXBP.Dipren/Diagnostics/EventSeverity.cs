@@ -4,7 +4,7 @@ namespace EXBP.Dipren.Diagnostics
     /// <summary>
     ///   Indicates the severity of a log message.
     /// </summary>
-    public enum Severity
+    public enum EventSeverity
     {
         /// <summary>
         ///   The log message provides details usually only needed for debugging purposes.
