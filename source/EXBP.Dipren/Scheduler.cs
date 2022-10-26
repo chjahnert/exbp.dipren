@@ -104,11 +104,11 @@ namespace EXBP.Dipren
             DateTime timestamp = this.Clock.GetDateTime();
             Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing);
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, Guid.Empty, "Creating job entry.", cancellation);
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, "Creating job entry.", cancellation);
 
             await this.Store.InsertJobAsync(result, cancellation);
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, Guid.Empty, "Job entry created.", cancellation);
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, "Job entry created.", cancellation);
 
             return result;
         }
