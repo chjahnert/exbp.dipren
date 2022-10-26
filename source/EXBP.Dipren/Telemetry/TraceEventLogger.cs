@@ -103,7 +103,7 @@ namespace EXBP.Dipren.Telemetry
                         if (descriptor.PartitionId != null)
                         {
                             builder.Append("|");
-                            builder.AppendFormat("{0}:D", descriptor.PartitionId.Value);
+                            builder.AppendFormat("{0:D}", descriptor.PartitionId.Value);
                         }
                     }
 
