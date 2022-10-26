@@ -98,9 +98,8 @@ namespace EXBP.Dipren.Tests
 
             IDataSource<int, int> source = Substitute.For<IDataSource<int, int>>();
 
-            source
-                .When(x => x.GetEntireRangeAsync(Arg.Any<CancellationToken>()))
-                .Do(x => new Range<int>(1, 1000, true));
+            source.GetEntireRangeAsync(Arg.Any<CancellationToken>())
+                .Returns(new Range<int>(1, 1000, true));
 
             source
                 .When(x => x.EstimateRangeSizeAsync(Arg.Any<Range<int>>(), Arg.Any<CancellationToken>()))
