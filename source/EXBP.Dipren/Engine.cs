@@ -3,6 +3,7 @@ using System.Diagnostics;
 
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Diagnostics;
+using EXBP.Dipren.Telemetry;
 
 
 namespace EXBP.Dipren
@@ -10,11 +11,8 @@ namespace EXBP.Dipren
     /// <summary>
     ///   Implements a processing engine that can iterate over a large set of ordered items in a distributed fashion.
     /// </summary>
-    public class Engine
+    public class Engine : Node
     {
-        private readonly string _id;
-        private readonly IEngineDataStore _store;
-        private readonly IDateTimeProvider _clock;
         private readonly Configuration _configuration;
 
 
@@ -22,14 +20,6 @@ namespace EXBP.Dipren
         ///   Gets the configuration settings for the current distributed processing engine instance.
         /// </summary>
         public Configuration Configuration => this._configuration;
-
-        /// <summary>
-        ///   Gets the unique identifier of the current engine.
-        /// </summary>
-        /// <value>
-        ///   A <see cref="string"/> value that contains the unique identifier of the current engine.
-        /// </value>
-        public string Identity => this._id;
 
 
         /// <summary>
@@ -39,33 +29,19 @@ namespace EXBP.Dipren
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
         /// <param name="clock">
-        ///   A <see cref="IDateTimeProvider"/> that can be used to generate timestamp values.
+        ///   A <see cref="IDateTimeProvider"/> that can be used to generate timestamp values; or
+        ///   <see langword="null"/> to use a <see cref="UtcDateTimeProvider"/> instance.
+        /// </param>
+        /// <param name="handler">
+        ///   The <see cref="IEventHandler"/> object to use to emit event notifications; or <see langword="null"/> to
+        ///   discard event notifications.
         /// </param>
         /// <param name="configuration">
-        ///   The configuration settings to use.
+        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
         /// </param>
-        internal Engine(IEngineDataStore store, IDateTimeProvider clock, Configuration configuration = null)
+        public Engine(IEngineDataStore store, IDateTimeProvider clock = null, IEventHandler handler = null, Configuration configuration = null) : base(NodeType.Engine, store, clock, handler)
         {
-            Assert.ArgumentIsNotNull(store, nameof(store));
-            Assert.ArgumentIsNotNull(clock, nameof(clock));
-
-            this._id = NodeIdentifier.Generate(NodeType.Engine);
             this._configuration = (configuration ?? new Configuration());
-            this._store = store;
-            this._clock = clock;
-        }
-
-        /// <summary>
-        ///   Initializes a new instance of the <see cref="Engine"/> class.
-        /// </summary>
-        /// <param name="store">
-        ///   The <see cref="IEngineDataStore"/> to use.
-        /// </param>
-        /// <param name="configuration">
-        ///   The configuration settings to use.
-        /// </param>
-        public Engine(IEngineDataStore store, Configuration configuration = null) : this(store, UtcDateTimeProvider.Default, configuration)
-        {
         }
 
         /// <summary>
@@ -131,7 +107,7 @@ namespace EXBP.Dipren
 
             try
             {
-                persisted = await this._store.RetrieveJobAsync(job.Id, cancellation);
+                persisted = await this.Store.RetrieveJobAsync(job.Id, cancellation);
             }
             catch (UnknownIdentifierException ex)
             {
@@ -152,7 +128,7 @@ namespace EXBP.Dipren
 
                 try
                 {
-                    persisted = await this._store.RetrieveJobAsync(job.Id, cancellation);
+                    persisted = await this.Store.RetrieveJobAsync(job.Id, cancellation);
                 }
                 catch (UnknownIdentifierException)
                 {
@@ -186,7 +162,7 @@ namespace EXBP.Dipren
                 }
                 else
                 {
-                    long incomplete = await this._store.CountIncompletePartitionsAsync(job.Id, cancellation);
+                    long incomplete = await this.Store.CountIncompletePartitionsAsync(job.Id, cancellation);
 
                     if (incomplete == 0L)
                     {
@@ -203,7 +179,7 @@ namespace EXBP.Dipren
 
                         try
                         {
-                            persisted = await this._store.RetrieveJobAsync(job.Id, cancellation);
+                            persisted = await this.Store.RetrieveJobAsync(job.Id, cancellation);
                         }
                         catch (UnknownIdentifierException)
                         {
@@ -268,7 +244,7 @@ namespace EXBP.Dipren
 
                 bool completed = (progress < job.BatchSize);
                 TKey position = ((progress == 0L) ? partition.Position : batch.Last().Key);
-                DateTime timestamp = this._clock.GetDateTime();
+                DateTime timestamp = this.Clock.GetDateTime();
 
                 partition = await this.ReportProgressAsync(job, partition, timestamp, position, progress, completed, cancellation);
 
@@ -304,10 +280,10 @@ namespace EXBP.Dipren
         {
             Debug.Assert(job != null);
 
-            DateTime now = this._clock.GetDateTime();
+            DateTime now = this.Clock.GetDateTime();
             DateTime cut = (now - job.Timeout - this._configuration.MaximumClockDrift);
 
-            Partition acquired = await this._store.TryAcquirePartitionsAsync(job.Id, this.Identity, now, cut, cancellation);
+            Partition acquired = await this.Store.TryAcquirePartitionsAsync(job.Id, this.Id, now, cut, cancellation);
 
             Partition<TKey> result = null;
 
@@ -317,7 +293,7 @@ namespace EXBP.Dipren
             }
             else
             {
-                await this._store.TryRequestSplitAsync(job.Id, cut, cancellation);
+                await this.Store.TryRequestSplitAsync(job.Id, cut, cancellation);
             }
 
             return result;
@@ -365,13 +341,13 @@ namespace EXBP.Dipren
         {
             Debug.Assert(job != null);
             Debug.Assert(partition != null);
-            Debug.Assert(partition.Owner == this.Identity);
+            Debug.Assert(partition.Owner == this.Id);
             Debug.Assert(position != null);
             Debug.Assert(progress >= 0L);
 
             string sp = job.Serializer.Serialize(position);
 
-            Partition updated = await this._store.ReportProgressAsync(partition.Id, this.Identity, timestamp, sp, progress, completed, cancellation);
+            Partition updated = await this.Store.ReportProgressAsync(partition.Id, this.Id, timestamp, sp, progress, completed, cancellation);
 
             Partition<TKey> result = updated.ToPartition(job.Serializer);
 
@@ -415,7 +391,7 @@ namespace EXBP.Dipren
                 Task<long> remainingKeyRangeSize = job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
                 Task<long> excludedKeyRangeSize = job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
 
-                DateTime timestamp = this._clock.GetDateTime();
+                DateTime timestamp = this.Clock.GetDateTime();
 
                 Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, remainingKeyRange, partition.Position, partition.Processed, await remainingKeyRangeSize, false, false);
                 Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
@@ -424,7 +400,7 @@ namespace EXBP.Dipren
                 Partition<TKey> expludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, await excludedKeyRangeSize, false, false);
                 Partition excludedEntry = expludedPartition.ToEntry(job.Serializer);
 
-                await this._store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);
+                await this.Store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);
 
                 result = updatedPartition;
             }
@@ -448,8 +424,8 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Job> MarkJobAsCompletedAsync(string jobId, CancellationToken cancellation)
         {
-            DateTime timestamp = this._clock.GetDateTime();
-            Job result = await this._store.UpdateJobAsync(jobId, timestamp, JobState.Completed, null, cancellation);
+            DateTime timestamp = this.Clock.GetDateTime();
+            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Completed, null, cancellation);
 
             return result;
         }

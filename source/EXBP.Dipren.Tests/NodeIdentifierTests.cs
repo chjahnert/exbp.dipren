@@ -20,7 +20,7 @@ namespace EXBP.Dipren.Tests
         {
             string actual = NodeIdentifier.Generate(NodeType.Scheduler);
 
-            string expected = FormattableString.Invariant($"X{NodeIdentifier.TYPE_DELIMITER}{Environment.MachineName}{NodeIdentifier.ITEM_DELIMITER}{Environment.ProcessId}{NodeIdentifier.ITEM_DELIMITER}{AppDomain.CurrentDomain.Id}{NodeIdentifier.ITEM_DELIMITER}");
+            string expected = FormattableString.Invariant($"S{NodeIdentifier.TYPE_DELIMITER}{Environment.MachineName}{NodeIdentifier.ITEM_DELIMITER}{Environment.ProcessId}{NodeIdentifier.ITEM_DELIMITER}{AppDomain.CurrentDomain.Id}{NodeIdentifier.ITEM_DELIMITER}");
 
             StringAssert.StartsWith(expected, actual);
         }

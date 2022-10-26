@@ -1,6 +1,7 @@
 ﻿
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Data.Memory;
+using EXBP.Dipren.Telemetry;
 
 using NUnit.Framework;
 
@@ -80,7 +81,7 @@ namespace EXBP.Dipren.Tests
             Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
 
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
-            Scheduler scheduler = new Scheduler(store);
+            Scheduler scheduler = new Scheduler(store, TraceEventLogger.Debug);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);
 

@@ -1,6 +1,7 @@
 ﻿
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Diagnostics;
+using EXBP.Dipren.Telemetry;
 
 
 namespace EXBP.Dipren
@@ -8,34 +9,34 @@ namespace EXBP.Dipren
     /// <summary>
     ///   Implements methods to schedule, cancel, and monitor distributed processing jobs.
     /// </summary>
-    public class Scheduler
+    public class Scheduler : Node
     {
-        private readonly IEngineDataStore _store;
-        private readonly IDateTimeProvider _clock;
-
-
         /// <summary>
         ///   Initializes a new instance of the <see cref="Engine"/> class.
         /// </summary>
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
-        internal Scheduler(IEngineDataStore store, IDateTimeProvider clock)
+        /// <param name="handler">
+        ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
+        /// </param>
+        /// <param name="clock">
+        ///   The <see cref="IDateTimeProvider"/> to use to generate timestamps.
+        /// </param>
+        internal Scheduler(IEngineDataStore store, IEventHandler handler, IDateTimeProvider clock) : base(NodeType.Scheduler, store, clock, handler)
         {
-            Assert.ArgumentIsNotNull(store, nameof(store));
-            Assert.ArgumentIsNotNull(clock, nameof(clock));
-
-            this._store = store;
-            this._clock = clock;
         }
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="Engine"/> class.
         /// </summary>
+        /// <param name="logger">
+        ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
+        /// </param>
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
-        public Scheduler(IEngineDataStore store) : this(store, UtcDateTimeProvider.Default)
+        public Scheduler(IEngineDataStore store, IEventHandler logger = null) : this(store, logger, UtcDateTimeProvider.Default)
         {
         }
 
@@ -100,10 +101,14 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Job> CreateJobEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
-            DateTime timestamp = this._clock.GetDateTime();
+            DateTime timestamp = this.Clock.GetDateTime();
             Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing);
 
-            await this._store.InsertJobAsync(result, cancellation);
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, Guid.Empty, "Creating job entry.", cancellation);
+
+            await this.Store.InsertJobAsync(result, cancellation);
+
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, Guid.Empty, "Job entry created.", cancellation);
 
             return result;
         }
@@ -134,11 +139,11 @@ namespace EXBP.Dipren
             long remaining = await job.Source.EstimateRangeSizeAsync(range, cancellation);
 
             Guid id = Guid.NewGuid();
-            DateTime timestampPartitionCreated = this._clock.GetDateTime();
+            DateTime timestampPartitionCreated = this.Clock.GetDateTime();
             Partition<TKey> partition = new Partition<TKey>(id, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false, false);
             Partition result = partition.ToEntry(job.Serializer);
 
-            await this._store.InsertPartitionAsync(result, cancellation);
+            await this.Store.InsertPartitionAsync(result, cancellation);
 
             return result;
         }
@@ -159,8 +164,8 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Job> MarkJobAsReadyAsync(string jobId, CancellationToken cancellation)
         {
-            DateTime timestamp = this._clock.GetDateTime();
-            Job result = await this._store.UpdateJobAsync(jobId, timestamp, JobState.Ready, null, cancellation);
+            DateTime timestamp = this.Clock.GetDateTime();
+            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Ready, null, cancellation);
 
             return result;
         }
@@ -184,8 +189,8 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Job> MarkJobAsFailedAsync(string jobId, Exception exception, CancellationToken cancellation)
         {
-            DateTime timestamp = this._clock.GetDateTime();
-            Job result = await this._store.UpdateJobAsync(jobId, timestamp, JobState.Failed, exception, cancellation);
+            DateTime timestamp = this.Clock.GetDateTime();
+            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Failed, exception, cancellation);
 
             return result;
         }

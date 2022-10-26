@@ -19,14 +19,6 @@ namespace EXBP.Dipren.Tests
         }
 
         [Test]
-        public void Ctor_ArgumentClockIsNull_ThrowsException()
-        {
-            IEngineDataStore store = Substitute.For<IEngineDataStore>();
-
-            Assert.Throws<ArgumentNullException>(() => new Scheduler(store, null));
-        }
-
-        [Test]
         public void ScheduleAsync_ArgumentJobIsNull_ThrowsException()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
