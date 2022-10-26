@@ -61,6 +61,186 @@ namespace EXBP.Dipren {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Processed a batch of {0} items. Took {1} ms..
+        /// </summary>
+        internal static string EventBatchProcessed {
+            get {
+                return ResourceManager.GetString("EventBatchProcessed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Retrieved a batch of {0} items. Took {1} ms..
+        /// </summary>
+        internal static string EventBatchRetrieved {
+            get {
+                return ResourceManager.GetString("EventBatchRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Job completed..
+        /// </summary>
+        internal static string EventJobCompleted {
+            get {
+                return ResourceManager.GetString("EventJobCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified job is not scheduled..
+        /// </summary>
+        internal static string EventJobNotScheduled {
+            get {
+                return ResourceManager.GetString("EventJobNotScheduled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The job is ready to be processed..
+        /// </summary>
+        internal static string EventJobReady {
+            get {
+                return ResourceManager.GetString("EventJobReady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Job started..
+        /// </summary>
+        internal static string EventJobStarted {
+            get {
+                return ResourceManager.GetString("EventJobStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Partition acquired..
+        /// </summary>
+        internal static string EventPartitionAcquired {
+            get {
+                return ResourceManager.GetString("EventPartitionAcquired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Partition completed..
+        /// </summary>
+        internal static string EventPartitionCompleted {
+            get {
+                return ResourceManager.GetString("EventPartitionCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not acquire partition. None free or abandoned..
+        /// </summary>
+        internal static string EventPartitionNotAcquired {
+            get {
+                return ResourceManager.GetString("EventPartitionNotAcquired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Partition updated to [{0}..{1}]. New partition {2} created with range [{3}..{4}]. Took {5} ms.
+        /// </summary>
+        internal static string EventPartitionSplit {
+            get {
+                return ResourceManager.GetString("EventPartitionSplit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The partition was taken by another processing node..
+        /// </summary>
+        internal static string EventPartitionTaken {
+            get {
+                return ResourceManager.GetString("EventPartitionTaken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Processing failed..
+        /// </summary>
+        internal static string EventProcessingFailed {
+            get {
+                return ResourceManager.GetString("EventProcessingFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Processing partition..
+        /// </summary>
+        internal static string EventProcessingPartition {
+            get {
+                return ResourceManager.GetString("EventProcessingPartition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requesting {0} items from range [{1}..{2}]. Skipping {3}..
+        /// </summary>
+        internal static string EventRequestingNextBatch {
+            get {
+                return ResourceManager.GetString("EventRequestingNextBatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requesting a partition to be split..
+        /// </summary>
+        internal static string EventRequestingSplit {
+            get {
+                return ResourceManager.GetString("EventRequestingSplit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Partition split requested..
+        /// </summary>
+        internal static string EventSplitRequested {
+            get {
+                return ResourceManager.GetString("EventSplitRequested", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No suitable partitions available..
+        /// </summary>
+        internal static string EventSplitRequestFailed {
+            get {
+                return ResourceManager.GetString("EventSplitRequestFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully requested a split..
+        /// </summary>
+        internal static string EventSplitRequestSucceeded {
+            get {
+                return ResourceManager.GetString("EventSplitRequestSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trying to acquire a partition..
+        /// </summary>
+        internal static string EventTryingToAcquirePartition {
+            get {
+                return ResourceManager.GetString("EventTryingToAcquirePartition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Waiting for the job to be ready..
+        /// </summary>
+        internal static string EventWaitingForJobToBeReady {
+            get {
+                return ResourceManager.GetString("EventWaitingForJobToBeReady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A distributed processing job with the specified identifier is not scheduled..
         /// </summary>
         internal static string NoJobScheduledWithSpecifiedIdentifier {

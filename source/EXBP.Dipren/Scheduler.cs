@@ -1,4 +1,7 @@
 ﻿
+using System.Diagnostics;
+using System.Globalization;
+
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Diagnostics;
 using EXBP.Dipren.Telemetry;
@@ -104,11 +107,11 @@ namespace EXBP.Dipren
             DateTime timestamp = this.Clock.GetDateTime();
             Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing);
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, "Creating job entry.", cancellation);
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, SchedulerResources.EventCreatingJob, cancellation);
 
             await this.Store.InsertJobAsync(result, cancellation);
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, "Job entry created.", cancellation);
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, SchedulerResources.EventJobCreated, cancellation);
 
             return result;
         }
@@ -135,15 +138,37 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Partition> CreatePartitionEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
         {
+            Guid partitionId = Guid.NewGuid();
+
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, SchedulerResources.EventCreatingInitialPartition, cancellation);
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, SchedulerResources.EventRetrievingRangeBoundaries, cancellation);
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             Range<TKey> range = await job.Source.GetEntireRangeAsync(cancellation);
+
+            stopwatch.Stop();
+
+            string descriptionRangeBoundariesRetrieved = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeBoundariesRetrieved, range.First, range.Last, stopwatch.Elapsed.TotalMilliseconds);
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, descriptionRangeBoundariesRetrieved, cancellation);
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, SchedulerResources.EventEstimatingRangeSize, cancellation);
+
+            stopwatch.Restart();
+
             long remaining = await job.Source.EstimateRangeSizeAsync(range, cancellation);
 
-            Guid id = Guid.NewGuid();
+            stopwatch.Stop();
+
+            string descriptionRangeSizeEstimated = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeSizeEstimated, remaining, stopwatch.Elapsed.TotalMilliseconds);
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, descriptionRangeSizeEstimated, cancellation);
+
             DateTime timestampPartitionCreated = this.Clock.GetDateTime();
-            Partition<TKey> partition = new Partition<TKey>(id, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false, false);
+            Partition<TKey> partition = new Partition<TKey>(partitionId, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false, false);
             Partition result = partition.ToEntry(job.Serializer);
 
             await this.Store.InsertPartitionAsync(result, cancellation);
+
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, SchedulerResources.EventInitialPartitionCreated, cancellation);
 
             return result;
         }

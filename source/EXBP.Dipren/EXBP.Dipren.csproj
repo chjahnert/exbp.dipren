@@ -22,6 +22,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AssertResources.resx</DependentUpon>
     </Compile>
+    <Compile Update="SchedulerResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SchedulerResources.resx</DependentUpon>
+    </Compile>
     <Compile Update="Telemetry\TextEventLoggerResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -46,6 +51,10 @@
     <EmbeddedResource Update="Diagnostics\AssertResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AssertResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="SchedulerResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SchedulerResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Telemetry\TextEventLoggerResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
