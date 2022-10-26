@@ -1,5 +1,4 @@
-﻿
-namespace EXBP.Dipren.Telemetry
+﻿namespace EXBP.Dipren.Telemetry
 {
     /// <summary>
     ///   Holds information about an event that occurred.
@@ -18,9 +17,9 @@ namespace EXBP.Dipren.Telemetry
         ///   Gets the component in which the current event occurred.
         /// </summary>
         /// <value>
-        ///   An <see cref="EventSource"/> value indicating the component in which the current event occurred.
+        ///   An <see cref="NodeType"/> value indicating the component in which the current event occurred.
         /// </value>
-        public EventSource Source { get; init; }
+        public NodeType Source { get; init; }
 
         /// <summary>
         ///   Gets the severity of the current event.

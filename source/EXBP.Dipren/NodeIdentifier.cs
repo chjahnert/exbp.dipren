@@ -1,4 +1,8 @@
 ﻿
+using System.Net.Http.Headers;
+
+using EXBP.Dipren.Diagnostics;
+
 namespace EXBP.Dipren
 {
     /// <summary>
@@ -6,22 +10,41 @@ namespace EXBP.Dipren
     /// </summary>
     internal static class NodeIdentifier
     {
-        internal const string DELIMITER = "/";
+        internal const string TYPE_DELIMITER = ":";
+        internal const string ITEM_DELIMITER = "/";
 
         private static long _instances = 0L;
+
 
         /// <summary>
         ///   Generates a new node identifier using a combination of machine name, process ID, application domain ID,
         ///   and an instance counter.
         /// </summary>
+        /// <param name="type">
+        ///   A <see cref="NodeType"/> value that indicates the type of the node for which the identifier is generated.
+        /// </param>
         /// <returns>
         ///   A <see cref="string"/> value that contains a new unique identifier for a node.
         /// </returns>
-        internal static string Generate()
+        internal static string Generate(NodeType type)
         {
-            long instanceId = Interlocked.Increment(ref NodeIdentifier._instances);
+            Assert.ArgumentIsDefined(type, nameof(type));
 
-            string result = FormattableString.Invariant($"{Environment.MachineName}{DELIMITER}{Environment.ProcessId}{DELIMITER}{AppDomain.CurrentDomain.Id}{DELIMITER}{instanceId}");
+            long instanceId = Interlocked.Increment(ref NodeIdentifier._instances);
+            string prefix = "?";
+
+            switch (type)
+            {
+                case NodeType.Scheduler:
+                    prefix = "S";
+                    break;
+
+                case NodeType.Engine:
+                    prefix = "E";
+                    break;
+            }
+
+            string result = FormattableString.Invariant($"{prefix}{TYPE_DELIMITER}{Environment.MachineName}{ITEM_DELIMITER}{Environment.ProcessId}{ITEM_DELIMITER}{AppDomain.CurrentDomain.Id}{ITEM_DELIMITER}{instanceId}");
 
             return result;
         }

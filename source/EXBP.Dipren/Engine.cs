@@ -38,6 +38,9 @@ namespace EXBP.Dipren
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
+        /// <param name="clock">
+        ///   A <see cref="IDateTimeProvider"/> that can be used to generate timestamp values.
+        /// </param>
         /// <param name="configuration">
         ///   The configuration settings to use.
         /// </param>
@@ -46,10 +49,10 @@ namespace EXBP.Dipren
             Assert.ArgumentIsNotNull(store, nameof(store));
             Assert.ArgumentIsNotNull(clock, nameof(clock));
 
+            this._id = NodeIdentifier.Generate(NodeType.Engine);
+            this._configuration = (configuration ?? new Configuration());
             this._store = store;
             this._clock = clock;
-            this._configuration = (configuration ?? new Configuration());
-            this._id = EngineIdentifier.Generate();
         }
 
         /// <summary>
