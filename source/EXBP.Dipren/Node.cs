@@ -79,6 +79,9 @@ namespace EXBP.Dipren
         }
 
 
+        /// <summary>
+        ///   Dispatches event notifications to the event handler.
+        /// </summary>
         protected sealed class EventDispatcher
         {
             private readonly NodeType _type;
@@ -87,7 +90,23 @@ namespace EXBP.Dipren
             private readonly IEventHandler _handler;
 
 
-            internal EventDispatcher(NodeType type, string nodeId, IDateTimeProvider clock, IEventHandler handler)
+            /// <summary>
+            ///   Initializes a new instance of the <see cref="EventDispatcher"/> type.
+            /// </summary>
+            /// <param name="type">
+            ///   The type of the node generating the events.
+            /// </param>
+            /// <param name="nodeId">
+            ///   The unique identifier of the node generating the events.
+            /// </param>
+            /// <param name="clock">
+            ///   The <see cref="IDateTimeProvider"/> object to use to generate timestamp values.
+            /// </param>
+            /// <param name="handler">
+            ///   The <see cref="IEventHandler"/> object to dispatch the events to; or <see langword="null"/> to
+            ///   discard the events.
+            /// </param>
+            public EventDispatcher(NodeType type, string nodeId, IDateTimeProvider clock, IEventHandler handler)
             {
                 Debug.Assert(nodeId != null);
                 Debug.Assert(clock != null);
@@ -98,7 +117,29 @@ namespace EXBP.Dipren
                 this._handler = handler;
             }
 
-            internal async Task DispatchEventAsync(EventSeverity severity, string jobId, Guid parititonId, string description, CancellationToken cancellation)
+            /// <summary>
+            ///   Dispatches an event related to a job and a partition.
+            /// </summary>
+            /// <param name="severity">
+            ///   A <see cref="EventSeverity"/> value indicating the severity of the event.
+            /// </param>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job the event is related to.
+            /// </param>
+            /// <param name="parititonId">
+            ///   The unique identifier of the partition the event is related to.
+            /// </param>
+            /// <param name="description">
+            ///   A description of the event.
+            /// </param>
+            /// <param name="cancellation">
+            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+            ///   canceled.
+            /// </param>
+            /// <returns>
+            ///   A <see cref="Task"/> object that represents the asynchronous operation.
+            /// </returns>
+            public async Task DispatchEventAsync(EventSeverity severity, string jobId, Guid parititonId, string description, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(description != null);
@@ -120,6 +161,32 @@ namespace EXBP.Dipren
                 }
             }
 
+            /// <summary>
+            ///   Dispatches an event related to a job and a partition.
+            /// </summary>
+            /// <param name="severity">
+            ///   A <see cref="EventSeverity"/> value indicating the severity of the event.
+            /// </param>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job the event is related to.
+            /// </param>
+            /// <param name="parititonId">
+            ///   The unique identifier of the partition the event is related to.
+            /// </param>
+            /// <param name="description">
+            ///   A description of the event.
+            /// </param>
+            /// <param name="exception">
+            ///   The exception providing further information about the event; or <see langword="null"/> if not
+            ///   available.
+            /// </param>
+            /// <param name="cancellation">
+            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+            ///   canceled.
+            /// </param>
+            /// <returns>
+            ///   A <see cref="Task"/> object that represents the asynchronous operation.
+            /// </returns>
             internal async Task DispatchEventAsync(EventSeverity severity, string jobId, Guid parititonId, string description, Exception exception, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
