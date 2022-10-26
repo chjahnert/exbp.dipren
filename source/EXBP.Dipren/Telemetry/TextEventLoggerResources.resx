@@ -120,9 +120,6 @@
   <data name="Debug" xml:space="preserve">
     <value>DEBUG</value>
   </data>
-  <data name="Dipren" xml:space="preserve">
-    <value>DIPREN</value>
-  </data>
   <data name="Error" xml:space="preserve">
     <value>ERROR</value>
   </data>
