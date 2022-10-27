@@ -436,8 +436,6 @@ namespace EXBP.Dipren
 
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventSplitRequested, cancellation);
 
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
             Range<TKey> remainingKeyRange = partition.GetRemainingKeyRange();
             Range<TKey> updatedKeyRange = job.Arithmetics.Split(remainingKeyRange, out Range<TKey> excludedKeyRange);
 
@@ -445,6 +443,8 @@ namespace EXBP.Dipren
 
             if (excludedKeyRange != null)
             {
+                Stopwatch stopwatch = Stopwatch.StartNew();
+
                 Task<long> remainingKeyRangeSize = job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
                 Task<long> excludedKeyRangeSize = job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
 
