@@ -1,6 +1,4 @@
 ﻿
-using System.Collections.Concurrent;
-
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Data.Memory;
 
@@ -12,9 +10,6 @@ namespace EXBP.Dipren.Tests.Data.Memory
     [TestFixture]
     public class InMemoryEngineDataStoreTests
     {
-        private readonly Random _random = new Random(19827364);
-
-
         [Test]
         public void InsertJobAsync_ArgumentJobIsNull_ThrowsException()
         {

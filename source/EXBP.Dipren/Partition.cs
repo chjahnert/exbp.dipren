@@ -1,7 +1,6 @@
 ﻿
 using System.Diagnostics;
 
-using EXBP.Dipren.Diagnostics;
 
 namespace EXBP.Dipren
 {

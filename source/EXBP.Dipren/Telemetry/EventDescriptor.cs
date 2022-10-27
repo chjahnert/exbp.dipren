@@ -1,4 +1,5 @@
-﻿namespace EXBP.Dipren.Telemetry
+﻿
+namespace EXBP.Dipren.Telemetry
 {
     /// <summary>
     ///   Holds information about an event that occurred.
