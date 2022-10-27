@@ -123,6 +123,9 @@
   <data name="EventBatchRetrieved" xml:space="preserve">
     <value>Retrieved a batch of {0} items. Took {1} ms.</value>
   </data>
+  <data name="EventCouldNotSplitPartition" xml:space="preserve">
+    <value>The partition could not be split.</value>
+  </data>
   <data name="EventJobCompleted" xml:space="preserve">
     <value>Job completed.</value>
   </data>

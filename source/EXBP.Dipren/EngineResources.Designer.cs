@@ -79,6 +79,15 @@ namespace EXBP.Dipren {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The partition could not be split..
+        /// </summary>
+        internal static string EventCouldNotSplitPartition {
+            get {
+                return ResourceManager.GetString("EventCouldNotSplitPartition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Job completed..
         /// </summary>
         internal static string EventJobCompleted {
