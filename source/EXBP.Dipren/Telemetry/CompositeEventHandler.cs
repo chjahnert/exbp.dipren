@@ -19,7 +19,20 @@ namespace EXBP.Dipren.Telemetry
         ///   An <see cref="IEnumerable{T}"/> of <see cref="IEventHandler"/> objects to which to forward the event
         ///   notifications.
         /// </param>
-        protected CompositeEventHandler(IEnumerable<IEventHandler> handlers)
+        public CompositeEventHandler(IEnumerable<IEventHandler> handlers)
+        {
+            Assert.ArgumentIsNotNull(handlers, nameof(handlers));
+
+            this._handlers = handlers.Where(h => (h != null)).ToArray();
+        }
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="CompositeEventHandler"/> class.
+        /// </summary>
+        /// <param name="handlers">
+        ///   One or more <see cref="IEventHandler"/> objects to which to forward the event notifications.
+        /// </param>
+        public CompositeEventHandler(params IEventHandler[] handlers)
         {
             Assert.ArgumentIsNotNull(handlers, nameof(handlers));
 
