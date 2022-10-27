@@ -1,7 +1,6 @@
 ﻿
-using System.Net.Http.Headers;
-
 using EXBP.Dipren.Diagnostics;
+
 
 namespace EXBP.Dipren
 {
@@ -10,8 +9,7 @@ namespace EXBP.Dipren
     /// </summary>
     internal static class NodeIdentifier
     {
-        internal const string TYPE_DELIMITER = ":";
-        internal const string ITEM_DELIMITER = "/";
+        internal const string DELIMITER = ":";
 
         private static long _instances = 0L;
 
@@ -31,7 +29,8 @@ namespace EXBP.Dipren
             Assert.ArgumentIsDefined(type, nameof(type));
 
             long instanceId = Interlocked.Increment(ref NodeIdentifier._instances);
-            string prefix = "?";
+
+            string prefix;
 
             switch (type)
             {
@@ -42,9 +41,12 @@ namespace EXBP.Dipren
                 case NodeType.Engine:
                     prefix = "E";
                     break;
+
+                default:
+                    throw new NotSupportedException();
             }
 
-            string result = FormattableString.Invariant($"{prefix}{TYPE_DELIMITER}{Environment.MachineName}{ITEM_DELIMITER}{Environment.ProcessId}{ITEM_DELIMITER}{AppDomain.CurrentDomain.Id}{ITEM_DELIMITER}{instanceId}");
+            string result = FormattableString.Invariant($"{prefix}{DELIMITER}{Environment.MachineName}{DELIMITER}{Environment.ProcessId}{DELIMITER}{AppDomain.CurrentDomain.Id}{DELIMITER}{instanceId}");
 
             return result;
         }
