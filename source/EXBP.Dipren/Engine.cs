@@ -29,18 +29,18 @@ namespace EXBP.Dipren
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
-        /// <param name="clock">
-        ///   A <see cref="IDateTimeProvider"/> that can be used to generate timestamp values; or
-        ///   <see langword="null"/> to use a <see cref="UtcDateTimeProvider"/> instance.
-        /// </param>
         /// <param name="handler">
         ///   The <see cref="IEventHandler"/> object to use to emit event notifications; or <see langword="null"/> to
         ///   discard event notifications.
         /// </param>
+        /// <param name="clock">
+        ///   A <see cref="IDateTimeProvider"/> that can be used to generate timestamp values; or
+        ///   <see langword="null"/> to use a <see cref="UtcDateTimeProvider"/> instance.
+        /// </param>
         /// <param name="configuration">
         ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
         /// </param>
-        public Engine(IEngineDataStore store, IDateTimeProvider clock = null, IEventHandler handler = null, Configuration configuration = null) : base(NodeType.Engine, store, clock, handler)
+        public Engine(IEngineDataStore store, IEventHandler handler = null, IDateTimeProvider clock = null, Configuration configuration = null) : base(NodeType.Engine, store, clock, handler)
         {
             this._configuration = (configuration ?? new Configuration());
         }
