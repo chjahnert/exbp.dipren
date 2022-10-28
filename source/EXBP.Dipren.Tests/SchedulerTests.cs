@@ -1,6 +1,7 @@
 ﻿
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Data.Memory;
+using EXBP.Dipren.Telemetry;
 
 using NSubstitute;
 
@@ -12,18 +13,13 @@ namespace EXBP.Dipren.Tests
     [TestFixture]
     public class SchedulerTests
     {
+        private IEventHandler DefaultEventHandler { get; } = new CompositeEventHandler(ConsoleEventLogger.Debug, DebugEventLogger.Debug);
+
+
         [Test]
         public void Ctor_ArgumentStoreIsNull_ThrowsException()
         {
             Assert.Throws<ArgumentNullException>(() => new Scheduler(null));
-        }
-
-        [Test]
-        public void Ctor_ArgumentClockIsNull_ThrowsException()
-        {
-            IEngineDataStore store = Substitute.For<IEngineDataStore>();
-
-            Assert.Throws<ArgumentNullException>(() => new Scheduler(store, null));
         }
 
         [Test]
@@ -39,7 +35,7 @@ namespace EXBP.Dipren.Tests
         public async Task ScheduleAsync_ArgumentJobIsValid_SchedulesJob()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
-            Scheduler scheduler = new Scheduler(store);
+            Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             DummyDataSource source = new DummyDataSource(1, 1024);
             IKeyArithmetics<int> arithmetics = Substitute.For<IKeyArithmetics<int>>();
@@ -71,7 +67,7 @@ namespace EXBP.Dipren.Tests
         public void ScheduleAsync_RangeQueryFails_CreatesJobInFailedState()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
-            Scheduler scheduler = new Scheduler(store);
+            Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             IDataSource<int, int> source = Substitute.For<IDataSource<int,int>>();
 
@@ -102,13 +98,12 @@ namespace EXBP.Dipren.Tests
         public void ScheduleAsync_RangeSizeEstimationFails_CreatesJobInFailedState()
         {
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
-            Scheduler scheduler = new Scheduler(store);
+            Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             IDataSource<int, int> source = Substitute.For<IDataSource<int, int>>();
 
-            source
-                .When(x => x.GetEntireRangeAsync(Arg.Any<CancellationToken>()))
-                .Do(x => new Range<int>(1, 1000, true));
+            source.GetEntireRangeAsync(Arg.Any<CancellationToken>())
+                .Returns(new Range<int>(1, 1000, true));
 
             source
                 .When(x => x.EstimateRangeSizeAsync(Arg.Any<Range<int>>(), Arg.Any<CancellationToken>()))

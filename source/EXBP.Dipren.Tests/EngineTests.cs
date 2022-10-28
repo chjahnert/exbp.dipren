@@ -1,6 +1,7 @@
 ﻿
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Data.Memory;
+using EXBP.Dipren.Telemetry;
 
 using NUnit.Framework;
 
@@ -10,6 +11,9 @@ namespace EXBP.Dipren.Tests
     [TestFixture]
     public class EngineTests
     {
+        private IEventHandler DefaultEventHandler { get; } = new CompositeEventHandler(ConsoleEventLogger.Debug, DebugEventLogger.Debug);
+
+
         [Test]
         public void Ctor_ArgumentStoreIsNull_ThrowsException()
         {
@@ -36,11 +40,11 @@ namespace EXBP.Dipren.Tests
             Job<int, string> job = new Job<int, string>(jobId, source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
 
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
-            Scheduler scheduler = new Scheduler(store);
+            Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);
 
-            Engine engine = new Engine(store);
+            Engine engine = new Engine(store, this.DefaultEventHandler);
 
             await engine.RunAsync(job, false, CancellationToken.None);
 
@@ -59,11 +63,11 @@ namespace EXBP.Dipren.Tests
             Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
 
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
-            Scheduler scheduler = new Scheduler(store);
+            Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);
 
-            Engine engine = new Engine(store);
+            Engine engine = new Engine(store, this.DefaultEventHandler);
 
             await engine.RunAsync(job, false, CancellationToken.None);
 
@@ -80,11 +84,11 @@ namespace EXBP.Dipren.Tests
             Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
 
             InMemoryEngineDataStore store = new InMemoryEngineDataStore();
-            Scheduler scheduler = new Scheduler(store);
+            Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);
 
-            Engine engine = new Engine(store);
+            Engine engine = new Engine(store, this.DefaultEventHandler);
 
             await engine.RunAsync(job, false, CancellationToken.None);
 

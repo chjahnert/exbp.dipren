@@ -1,8 +1,10 @@
 ﻿
 using System.Diagnostics;
+using System.Globalization;
 
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Diagnostics;
+using EXBP.Dipren.Telemetry;
 
 
 namespace EXBP.Dipren
@@ -10,11 +12,8 @@ namespace EXBP.Dipren
     /// <summary>
     ///   Implements a processing engine that can iterate over a large set of ordered items in a distributed fashion.
     /// </summary>
-    public class Engine
+    public class Engine : Node
     {
-        private readonly string _id;
-        private readonly IEngineDataStore _store;
-        private readonly IDateTimeProvider _clock;
         private readonly Configuration _configuration;
 
 
@@ -23,14 +22,6 @@ namespace EXBP.Dipren
         /// </summary>
         public Configuration Configuration => this._configuration;
 
-        /// <summary>
-        ///   Gets the unique identifier of the current engine.
-        /// </summary>
-        /// <value>
-        ///   A <see cref="string"/> value that contains the unique identifier of the current engine.
-        /// </value>
-        public string Identity => this._id;
-
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="Engine"/> class.
@@ -38,31 +29,20 @@ namespace EXBP.Dipren
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
-        /// <param name="configuration">
-        ///   The configuration settings to use.
+        /// <param name="handler">
+        ///   The <see cref="IEventHandler"/> object to use to emit event notifications; or <see langword="null"/> to
+        ///   discard event notifications.
         /// </param>
-        internal Engine(IEngineDataStore store, IDateTimeProvider clock, Configuration configuration = null)
+        /// <param name="clock">
+        ///   A <see cref="IDateTimeProvider"/> that can be used to generate timestamp values; or
+        ///   <see langword="null"/> to use a <see cref="UtcDateTimeProvider"/> instance.
+        /// </param>
+        /// <param name="configuration">
+        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
+        /// </param>
+        public Engine(IEngineDataStore store, IEventHandler handler = null, IDateTimeProvider clock = null, Configuration configuration = null) : base(NodeType.Engine, store, clock, handler)
         {
-            Assert.ArgumentIsNotNull(store, nameof(store));
-            Assert.ArgumentIsNotNull(clock, nameof(clock));
-
-            this._store = store;
-            this._clock = clock;
             this._configuration = (configuration ?? new Configuration());
-            this._id = EngineIdentifier.Generate();
-        }
-
-        /// <summary>
-        ///   Initializes a new instance of the <see cref="Engine"/> class.
-        /// </summary>
-        /// <param name="store">
-        ///   The <see cref="IEngineDataStore"/> to use.
-        /// </param>
-        /// <param name="configuration">
-        ///   The configuration settings to use.
-        /// </param>
-        public Engine(IEngineDataStore store, Configuration configuration = null) : this(store, UtcDateTimeProvider.Default, configuration)
-        {
         }
 
         /// <summary>
@@ -101,112 +81,133 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
-            //
-            // Flow:
-            //
-            // 1. Check if there are any free partitions.
-            // 2. If there are no free partitions, check if there are any abandoned partitions.
-            // 3. If there are no free or abandoned partitions, request (the largest) partition to be split.
-            // 4. Take ownership of the partition.
-            // 5. Start processing the partition in a loop.
-            //    a. Process the next batch of keys
-            //    b. Record progress
-            //    c. Check job state.
-            //    d. If requested, split the current partition
-            // 6. Once the current partition is completed, repeat from step 1 until all keys are processed.
-            // 7. Mark the job completed.
-            //
-            // Questions:
-            //
-            //  - Should partitions smaller than the batch size be split?
-            //    Could be a configuration option. Default: yes.
-            //  - How to handle the condition when the scheduler crashed right after the job was inserted?
-            //    Could be a configuration option like job initialization timeout with a default of 15 minutes.
-            //
-
-            Job persisted = null;
-
             try
             {
-                persisted = await this._store.RetrieveJobAsync(job.Id, cancellation);
-            }
-            catch (UnknownIdentifierException ex)
-            {
-                if (wait == false)
-                {
-                    throw new JobNotScheduledException(EngineResources.NoJobScheduledWithSpecifiedIdentifier, job.Id, ex);
-                }
-            }
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobStarted, cancellation);
 
-            //
-            // If waiting was requested or the job is still initializing, we wait for the job to be scheduled and
-            // become ready for processing.
-            //
+                //
+                // Flow:
+                //
+                // 1. Check if there are any free partitions.
+                // 2. If there are no free partitions, check if there are any abandoned partitions.
+                // 3. If there are no free or abandoned partitions, request (the largest) partition to be split.
+                // 4. Take ownership of the partition.
+                // 5. Start processing the partition in a loop.
+                //    a. Process the next batch of keys
+                //    b. Record progress
+                //    c. Check job state.
+                //    d. If requested, split the current partition
+                // 6. Once the current partition is completed, repeat from step 1 until all keys are processed.
+                // 7. Mark the job completed.
+                //
+                // Questions:
+                //
+                //  - Should partitions smaller than the batch size be split?
+                //    Could be a configuration option. Default: yes.
+                //  - How to handle the condition when the scheduler crashed right after the job was inserted?
+                //    Could be a configuration option like job initialization timeout with a default of 15 minutes.
+                //
 
-            while ((persisted == null) || (persisted.State == JobState.Initializing))
-            {
-                await Task.Delay(this._configuration.PollingInterval, cancellation);
+                Job persisted = null;
 
                 try
                 {
-                    persisted = await this._store.RetrieveJobAsync(job.Id, cancellation);
+                    persisted = await this.Store.RetrieveJobAsync(job.Id, cancellation);
                 }
-                catch (UnknownIdentifierException)
+                catch (UnknownIdentifierException ex)
                 {
+                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobNotScheduled, cancellation);
+
+                    if (wait == false)
+                    {
+                        throw new JobNotScheduledException(EngineResources.NoJobScheduledWithSpecifiedIdentifier, job.Id, ex);
+                    }
                 }
-            }
 
-            //
-            // Processing is only started if the scheduled job is in either Ready or Processing state.
-            //
-
-            while ((persisted?.State == JobState.Ready) || (persisted?.State == JobState.Processing))
-            {
                 //
-                // Acquire a partition that is ready to be processed or request an existing partition to be split.
+                // If waiting was requested or the job is still initializing, we wait for the job to be scheduled and
+                // become ready for processing.
                 //
 
-                Partition<TKey> partition = await this.TryAcquirePartitionAsync(job, cancellation);
-
-                if (partition != null)
+                while ((persisted == null) || (persisted.State == JobState.Initializing))
                 {
+                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, EngineResources.EventWaitingForJobToBeReady, cancellation);
+
+                    await Task.Delay(this._configuration.PollingInterval, cancellation);
+
                     try
                     {
-                        await this.ProcessPartitionAsync(job, partition, cancellation);
+                        persisted = await this.Store.RetrieveJobAsync(job.Id, cancellation);
                     }
-                    catch (LockException)
+                    catch (UnknownIdentifierException)
                     {
-                        //
-                        // The partition being processed was stolen by another processing node.
-                        //
                     }
                 }
-                else
-                {
-                    long incomplete = await this._store.CountIncompletePartitionsAsync(job.Id, cancellation);
 
-                    if (incomplete == 0L)
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobReady, cancellation);
+
+                //
+                // Processing is only started if the scheduled job is in either Ready or Processing state.
+                //
+
+                while ((persisted?.State == JobState.Ready) || (persisted?.State == JobState.Processing))
+                {
+                    //
+                    // Acquire a partition that is ready to be processed or request an existing partition to be split.
+                    //
+
+                    Partition<TKey> partition = await this.TryAcquirePartitionAsync(job, cancellation);
+
+                    if (partition != null)
                     {
-                        persisted = await this.MarkJobAsCompletedAsync(persisted.Id, cancellation);
+                        try
+                        {
+                            await this.ProcessPartitionAsync(job, partition, cancellation);
+                        }
+                        catch (LockException)
+                        {
+                            //
+                            // The partition being processed was taken by another processing node.
+                            //
+
+                            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventPartitionTaken, cancellation);
+                        }
                     }
                     else
                     {
-                        //
-                        // If a partition could not be acquired, wait the configured amount of time and check if the job
-                        // has not completed, failed, or was deleted in the meanwhile.
-                        //
+                        long incomplete = await this.Store.CountIncompletePartitionsAsync(job.Id, cancellation);
 
-                        await Task.Delay(this._configuration.PollingInterval, cancellation);
-
-                        try
+                        if (incomplete == 0L)
                         {
-                            persisted = await this._store.RetrieveJobAsync(job.Id, cancellation);
+                            persisted = await this.MarkJobAsCompletedAsync(persisted.Id, cancellation);
+
+                            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobCompleted, cancellation);
                         }
-                        catch (UnknownIdentifierException)
+                        else
                         {
+                            //
+                            // If a partition could not be acquired, wait the configured amount of time and check if the job
+                            // has not completed, failed, or was deleted in the meanwhile.
+                            //
+
+                            await Task.Delay(this._configuration.PollingInterval, cancellation);
+
+                            try
+                            {
+                                persisted = await this.Store.RetrieveJobAsync(job.Id, cancellation);
+                            }
+                            catch (UnknownIdentifierException)
+                            {
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Error, job.Id, EngineResources.EventProcessingFailed, ex, cancellation);
+
+                throw;
             }
         }
 
@@ -237,6 +238,8 @@ namespace EXBP.Dipren
             Assert.ArgumentIsNotNull(job, nameof(job));
             Assert.ArgumentIsNotNull(partition, nameof(partition));
 
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventProcessingPartition, cancellation);
+
             //
             // 1. Fetch the next batch of items to be processed from the data source.
             // 2. Process the batch.
@@ -253,19 +256,37 @@ namespace EXBP.Dipren
                 Range<TKey> range = new Range<TKey>(first, partition.Range.Last, partition.Range.IsInclusive);
                 int skip = ((partition.Processed == 0L) ? 0 : 1);
 
+                string descriptionRequestingNextBatch = string.Format(CultureInfo.InvariantCulture, EngineResources.EventRequestingNextBatch, job.BatchSize, range.First, range.Last, skip);
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionRequestingNextBatch, cancellation);
+
+                Stopwatch stopwatch = Stopwatch.StartNew();
+
                 IEnumerable<KeyValuePair<TKey, TItem>> batch = await job.Source.GetNextBatchAsync(range, skip, job.BatchSize, cancellation);
+
+                stopwatch.Stop();
+
                 long progress = batch.Count();
+
+                string descriptionBatchRetrieved = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchRetrieved, progress, stopwatch.Elapsed.TotalMilliseconds);
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchRetrieved, cancellation);
 
                 if (progress > 0L)
                 {
                     IEnumerable<TItem> items = batch.Select(kvp => kvp.Value);
 
+                    stopwatch.Restart();
+
                     await job.Processor.ProcessAsync(items, cancellation);
+
+                    stopwatch.Stop();
+
+                    string descriptionBatchProcessed = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessed, progress, stopwatch.Elapsed.TotalMilliseconds);
+                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchProcessed, cancellation);
                 }
 
                 bool completed = (progress < job.BatchSize);
                 TKey position = ((progress == 0L) ? partition.Position : batch.Last().Key);
-                DateTime timestamp = this._clock.GetDateTime();
+                DateTime timestamp = this.Clock.GetDateTime();
 
                 partition = await this.ReportProgressAsync(job, partition, timestamp, position, progress, completed, cancellation);
 
@@ -274,6 +295,8 @@ namespace EXBP.Dipren
                     partition = await this.SplitPartitionAsync(job, partition, cancellation);
                 }
             }
+
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventPartitionCompleted, cancellation);
         }
 
         /// <summary>
@@ -301,20 +324,29 @@ namespace EXBP.Dipren
         {
             Debug.Assert(job != null);
 
-            DateTime now = this._clock.GetDateTime();
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventTryingToAcquirePartition, cancellation);
+
+            DateTime now = this.Clock.GetDateTime();
             DateTime cut = (now - job.Timeout - this._configuration.MaximumClockDrift);
 
-            Partition acquired = await this._store.TryAcquirePartitionsAsync(job.Id, this.Identity, now, cut, cancellation);
+            Partition acquired = await this.Store.TryAcquirePartitionsAsync(job.Id, this.Id, now, cut, cancellation);
 
             Partition<TKey> result = null;
 
             if (acquired != null)
             {
                 result = acquired.ToPartition(job.Serializer);
+
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, result.Id, EngineResources.EventPartitionAcquired, cancellation);
             }
             else
             {
-                await this._store.TryRequestSplitAsync(job.Id, cut, cancellation);
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventPartitionNotAcquired, cancellation);
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventRequestingSplit, cancellation);
+
+                bool succeeded = await this.Store.TryRequestSplitAsync(job.Id, cut, cancellation);
+
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, (succeeded ? EngineResources.EventSplitRequestSucceeded : EngineResources.EventSplitRequestFailed), cancellation);
             }
 
             return result;
@@ -362,13 +394,13 @@ namespace EXBP.Dipren
         {
             Debug.Assert(job != null);
             Debug.Assert(partition != null);
-            Debug.Assert(partition.Owner == this.Identity);
+            Debug.Assert(partition.Owner == this.Id);
             Debug.Assert(position != null);
             Debug.Assert(progress >= 0L);
 
             string sp = job.Serializer.Serialize(position);
 
-            Partition updated = await this._store.ReportProgressAsync(partition.Id, this.Identity, timestamp, sp, progress, completed, cancellation);
+            Partition updated = await this.Store.ReportProgressAsync(partition.Id, this.Id, timestamp, sp, progress, completed, cancellation);
 
             Partition<TKey> result = updated.ToPartition(job.Serializer);
 
@@ -402,6 +434,8 @@ namespace EXBP.Dipren
         {
             Debug.Assert(partition != null);
 
+            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventSplitRequested, cancellation);
+
             Range<TKey> remainingKeyRange = partition.GetRemainingKeyRange();
             Range<TKey> updatedKeyRange = job.Arithmetics.Split(remainingKeyRange, out Range<TKey> excludedKeyRange);
 
@@ -409,21 +443,30 @@ namespace EXBP.Dipren
 
             if (excludedKeyRange != null)
             {
+                Stopwatch stopwatch = Stopwatch.StartNew();
+
                 Task<long> remainingKeyRangeSize = job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
                 Task<long> excludedKeyRangeSize = job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
 
-                DateTime timestamp = this._clock.GetDateTime();
+                DateTime timestamp = this.Clock.GetDateTime();
 
                 Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, remainingKeyRange, partition.Position, partition.Processed, await remainingKeyRangeSize, false, false);
                 Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
 
                 Guid id = Guid.NewGuid();
-                Partition<TKey> expludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, await excludedKeyRangeSize, false, false);
-                Partition excludedEntry = expludedPartition.ToEntry(job.Serializer);
+                Partition<TKey> excludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, await excludedKeyRangeSize, false, false);
+                Partition excludedEntry = excludedPartition.ToEntry(job.Serializer);
 
-                await this._store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);
+                await this.Store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);
 
                 result = updatedPartition;
+
+                string descriptionPartitionSplit = String.Format(CultureInfo.InvariantCulture, EngineResources.EventPartitionSplit, updatedPartition.Range.First, updatedPartition.Range.Last, excludedPartition.Id, excludedPartition.Range.First, excludedPartition.Range.Last, stopwatch.Elapsed.TotalMilliseconds);
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, descriptionPartitionSplit, cancellation);
+            }
+            else
+            {
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventCouldNotSplitPartition, cancellation);
             }
 
             return result;
@@ -445,8 +488,8 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Job> MarkJobAsCompletedAsync(string jobId, CancellationToken cancellation)
         {
-            DateTime timestamp = this._clock.GetDateTime();
-            Job result = await this._store.UpdateJobAsync(jobId, timestamp, JobState.Completed, null, cancellation);
+            DateTime timestamp = this.Clock.GetDateTime();
+            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Completed, null, cancellation);
 
             return result;
         }
