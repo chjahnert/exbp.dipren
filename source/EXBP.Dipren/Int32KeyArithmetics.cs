@@ -9,10 +9,31 @@ namespace EXBP.Dipren
     /// </summary>
     public class Int32KeyArithmetics : IKeyArithmetics<int>
     {
+        private readonly IComparer<int> _comparer;
+
+
         /// <summary>
-        ///   A ready to be used instance of the <see cref="Int32KeyArithmetics"/> class.
+        ///   Gets the default instance of the <see cref="Int32KeyArithmetics"/> class.
         /// </summary>
-        public static readonly Int32KeyArithmetics Default = new Int32KeyArithmetics();
+        /// <value>
+        ///   An <see cref="Int32KeyArithmetics"/> object that uses the default comparer for the <see cref="int"/>
+        ///   type.
+        /// </value>
+        public static Int32KeyArithmetics Default { get; } = new Int32KeyArithmetics(Comparer<int>.Default);
+
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="Int32KeyArithmetics"/> class.
+        /// </summary>
+        /// <param name="comparer">
+        ///   The <see cref="IComparable{T}"/> of <see cref="int"/> object to use to compare key values.
+        /// </param>
+        public Int32KeyArithmetics(IComparer<int> comparer)
+        {
+            Assert.ArgumentIsNotNull(comparer, nameof(comparer));
+
+            this._comparer = comparer;
+        }
 
 
         /// <summary>
@@ -41,7 +62,9 @@ namespace EXBP.Dipren
             {
                 int half = (int) Math.Round(distance / 2);
 
-                if (range.IsAscending == false)
+                bool ascending = range.IsAscending(this._comparer); 
+
+                if (ascending == false)
                 {
                     half *= -1;
                 }
