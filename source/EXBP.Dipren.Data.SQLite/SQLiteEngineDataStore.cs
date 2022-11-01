@@ -1,6 +1,8 @@
 ﻿
+using System.Data;
 using System.Data.SQLite;
 
+using EXBP.Dipren.Data.SQLite;
 using EXBP.Dipren.Diagnostics;
 
 
@@ -17,9 +19,14 @@ namespace EXBP.Dipren.Data.Memory
         /// <summary>
         ///   Initializes a new and empty instance of the <see cref="SQLiteEngineDataStore"/> class.
         /// </summary>
-        public SQLiteEngineDataStore(string connectionString)
+        /// <param name="connection">
+        ///   The ready-to-be-used <see cref="SQLiteConnection"/> object.
+        /// </param>
+        protected SQLiteEngineDataStore(SQLiteConnection connection)
         {
-            this._connection = new SQLiteConnection(connectionString);
+            Assert.ArgumentIsNotNull(connection, nameof(connection));
+
+            this._connection = connection;
         }
 
         /// <summary>
@@ -78,11 +85,29 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="DuplicateIdentifierException">
         ///   A job with the specified unique identifier already exists in the data store.
         /// </exception>
-        public Task InsertJobAsync(Job job, CancellationToken cancellation)
+        public async Task InsertJobAsync(Job job, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
-            throw new NotImplementedException();
+            using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
+            using SQLiteCommand command = new SQLiteCommand
+            {
+                CommandText = SQLiteEngineDataStoreResources.SqlInsertJob,
+                CommandType = CommandType.Text,
+                Connection = _connection,
+                Transaction = transaction
+            };
+
+            command.Parameters.AddWithValue("$id", job.Id);
+            command.Parameters.AddWithValue("$created", job.Created);
+            command.Parameters.AddWithValue("$updated", job.Updated);
+            command.Parameters.AddWithValue("$state", job.State);
+            command.Parameters.AddWithValue("$exception", job.Exception);
+
+            await command.ExecuteNonQueryAsync(cancellation);
+
+            transaction.Commit();
         }
 
         /// <summary>
@@ -104,11 +129,39 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="InvalidReferenceException">
         ///   The job referenced by the partition does not exist within the data store.
         /// </exception>
-        public Task InsertPartitionAsync(Partition partition, CancellationToken cancellation)
+        public async Task InsertPartitionAsync(Partition partition, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(partition, nameof(partition));
 
-            throw new NotImplementedException();
+            using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
+            using SQLiteCommand command = new SQLiteCommand
+            {
+                CommandText = SQLiteEngineDataStoreResources.SqlInsertPartition,
+                CommandType = CommandType.Text,
+                Connection = _connection,
+                Transaction = transaction
+            };
+
+            string id = partition.Id.ToString("d");
+
+            command.Parameters.AddWithValue("$id", id);
+            command.Parameters.AddWithValue("$job_id", partition.JobId);
+            command.Parameters.AddWithValue("$created", partition.Created);
+            command.Parameters.AddWithValue("$updated", partition.Updated);
+            command.Parameters.AddWithValue("$owner", partition.Owner);
+            command.Parameters.AddWithValue("$first", partition.First);
+            command.Parameters.AddWithValue("$last", partition.Last);
+            command.Parameters.AddWithValue("$inclusive", partition.IsInclusive);
+            command.Parameters.AddWithValue("$position", partition.Position);
+            command.Parameters.AddWithValue("$processed", partition.Processed);
+            command.Parameters.AddWithValue("$remaining", partition.Remaining);
+            command.Parameters.AddWithValue("$is_completed", partition.IsCompleted);
+            command.Parameters.AddWithValue("$is_split_requested", partition.IsSplitRequested);
+
+            await command.ExecuteNonQueryAsync(cancellation);
+
+            transaction.Commit();
         }
 
         /// <summary>
@@ -254,6 +307,21 @@ namespace EXBP.Dipren.Data.Memory
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsNotNull(requester, nameof(requester));
 
+            /*
+            SELECT
+              *
+            FROM
+              "partitions"
+            WHERE
+              ("job_id" = 'DPJ-0001') AND
+              (("owner" IS NULL) OR ("updated" < '2022-11-01 22:00:00')) AND
+              ("is_completed" = 0)
+            ORDER BY
+              "remaining" DESC
+            LIMIT
+              1;
+            */
+
             throw new NotImplementedException();
         }
 
@@ -326,6 +394,40 @@ namespace EXBP.Dipren.Data.Memory
             Assert.ArgumentIsNotNull(position, nameof(position));
 
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///   Opens the specified database connection and deploys the required table structure.
+        /// </summary>
+        /// <param name="connectionString">
+        ///   A <see cref="string"/> value that contains the connection string to use.
+        /// </param>
+        /// <returns>
+        ///   The <see cref="SQLiteEngineDataStore"/> object that is ready to be used.
+        /// </returns>
+        public static async Task<SQLiteEngineDataStore> OpenAsync(string connectionString, CancellationToken cancellation)
+        {
+            SQLiteConnection connection = new SQLiteConnection(connectionString);
+
+            await connection.OpenAsync(cancellation);
+
+            using SQLiteTransaction transaction = connection.BeginTransaction();
+
+            using SQLiteCommand command = new SQLiteCommand
+            {
+                CommandText = SQLiteEngineDataStoreResources.SqlCreateSchema,
+                CommandType = CommandType.Text,
+                Connection = connection,
+                Transaction = transaction
+            };
+
+            await command.ExecuteNonQueryAsync();
+
+            transaction.Commit();
+
+            SQLiteEngineDataStore result = new SQLiteEngineDataStore(connection);
+
+            return result;
         }
     }
 }
