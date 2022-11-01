@@ -24,7 +24,7 @@ namespace EXBP.Dipren.Data
         /// <returns>
         ///   A <see cref="Partition{TKey}"/> object that is equivalent to <paramref name="source"/>.
         /// </returns>
-        internal static Partition<TKey> ToPartition<TKey>(this Partition source, IKeySerializer<TKey> serializer) where TKey : IComparable<TKey>
+        internal static Partition<TKey> ToPartition<TKey>(this Partition source, IKeySerializer<TKey> serializer)
         {
             Debug.Assert(source != null);
             Debug.Assert(serializer != null);

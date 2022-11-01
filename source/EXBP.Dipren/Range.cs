@@ -13,7 +13,7 @@ namespace EXBP.Dipren
     ///   The type of the key.
     /// </typeparam>
     [DebuggerDisplay("Range = [{First}..{Last}], Inclusive = {IsInclusive}, Ascending = {IsAscending}")]
-    public class Range<TKey> where TKey : IComparable<TKey>
+    public class Range<TKey>
     {
         private readonly TKey _first;
         private readonly TKey _last;
@@ -50,15 +50,6 @@ namespace EXBP.Dipren
         ///   <see langword="false"/>.
         /// </value>
         public bool IsInclusive => this._inclusive;
-
-        /// <summary>
-        ///   Gets a value indicating whether the keys in current range are in ascending order.
-        /// </summary>
-        /// <value>
-        ///   <see langword="true"/> if the keys in the current range are in ascending order; otherwise,
-        ///   <see langword="false"/>.
-        /// </value>
-        public bool IsAscending => this.First.CompareTo(this.Last) <= 0;
 
 
         /// <summary>

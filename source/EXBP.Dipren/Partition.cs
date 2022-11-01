@@ -10,7 +10,7 @@ namespace EXBP.Dipren
     /// <typeparam name="TKey">
     ///   The type of the keys.
     /// </typeparam>
-    internal class Partition<TKey> where TKey : IComparable<TKey>
+    internal class Partition<TKey>
     {
         private readonly Guid _id;
         private readonly string _jobId;
