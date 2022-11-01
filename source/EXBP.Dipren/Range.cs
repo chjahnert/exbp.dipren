@@ -13,7 +13,7 @@ namespace EXBP.Dipren
     ///   The type of the key.
     /// </typeparam>
     [DebuggerDisplay("Range = [{First}..{Last}], Inclusive = {IsInclusive}, Ascending = {IsAscending}")]
-    public class Range<TKey> where TKey : IComparable<TKey>
+    public class Range<TKey>
     {
         private readonly TKey _first;
         private readonly TKey _last;

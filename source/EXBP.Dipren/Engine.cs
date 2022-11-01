@@ -77,7 +77,7 @@ namespace EXBP.Dipren
         ///     wait for the job to be scheduled.
         ///   </para>
         /// </remarks>
-        public async Task RunAsync<TKey, TItem>(Job<TKey, TItem> job, bool wait, CancellationToken cancellation) where TKey : IComparable<TKey>
+        public async Task RunAsync<TKey, TItem>(Job<TKey, TItem> job, bool wait, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
@@ -233,7 +233,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        private async Task ProcessPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, CancellationToken cancellation) where TKey : IComparable<TKey>
+        private async Task ProcessPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
             Assert.ArgumentIsNotNull(partition, nameof(partition));
@@ -320,7 +320,7 @@ namespace EXBP.Dipren
         ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
         ///   otherwise, <see langword="null"/>.
         /// </returns>
-        private async Task<Partition<TKey>> TryAcquirePartitionAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
+        private async Task<Partition<TKey>> TryAcquirePartitionAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation)
         {
             Debug.Assert(job != null);
 
@@ -390,7 +390,7 @@ namespace EXBP.Dipren
         /// <exception cref="LockException">
         ///   The current processing node no longer holds the lock on the partition.
         /// </exception>
-        private async Task<Partition<TKey>> ReportProgressAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, DateTime timestamp, TKey position, long progress, bool completed, CancellationToken cancellation) where TKey : IComparable<TKey>
+        private async Task<Partition<TKey>> ReportProgressAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, DateTime timestamp, TKey position, long progress, bool completed, CancellationToken cancellation)
         {
             Debug.Assert(job != null);
             Debug.Assert(partition != null);
@@ -430,7 +430,7 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
         ///   operation. The <see cref="Task{TResult}.Result"/> property contains the updated partition.
         /// </returns>
-        private async Task<Partition<TKey>> SplitPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, CancellationToken cancellation) where TKey : IComparable<TKey>
+        private async Task<Partition<TKey>> SplitPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, CancellationToken cancellation)
         {
             Debug.Assert(partition != null);
 

@@ -26,7 +26,7 @@ namespace EXBP.Dipren
         ///   <see langword="true"/> if the keys in the current key range are in ascending order; otherwise,
         ///   <see langword="false"/>.
         /// </returns>
-        public static bool IsAscending<TKey>(this Range<TKey> range, IComparer<TKey> comparer) where TKey : IComparable<TKey>
+        public static bool IsAscending<TKey>(this Range<TKey> range, IComparer<TKey> comparer)
         {
             Assert.ArgumentIsNotNull(range, nameof(range));
             Assert.ArgumentIsNotNull(comparer, nameof(comparer));

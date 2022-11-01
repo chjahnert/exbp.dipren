@@ -16,7 +16,7 @@ namespace EXBP.Dipren
     ///   The type of the items to process.
     /// </typeparam>
     [DebuggerDisplay("ID = {Id}")]
-    public class Job<TKey, TItem> where TKey : IComparable<TKey>
+    public class Job<TKey, TItem>
     {
         private readonly string _id;
         private readonly IDataSource<TKey, TItem> _source;

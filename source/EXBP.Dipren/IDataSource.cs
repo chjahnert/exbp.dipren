@@ -11,7 +11,7 @@ namespace EXBP.Dipren
     /// <typeparam name="TItem">
     ///   The type of items to process.
     /// </typeparam>
-    public interface IDataSource<TKey, TItem> where TKey : IComparable<TKey>
+    public interface IDataSource<TKey, TItem>
     {
         /// <summary>
         ///   Returns the range of keys to process.

@@ -63,7 +63,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        public async Task ScheduleAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
+        public async Task ScheduleAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
@@ -102,7 +102,7 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
-        private async Task<Job> CreateJobEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
+        private async Task<Job> CreateJobEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation)
         {
             DateTime timestamp = this.Clock.GetDateTime();
             Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing);
@@ -136,7 +136,7 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
-        private async Task<Partition> CreatePartitionEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation) where TKey : IComparable<TKey>
+        private async Task<Partition> CreatePartitionEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation)
         {
             Guid partitionId = Guid.NewGuid();
 

@@ -7,7 +7,7 @@ namespace EXBP.Dipren
     /// <typeparam name="TKey">
     ///   The type of keys.
     /// </typeparam>
-    public interface IKeyArithmetics<TKey> where TKey : IComparable<TKey>
+    public interface IKeyArithmetics<TKey>
     {
         /// <summary>
         ///   Splits the specified range into two ranges.

@@ -27,7 +27,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Partition"/> object that is equivalent to <paramref name="source"/>.
         /// </returns>
-        internal static Partition ToEntry<TKey>(this Partition<TKey> source, IKeySerializer<TKey> serializer) where TKey : IComparable<TKey>
+        internal static Partition ToEntry<TKey>(this Partition<TKey> source, IKeySerializer<TKey> serializer)
         {
             Debug.Assert(source != null);
             Debug.Assert(serializer != null);
@@ -53,7 +53,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Range{TKey}"/> of <typeparamref name="TKey"/> representing the key range left to process.
         /// </returns>
-        internal static Range<TKey> GetRemainingKeyRange<TKey>(this Partition<TKey> source) where TKey : IComparable<TKey>
+        internal static Range<TKey> GetRemainingKeyRange<TKey>(this Partition<TKey> source)
         {
             Debug.Assert(source != null);
 
