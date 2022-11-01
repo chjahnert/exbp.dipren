@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.13.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EXBP.Dipren.Data.SQLite\EXBP.Dipren.Data.SQLite.csproj" />
+    <ProjectReference Include="..\EXBP.Dipren.Tests\EXBP.Dipren.Tests.csproj" />
+  </ItemGroup>
+
+</Project>
