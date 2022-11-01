@@ -101,12 +101,14 @@ namespace EXBP.Dipren.Tests
         {
             private readonly int _minimum;
             private readonly int _maximum;
+            private readonly IComparer<int> _comparer;
 
 
-            public Int32SequenceDataSource(int minimum, int maximum)
+            public Int32SequenceDataSource(int minimum, int maximum, IComparer<int> comparer = null)
             {
                 this._minimum = minimum;
                 this._maximum = maximum;
+                this._comparer = (comparer ?? Comparer<int>.Default);
             }
 
 
@@ -120,7 +122,9 @@ namespace EXBP.Dipren.Tests
             {
                 List<KeyValuePair<int, string>> result = new List<KeyValuePair<int, string>>(take);
 
-                if (range.IsAscending == true)
+                bool ascending = range.IsAscending(this._comparer);
+
+                if (ascending == true)
                 {
                     int start = (range.First + skip);
 

@@ -51,15 +51,6 @@ namespace EXBP.Dipren
         /// </value>
         public bool IsInclusive => this._inclusive;
 
-        /// <summary>
-        ///   Gets a value indicating whether the keys in current range are in ascending order.
-        /// </summary>
-        /// <value>
-        ///   <see langword="true"/> if the keys in the current range are in ascending order; otherwise,
-        ///   <see langword="false"/>.
-        /// </value>
-        public bool IsAscending => this.First.CompareTo(this.Last) <= 0;
-
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="Range{TKey}"/> type.

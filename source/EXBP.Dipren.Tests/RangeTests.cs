@@ -18,21 +18,5 @@ namespace EXBP.Dipren.Tests
         {
             Assert.Throws<ArgumentNullException>(() => new Range<string>("a", null));
         }
-
-        [Test]
-        public void IsAscendingProperty_RangeIsAscending_ReturnsTrue()
-        {
-            Range<int> range = new Range<int>(32, 64);
-
-            Assert.That(range.IsAscending, Is.True);
-        }
-
-        [Test]
-        public void IsAscendingProperty_RangeIsDescending_ReturnsFalse()
-        {
-            Range<int> range = new Range<int>(64, 32);
-
-            Assert.That(range.IsAscending, Is.False);
-        }
     }
 }
