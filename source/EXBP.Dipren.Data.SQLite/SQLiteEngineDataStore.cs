@@ -364,13 +364,7 @@ namespace EXBP.Dipren.Data.Memory
                 this.RaiseErrorUnknownJobIdentifier();
             }
 
-            string rId = reader.GetString("id");
-            DateTime rCreated = reader.GetDateTime("created");
-            DateTime rUpdated = reader.GetDateTime("updated");
-            JobState rState = (JobState) reader.GetInt32("state");
-            string rError = reader.GetNullableString("error");
-
-            Job result = new Job(rId, rCreated, rUpdated, rState, rError);
+            Job result = this.ReadJob(reader);
 
             return result;
         }
@@ -410,13 +404,7 @@ namespace EXBP.Dipren.Data.Memory
                 this.RaiseErrorUnknownJobIdentifier();
             }
 
-            string rId = reader.GetString("id");
-            DateTime rCreated = reader.GetDateTime("created");
-            DateTime rUpdated = reader.GetDateTime("updated");
-            JobState rState = (JobState) reader.GetInt32("state");
-            string rError = reader.GetNullableString("error");
-
-            Job result = new Job(rId, rCreated, rUpdated, rState, rError);
+            Job result = this.ReadJob(reader);
 
             return result;
         }
@@ -791,6 +779,31 @@ namespace EXBP.Dipren.Data.Memory
             long count = (long) await command.ExecuteScalarAsync(cancellation);
 
             bool result = (count > 0);
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Constructs a <see cref="Job"/> object from the values read from the current position of the specified
+        ///   reader.
+        /// </summary>
+        /// <param name="reader">
+        ///   The <see cref="DbDataReader"/> to read from.
+        /// </param>
+        /// <returns>
+        ///   The <see cref="Job"/> constructed from the values read from the reader.
+        /// </returns>
+        private Job ReadJob(DbDataReader reader)
+        {
+            Debug.Assert(reader != null);
+
+            string id = reader.GetString("id");
+            DateTime created = reader.GetDateTime("created");
+            DateTime updated = reader.GetDateTime("updated");
+            JobState state = (JobState) reader.GetInt32("state");
+            string error = reader.GetNullableString("error");
+
+            Job result = new Job(id, created, updated, state, error);
 
             return result;
         }
