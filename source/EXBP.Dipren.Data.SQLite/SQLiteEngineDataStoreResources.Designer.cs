@@ -61,6 +61,21 @@ namespace EXBP.Dipren.Data.SQLite {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SELECT
+        ///  COUNT()
+        ///FROM
+        ///  &quot;partitions&quot;
+        ///WHERE
+        ///  (&quot;job_id&quot; LIKE $job_id) AND
+        ///  (&quot;is_completed&quot; = 0);.
+        /// </summary>
+        internal static string SqlCountIncompletePartitions {
+            get {
+                return ResourceManager.GetString("SqlCountIncompletePartitions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CREATE TABLE IF NOT EXISTS &quot;jobs&quot;
         ///(
         ///  &quot;id&quot; VARCHAR(256) NOT NULL,

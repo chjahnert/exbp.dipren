@@ -59,11 +59,22 @@ namespace EXBP.Dipren.Data.Memory
         ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and can
         ///   be used to access the result.
         /// </returns>
-        public Task<long> CountIncompletePartitionsAsync(string jobId, CancellationToken cancellation)
+        public async Task<long> CountIncompletePartitionsAsync(string jobId, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
-            throw new NotImplementedException();
+            using SQLiteCommand command = new SQLiteCommand
+            {
+                CommandText = SQLiteEngineDataStoreResources.SqlCountIncompletePartitions,
+                CommandType = CommandType.Text,
+                Connection = _connection
+            };
+
+            command.Parameters.AddWithValue("$job_id", jobId);
+
+            long result = (long) await command.ExecuteScalarAsync(cancellation);
+
+            return result;
         }
 
         /// <summary>
