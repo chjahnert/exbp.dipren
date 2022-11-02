@@ -271,6 +271,7 @@ WHERE
   </data>
   <data name="SqlRetrievePartitionById" xml:space="preserve">
     <value>SELECT
+  "id" AS "id",
   "job_id" AS "job_id",
   "created" AS "created",
   "updated" AS "updated",

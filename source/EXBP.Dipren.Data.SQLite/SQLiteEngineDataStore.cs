@@ -9,8 +9,6 @@ using EXBP.Dipren.Diagnostics;
 
 //
 // - Implement the IDisposable interface
-// - Implement the DbDataReader extension method for reading GUIDs and nullable string values.
-// - Implement the ReadJob() and ReadPartition() methods.
 // - Reconsider the type constructor.
 //
 
@@ -447,20 +445,7 @@ namespace EXBP.Dipren.Data.Memory
                 this.RaiseErrorUnknownPartitionIdentifier();
             }
 
-            string jobId = reader.GetString("job_id");
-            DateTime created = reader.GetDateTime("created");
-            DateTime updated = reader.GetDateTime("updated");
-            string owner = reader.GetNullableString("owner");
-            string first = reader.GetString("first");
-            string last = reader.GetString("last");
-            bool inclusive = reader.GetBoolean("is_inclusive");
-            string position = reader.GetNullableString("position");
-            long processed = reader.GetInt64("processed");
-            long remaining = reader.GetInt64("remaining");
-            bool completed = reader.GetBoolean("is_completed");
-            bool split = reader.GetBoolean("is_split_requested");
-
-            Partition result = new Partition(id, jobId, created, updated, first, last, inclusive, position, processed, remaining, owner, completed, split);
+            Partition result = this.ReadPartition(reader);
 
             return result;
         }
@@ -527,23 +512,7 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (found == true)
                 {
-                    string rId = reader.GetString("id");
-                    string rJobId = reader.GetString("job_id");
-                    DateTime created = reader.GetDateTime("created");
-                    DateTime updated = reader.GetDateTime("updated");
-                    string owner = reader.GetNullableString("owner");
-                    string first = reader.GetString("first");
-                    string last = reader.GetString("last");
-                    bool inclusive = reader.GetBoolean("is_inclusive");
-                    string position = reader.GetNullableString("position");
-                    long processed = reader.GetInt64("processed");
-                    long remaining = reader.GetInt64("remaining");
-                    bool completed = reader.GetBoolean("is_completed");
-                    bool split = reader.GetBoolean("is_split_requested");
-
-                    Guid id = Guid.Parse(rId);
-
-                    result = new Partition(id, rJobId, created, updated, first, last, inclusive, position, processed, remaining, owner, completed, split);
+                    result = this.ReadPartition(reader);
                 }
             }
 
@@ -678,23 +647,7 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (found == true)
                 {
-                    string rsId = reader.GetString("id");
-                    string rJobId = reader.GetString("job_id");
-                    DateTime rCreated = reader.GetDateTime("created");
-                    DateTime rUpdated = reader.GetDateTime("updated");
-                    string rOwner = reader.GetNullableString("owner");
-                    string rFirst = reader.GetString("first");
-                    string rLast = reader.GetString("last");
-                    bool rInclusive = reader.GetBoolean("is_inclusive");
-                    string rPosition = reader.GetNullableString("position");
-                    long rProcessed = reader.GetInt64("processed");
-                    long rRemaining = reader.GetInt64("remaining");
-                    bool rCompleted = reader.GetBoolean("is_completed");
-                    bool rSplit = reader.GetBoolean("is_split_requested");
-
-                    Guid rId = Guid.Parse(rsId);
-
-                    result = new Partition(rId, rJobId, rCreated, rUpdated, rFirst, rLast, rInclusive, rPosition, rProcessed, rRemaining, rOwner, rCompleted, rSplit);
+                    result = this.ReadPartition(reader);
                 }
                 else
                 {
@@ -804,6 +757,41 @@ namespace EXBP.Dipren.Data.Memory
             string error = reader.GetNullableString("error");
 
             Job result = new Job(id, created, updated, state, error);
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Constructs a <see cref="Partition"/> object from the values read from the current position of the
+        ///   specified reader.
+        /// </summary>
+        /// <param name="reader">
+        ///   The <see cref="DbDataReader"/> to read from.
+        /// </param>
+        /// <returns>
+        ///   The <see cref="Partition"/> constructed from the values read from the reader.
+        /// </returns>
+        private Partition ReadPartition(DbDataReader reader)
+        {
+            Debug.Assert(reader != null);
+
+            string sid = reader.GetString("id");
+            string jobId = reader.GetString("job_id");
+            DateTime created = reader.GetDateTime("created");
+            DateTime updated = reader.GetDateTime("updated");
+            string owner = reader.GetNullableString("owner");
+            string first = reader.GetString("first");
+            string last = reader.GetString("last");
+            bool inclusive = reader.GetBoolean("is_inclusive");
+            string position = reader.GetNullableString("position");
+            long processed = reader.GetInt64("processed");
+            long remaining = reader.GetInt64("remaining");
+            bool completed = reader.GetBoolean("is_completed");
+            bool split = reader.GetBoolean("is_split_requested");
+
+            Guid id = Guid.ParseExact(sid, "d");
+
+            Partition result = new Partition(id, jobId, created, updated, first, last, inclusive, position, processed, remaining, owner, completed, split);
 
             return result;
         }

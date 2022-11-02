@@ -253,6 +253,7 @@ namespace EXBP.Dipren.Data.SQLite {
         
         /// <summary>
         ///   Looks up a localized string similar to SELECT
+        ///  &quot;id&quot; AS &quot;id&quot;,
         ///  &quot;job_id&quot; AS &quot;job_id&quot;,
         ///  &quot;created&quot; AS &quot;created&quot;,
         ///  &quot;updated&quot; AS &quot;updated&quot;,
