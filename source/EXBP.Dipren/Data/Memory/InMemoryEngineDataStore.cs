@@ -481,7 +481,7 @@ namespace EXBP.Dipren.Data.Memory
                 }
 
                 Partition candidate = this._partitions
-                    .Where(p => (p.JobId == jobId) && (p.Owner != null) && (p.Updated >= active) && (p.Remaining > 0L) && (p.IsSplitRequested == false))
+                    .Where(p => (p.JobId == jobId) && (p.Owner != null) && (p.Updated >= active) && (p.IsCompleted == false) && (p.IsSplitRequested == false))
                     .OrderByDescending(p => p.Remaining)
                     .FirstOrDefault();
 
