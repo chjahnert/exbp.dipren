@@ -9,7 +9,7 @@ namespace EXBP.Dipren.Data.Memory
     /// <summary>
     ///   Implements an in-memory <see cref="IEngineDataStore"/> that can be used for testing.
     /// </summary>
-    public class InMemoryEngineDataStore : IEngineDataStore
+    public class InMemoryEngineDataStore : EngineDataStore, IEngineDataStore
     {
         private readonly object _syncRoot = new object();
         private readonly JobCollection _jobs = new JobCollection();
@@ -91,7 +91,7 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (exists == false)
                 {
-                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.JobWithSpecifiedIdentifierDoesNotExist);
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
 
                 result = this._partitions.Count(p => (p.JobId == jobId) && (p.IsCompleted == false));
@@ -129,7 +129,7 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (exists == true)
                 {
-                    throw new DuplicateIdentifierException(InMemoryEngineDataStoreResources.JobWithSameIdentiferAlreadyExists);
+                    this.RaiseErrorDuplicateJobIdentifier();
                 }
 
                 this._jobs.Add(job);
@@ -165,12 +165,12 @@ namespace EXBP.Dipren.Data.Memory
             {
                 if (this._partitions.Contains(partition.Id) == true)
                 {
-                    throw new DuplicateIdentifierException(InMemoryEngineDataStoreResources.PartitionWithSameIdentifierAlreadyExists);
+                    this.RaiseErrorDuplicatePartitionIdentifier();
                 }
 
                 if (this._jobs.Contains(partition.JobId) == false)
                 {
-                    throw new InvalidReferenceException(InMemoryEngineDataStoreResources.ReferencedJobDoesNotExist);
+                    this.RaiseErrorInvalidJobReference();
                 }
 
                 this._partitions.Add(partition);
@@ -216,14 +216,14 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (partitionToUpdateExists == false)
                 {
-                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.PartitionWithSpecifiedIdentifierDoesNotExist);
+                    this.RaiseErrorUnknownPartitionIdentifier();
                 }
 
                 bool partitionToInsertExists = this._partitions.Contains(partitionToInsert.Id);
 
                 if (partitionToInsertExists == true)
                 {
-                    throw new DuplicateIdentifierException(InMemoryEngineDataStoreResources.PartitionWithSameIdentifierAlreadyExists);
+                    this.RaiseErrorDuplicatePartitionIdentifier();
                 }
 
                 //
@@ -293,7 +293,7 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (exists == false)
                 {
-                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.JobWithSpecifiedIdentifierDoesNotExist);
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
 
                 result = this._jobs[jobId] with
@@ -337,7 +337,7 @@ namespace EXBP.Dipren.Data.Memory
                 }
                 catch (KeyNotFoundException ex)
                 {
-                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.JobWithSpecifiedIdentifierDoesNotExist, ex);
+                    this.RaiseErrorUnknownJobIdentifier(ex);
                 }
             }
 
@@ -372,7 +372,7 @@ namespace EXBP.Dipren.Data.Memory
                 }
                 catch (KeyNotFoundException ex)
                 {
-                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.JobWithSpecifiedIdentifierDoesNotExist, ex);
+                    this.RaiseErrorUnknownPartitionIdentifier(ex);
                 }
             }
 
@@ -419,7 +419,7 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (exists == false)
                 {
-                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.JobWithSpecifiedIdentifierDoesNotExist);
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
 
                 Partition current = this._partitions
@@ -477,7 +477,7 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (exists == false)
                 {
-                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.JobWithSpecifiedIdentifierDoesNotExist);
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
 
                 Partition candidate = this._partitions
@@ -550,12 +550,12 @@ namespace EXBP.Dipren.Data.Memory
 
                 if (exists == false)
                 {
-                    throw new UnknownIdentifierException(InMemoryEngineDataStoreResources.PartitionWithSpecifiedIdentifierDoesNotExist);
+                    this.RaiseErrorUnknownPartitionIdentifier();
                 }
 
                 if (persisted.Owner != owner)
                 {
-                    throw new LockException(InMemoryEngineDataStoreResources.PartitionLockNoLongerHeld);
+                    this.RaiseErrorLockNoLongerHeld();
                 }
 
                 result = persisted with

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EXBP.Dipren.Data.Memory {
+namespace EXBP.Dipren.Data {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace EXBP.Dipren.Data.Memory {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class InMemoryEngineDataStoreResources {
+    internal class EngineDataStoreResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal InMemoryEngineDataStoreResources() {
+        internal EngineDataStoreResources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace EXBP.Dipren.Data.Memory {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EXBP.Dipren.Data.Memory.InMemoryEngineDataStoreResources", typeof(InMemoryEngineDataStoreResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EXBP.Dipren.Data.EngineDataStoreResources", typeof(EngineDataStoreResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
