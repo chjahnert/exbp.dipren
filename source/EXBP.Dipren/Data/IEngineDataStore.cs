@@ -65,8 +65,8 @@ namespace EXBP.Dipren.Data
         /// <param name="state">
         ///   The new state of the job.
         /// </param>
-        /// <param name="exception">
-        ///   The exception, if available, that provides information about the error.
+        /// <param name="error">
+        ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
@@ -78,7 +78,7 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, Exception exception, CancellationToken cancellation);
+        Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation);
 
         /// <summary>
         ///   Retrieves the job with the specified identifier from the data store.

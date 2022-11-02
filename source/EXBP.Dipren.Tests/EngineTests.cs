@@ -51,7 +51,7 @@ namespace EXBP.Dipren.Tests
             Job persisted = await store.RetrieveJobAsync(jobId, CancellationToken.None);
 
             Assert.That(persisted.State, Is.EqualTo(JobState.Completed));
-            Assert.That(persisted.Exception, Is.Null);
+            Assert.That(persisted.Error, Is.Null);
         }
 
         [Test]

@@ -264,8 +264,8 @@ namespace EXBP.Dipren.Data.Memory
         /// <param name="state">
         ///   The new state of the job.
         /// </param>
-        /// <param name="exception">
-        ///   The exception, if available, that provides information about the error.
+        /// <param name="error">
+        ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
@@ -281,7 +281,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, Exception exception, CancellationToken cancellation)
+        public Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
@@ -300,7 +300,7 @@ namespace EXBP.Dipren.Data.Memory
                 {
                     Updated = timestamp,
                     State = state,
-                    Exception = exception
+                    Error = error
                 };
 
                 this._jobs.Remove(jobId);

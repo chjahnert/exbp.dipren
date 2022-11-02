@@ -61,10 +61,10 @@ namespace EXBP.Dipren.Data
         ///   Gets the exception that is the reason the current job failed.
         /// </summary>
         /// <value>
-        ///   A <see cref="System.Exception"/> object that provides information about the error that occurred; or
+        ///   A <see cref="string"/> value that contains a description of the error that occurred; or
         ///   <see langword="null"/> if no error occurred.
         /// </value>
-        public Exception Exception { get; init; }
+        public string Error { get; init; }
 
 
         /// <summary>
@@ -82,10 +82,10 @@ namespace EXBP.Dipren.Data
         /// <param name="state">
         ///   The state of the job.
         /// </param>
-        /// <param name="exception">
-        ///   The exception that is the reason the job failed.
+        /// <param name="error">
+        ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
         /// </param>
-        public Job(string id, DateTime created, DateTime updated, JobState state, Exception exception = null)
+        public Job(string id, DateTime created, DateTime updated, JobState state, string error = null)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
@@ -93,7 +93,7 @@ namespace EXBP.Dipren.Data
             this.Created = created;
             this.Updated = updated;
             this.State = state;
-            this.Exception = exception;
+            this.Error = error;
         }
     }
 }

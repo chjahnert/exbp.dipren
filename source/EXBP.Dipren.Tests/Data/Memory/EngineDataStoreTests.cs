@@ -84,17 +84,16 @@ namespace EXBP.Dipren.Tests.Data.Memory
             await store.InsertJobAsync(job, CancellationToken.None);
 
             DateTime updated = new DateTime(2022, 9, 11, 13, 21, 49, DateTimeKind.Utc);
-            Exception exception = new NotSupportedException();
+            string error = "The connection to the data source was terminated.";
 
-            await store.UpdateJobAsync(id, updated, JobState.Failed, exception, CancellationToken.None);
+            await store.UpdateJobAsync(id, updated, JobState.Failed, error, CancellationToken.None);
 
             Job persisted = await store.RetrieveJobAsync(id, CancellationToken.None);
 
             Assert.That(persisted.Created, Is.EqualTo(created));
             Assert.That(persisted.Updated, Is.EqualTo(updated));
             Assert.That(persisted.State, Is.EqualTo(JobState.Failed));
-            Assert.That(persisted.Exception, Is.Not.Null);
-            Assert.That(persisted.Exception, Is.TypeOf<NotSupportedException>());
+            Assert.That(persisted.Error, Is.EqualTo(error));
         }
 
         [Test]
@@ -132,7 +131,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Assert.That(retrieved.Created, Is.EqualTo(timestamp));
             Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
             Assert.That(retrieved.State, Is.EqualTo(JobState.Initializing));
-            Assert.That(retrieved.Exception, Is.Null);
+            Assert.That(retrieved.Error, Is.Null);
         }
 
         [Test]

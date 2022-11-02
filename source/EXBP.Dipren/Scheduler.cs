@@ -215,7 +215,7 @@ namespace EXBP.Dipren
         private async Task<Job> MarkJobAsFailedAsync(string jobId, Exception exception, CancellationToken cancellation)
         {
             DateTime timestamp = this.Clock.GetDateTime();
-            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Failed, exception, cancellation);
+            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Failed, exception?.Message, cancellation);
 
             return result;
         }

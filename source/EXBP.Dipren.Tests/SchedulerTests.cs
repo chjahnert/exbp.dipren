@@ -49,7 +49,7 @@ namespace EXBP.Dipren.Tests
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
-            Assert.That(sj.Exception, Is.Null);
+            Assert.That(sj.Error, Is.Null);
 
             Partition sp = store.Partitions.First(p => p.JobId == job.Id);
 
@@ -90,7 +90,7 @@ namespace EXBP.Dipren.Tests
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
-            Assert.That(sj.Exception, Is.InstanceOf<ArgumentOutOfRangeException>());
+            Assert.That(sj.Error, Is.Not.Null);
             Assert.That(store.Partitions.Any(p => p.JobId == job.Id), Is.False);
         }
 
@@ -120,7 +120,7 @@ namespace EXBP.Dipren.Tests
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
-            Assert.That(sj.Exception, Is.InstanceOf<KeyNotFoundException>());
+            Assert.That(sj.Error, Is.Not.Null);
             Assert.That(store.Partitions.Any(p => p.JobId == job.Id), Is.False);
         }
 
