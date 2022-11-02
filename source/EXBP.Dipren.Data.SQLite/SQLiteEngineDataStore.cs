@@ -10,6 +10,7 @@ using EXBP.Dipren.Diagnostics;
 //
 // - Implement the IDisposable interface
 // - Reconsider the type constructor.
+// - Should the database connection be opened and closed for all operations? How about in-memory databases?
 //
 
 
