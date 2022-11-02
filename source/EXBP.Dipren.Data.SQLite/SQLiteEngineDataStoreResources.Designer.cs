@@ -62,12 +62,8 @@ namespace EXBP.Dipren.Data.SQLite {
         
         /// <summary>
         ///   Looks up a localized string similar to SELECT
-        ///  COUNT()
-        ///FROM
-        ///  &quot;partitions&quot;
-        ///WHERE
-        ///  (&quot;job_id&quot; LIKE $job_id) AND
-        ///  (&quot;is_completed&quot; = 0);.
+        ///  (SELECT COUNT() FROM &quot;jobs&quot; WHERE (&quot;id&quot; = $job_id)) AS &quot;job_count&quot;,
+        ///  (SELECT COUNT() FROM &quot;partitions&quot; WHERE (&quot;job_id&quot; = $job_id) AND (&quot;is_completed&quot; = 0)) AS &quot;partition_count&quot;;.
         /// </summary>
         internal static string SqlCountIncompletePartitions {
             get {
@@ -82,7 +78,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;created&quot; DATETIME NOT NULL,
         ///  &quot;updated&quot; DATETIME NOT NULL,
         ///  &quot;state&quot; INTEGER NOT NULL,
-        ///  &quot;exception&quot; TEXT NULL,
+        ///  &quot;error&quot; TEXT NULL,
         ///  
         ///  CONSTRAINT &quot;pk_jobs&quot; PRIMARY KEY (&quot;id&quot;)
         ///)
@@ -98,11 +94,48 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;owner&quot; VARCHAR(256) NULL,
         ///  &quot;first&quot; TEXT NOT NULL,
         ///  &quot;last&quot; TEXT NOT NULL,
-        ///  &quot; [rest of string was truncated]&quot;;.
+        ///  &quot;is_i [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SqlCreateSchema {
             get {
                 return ResourceManager.GetString("SqlCreateSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT
+        ///  COUNT() AS &quot;count&quot;
+        ///FROM
+        ///  &quot;jobs&quot;
+        ///WHERE
+        ///  (&quot;id&quot; = $id);.
+        /// </summary>
+        internal static string SqlDoesJobExist {
+            get {
+                return ResourceManager.GetString("SqlDoesJobExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT
+        ///  COUNT() AS &quot;count&quot;
+        ///FROM
+        ///  &quot;partitions&quot;
+        ///WHERE
+        ///  (&quot;id&quot; = $id);.
+        /// </summary>
+        internal static string SqlDoesPartitionExist {
+            get {
+                return ResourceManager.GetString("SqlDoesPartitionExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PRAGMA foreign_keys = ON;.
+        /// </summary>
+        internal static string SqlEnableForeignKeys {
+            get {
+                return ResourceManager.GetString("SqlEnableForeignKeys", resourceCulture);
             }
         }
         
@@ -113,7 +146,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;created&quot;,
         ///  &quot;updated&quot;,
         ///  &quot;state&quot;,
-        ///  &quot;exception&quot;
+        ///  &quot;error&quot;
         ///)
         ///VALUES
         ///(
@@ -121,7 +154,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  $created,
         ///  $updated,
         ///  $state,
-        ///  $exception
+        ///  $error
         ///);.
         /// </summary>
         internal static string SqlInsertJob {
@@ -140,7 +173,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;owner&quot;,
         ///  &quot;first&quot;,
         ///  &quot;last&quot;,
-        ///  &quot;inclusive&quot;,
+        ///  &quot;is_inclusive&quot;,
         ///  &quot;position&quot;,
         ///  &quot;processed&quot;,
         ///  &quot;remaining&quot;,
@@ -156,7 +189,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  $owner,
         ///  $first,
         ///  $last,
-        ///  $inclusive,
+        ///  $is_inclusive,
         ///  $position,
         ///  $processed,
         ///  $remaining,
@@ -167,6 +200,175 @@ namespace EXBP.Dipren.Data.SQLite {
         internal static string SqlInsertPartition {
             get {
                 return ResourceManager.GetString("SqlInsertPartition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE
+        ///  &quot;partitions&quot;
+        ///SET
+        ///  &quot;updated&quot; = $updated,
+        ///  &quot;position&quot; = $position,
+        ///  &quot;processed&quot; = (&quot;processed&quot; + $progress),
+        ///  &quot;remaining&quot; = (&quot;remaining&quot; - $progress),
+        ///  &quot;is_completed&quot; = $completed
+        ///WHERE
+        ///  (&quot;id&quot; = $id) AND
+        ///  (&quot;owner&quot; = $owner)
+        ///RETURNING
+        ///  &quot;id&quot; AS &quot;id&quot;,
+        ///  &quot;job_id&quot; AS &quot;job_id&quot;,
+        ///  &quot;created&quot; AS &quot;created&quot;,
+        ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;owner&quot; AS &quot;owner&quot;,
+        ///  &quot;first&quot; AS &quot;first&quot;,
+        ///  &quot;last&quot; AS &quot;last&quot;,
+        ///  &quot;is_inclusive&quot; AS &quot;is_inclusive&quot;,
+        ///  &quot;position&quot; AS &quot;position&quot;,
+        ///  &quot;processed&quot; AS &quot;proce [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SqlReportProgress {
+            get {
+                return ResourceManager.GetString("SqlReportProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT
+        ///  &quot;id&quot; AS &quot;id&quot;,
+        ///  &quot;created&quot; AS &quot;created&quot;,
+        ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;state&quot; AS &quot;state&quot;,
+        ///  &quot;error&quot; AS &quot;error&quot;
+        ///FROM
+        ///  &quot;jobs&quot;
+        ///WHERE
+        ///  &quot;id&quot; = $id;.
+        /// </summary>
+        internal static string SqlRetrieveJobById {
+            get {
+                return ResourceManager.GetString("SqlRetrieveJobById", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT
+        ///  &quot;job_id&quot; AS &quot;job_id&quot;,
+        ///  &quot;created&quot; AS &quot;created&quot;,
+        ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;owner&quot; AS &quot;owner&quot;,
+        ///  &quot;first&quot; AS &quot;first&quot;,
+        ///  &quot;last&quot; AS &quot;last&quot;,
+        ///  &quot;is_inclusive&quot; AS &quot;is_inclusive&quot;,
+        ///  &quot;position&quot; AS &quot;position&quot;,
+        ///  &quot;processed&quot; AS &quot;processed&quot;,
+        ///  &quot;remaining&quot; AS &quot;remaining&quot;,
+        ///  &quot;is_completed&quot; AS &quot;is_completed&quot;,
+        ///  &quot;is_split_requested&quot; AS &quot;is_split_requested&quot;
+        ///FROM
+        ///  &quot;partitions&quot;
+        ///WHERE
+        ///  (&quot;id&quot; = $id);.
+        /// </summary>
+        internal static string SqlRetrievePartitionById {
+            get {
+                return ResourceManager.GetString("SqlRetrievePartitionById", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE
+        ///  &quot;partitions&quot;
+        ///SET
+        ///  &quot;updated&quot; = $updated,
+        ///  &quot;owner&quot; = $owner
+        ///WHERE
+        ///  (&quot;job_id&quot; = $job_id) AND
+        ///  ((&quot;owner&quot; IS NULL) OR (&quot;updated&quot; &lt; $active)) AND
+        ///  (&quot;is_completed&quot; = 0)
+        ///RETURNING
+        ///  &quot;id&quot; AS &quot;id&quot;,
+        ///  &quot;job_id&quot; AS &quot;job_id&quot;,
+        ///  &quot;created&quot; AS &quot;created&quot;,
+        ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;owner&quot; AS &quot;owner&quot;,
+        ///  &quot;first&quot; AS &quot;first&quot;,
+        ///  &quot;last&quot; AS &quot;last&quot;,
+        ///  &quot;is_inclusive&quot; AS &quot;is_inclusive&quot;,
+        ///  &quot;position&quot; AS &quot;position&quot;,
+        ///  &quot;processed&quot; AS &quot;processed&quot;,
+        ///  &quot;remaining&quot; AS &quot;remaining&quot;,
+        ///  &quot;is_completed&quot; AS &quot;is_c [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SqlTryAcquirePartition {
+            get {
+                return ResourceManager.GetString("SqlTryAcquirePartition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE
+        ///  &quot;partitions&quot;
+        ///SET
+        ///  &quot;is_split_requested&quot; = 1
+        ///WHERE
+        ///  (&quot;job_id&quot; = $job_id) AND
+        ///  (&quot;owner&quot; IS NOT NULL) AND
+        ///  (&quot;updated&quot; &gt;= $active) AND
+        ///  (&quot;is_completed&quot; = 0) AND
+        ///  (&quot;is_split_requested&quot; = 0)
+        ///ORDER BY
+        ///  &quot;remaining&quot; DESC
+        ///LIMIT
+        ///  1;
+        ///.
+        /// </summary>
+        internal static string SqlTryRequestSplit {
+            get {
+                return ResourceManager.GetString("SqlTryRequestSplit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE
+        ///  &quot;jobs&quot;
+        ///SET
+        ///  &quot;updated&quot; = $updated,
+        ///  &quot;state&quot; = $state,
+        ///  &quot;error&quot; = $error
+        ///WHERE
+        ///  (&quot;id&quot; = $id)
+        ///RETURNING
+        ///  &quot;id&quot; AS &quot;id&quot;,
+        ///  &quot;created&quot; AS &quot;created&quot;,
+        ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;state&quot; AS &quot;state&quot;,
+        ///  &quot;error&quot; AS &quot;error&quot;;.
+        /// </summary>
+        internal static string SqlUpdateJobById {
+            get {
+                return ResourceManager.GetString("SqlUpdateJobById", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE
+        ///  &quot;partitions&quot;
+        ///SET
+        ///  &quot;updated&quot; = $updated,
+        ///  &quot;last&quot; = $last,
+        ///  &quot;is_inclusive&quot; = $is_inclusive,
+        ///  &quot;position&quot; = $position,
+        ///  &quot;processed&quot; = $processed,
+        ///  &quot;remaining&quot; = $remaining,
+        ///  &quot;is_split_requested&quot; = $is_split_requested
+        ///WHERE
+        ///  (&quot;id&quot; = $partition_id) AND
+        ///  (&quot;owner&quot; = $owner);.
+        /// </summary>
+        internal static string SqlUpdateSplitPartition {
+            get {
+                return ResourceManager.GetString("SqlUpdateSplitPartition", resourceCulture);
             }
         }
     }
