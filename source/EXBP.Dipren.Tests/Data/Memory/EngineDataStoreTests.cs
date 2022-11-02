@@ -60,7 +60,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         {
             TStore store = await this.CreateEngineDataStoreAsync();
 
-            Assert.Throws<ArgumentNullException>(() => store.UpdateJobAsync(null, DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateJobAsync(null, DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
         }
 
         [Test]
@@ -68,7 +68,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         {
             TStore store = await this.CreateEngineDataStoreAsync();
 
-            Assert.Throws<UnknownIdentifierException>(() => store.UpdateJobAsync("DPJ-0001", DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.UpdateJobAsync("DPJ-0001", DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
         }
 
         [Test]
@@ -89,6 +89,29 @@ namespace EXBP.Dipren.Tests.Data.Memory
             await store.UpdateJobAsync(id, updated, JobState.Failed, error, CancellationToken.None);
 
             Job persisted = await store.RetrieveJobAsync(id, CancellationToken.None);
+
+            Assert.That(persisted.Created, Is.EqualTo(created));
+            Assert.That(persisted.Updated, Is.EqualTo(updated));
+            Assert.That(persisted.State, Is.EqualTo(JobState.Failed));
+            Assert.That(persisted.Error, Is.EqualTo(error));
+        }
+
+        [Test]
+        public async Task UpdateJobAsync_JobExists_ReturnsUpdatedJob()
+        {
+            TStore store = await this.CreateEngineDataStoreAsync();
+
+            const string id = "DPJ-0001";
+            DateTime created = new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc);
+
+            Job job = new Job(id, created, created, JobState.Ready);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            DateTime updated = new DateTime(2022, 9, 11, 13, 21, 49, DateTimeKind.Utc);
+            string error = "The connection to the data source was terminated.";
+
+            Job persisted = await store.UpdateJobAsync(id, updated, JobState.Failed, error, CancellationToken.None);
 
             Assert.That(persisted.Created, Is.EqualTo(created));
             Assert.That(persisted.Updated, Is.EqualTo(updated));
@@ -502,7 +525,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "z", 24L, 0L, "owner", false);
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "z", 24L, 0L, "owner", true);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
@@ -719,7 +742,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false);
 
-            Assert.Throws<ArgumentNullException>(() => store.InsertSplitPartitionAsync(null, partition, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertSplitPartitionAsync(null, partition, CancellationToken.None));
         }
 
         [Test]
@@ -741,7 +764,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
-            Assert.Throws<ArgumentNullException>(() => store.InsertSplitPartitionAsync(partition, null, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertSplitPartitionAsync(partition, null, CancellationToken.None));
         }
 
         [Test]
@@ -767,7 +790,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             Partition partitionToInsert = new Partition(partitionToInsertId, jobId, partitionToInsertCreated, partitionToInsertUpdated, "n", "z", true, null, 0L, 12L, null, false);
 
-            Assert.Throws<UnknownIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
         }
 
         [Test]
@@ -797,7 +820,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             await store.InsertPartitionAsync(partitionToInsert, CancellationToken.None);
 
-            Assert.Throws<DuplicateIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
+            Assert.ThrowsAsync<DuplicateIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
         }
 
         [Test]
@@ -811,13 +834,19 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             await store.InsertJobAsync(job, CancellationToken.None);
 
-            Guid partitionToUpdateId = Guid.NewGuid();
-            DateTime partitionToUpdateCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionToUpdateUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+            Guid partitionToSplitId = Guid.NewGuid();
+            DateTime partitionToSplitCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionToSplitUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partitionToUpdate = new Partition(partitionToUpdateId, jobId, partitionToUpdateCreated, partitionToUpdateUpdated, "a", "m", true, "c", 2L, 12L, "owner", false);
+            Partition partitionToSplit = new Partition(partitionToSplitId, jobId, partitionToSplitCreated, partitionToSplitUpdated, "a", "z", true, "c", 2L, 24L, "owner", false);
 
-            await store.InsertPartitionAsync(partitionToUpdate, CancellationToken.None);
+            await store.InsertPartitionAsync(partitionToSplit, CancellationToken.None);
+
+            Partition partitionToUpdate = partitionToSplit with
+            {
+                Last = "m",
+                Remaining = 10L
+            };
 
             Guid partitionToInsertId = Guid.NewGuid();
             DateTime partitionToInsertCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
@@ -827,7 +856,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             await store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None);
 
-            Partition updated = await store.RetrievePartitionAsync(partitionToUpdateId, CancellationToken.None);
+            Partition updated = await store.RetrievePartitionAsync(partitionToSplitId, CancellationToken.None);
             Partition inserted = await store.RetrievePartitionAsync(partitionToInsertId, CancellationToken.None);
 
             Assert.That(updated, Is.EqualTo(partitionToUpdate));
