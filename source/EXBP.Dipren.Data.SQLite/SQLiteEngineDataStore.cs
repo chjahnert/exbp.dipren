@@ -7,6 +7,13 @@ using System.Diagnostics;
 using EXBP.Dipren.Data.SQLite;
 using EXBP.Dipren.Diagnostics;
 
+//
+// - Implement the IDisposable interface
+// - Implement the DbDataReader extension method for reading GUIDs and nullable string values.
+// - Implement the ReadJob() and ReadPartition() methods.
+// - Reconsider the type constructor.
+//
+
 
 namespace EXBP.Dipren.Data.Memory
 {
@@ -361,7 +368,7 @@ namespace EXBP.Dipren.Data.Memory
             DateTime rCreated = reader.GetDateTime("created");
             DateTime rUpdated = reader.GetDateTime("updated");
             JobState rState = (JobState) reader.GetInt32("state");
-            string rError = reader.IsDBNull("error") ? null : reader.GetString("error");
+            string rError = reader.GetNullableString("error");
 
             Job result = new Job(rId, rCreated, rUpdated, rState, rError);
 
@@ -407,7 +414,7 @@ namespace EXBP.Dipren.Data.Memory
             DateTime rCreated = reader.GetDateTime("created");
             DateTime rUpdated = reader.GetDateTime("updated");
             JobState rState = (JobState) reader.GetInt32("state");
-            string rError = reader.IsDBNull("error") ? null : reader.GetString("error");
+            string rError = reader.GetNullableString("error");
 
             Job result = new Job(rId, rCreated, rUpdated, rState, rError);
 
@@ -455,11 +462,11 @@ namespace EXBP.Dipren.Data.Memory
             string jobId = reader.GetString("job_id");
             DateTime created = reader.GetDateTime("created");
             DateTime updated = reader.GetDateTime("updated");
-            string owner = reader.IsDBNull("owner") ? null : reader.GetString("owner");
+            string owner = reader.GetNullableString("owner");
             string first = reader.GetString("first");
             string last = reader.GetString("last");
             bool inclusive = reader.GetBoolean("is_inclusive");
-            string position = reader.IsDBNull("position") ? null : reader.GetString("position");
+            string position = reader.GetNullableString("position");
             long processed = reader.GetInt64("processed");
             long remaining = reader.GetInt64("remaining");
             bool completed = reader.GetBoolean("is_completed");
@@ -536,11 +543,11 @@ namespace EXBP.Dipren.Data.Memory
                     string rJobId = reader.GetString("job_id");
                     DateTime created = reader.GetDateTime("created");
                     DateTime updated = reader.GetDateTime("updated");
-                    string owner = reader.IsDBNull("owner") ? null : reader.GetString("owner");
+                    string owner = reader.GetNullableString("owner");
                     string first = reader.GetString("first");
                     string last = reader.GetString("last");
                     bool inclusive = reader.GetBoolean("is_inclusive");
-                    string position = reader.IsDBNull("position") ? null : reader.GetString("position");
+                    string position = reader.GetNullableString("position");
                     long processed = reader.GetInt64("processed");
                     long remaining = reader.GetInt64("remaining");
                     bool completed = reader.GetBoolean("is_completed");
@@ -687,11 +694,11 @@ namespace EXBP.Dipren.Data.Memory
                     string rJobId = reader.GetString("job_id");
                     DateTime rCreated = reader.GetDateTime("created");
                     DateTime rUpdated = reader.GetDateTime("updated");
-                    string rOwner = reader.IsDBNull("owner") ? null : reader.GetString("owner");
+                    string rOwner = reader.GetNullableString("owner");
                     string rFirst = reader.GetString("first");
                     string rLast = reader.GetString("last");
                     bool rInclusive = reader.GetBoolean("is_inclusive");
-                    string rPosition = reader.IsDBNull("position") ? null : reader.GetString("position");
+                    string rPosition = reader.GetNullableString("position");
                     long rProcessed = reader.GetInt64("processed");
                     long rRemaining = reader.GetInt64("remaining");
                     bool rCompleted = reader.GetBoolean("is_completed");
