@@ -889,7 +889,7 @@ namespace EXBP.Dipren.Data.SQLite
         }
 
         /// <summary>
-        ///   Opens the specified database connection and deploys the required table structure.
+        ///   Opens the specified database connection and ensures that the required tables are created.
         /// </summary>
         /// <param name="connectionString">
         ///   A <see cref="string"/> value that contains the connection string to use.
@@ -900,8 +900,28 @@ namespace EXBP.Dipren.Data.SQLite
         public static async Task<SQLiteEngineDataStore> OpenAsync(string connectionString, CancellationToken cancellation)
         {
             SQLiteConnection connection = new SQLiteConnection(connectionString);
+            SQLiteEngineDataStore result = await SQLiteEngineDataStore.OpenAsync(connection, cancellation);
 
-            await connection.OpenAsync(cancellation);
+            return result;
+        }
+
+        /// <summary>
+        ///   Opens the specified database connection and ensures that the required tables are created.
+        /// </summary>
+        /// <param name="connectionString">
+        ///   A <see cref="string"/> value that contains the connection string to use.
+        /// </param>
+        /// <returns>
+        ///   The <see cref="SQLiteEngineDataStore"/> object that is ready to be used.
+        /// </returns>
+        public static async Task<SQLiteEngineDataStore> OpenAsync(SQLiteConnection connection, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(connection, nameof(connection));
+
+            if (connection.State == ConnectionState.Closed)
+            {
+                await connection.OpenAsync(cancellation);
+            }
 
             await SQLiteEngineDataStore.EnsureForeignKeysAsync(connection, cancellation);
             await SQLiteEngineDataStore.EnsureSchemaAsync(connection, cancellation);
