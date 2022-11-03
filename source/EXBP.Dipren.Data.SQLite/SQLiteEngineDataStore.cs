@@ -7,21 +7,16 @@ using System.Diagnostics;
 using EXBP.Dipren.Data.SQLite;
 using EXBP.Dipren.Diagnostics;
 
-//
-// - Implement the IDisposable interface.
-// - Reconsider the type constructor.
-// - Should the database connection be opened and closed for all operations? - Use a shared connection object
-//
-
 
 namespace EXBP.Dipren.Data.Memory
 {
     /// <summary>
     ///   Implements an <see cref="IEngineDataStore"/> that uses SQLite as its storage engine.
     /// </summary>
-    public class SQLiteEngineDataStore : EngineDataStore, IEngineDataStore
+    public class SQLiteEngineDataStore : EngineDataStore, IEngineDataStore, IDisposable, IAsyncDisposable
     {
         private readonly SQLiteConnection _connection;
+        private bool _disposed;
 
 
         /// <summary>
@@ -35,6 +30,52 @@ namespace EXBP.Dipren.Data.Memory
             Assert.ArgumentIsNotNull(connection, nameof(connection));
 
             this._connection = connection;
+        }
+
+        /// <summary>
+        ///   Disposes the current object and releases unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        ///   Disposes the current object and releases unmanaged resources.
+        /// </summary>
+        /// <param name="disposing">
+        ///   Indicates whether the current method was called from the <see cref="Dispose"/> method or from the
+        ///   destructor.
+        /// </param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this._disposed == false)
+            {
+                if (disposing == true)
+                {
+                    this._connection.Dispose();
+                }
+
+                this._disposed = true;
+            }
+        }
+
+        /// <summary>
+        ///   Asynchronously disposes the current object and releases unmanaged resources.
+        /// </summary>
+        /// <returns>
+        ///   A <see cref="ValueTask"/> representing the asynchronous operation.
+        /// </returns>
+        public virtual async ValueTask DisposeAsync()
+        {
+            if (this._disposed == false)
+            {
+                await this._connection.DisposeAsync();
+
+                this._disposed = true;
+            }
         }
 
         /// <summary>
