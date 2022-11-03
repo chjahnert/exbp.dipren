@@ -23,7 +23,7 @@ namespace EXBP.Dipren.Tests
         [Test]
         public void RunAsync_ArgumentJobIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Engine engine = new Engine(store);
 
             Assert.ThrowsAsync<ArgumentNullException>(() => engine.RunAsync<int, int>(null, false, CancellationToken.None));
@@ -39,7 +39,7 @@ namespace EXBP.Dipren.Tests
             TimeSpan timeout = TimeSpan.FromSeconds(2);
             Job<int, string> job = new Job<int, string>(jobId, source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
 
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);
@@ -62,7 +62,7 @@ namespace EXBP.Dipren.Tests
             TimeSpan timeout = TimeSpan.FromSeconds(2);
             Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
 
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);
@@ -83,7 +83,7 @@ namespace EXBP.Dipren.Tests
             TimeSpan timeout = TimeSpan.FromSeconds(2);
             Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
 
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);

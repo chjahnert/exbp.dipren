@@ -9,7 +9,7 @@ namespace EXBP.Dipren.Data.Memory
     /// <summary>
     ///   Implements an in-memory <see cref="IEngineDataStore"/> that can be used for testing.
     /// </summary>
-    public class InMemoryEngineDataStore : EngineDataStore, IEngineDataStore
+    public class MemoryEngineDataStore : EngineDataStore, IEngineDataStore
     {
         private readonly object _syncRoot = new object();
         private readonly JobCollection _jobs = new JobCollection();
@@ -36,9 +36,9 @@ namespace EXBP.Dipren.Data.Memory
 
 
         /// <summary>
-        ///   Initializes a new and empty instance of the <see cref="InMemoryEngineDataStore"/> class.
+        ///   Initializes a new and empty instance of the <see cref="MemoryEngineDataStore"/> class.
         /// </summary>
-        public InMemoryEngineDataStore()
+        public MemoryEngineDataStore()
         {
         }
 

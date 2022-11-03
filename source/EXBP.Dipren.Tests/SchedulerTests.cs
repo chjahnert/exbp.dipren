@@ -25,7 +25,7 @@ namespace EXBP.Dipren.Tests
         [Test]
         public void ScheduleAsync_ArgumentJobIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store);
 
             Assert.ThrowsAsync<ArgumentNullException>( () => scheduler.ScheduleAsync<int, int>(null, CancellationToken.None));
@@ -34,7 +34,7 @@ namespace EXBP.Dipren.Tests
         [Test]
         public async Task ScheduleAsync_ArgumentJobIsValid_SchedulesJob()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             DummyDataSource source = new DummyDataSource(1, 1024);
@@ -66,7 +66,7 @@ namespace EXBP.Dipren.Tests
         [Test]
         public void ScheduleAsync_RangeQueryFails_CreatesJobInFailedState()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             IDataSource<int, int> source = Substitute.For<IDataSource<int,int>>();
@@ -97,7 +97,7 @@ namespace EXBP.Dipren.Tests
         [Test]
         public void ScheduleAsync_RangeSizeEstimationFails_CreatesJobInFailedState()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             IDataSource<int, int> source = Substitute.For<IDataSource<int, int>>();
