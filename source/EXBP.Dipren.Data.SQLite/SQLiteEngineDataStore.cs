@@ -11,7 +11,6 @@ using EXBP.Dipren.Diagnostics;
 // - Implement the IDisposable interface.
 // - Reconsider the type constructor.
 // - Should the database connection be opened and closed for all operations? - Use a shared connection object
-// - Always use transactions.
 //
 
 
@@ -57,7 +56,7 @@ namespace EXBP.Dipren.Data.Memory
             {
                 CommandText = SQLiteEngineDataStoreResources.SqlCountJobs,
                 CommandType = CommandType.Text,
-                Connection = _connection
+                Connection = this._connection
             };
 
             long result = (long) await command.ExecuteScalarAsync(cancellation);
@@ -85,27 +84,35 @@ namespace EXBP.Dipren.Data.Memory
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
+            using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
             using SQLiteCommand command = new SQLiteCommand
             {
                 CommandText = SQLiteEngineDataStoreResources.SqlCountIncompletePartitions,
                 CommandType = CommandType.Text,
-                Connection = _connection
+                Connection = this._connection,
+                Transaction = transaction
             };
 
             command.Parameters.AddWithValue("$job_id", jobId);
 
-            using DbDataReader reader = await command.ExecuteReaderAsync(cancellation);
+            long result = 0L;
 
-            await reader.ReadAsync(cancellation);
-
-            long jobCount = reader.GetInt64("job_count");
-
-            if (jobCount == 0L)
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                this.RaiseErrorUnknownJobIdentifier();
+                await reader.ReadAsync(cancellation);
+
+                long jobCount = reader.GetInt64("job_count");
+
+                if (jobCount == 0L)
+                {
+                    this.RaiseErrorUnknownJobIdentifier();
+                }
+
+                result = reader.GetInt64("partition_count");
             }
 
-            long result = reader.GetInt64("partition_count");
+            transaction.Commit();
 
             return result;
         }
@@ -133,11 +140,14 @@ namespace EXBP.Dipren.Data.Memory
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
+            using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
             using SQLiteCommand command = new SQLiteCommand
             {
                 CommandText = SQLiteEngineDataStoreResources.SqlInsertJob,
                 CommandType = CommandType.Text,
-                Connection = _connection
+                Connection = this._connection,
+                Transaction = transaction
             };
 
             command.Parameters.AddWithValue("$id", job.Id);
@@ -154,6 +164,8 @@ namespace EXBP.Dipren.Data.Memory
             {
                 this.RaiseErrorDuplicateJobIdentifier(ex);
             }
+
+            transaction.Commit();
         }
 
         /// <summary>
@@ -192,7 +204,8 @@ namespace EXBP.Dipren.Data.Memory
             {
                 CommandText = SQLiteEngineDataStoreResources.SqlInsertPartition,
                 CommandType = CommandType.Text,
-                Connection = _connection
+                Connection = this._connection,
+                Transaction = transaction
             };
 
             string id = partition.Id.ToString("d");
@@ -261,7 +274,7 @@ namespace EXBP.Dipren.Data.Memory
                 {
                     CommandText = SQLiteEngineDataStoreResources.SqlInsertPartition,
                     CommandType = CommandType.Text,
-                    Connection = _connection,
+                    Connection = this._connection,
                     Transaction = transaction
                 };
 
@@ -356,11 +369,14 @@ namespace EXBP.Dipren.Data.Memory
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
+            using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
             using SQLiteCommand command = new SQLiteCommand
             {
                 CommandText = SQLiteEngineDataStoreResources.SqlUpdateJobById,
                 CommandType = CommandType.Text,
-                Connection = this._connection
+                Connection = this._connection,
+                Transaction = transaction
             };
 
             command.Parameters.AddWithValue("$id", jobId);
@@ -368,16 +384,21 @@ namespace EXBP.Dipren.Data.Memory
             command.Parameters.AddWithValue("$state", state);
             command.Parameters.AddWithValue("$error", error);
 
-            using DbDataReader reader = await command.ExecuteReaderAsync(cancellation);
+            Job result = null;
 
-            bool found = await reader.ReadAsync(cancellation);
-
-            if (found == false)
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                this.RaiseErrorUnknownJobIdentifier();
+                bool found = await reader.ReadAsync(cancellation);
+
+                if (found == false)
+                {
+                    this.RaiseErrorUnknownJobIdentifier();
+                }
+
+                result = this.ReadJob(reader);
             }
 
-            Job result = this.ReadJob(reader);
+            transaction.Commit();
 
             return result;
         }
@@ -399,25 +420,33 @@ namespace EXBP.Dipren.Data.Memory
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
+            using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
             using SQLiteCommand command = new SQLiteCommand
             {
                 CommandText = SQLiteEngineDataStoreResources.SqlRetrieveJobById,
                 CommandType = CommandType.Text,
-                Connection = _connection
+                Connection = this._connection,
+                Transaction = transaction
             };
 
             command.Parameters.AddWithValue("$id", id);
 
-            using DbDataReader reader = await command.ExecuteReaderAsync(cancellation);
+            Job result = null;
 
-            bool exists = await reader.ReadAsync(cancellation);
-
-            if (exists == false)
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                this.RaiseErrorUnknownJobIdentifier();
+                bool exists = await reader.ReadAsync(cancellation);
+
+                if (exists == false)
+                {
+                    this.RaiseErrorUnknownJobIdentifier();
+                }
+
+                result = this.ReadJob(reader);
             }
 
-            Job result = this.ReadJob(reader);
+            transaction.Commit();
 
             return result;
         }
@@ -440,27 +469,35 @@ namespace EXBP.Dipren.Data.Memory
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
+            using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
             using SQLiteCommand command = new SQLiteCommand
             {
                 CommandText = SQLiteEngineDataStoreResources.SqlRetrievePartitionById,
                 CommandType = CommandType.Text,
-                Connection = this._connection
+                Connection = this._connection,
+                Transaction = transaction
             };
 
             string sid = id.ToString("d");
 
             command.Parameters.AddWithValue("$id", sid);
 
-            using DbDataReader reader = await command.ExecuteReaderAsync(cancellation);
+            Partition result = null;
 
-            bool exists = await reader.ReadAsync(cancellation);
-
-            if (exists == false)
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                this.RaiseErrorUnknownPartitionIdentifier();
+                bool exists = await reader.ReadAsync(cancellation);
+
+                if (exists == false)
+                {
+                    this.RaiseErrorUnknownPartitionIdentifier();
+                }
+
+                result = this.ReadPartition(reader);
             }
 
-            Partition result = this.ReadPartition(reader);
+            transaction.Commit();
 
             return result;
         }
