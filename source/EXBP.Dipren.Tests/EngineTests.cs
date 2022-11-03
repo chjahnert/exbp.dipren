@@ -118,7 +118,7 @@ namespace EXBP.Dipren.Tests
             public Task<Range<int>> GetEntireRangeAsync(CancellationToken cancellation)
                 => Task.FromResult(new Range<int>(this._minimum, this._maximum, true));
 
-            public Task<IEnumerable<KeyValuePair<int, string>>> GetNextBatchAsync(Range<int> range, int skip, int take, CancellationToken canellation)
+            public Task<IEnumerable<KeyValuePair<int, string>>> GetNextBatchAsync(Range<int> range, int skip, int take, CancellationToken cancellation)
             {
                 List<KeyValuePair<int, string>> result = new List<KeyValuePair<int, string>>(take);
 

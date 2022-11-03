@@ -139,7 +139,7 @@ namespace EXBP.Dipren.Tests
             public Task<Range<int>> GetEntireRangeAsync(CancellationToken cancellation)
                 => Task.FromResult(new Range<int>(this._minimum, this._maximum, true));
 
-            public Task<long> EstimateRangeSizeAsync(Range<int> range, CancellationToken canellation)
+            public Task<long> EstimateRangeSizeAsync(Range<int> range, CancellationToken cancellation)
             {
                 if (range == null)
                 {
