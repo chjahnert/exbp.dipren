@@ -13,7 +13,7 @@ namespace EXBP.Dipren.Tests
     [TestFixture]
     public class SchedulerTests
     {
-        private IEventHandler DefaultEventHandler { get; } = new CompositeEventHandler(ConsoleEventLogger.Debug, DebugEventLogger.Debug);
+        private IEventHandler DefaultEventHandler { get; } = new CompositeEventHandler(DebugEventLogger.Debug);
 
 
         [Test]
