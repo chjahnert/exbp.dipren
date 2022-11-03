@@ -117,18 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="SqlCountIncompletePartitions" xml:space="preserve">
+  <data name="QueryCountIncompletePartitions" xml:space="preserve">
     <value>SELECT
   (SELECT COUNT() FROM "jobs" WHERE ("id" = $job_id)) AS "job_count",
   (SELECT COUNT() FROM "partitions" WHERE ("job_id" = $job_id) AND ("is_completed" = 0)) AS "partition_count";</value>
   </data>
-  <data name="SqlCountJobs" xml:space="preserve">
+  <data name="QueryCountJobs" xml:space="preserve">
     <value>SELECT
   COUNT() AS "count"
 FROM
   "jobs";</value>
   </data>
-  <data name="SqlCreateSchema" xml:space="preserve">
+  <data name="QueryCreateSchema" xml:space="preserve">
     <value>CREATE TABLE IF NOT EXISTS "jobs"
 (
   "id" VARCHAR(256) NOT NULL,
@@ -165,7 +165,7 @@ WITHOUT ROWID;
 
 CREATE INDEX "ix_partitions_by_state" ON "partitions" ("job_id", "updated", "owner") WHERE ("is_completed" = 0);</value>
   </data>
-  <data name="SqlDoesJobExist" xml:space="preserve">
+  <data name="QueryDoesJobExist" xml:space="preserve">
     <value>SELECT
   COUNT() AS "count"
 FROM
@@ -173,7 +173,7 @@ FROM
 WHERE
   ("id" = $id);</value>
   </data>
-  <data name="SqlDoesPartitionExist" xml:space="preserve">
+  <data name="QueryDoesPartitionExist" xml:space="preserve">
     <value>SELECT
   COUNT() AS "count"
 FROM
@@ -181,10 +181,10 @@ FROM
 WHERE
   ("id" = $id);</value>
   </data>
-  <data name="SqlEnableForeignKeys" xml:space="preserve">
+  <data name="QueryEnableForeignKeys" xml:space="preserve">
     <value>PRAGMA foreign_keys = ON;</value>
   </data>
-  <data name="SqlInsertJob" xml:space="preserve">
+  <data name="QueryInsertJob" xml:space="preserve">
     <value>INSERT INTO "jobs"
 (
   "id",
@@ -202,7 +202,7 @@ VALUES
   $error
 );</value>
   </data>
-  <data name="SqlInsertPartition" xml:space="preserve">
+  <data name="QueryInsertPartition" xml:space="preserve">
     <value>INSERT INTO "partitions"
 (
   "id",
@@ -236,7 +236,7 @@ VALUES
   $is_split_requested
 );</value>
   </data>
-  <data name="SqlReportProgress" xml:space="preserve">
+  <data name="QueryReportProgress" xml:space="preserve">
     <value>UPDATE
   "partitions"
 SET
@@ -263,7 +263,7 @@ RETURNING
   "is_completed" AS "is_completed",
   "is_split_requested" AS "is_split_requested";</value>
   </data>
-  <data name="SqlRetrieveJobById" xml:space="preserve">
+  <data name="QueryRetrieveJobById" xml:space="preserve">
     <value>SELECT
   "id" AS "id",
   "created" AS "created",
@@ -275,7 +275,7 @@ FROM
 WHERE
   "id" = $id;</value>
   </data>
-  <data name="SqlRetrievePartitionById" xml:space="preserve">
+  <data name="QueryRetrievePartitionById" xml:space="preserve">
     <value>SELECT
   "id" AS "id",
   "job_id" AS "job_id",
@@ -295,7 +295,7 @@ FROM
 WHERE
   ("id" = $id);</value>
   </data>
-  <data name="SqlTryAcquirePartition" xml:space="preserve">
+  <data name="QueryTryAcquirePartition" xml:space="preserve">
     <value>UPDATE
   "partitions"
 SET
@@ -324,7 +324,7 @@ ORDER BY
 LIMIT
   1;</value>
   </data>
-  <data name="SqlTryRequestSplit" xml:space="preserve">
+  <data name="QueryTryRequestSplit" xml:space="preserve">
     <value>UPDATE
   "partitions"
 SET
@@ -341,7 +341,7 @@ LIMIT
   1;
 </value>
   </data>
-  <data name="SqlUpdateJobById" xml:space="preserve">
+  <data name="QueryUpdateJobById" xml:space="preserve">
     <value>UPDATE
   "jobs"
 SET
@@ -357,7 +357,7 @@ RETURNING
   "state" AS "state",
   "error" AS "error";</value>
   </data>
-  <data name="SqlUpdateSplitPartition" xml:space="preserve">
+  <data name="QueryUpdateSplitPartition" xml:space="preserve">
     <value>UPDATE
   "partitions"
 SET

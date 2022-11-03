@@ -94,7 +94,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlCountJobs,
+                CommandText = SQLiteEngineDataStoreResources.QueryCountJobs,
                 CommandType = CommandType.Text,
                 Connection = this._connection
             };
@@ -128,7 +128,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlCountIncompletePartitions,
+                CommandText = SQLiteEngineDataStoreResources.QueryCountIncompletePartitions,
                 CommandType = CommandType.Text,
                 Connection = this._connection,
                 Transaction = transaction
@@ -184,7 +184,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlInsertJob,
+                CommandText = SQLiteEngineDataStoreResources.QueryInsertJob,
                 CommandType = CommandType.Text,
                 Connection = this._connection,
                 Transaction = transaction
@@ -242,7 +242,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlInsertPartition,
+                CommandText = SQLiteEngineDataStoreResources.QueryInsertPartition,
                 CommandType = CommandType.Text,
                 Connection = this._connection,
                 Transaction = transaction
@@ -312,7 +312,7 @@ namespace EXBP.Dipren.Data.SQLite
             {
                 using SQLiteCommand command = new SQLiteCommand
                 {
-                    CommandText = SQLiteEngineDataStoreResources.SqlInsertPartition,
+                    CommandText = SQLiteEngineDataStoreResources.QueryInsertPartition,
                     CommandType = CommandType.Text,
                     Connection = this._connection,
                     Transaction = transaction
@@ -347,7 +347,7 @@ namespace EXBP.Dipren.Data.SQLite
             {
                 using SQLiteCommand command = new SQLiteCommand
                 {
-                    CommandText = SQLiteEngineDataStoreResources.SqlUpdateSplitPartition,
+                    CommandText = SQLiteEngineDataStoreResources.QueryUpdateSplitPartition,
                     CommandType = CommandType.Text,
                     Connection = this._connection,
                     Transaction = transaction
@@ -413,7 +413,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlUpdateJobById,
+                CommandText = SQLiteEngineDataStoreResources.QueryUpdateJobById,
                 CommandType = CommandType.Text,
                 Connection = this._connection,
                 Transaction = transaction
@@ -464,7 +464,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlRetrieveJobById,
+                CommandText = SQLiteEngineDataStoreResources.QueryRetrieveJobById,
                 CommandType = CommandType.Text,
                 Connection = this._connection,
                 Transaction = transaction
@@ -513,7 +513,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlRetrievePartitionById,
+                CommandText = SQLiteEngineDataStoreResources.QueryRetrievePartitionById,
                 CommandType = CommandType.Text,
                 Connection = this._connection,
                 Transaction = transaction
@@ -585,7 +585,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlTryAcquirePartition,
+                CommandText = SQLiteEngineDataStoreResources.QueryTryAcquirePartition,
                 CommandType = CommandType.Text,
                 Connection = this._connection,
                 Transaction = transaction
@@ -649,7 +649,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlTryRequestSplit,
+                CommandText = SQLiteEngineDataStoreResources.QueryTryRequestSplit,
                 CommandType = CommandType.Text,
                 Connection = this._connection,
                 Transaction = transaction
@@ -716,7 +716,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlReportProgress,
+                CommandText = SQLiteEngineDataStoreResources.QueryReportProgress,
                 CommandType = CommandType.Text,
                 Connection = this._connection,
                 Transaction = transaction
@@ -775,7 +775,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlDoesJobExist,
+                CommandText = SQLiteEngineDataStoreResources.QueryDoesJobExist,
                 CommandType = CommandType.Text,
                 Connection = this._connection,
                 Transaction = transaction
@@ -811,7 +811,7 @@ namespace EXBP.Dipren.Data.SQLite
         {
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlDoesPartitionExist,
+                CommandText = SQLiteEngineDataStoreResources.QueryDoesPartitionExist,
                 CommandType = CommandType.Text,
                 Connection = this._connection,
                 Transaction = transaction
@@ -950,7 +950,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand command = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlEnableForeignKeys,
+                CommandText = SQLiteEngineDataStoreResources.QueryEnableForeignKeys,
                 CommandType = CommandType.Text,
                 Connection = connection
             };
@@ -977,7 +977,7 @@ namespace EXBP.Dipren.Data.SQLite
 
             using SQLiteCommand commandSchema = new SQLiteCommand
             {
-                CommandText = SQLiteEngineDataStoreResources.SqlCreateSchema,
+                CommandText = SQLiteEngineDataStoreResources.QueryCreateSchema,
                 CommandType = CommandType.Text,
                 Connection = connection
             };

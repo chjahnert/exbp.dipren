@@ -65,9 +65,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  (SELECT COUNT() FROM &quot;jobs&quot; WHERE (&quot;id&quot; = $job_id)) AS &quot;job_count&quot;,
         ///  (SELECT COUNT() FROM &quot;partitions&quot; WHERE (&quot;job_id&quot; = $job_id) AND (&quot;is_completed&quot; = 0)) AS &quot;partition_count&quot;;.
         /// </summary>
-        internal static string SqlCountIncompletePartitions {
+        internal static string QueryCountIncompletePartitions {
             get {
-                return ResourceManager.GetString("SqlCountIncompletePartitions", resourceCulture);
+                return ResourceManager.GetString("QueryCountIncompletePartitions", resourceCulture);
             }
         }
         
@@ -77,9 +77,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///FROM
         ///  &quot;jobs&quot;;.
         /// </summary>
-        internal static string SqlCountJobs {
+        internal static string QueryCountJobs {
             get {
-                return ResourceManager.GetString("SqlCountJobs", resourceCulture);
+                return ResourceManager.GetString("QueryCountJobs", resourceCulture);
             }
         }
         
@@ -108,9 +108,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;last&quot; TEXT NOT NULL,
         ///  &quot;is_i [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string SqlCreateSchema {
+        internal static string QueryCreateSchema {
             get {
-                return ResourceManager.GetString("SqlCreateSchema", resourceCulture);
+                return ResourceManager.GetString("QueryCreateSchema", resourceCulture);
             }
         }
         
@@ -122,9 +122,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///WHERE
         ///  (&quot;id&quot; = $id);.
         /// </summary>
-        internal static string SqlDoesJobExist {
+        internal static string QueryDoesJobExist {
             get {
-                return ResourceManager.GetString("SqlDoesJobExist", resourceCulture);
+                return ResourceManager.GetString("QueryDoesJobExist", resourceCulture);
             }
         }
         
@@ -136,18 +136,18 @@ namespace EXBP.Dipren.Data.SQLite {
         ///WHERE
         ///  (&quot;id&quot; = $id);.
         /// </summary>
-        internal static string SqlDoesPartitionExist {
+        internal static string QueryDoesPartitionExist {
             get {
-                return ResourceManager.GetString("SqlDoesPartitionExist", resourceCulture);
+                return ResourceManager.GetString("QueryDoesPartitionExist", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to PRAGMA foreign_keys = ON;.
         /// </summary>
-        internal static string SqlEnableForeignKeys {
+        internal static string QueryEnableForeignKeys {
             get {
-                return ResourceManager.GetString("SqlEnableForeignKeys", resourceCulture);
+                return ResourceManager.GetString("QueryEnableForeignKeys", resourceCulture);
             }
         }
         
@@ -169,9 +169,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  $error
         ///);.
         /// </summary>
-        internal static string SqlInsertJob {
+        internal static string QueryInsertJob {
             get {
-                return ResourceManager.GetString("SqlInsertJob", resourceCulture);
+                return ResourceManager.GetString("QueryInsertJob", resourceCulture);
             }
         }
         
@@ -209,9 +209,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  $is_split_requested
         ///);.
         /// </summary>
-        internal static string SqlInsertPartition {
+        internal static string QueryInsertPartition {
             get {
-                return ResourceManager.GetString("SqlInsertPartition", resourceCulture);
+                return ResourceManager.GetString("QueryInsertPartition", resourceCulture);
             }
         }
         
@@ -239,9 +239,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;position&quot; AS &quot;position&quot;,
         ///  &quot;processed&quot; AS &quot;proce [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string SqlReportProgress {
+        internal static string QueryReportProgress {
             get {
-                return ResourceManager.GetString("SqlReportProgress", resourceCulture);
+                return ResourceManager.GetString("QueryReportProgress", resourceCulture);
             }
         }
         
@@ -257,9 +257,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///WHERE
         ///  &quot;id&quot; = $id;.
         /// </summary>
-        internal static string SqlRetrieveJobById {
+        internal static string QueryRetrieveJobById {
             get {
-                return ResourceManager.GetString("SqlRetrieveJobById", resourceCulture);
+                return ResourceManager.GetString("QueryRetrieveJobById", resourceCulture);
             }
         }
         
@@ -283,9 +283,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///WHERE
         ///  (&quot;id&quot; = $id);.
         /// </summary>
-        internal static string SqlRetrievePartitionById {
+        internal static string QueryRetrievePartitionById {
             get {
-                return ResourceManager.GetString("SqlRetrievePartitionById", resourceCulture);
+                return ResourceManager.GetString("QueryRetrievePartitionById", resourceCulture);
             }
         }
         
@@ -313,9 +313,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;remaining&quot; AS &quot;remaining&quot;,
         ///  &quot;is_completed&quot; AS &quot;is_c [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string SqlTryAcquirePartition {
+        internal static string QueryTryAcquirePartition {
             get {
-                return ResourceManager.GetString("SqlTryAcquirePartition", resourceCulture);
+                return ResourceManager.GetString("QueryTryAcquirePartition", resourceCulture);
             }
         }
         
@@ -336,9 +336,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  1;
         ///.
         /// </summary>
-        internal static string SqlTryRequestSplit {
+        internal static string QueryTryRequestSplit {
             get {
-                return ResourceManager.GetString("SqlTryRequestSplit", resourceCulture);
+                return ResourceManager.GetString("QueryTryRequestSplit", resourceCulture);
             }
         }
         
@@ -358,9 +358,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;state&quot; AS &quot;state&quot;,
         ///  &quot;error&quot; AS &quot;error&quot;;.
         /// </summary>
-        internal static string SqlUpdateJobById {
+        internal static string QueryUpdateJobById {
             get {
-                return ResourceManager.GetString("SqlUpdateJobById", resourceCulture);
+                return ResourceManager.GetString("QueryUpdateJobById", resourceCulture);
             }
         }
         
@@ -379,9 +379,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  (&quot;id&quot; = $partition_id) AND
         ///  (&quot;owner&quot; = $owner);.
         /// </summary>
-        internal static string SqlUpdateSplitPartition {
+        internal static string QueryUpdateSplitPartition {
             get {
-                return ResourceManager.GetString("SqlUpdateSplitPartition", resourceCulture);
+                return ResourceManager.GetString("QueryUpdateSplitPartition", resourceCulture);
             }
         }
     }
