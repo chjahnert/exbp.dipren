@@ -12,6 +12,41 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
 
         [Test]
+        public async Task CountJobsAsync_NoJobsAvailable_RetrunsZero()
+        {
+            TStore store = await this.CreateEngineDataStoreAsync();
+
+            long result = await store.CountJobsAsync(CancellationToken.None);
+
+            Assert.That(result, Is.Zero);
+        }
+
+        [Test]
+        public async Task CountJobsAsync_MultipleJobsAvailable_RetrunsCorrectCount()
+        {
+            TStore store = await this.CreateEngineDataStoreAsync();
+
+            DateTime timestamp = new DateTime(2022, 9, 11, 11, 23, 7, DateTimeKind.Utc);
+
+            Job job1 = new Job("DPJ-0001", timestamp, timestamp, JobState.Initializing);
+            Job job2 = new Job("DPJ-0002", timestamp, timestamp, JobState.Ready);
+            Job job3 = new Job("DPJ-0003", timestamp, timestamp, JobState.Processing);
+            Job job4 = new Job("DPJ-0004", timestamp, timestamp, JobState.Completed);
+            Job job5 = new Job("DPJ-0005", timestamp, timestamp, JobState.Failed);
+
+            await store.InsertJobAsync(job1, CancellationToken.None);
+            await store.InsertJobAsync(job2, CancellationToken.None);
+            await store.InsertJobAsync(job3, CancellationToken.None);
+            await store.InsertJobAsync(job4, CancellationToken.None);
+            await store.InsertJobAsync(job5, CancellationToken.None);
+
+            long result = await store.CountJobsAsync(CancellationToken.None);
+
+            Assert.That(result, Is.EqualTo(5L));
+        }
+
+
+        [Test]
         public async Task InsertJobAsync_ArgumentJobIsNull_ThrowsException()
         {
             TStore store = await this.CreateEngineDataStoreAsync();

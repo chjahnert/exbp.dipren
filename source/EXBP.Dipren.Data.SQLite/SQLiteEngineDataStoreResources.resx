@@ -122,6 +122,12 @@
   (SELECT COUNT() FROM "jobs" WHERE ("id" = $job_id)) AS "job_count",
   (SELECT COUNT() FROM "partitions" WHERE ("job_id" = $job_id) AND ("is_completed" = 0)) AS "partition_count";</value>
   </data>
+  <data name="SqlCountJobs" xml:space="preserve">
+    <value>SELECT
+  COUNT() AS "count"
+FROM
+  "jobs";</value>
+  </data>
   <data name="SqlCreateSchema" xml:space="preserve">
     <value>CREATE TABLE IF NOT EXISTS "jobs"
 (

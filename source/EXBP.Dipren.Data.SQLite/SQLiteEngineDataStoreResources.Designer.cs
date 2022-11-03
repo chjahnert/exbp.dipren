@@ -72,6 +72,18 @@ namespace EXBP.Dipren.Data.SQLite {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SELECT
+        ///  COUNT() AS &quot;count&quot;
+        ///FROM
+        ///  &quot;jobs&quot;;.
+        /// </summary>
+        internal static string SqlCountJobs {
+            get {
+                return ResourceManager.GetString("SqlCountJobs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CREATE TABLE IF NOT EXISTS &quot;jobs&quot;
         ///(
         ///  &quot;id&quot; VARCHAR(256) NOT NULL,

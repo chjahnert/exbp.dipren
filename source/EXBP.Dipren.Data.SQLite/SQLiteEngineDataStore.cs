@@ -8,9 +8,10 @@ using EXBP.Dipren.Data.SQLite;
 using EXBP.Dipren.Diagnostics;
 
 //
-// - Implement the IDisposable interface
+// - Implement the IDisposable interface.
 // - Reconsider the type constructor.
-// - Should the database connection be opened and closed for all operations? How about in-memory databases?
+// - Should the database connection be opened and closed for all operations? - Use a shared connection object
+// - Always use transactions.
 //
 
 
@@ -48,9 +49,22 @@ namespace EXBP.Dipren.Data.Memory
         ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and can
         ///   be used to access the result.
         /// </returns>
-        public Task<long> CountJobsAsync(CancellationToken cancellation)
+        public async Task<long> CountJobsAsync(CancellationToken cancellation)
         {
-            throw new NotImplementedException();
+            using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
+            using SQLiteCommand command = new SQLiteCommand
+            {
+                CommandText = SQLiteEngineDataStoreResources.SqlCountJobs,
+                CommandType = CommandType.Text,
+                Connection = _connection
+            };
+
+            long result = (long) await command.ExecuteScalarAsync(cancellation);
+
+            transaction.Commit();
+
+            return result;
         }
 
         /// <summary>
