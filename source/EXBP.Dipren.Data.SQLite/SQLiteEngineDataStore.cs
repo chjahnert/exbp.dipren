@@ -4,11 +4,10 @@ using System.Data.Common;
 using System.Data.SQLite;
 using System.Diagnostics;
 
-using EXBP.Dipren.Data.SQLite;
 using EXBP.Dipren.Diagnostics;
 
 
-namespace EXBP.Dipren.Data.Memory
+namespace EXBP.Dipren.Data.SQLite
 {
     /// <summary>
     ///   Implements an <see cref="IEngineDataStore"/> that uses SQLite as its storage engine.
