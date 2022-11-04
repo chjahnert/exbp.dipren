@@ -1,4 +1,6 @@
 ﻿
+using System.Security.Cryptography;
+
 using EXBP.Dipren.Diagnostics;
 
 
@@ -58,7 +60,7 @@ namespace EXBP.Dipren
 
             double distance = Math.Abs(range.Last - range.First);
 
-            if (distance >= 2)
+            if (((range.IsInclusive == true) && (distance >= 2)) || ((range.IsInclusive == false) && (distance >= 3)))
             {
                 int half = (int) Math.Round(distance / 2);
 
