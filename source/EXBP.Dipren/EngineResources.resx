@@ -153,6 +153,9 @@
   <data name="EventPartitionTaken" xml:space="preserve">
     <value>The partition was taken by another processing node.</value>
   </data>
+  <data name="EventPartitionTooSmallToBeSplit" xml:space="preserve">
+    <value>The partition is too small to be split.</value>
+  </data>
   <data name="EventProcessingFailed" xml:space="preserve">
     <value>Processing failed.</value>
   </data>
