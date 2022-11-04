@@ -15,6 +15,7 @@ namespace EXBP.Dipren.Data.SQLite
     public class SQLiteEngineDataStore : EngineDataStore, IEngineDataStore, IDisposable, IAsyncDisposable
     {
         private readonly SQLiteConnection _connection;
+        private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         private bool _disposed;
 
 
@@ -29,6 +30,15 @@ namespace EXBP.Dipren.Data.SQLite
             Assert.ArgumentIsNotNull(connection, nameof(connection));
 
             this._connection = connection;
+        }
+
+        private void OnDatabaseBusy(object sender, BusyEventArgs args)
+        {
+            Debug.WriteLine($"DATABASE BUSY: Attempts so far {args.Count}.");
+
+            Thread.Sleep(1);
+
+            args.ReturnCode = SQLiteBusyReturnCode.Retry;
         }
 
         /// <summary>
@@ -55,6 +65,7 @@ namespace EXBP.Dipren.Data.SQLite
                 if (disposing == true)
                 {
                     this._connection.Dispose();
+                    this._lock.Dispose();
                 }
 
                 this._disposed = true;
@@ -72,6 +83,7 @@ namespace EXBP.Dipren.Data.SQLite
             if (this._disposed == false)
             {
                 await this._connection.DisposeAsync();
+                this._lock.Dispose();
 
                 this._disposed = true;
             }
@@ -90,18 +102,25 @@ namespace EXBP.Dipren.Data.SQLite
         /// </returns>
         public async Task<long> CountJobsAsync(CancellationToken cancellation)
         {
-            using SQLiteTransaction transaction = this._connection.BeginTransaction();
+            long result = 0L;
 
-            using SQLiteCommand command = new SQLiteCommand
+            this._lock.EnterReadLock();
+
+            try
             {
-                CommandText = SQLiteEngineDataStoreResources.QueryCountJobs,
-                CommandType = CommandType.Text,
-                Connection = this._connection
-            };
+                using SQLiteCommand command = new SQLiteCommand
+                {
+                    CommandText = SQLiteEngineDataStoreResources.QueryCountJobs,
+                    CommandType = CommandType.Text,
+                    Connection = this._connection
+                };
 
-            long result = (long) await command.ExecuteScalarAsync(cancellation);
-
-            transaction.Commit();
+                result = (long) await command.ExecuteScalarAsync(cancellation);
+            }
+            finally
+            {
+                this._lock.ExitReadLock();
+            }
 
             return result;
         }
@@ -124,35 +143,39 @@ namespace EXBP.Dipren.Data.SQLite
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
-            using SQLiteTransaction transaction = this._connection.BeginTransaction();
-
-            using SQLiteCommand command = new SQLiteCommand
-            {
-                CommandText = SQLiteEngineDataStoreResources.QueryCountIncompletePartitions,
-                CommandType = CommandType.Text,
-                Connection = this._connection,
-                Transaction = transaction
-            };
-
-            command.Parameters.AddWithValue("$job_id", jobId);
-
             long result = 0L;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            this._lock.EnterReadLock();
+
+            try
             {
-                await reader.ReadAsync(cancellation);
-
-                long jobCount = reader.GetInt64("job_count");
-
-                if (jobCount == 0L)
+                using SQLiteCommand command = new SQLiteCommand
                 {
-                    this.RaiseErrorUnknownJobIdentifier();
+                    CommandText = SQLiteEngineDataStoreResources.QueryCountIncompletePartitions,
+                    CommandType = CommandType.Text,
+                    Connection = this._connection
+                };
+
+                command.Parameters.AddWithValue("$job_id", jobId);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    await reader.ReadAsync(cancellation);
+
+                    long jobCount = reader.GetInt64("job_count");
+
+                    if (jobCount == 0L)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+                    result = reader.GetInt64("partition_count");
                 }
-
-                result = reader.GetInt64("partition_count");
             }
-
-            transaction.Commit();
+            finally
+            {
+                this._lock.ExitReadLock();
+            }
 
             return result;
         }
@@ -180,32 +203,40 @@ namespace EXBP.Dipren.Data.SQLite
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
-            using SQLiteTransaction transaction = this._connection.BeginTransaction();
-
-            using SQLiteCommand command = new SQLiteCommand
-            {
-                CommandText = SQLiteEngineDataStoreResources.QueryInsertJob,
-                CommandType = CommandType.Text,
-                Connection = this._connection,
-                Transaction = transaction
-            };
-
-            command.Parameters.AddWithValue("$id", job.Id);
-            command.Parameters.AddWithValue("$created", job.Created);
-            command.Parameters.AddWithValue("$updated", job.Updated);
-            command.Parameters.AddWithValue("$state", job.State);
-            command.Parameters.AddWithValue("$error", job.Error);
+            this._lock.EnterWriteLock();
 
             try
             {
-                await command.ExecuteNonQueryAsync(cancellation);
-            }
-            catch (SQLiteException ex) when (ex.ErrorCode == 19)
-            {
-                this.RaiseErrorDuplicateJobIdentifier(ex);
-            }
+                using SQLiteTransaction transaction = this._connection.BeginTransaction();
 
-            transaction.Commit();
+                using SQLiteCommand command = new SQLiteCommand
+                {
+                    CommandText = SQLiteEngineDataStoreResources.QueryInsertJob,
+                    CommandType = CommandType.Text,
+                    Transaction = transaction
+                };
+
+                command.Parameters.AddWithValue("$id", job.Id);
+                command.Parameters.AddWithValue("$created", job.Created);
+                command.Parameters.AddWithValue("$updated", job.Updated);
+                command.Parameters.AddWithValue("$state", job.State);
+                command.Parameters.AddWithValue("$error", job.Error);
+
+                try
+                {
+                    await command.ExecuteNonQueryAsync(cancellation);
+                }
+                catch (SQLiteException ex) when (ex.ErrorCode == 19)
+                {
+                    this.RaiseErrorDuplicateJobIdentifier(ex);
+                }
+
+                transaction.Commit();
+            }
+            finally
+            {
+                this._lock.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -231,49 +262,57 @@ namespace EXBP.Dipren.Data.SQLite
         {
             Assert.ArgumentIsNotNull(partition, nameof(partition));
 
-            using SQLiteTransaction transaction = this._connection.BeginTransaction();
-
-            bool exists = await this.DoesJobExistAsync(transaction, partition.JobId, cancellation);
-
-            if (exists == false)
-            {
-                this.RaiseErrorInvalidJobReference();
-            }
-
-            using SQLiteCommand command = new SQLiteCommand
-            {
-                CommandText = SQLiteEngineDataStoreResources.QueryInsertPartition,
-                CommandType = CommandType.Text,
-                Connection = this._connection,
-                Transaction = transaction
-            };
-
-            string id = partition.Id.ToString("d");
-
-            command.Parameters.AddWithValue("$id", id);
-            command.Parameters.AddWithValue("$job_id", partition.JobId);
-            command.Parameters.AddWithValue("$created", partition.Created);
-            command.Parameters.AddWithValue("$updated", partition.Updated);
-            command.Parameters.AddWithValue("$owner", partition.Owner);
-            command.Parameters.AddWithValue("$first", partition.First);
-            command.Parameters.AddWithValue("$last", partition.Last);
-            command.Parameters.AddWithValue("$is_inclusive", partition.IsInclusive);
-            command.Parameters.AddWithValue("$position", partition.Position);
-            command.Parameters.AddWithValue("$processed", partition.Processed);
-            command.Parameters.AddWithValue("$remaining", partition.Remaining);
-            command.Parameters.AddWithValue("$is_completed", partition.IsCompleted);
-            command.Parameters.AddWithValue("$is_split_requested", partition.IsSplitRequested);
+            this._lock.EnterWriteLock();
 
             try
             {
-                await command.ExecuteNonQueryAsync(cancellation);
-            }
-            catch (SQLiteException ex) when (ex.ErrorCode == 19)
-            {
-                this.RaiseErrorDuplicatePartitionIdentifier(ex);
-            }
+                using SQLiteTransaction transaction = this._connection.BeginTransaction();
 
-            transaction.Commit();
+                bool exists = await this.DoesJobExistAsync(transaction, partition.JobId, cancellation);
+
+                if (exists == false)
+                {
+                    this.RaiseErrorInvalidJobReference();
+                }
+
+                using SQLiteCommand command = new SQLiteCommand
+                {
+                    CommandText = SQLiteEngineDataStoreResources.QueryInsertPartition,
+                    CommandType = CommandType.Text,
+                    Transaction = transaction
+                };
+
+                string id = partition.Id.ToString("d");
+
+                command.Parameters.AddWithValue("$id", id);
+                command.Parameters.AddWithValue("$job_id", partition.JobId);
+                command.Parameters.AddWithValue("$created", partition.Created);
+                command.Parameters.AddWithValue("$updated", partition.Updated);
+                command.Parameters.AddWithValue("$owner", partition.Owner);
+                command.Parameters.AddWithValue("$first", partition.First);
+                command.Parameters.AddWithValue("$last", partition.Last);
+                command.Parameters.AddWithValue("$is_inclusive", partition.IsInclusive);
+                command.Parameters.AddWithValue("$position", partition.Position);
+                command.Parameters.AddWithValue("$processed", partition.Processed);
+                command.Parameters.AddWithValue("$remaining", partition.Remaining);
+                command.Parameters.AddWithValue("$is_completed", partition.IsCompleted);
+                command.Parameters.AddWithValue("$is_split_requested", partition.IsSplitRequested);
+
+                try
+                {
+                    await command.ExecuteNonQueryAsync(cancellation);
+                }
+                catch (SQLiteException ex) when (ex.ErrorCode == 19)
+                {
+                    this.RaiseErrorDuplicatePartitionIdentifier(ex);
+                }
+
+                transaction.Commit();
+            }
+            finally
+            {
+                this._lock.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -307,73 +346,87 @@ namespace EXBP.Dipren.Data.SQLite
             Assert.ArgumentIsNotNull(partitionToUpdate, nameof(partitionToUpdate));
             Assert.ArgumentIsNotNull(partitionToInsert, nameof(partitionToInsert));
 
-            using SQLiteTransaction transaction = this._connection.BeginTransaction();
+            this._lock.EnterWriteLock();
 
+            try
             {
-                using SQLiteCommand command = new SQLiteCommand
+                using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
                 {
-                    CommandText = SQLiteEngineDataStoreResources.QueryInsertPartition,
-                    CommandType = CommandType.Text,
-                    Connection = this._connection,
-                    Transaction = transaction
-                };
+                    using SQLiteCommand command = new SQLiteCommand
+                    {
+                        CommandText = SQLiteEngineDataStoreResources.QueryInsertPartition,
+                        CommandType = CommandType.Text,
+                        Transaction = transaction
+                    };
 
-                string id = partitionToInsert.Id.ToString("d");
+                    string id = partitionToInsert.Id.ToString("d");
 
-                command.Parameters.AddWithValue("$id", id);
-                command.Parameters.AddWithValue("$job_id", partitionToInsert.JobId);
-                command.Parameters.AddWithValue("$created", partitionToInsert.Created);
-                command.Parameters.AddWithValue("$updated", partitionToInsert.Updated);
-                command.Parameters.AddWithValue("$owner", partitionToInsert.Owner);
-                command.Parameters.AddWithValue("$first", partitionToInsert.First);
-                command.Parameters.AddWithValue("$last", partitionToInsert.Last);
-                command.Parameters.AddWithValue("$is_inclusive", partitionToInsert.IsInclusive);
-                command.Parameters.AddWithValue("$position", partitionToInsert.Position);
-                command.Parameters.AddWithValue("$processed", partitionToInsert.Processed);
-                command.Parameters.AddWithValue("$remaining", partitionToInsert.Remaining);
-                command.Parameters.AddWithValue("$is_completed", partitionToInsert.IsCompleted);
-                command.Parameters.AddWithValue("$is_split_requested", partitionToInsert.IsSplitRequested);
+                    command.Parameters.AddWithValue("$id", id);
+                    command.Parameters.AddWithValue("$job_id", partitionToInsert.JobId);
+                    command.Parameters.AddWithValue("$created", partitionToInsert.Created);
+                    command.Parameters.AddWithValue("$updated", partitionToInsert.Updated);
+                    command.Parameters.AddWithValue("$owner", partitionToInsert.Owner);
+                    command.Parameters.AddWithValue("$first", partitionToInsert.First);
+                    command.Parameters.AddWithValue("$last", partitionToInsert.Last);
+                    command.Parameters.AddWithValue("$is_inclusive", partitionToInsert.IsInclusive);
+                    command.Parameters.AddWithValue("$position", partitionToInsert.Position);
+                    command.Parameters.AddWithValue("$processed", partitionToInsert.Processed);
+                    command.Parameters.AddWithValue("$remaining", partitionToInsert.Remaining);
+                    command.Parameters.AddWithValue("$is_completed", partitionToInsert.IsCompleted);
+                    command.Parameters.AddWithValue("$is_split_requested", partitionToInsert.IsSplitRequested);
 
-                try
-                {
-                    await command.ExecuteNonQueryAsync(cancellation);
+                    try
+                    {
+                        await command.ExecuteNonQueryAsync(cancellation);
+                    }
+                    catch (SQLiteException ex) when (ex.ErrorCode == 19)
+                    {
+                        this.RaiseErrorDuplicatePartitionIdentifier(ex);
+                    }
                 }
-                catch (SQLiteException ex) when (ex.ErrorCode == 19)
-                {
-                    this.RaiseErrorDuplicatePartitionIdentifier(ex);
-                }
-            }
 
-            {
-                using SQLiteCommand command = new SQLiteCommand
-                {
-                    CommandText = SQLiteEngineDataStoreResources.QueryUpdateSplitPartition,
-                    CommandType = CommandType.Text,
-                    Connection = this._connection,
-                    Transaction = transaction
-                };
+                bool exists = await this.DoesPartitionExistAsync(transaction, partitionToUpdate.Id, cancellation);
 
-                string id = partitionToUpdate.Id.ToString("d");
-
-                command.Parameters.AddWithValue("$partition_id", id);
-                command.Parameters.AddWithValue("$owner", partitionToUpdate.Owner);
-                command.Parameters.AddWithValue("$updated", partitionToUpdate.Updated);
-                command.Parameters.AddWithValue("$last", partitionToUpdate.Last);
-                command.Parameters.AddWithValue("$is_inclusive", partitionToUpdate.IsInclusive);
-                command.Parameters.AddWithValue("$position", partitionToUpdate.Position);
-                command.Parameters.AddWithValue("$processed", partitionToUpdate.Processed);
-                command.Parameters.AddWithValue("$remaining", partitionToUpdate.Remaining);
-                command.Parameters.AddWithValue("$is_split_requested", partitionToUpdate.IsSplitRequested);
-
-                int affected = await command.ExecuteNonQueryAsync(cancellation);
-
-                if (affected != 1)
+                if (exists == false)
                 {
                     this.RaiseErrorUnknownPartitionIdentifier();
                 }
-            }
 
-            transaction.Commit();
+                {
+                    using SQLiteCommand command = new SQLiteCommand
+                    {
+                        CommandText = SQLiteEngineDataStoreResources.QueryUpdateSplitPartition,
+                        CommandType = CommandType.Text,
+                        Transaction = transaction
+                    };
+
+                    string id = partitionToUpdate.Id.ToString("d");
+
+                    command.Parameters.AddWithValue("$partition_id", id);
+                    command.Parameters.AddWithValue("$owner", partitionToUpdate.Owner);
+                    command.Parameters.AddWithValue("$updated", partitionToUpdate.Updated);
+                    command.Parameters.AddWithValue("$last", partitionToUpdate.Last);
+                    command.Parameters.AddWithValue("$is_inclusive", partitionToUpdate.IsInclusive);
+                    command.Parameters.AddWithValue("$position", partitionToUpdate.Position);
+                    command.Parameters.AddWithValue("$processed", partitionToUpdate.Processed);
+                    command.Parameters.AddWithValue("$remaining", partitionToUpdate.Remaining);
+                    command.Parameters.AddWithValue("$is_split_requested", partitionToUpdate.IsSplitRequested);
+
+                    int affected = await command.ExecuteNonQueryAsync(cancellation);
+
+                    if (affected != 1)
+                    {
+                        this.RaiseErrorLockNoLongerHeld();
+                    }
+                }
+
+                transaction.Commit();
+            }
+            finally
+            {
+                this._lock.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -409,36 +462,44 @@ namespace EXBP.Dipren.Data.SQLite
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
-            using SQLiteTransaction transaction = this._connection.BeginTransaction();
-
-            using SQLiteCommand command = new SQLiteCommand
-            {
-                CommandText = SQLiteEngineDataStoreResources.QueryUpdateJobById,
-                CommandType = CommandType.Text,
-                Connection = this._connection,
-                Transaction = transaction
-            };
-
-            command.Parameters.AddWithValue("$id", jobId);
-            command.Parameters.AddWithValue("$updated", timestamp);
-            command.Parameters.AddWithValue("$state", state);
-            command.Parameters.AddWithValue("$error", error);
-
             Job result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
-            {
-                bool found = await reader.ReadAsync(cancellation);
+            this._lock.EnterWriteLock();
 
-                if (found == false)
+            try
+            {
+                using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
+                using SQLiteCommand command = new SQLiteCommand
                 {
-                    this.RaiseErrorUnknownJobIdentifier();
+                    CommandText = SQLiteEngineDataStoreResources.QueryUpdateJobById,
+                    CommandType = CommandType.Text,
+                    Transaction = transaction
+                };
+
+                command.Parameters.AddWithValue("$id", jobId);
+                command.Parameters.AddWithValue("$updated", timestamp);
+                command.Parameters.AddWithValue("$state", state);
+                command.Parameters.AddWithValue("$error", error);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool found = await reader.ReadAsync(cancellation);
+
+                    if (found == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+                    result = this.ReadJob(reader);
                 }
 
-                result = this.ReadJob(reader);
+                transaction.Commit();
             }
-
-            transaction.Commit();
+            finally
+            {
+                this._lock.ExitWriteLock();
+            }
 
             return result;
         }
@@ -460,33 +521,37 @@ namespace EXBP.Dipren.Data.SQLite
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
-            using SQLiteTransaction transaction = this._connection.BeginTransaction();
-
-            using SQLiteCommand command = new SQLiteCommand
-            {
-                CommandText = SQLiteEngineDataStoreResources.QueryRetrieveJobById,
-                CommandType = CommandType.Text,
-                Connection = this._connection,
-                Transaction = transaction
-            };
-
-            command.Parameters.AddWithValue("$id", id);
-
             Job result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            this._lock.EnterReadLock();
+
+            try
             {
-                bool exists = await reader.ReadAsync(cancellation);
-
-                if (exists == false)
+                using SQLiteCommand command = new SQLiteCommand
                 {
-                    this.RaiseErrorUnknownJobIdentifier();
+                    CommandText = SQLiteEngineDataStoreResources.QueryRetrieveJobById,
+                    CommandType = CommandType.Text,
+                    Connection = this._connection
+                };
+
+                command.Parameters.AddWithValue("$id", id);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool exists = await reader.ReadAsync(cancellation);
+
+                    if (exists == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+                    result = this.ReadJob(reader);
                 }
-
-                result = this.ReadJob(reader);
             }
-
-            transaction.Commit();
+            finally
+            {
+                this._lock.ExitReadLock();
+            }
 
             return result;
         }
@@ -509,35 +574,39 @@ namespace EXBP.Dipren.Data.SQLite
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
-            using SQLiteTransaction transaction = this._connection.BeginTransaction();
-
-            using SQLiteCommand command = new SQLiteCommand
-            {
-                CommandText = SQLiteEngineDataStoreResources.QueryRetrievePartitionById,
-                CommandType = CommandType.Text,
-                Connection = this._connection,
-                Transaction = transaction
-            };
-
-            string sid = id.ToString("d");
-
-            command.Parameters.AddWithValue("$id", sid);
-
             Partition result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            this._lock.EnterReadLock();
+
+            try
             {
-                bool exists = await reader.ReadAsync(cancellation);
-
-                if (exists == false)
+                using SQLiteCommand command = new SQLiteCommand
                 {
-                    this.RaiseErrorUnknownPartitionIdentifier();
+                    CommandText = SQLiteEngineDataStoreResources.QueryRetrievePartitionById,
+                    CommandType = CommandType.Text,
+                    Connection = this._connection
+                };
+
+                string sid = id.ToString("d");
+
+                command.Parameters.AddWithValue("$id", sid);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool exists = await reader.ReadAsync(cancellation);
+
+                    if (exists == false)
+                    {
+                        this.RaiseErrorUnknownPartitionIdentifier();
+                    }
+
+                    result = this.ReadPartition(reader);
                 }
-
-                result = this.ReadPartition(reader);
             }
-
-            transaction.Commit();
+            finally
+            {
+                this._lock.ExitReadLock();
+            }
 
             return result;
         }
@@ -574,41 +643,49 @@ namespace EXBP.Dipren.Data.SQLite
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsNotNull(requester, nameof(requester));
 
-            using SQLiteTransaction transaction = this._connection.BeginTransaction();
-
-            bool exists = await this.DoesJobExistAsync(transaction, jobId, cancellation);
-
-            if (exists == false)
-            {
-                this.RaiseErrorUnknownJobIdentifier();
-            }
-
-            using SQLiteCommand command = new SQLiteCommand
-            {
-                CommandText = SQLiteEngineDataStoreResources.QueryTryAcquirePartition,
-                CommandType = CommandType.Text,
-                Connection = this._connection,
-                Transaction = transaction
-            };
-
-            command.Parameters.AddWithValue("$job_id", jobId);
-            command.Parameters.AddWithValue("$owner", requester);
-            command.Parameters.AddWithValue("$updated", timestamp);
-            command.Parameters.AddWithValue("$active", active);
-
             Partition result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            this._lock.EnterWriteLock();
+
+            try
             {
-                bool found = await reader.ReadAsync(cancellation);
+                using SQLiteTransaction transaction = this._connection.BeginTransaction();
 
-                if (found == true)
+                bool exists = await this.DoesJobExistAsync(transaction, jobId, cancellation);
+
+                if (exists == false)
                 {
-                    result = this.ReadPartition(reader);
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
-            }
 
-            transaction.Commit();
+                using SQLiteCommand command = new SQLiteCommand
+                {
+                    CommandText = SQLiteEngineDataStoreResources.QueryTryAcquirePartition,
+                    CommandType = CommandType.Text,
+                    Transaction = transaction
+                };
+
+                command.Parameters.AddWithValue("$job_id", jobId);
+                command.Parameters.AddWithValue("$owner", requester);
+                command.Parameters.AddWithValue("$updated", timestamp);
+                command.Parameters.AddWithValue("$active", active);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool found = await reader.ReadAsync(cancellation);
+
+                    if (found == true)
+                    {
+                        result = this.ReadPartition(reader);
+                    }
+                }
+
+                transaction.Commit();
+            }
+            finally
+            {
+                this._lock.ExitWriteLock();
+            }
 
             return result;
         }
@@ -638,31 +715,43 @@ namespace EXBP.Dipren.Data.SQLite
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
-            using SQLiteTransaction transaction = this._connection.BeginTransaction();
+            bool result = false;
 
-            bool exists = await this.DoesJobExistAsync(transaction, jobId, cancellation);
+            this._lock.EnterWriteLock();
 
-            if (exists == false)
+            try
             {
-                this.RaiseErrorUnknownJobIdentifier();
+                using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
+                bool exists = await this.DoesJobExistAsync(transaction, jobId, cancellation);
+
+                if (exists == false)
+                {
+                    this.RaiseErrorUnknownJobIdentifier();
+                }
+
+                using SQLiteCommand command = new SQLiteCommand
+                {
+                    CommandText = SQLiteEngineDataStoreResources.QueryTryRequestSplit,
+                    CommandType = CommandType.Text,
+                    Transaction = transaction
+                };
+
+                command.Parameters.AddWithValue("$job_id", jobId);
+                command.Parameters.AddWithValue("$active", active);
+
+                int affected = await command.ExecuteNonQueryAsync(cancellation);
+
+                transaction.Commit();
+
+                result = (affected > 0);
+            }
+            finally
+            {
+                this._lock.ExitWriteLock();
             }
 
-            using SQLiteCommand command = new SQLiteCommand
-            {
-                CommandText = SQLiteEngineDataStoreResources.QueryTryRequestSplit,
-                CommandType = CommandType.Text,
-                Connection = this._connection,
-                Transaction = transaction
-            };
-
-            command.Parameters.AddWithValue("$job_id", jobId);
-            command.Parameters.AddWithValue("$active", active);
-
-            int affected = await command.ExecuteNonQueryAsync(cancellation);
-
-            transaction.Commit();
-
-            return (affected > 0);
+            return result;
         }
 
         /// <summary>
@@ -705,49 +794,57 @@ namespace EXBP.Dipren.Data.SQLite
             Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(position, nameof(position));
 
-            using SQLiteTransaction transaction = this._connection.BeginTransaction();
-
-            bool exists = await this.DoesPartitionExistAsync(transaction, id, cancellation);
-
-            if (exists == false)
-            {
-                this.RaiseErrorUnknownJobIdentifier();
-            }
-
-            using SQLiteCommand command = new SQLiteCommand
-            {
-                CommandText = SQLiteEngineDataStoreResources.QueryReportProgress,
-                CommandType = CommandType.Text,
-                Connection = this._connection,
-                Transaction = transaction
-            };
-
-            string sid = id.ToString("d");
-
-            command.Parameters.AddWithValue("$updated", timestamp);
-            command.Parameters.AddWithValue("$position", position);
-            command.Parameters.AddWithValue("$progress", progress);
-            command.Parameters.AddWithValue("$completed", completed);
-            command.Parameters.AddWithValue("$id", sid);
-            command.Parameters.AddWithValue("$owner", owner);
-
             Partition result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            this._lock.EnterWriteLock();
+
+            try
             {
-                bool found = await reader.ReadAsync(cancellation);
+                using SQLiteTransaction transaction = this._connection.BeginTransaction();
 
-                if (found == true)
+                bool exists = await this.DoesPartitionExistAsync(transaction, id, cancellation);
+
+                if (exists == false)
                 {
-                    result = this.ReadPartition(reader);
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
-                else
+
+                using SQLiteCommand command = new SQLiteCommand
                 {
-                    this.RaiseErrorLockNoLongerHeld();
+                    CommandText = SQLiteEngineDataStoreResources.QueryReportProgress,
+                    CommandType = CommandType.Text,
+                    Transaction = transaction
+                };
+
+                string sid = id.ToString("d");
+
+                command.Parameters.AddWithValue("$updated", timestamp);
+                command.Parameters.AddWithValue("$position", position);
+                command.Parameters.AddWithValue("$progress", progress);
+                command.Parameters.AddWithValue("$completed", completed);
+                command.Parameters.AddWithValue("$id", sid);
+                command.Parameters.AddWithValue("$owner", owner);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool found = await reader.ReadAsync(cancellation);
+
+                    if (found == true)
+                    {
+                        result = this.ReadPartition(reader);
+                    }
+                    else
+                    {
+                        this.RaiseErrorLockNoLongerHeld();
+                    }
                 }
+
+                transaction.Commit();
             }
-
-            transaction.Commit();
+            finally
+            {
+                this._lock.ExitWriteLock();
+            }
 
             return result;
         }
@@ -777,7 +874,6 @@ namespace EXBP.Dipren.Data.SQLite
             {
                 CommandText = SQLiteEngineDataStoreResources.QueryDoesJobExist,
                 CommandType = CommandType.Text,
-                Connection = this._connection,
                 Transaction = transaction
             };
 
@@ -813,7 +909,6 @@ namespace EXBP.Dipren.Data.SQLite
             {
                 CommandText = SQLiteEngineDataStoreResources.QueryDoesPartitionExist,
                 CommandType = CommandType.Text,
-                Connection = this._connection,
                 Transaction = transaction
             };
 
