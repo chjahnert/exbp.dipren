@@ -14,30 +14,40 @@ namespace EXBP.Dipren.Data.SQLite
     /// </summary>
     public class SQLiteEngineDataStore : EngineDataStore, IEngineDataStore, IDisposable, IAsyncDisposable
     {
+        private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
         private readonly SQLiteConnection _connection;
-        private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
-        private bool _disposed;
+        private bool _disposed = false;
 
 
         /// <summary>
         ///   Initializes a new and empty instance of the <see cref="SQLiteEngineDataStore"/> class.
         /// </summary>
-        /// <param name="connection">
-        ///   The ready-to-be-used <see cref="SQLiteConnection"/> object.
+        /// <param name="connectionString">
+        ///   A <see cref="string"/> value that contains the connection string to use.
         /// </param>
-        protected SQLiteEngineDataStore(SQLiteConnection connection)
+        public SQLiteEngineDataStore(string connectionString)
         {
-            Assert.ArgumentIsNotNull(connection, nameof(connection));
+            this._connection = new SQLiteConnection(connectionString);
 
-            this._connection = connection;
+            this._connection.Open();
+
+            SQLiteEngineDataStore.EnsureForeignKeys(this._connection);
+            SQLiteEngineDataStore.EnsureSchema(this._connection);
+
+            this._connection.Busy += this.OnDatabaseBusy;
         }
 
-        private void OnDatabaseBusy(object sender, BusyEventArgs args)
+        /// <summary>
+        ///   Handles the event when the underlying database is busy.
+        /// </summary>
+        /// <param name="sender">
+        ///   The object that generated the event.
+        /// </param>
+        /// <param name="args">
+        ///   The event arguments.
+        /// </param>
+        protected virtual void OnDatabaseBusy(object sender, BusyEventArgs args)
         {
-            Debug.WriteLine($"DATABASE BUSY: Attempts so far {args.Count}.");
-
-            Thread.Sleep(1);
-
             args.ReturnCode = SQLiteBusyReturnCode.Retry;
         }
 
@@ -984,62 +994,12 @@ namespace EXBP.Dipren.Data.SQLite
         }
 
         /// <summary>
-        ///   Opens the specified database connection and ensures that the required tables are created.
-        /// </summary>
-        /// <param name="connectionString">
-        ///   A <see cref="string"/> value that contains the connection string to use.
-        /// </param>
-        /// <returns>
-        ///   The <see cref="SQLiteEngineDataStore"/> object that is ready to be used.
-        /// </returns>
-        public static async Task<SQLiteEngineDataStore> OpenAsync(string connectionString, CancellationToken cancellation)
-        {
-            SQLiteConnection connection = new SQLiteConnection(connectionString);
-            SQLiteEngineDataStore result = await SQLiteEngineDataStore.OpenAsync(connection, cancellation);
-
-            return result;
-        }
-
-        /// <summary>
-        ///   Opens the specified database connection and ensures that the required tables are created.
-        /// </summary>
-        /// <param name="connectionString">
-        ///   A <see cref="string"/> value that contains the connection string to use.
-        /// </param>
-        /// <returns>
-        ///   The <see cref="SQLiteEngineDataStore"/> object that is ready to be used.
-        /// </returns>
-        public static async Task<SQLiteEngineDataStore> OpenAsync(SQLiteConnection connection, CancellationToken cancellation)
-        {
-            Assert.ArgumentIsNotNull(connection, nameof(connection));
-
-            if (connection.State == ConnectionState.Closed)
-            {
-                await connection.OpenAsync(cancellation);
-            }
-
-            await SQLiteEngineDataStore.EnsureForeignKeysAsync(connection, cancellation);
-            await SQLiteEngineDataStore.EnsureSchemaAsync(connection, cancellation);
-
-            SQLiteEngineDataStore result = new SQLiteEngineDataStore(connection);
-
-            return result;
-        }
-
-        /// <summary>
         ///   Ensures that foreign keys are enabled on the database.
         /// </summary>
         /// <param name="connection">
         ///   The database connection to use.
         /// </param>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task"/> object that represents the asynchronous operation.
-        /// </returns>
-        protected static async Task EnsureForeignKeysAsync(SQLiteConnection connection, CancellationToken cancellation)
+        private static void EnsureForeignKeys(SQLiteConnection connection)
         {
             Debug.Assert(connection != null);
 
@@ -1050,7 +1010,7 @@ namespace EXBP.Dipren.Data.SQLite
                 Connection = connection
             };
 
-            await command.ExecuteNonQueryAsync(cancellation);
+            command.ExecuteNonQuery();
         }
 
         /// <summary>
@@ -1059,14 +1019,7 @@ namespace EXBP.Dipren.Data.SQLite
         /// <param name="connection">
         ///   The database connection to use.
         /// </param>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task"/> object that represents the asynchronous operation.
-        /// </returns>
-        protected static async Task EnsureSchemaAsync(SQLiteConnection connection, CancellationToken cancellation)
+        private static void EnsureSchema(SQLiteConnection connection)
         {
             Debug.Assert(connection != null);
 
@@ -1077,7 +1030,7 @@ namespace EXBP.Dipren.Data.SQLite
                 Connection = connection
             };
 
-            await commandSchema.ExecuteNonQueryAsync(cancellation);
+            commandSchema.ExecuteNonQuery();
         }
     }
 }
