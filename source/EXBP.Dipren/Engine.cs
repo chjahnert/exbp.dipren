@@ -449,11 +449,11 @@ namespace EXBP.Dipren
 
                 if (excludedKeyRangeSize >= job.BatchSize)
                 {
-                    Task<long> updatedKeyRangeSize = job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
+                    long updatedKeyRangeSize = await job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
 
                     DateTime timestamp = this.Clock.GetDateTime();
 
-                    Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updatedKeyRange, partition.Position, partition.Processed, await updatedKeyRangeSize, false, false);
+                    Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updatedKeyRange, partition.Position, partition.Processed, (updatedKeyRangeSize - 1), false, false);
                     Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
 
                     Guid id = Guid.NewGuid();
