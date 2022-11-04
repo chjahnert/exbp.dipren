@@ -445,12 +445,12 @@ namespace EXBP.Dipren
             {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
-                Task<long> remainingKeyRangeSize = job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
+                Task<long> updatedKeyRangeSize = job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
                 Task<long> excludedKeyRangeSize = job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
 
                 DateTime timestamp = this.Clock.GetDateTime();
 
-                Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, remainingKeyRange, partition.Position, partition.Processed, await remainingKeyRangeSize, false, false);
+                Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updatedKeyRange, partition.Position, partition.Processed, await updatedKeyRangeSize, false, false);
                 Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
 
                 Guid id = Guid.NewGuid();
