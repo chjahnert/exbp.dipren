@@ -12,17 +12,22 @@ namespace EXBP.Dipren.Demo.SQLite
     internal static class EntryPoint
     {
         private const string SOURCE_CONNECTION_STRING = "Data Source = source.sqlite.db; DateTimeKind = UTC;";
+        private const string TARGET_CONNECTION_STRING = "Data Source = target.sqlite.db; DateTimeKind = UTC;";
         private const string ENGINE_CONNECTION_STRING = "Data Source = dipren.sqlite.db; DateTimeKind = UTC;";
 
-        private const long SOURCE_ITEM_COUNT = 4096;
+        private const int SOURCE_ITEM_COUNT = 65536;
         private const int BATCH_PROCESSING_TIMEOUT = 1000;
-        private const int BATCH_SIZE = 4;
-        private const int THREADS = 8;
+        private const int PROCESSING_THREADS = 4;
+        private const int POLLING_INTERVAL = 100;
+        private const int BATCH_SIZE = 16;
+
+        private static MeasurementBatchProcessor Processor { get; } = new MeasurementBatchProcessor(TARGET_CONNECTION_STRING, (BATCH_SIZE * PROCESSING_THREADS * 2));
 
 
         internal static async Task Main()
         {
             File.Delete("source.sqlite.db");
+            File.Delete("target.sqlite.db");
             File.Delete("dipren.sqlite.db");
 
             Stopwatch stopwatch = new Stopwatch();
@@ -43,7 +48,7 @@ namespace EXBP.Dipren.Demo.SQLite
 
                 Console.Write("Scheduling the processing job ... ");
 
-                Job<int, Measurement> job = EntryPoint.ConstructJob(connectionSource);
+                Job<int, Measurement> job = EntryPoint.CreateJob(connectionSource);
 
                 SQLiteEngineDataStore store = new SQLiteEngineDataStore(ENGINE_CONNECTION_STRING);
                 Scheduler scheduler = new Scheduler(store);
@@ -57,14 +62,18 @@ namespace EXBP.Dipren.Demo.SQLite
 
                 stopwatch.Start();
 
-                Task[] tasks = new Task[THREADS];
+                Task[] tasks = new Task[PROCESSING_THREADS];
 
                 for (int i = 0; i < tasks.Length; i++)
                 {
                     tasks[i] = Task.Run(async () => await EntryPoint.RunAsync(store, job));
+
+                    Thread.Sleep(1000);
                 }
 
                 Task.WaitAll(tasks);
+
+                EntryPoint.Processor.Flush();
 
                 stopwatch.Stop();
 
@@ -79,19 +88,20 @@ namespace EXBP.Dipren.Demo.SQLite
             }
         }
 
-        internal static Job<int, Measurement> ConstructJob(SQLiteConnection connectionSource)
+        internal static Job<int, Measurement> CreateJob(SQLiteConnection connectionSource)
         {
             MeasurementsDataSource source = new MeasurementsDataSource(connectionSource);
-            MeasurementBatchProcessor processor = new MeasurementBatchProcessor();
             TimeSpan timeout = TimeSpan.FromMilliseconds(BATCH_PROCESSING_TIMEOUT);
 
-            Job<int, Measurement> result = new Job<int, Measurement>("measurements", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, BATCH_SIZE);
+            Job<int, Measurement> result = new Job<int, Measurement>("measurements", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, EntryPoint.Processor, timeout, BATCH_SIZE);
 
             return result;
         }
 
         internal static async Task RunAsync(IEngineDataStore store, Job<int, Measurement> job)
         {
+            TimeSpan pollinInterval = TimeSpan.FromMilliseconds(POLLING_INTERVAL);
+            Configuration configuration = new Configuration(TimeSpan.Zero, pollinInterval);
             Engine engine = new Engine(store, ConsoleEventLogger.Information, UtcDateTimeProvider.Default);
 
             await engine.RunAsync(job, false, CancellationToken.None);

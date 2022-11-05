@@ -17,6 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="MeasurementBatchProcessorResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MeasurementBatchProcessorResources.resx</DependentUpon>
+    </Compile>
     <Compile Update="MeasurementDataSourceResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -30,6 +35,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="MeasurementBatchProcessorResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MeasurementBatchProcessorResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="MeasurementDataSourceResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>MeasurementDataSourceResources.Designer.cs</LastGenOutput>
