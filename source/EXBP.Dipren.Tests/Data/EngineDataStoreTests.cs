@@ -1,19 +1,66 @@
 ﻿
+using System.Diagnostics;
+
 using EXBP.Dipren.Data;
-using EXBP.Dipren.Data.Memory;
 
 using NUnit.Framework;
 
 
-namespace EXBP.Dipren.Tests.Data.Memory
+namespace EXBP.Dipren.Tests.Data
 {
-    [TestFixture]
-    public class InMemoryEngineDataStoreTests
+    public abstract class EngineDataStoreTests
     {
-        [Test]
-        public void InsertJobAsync_ArgumentJobIsNull_ThrowsException()
+        protected abstract Task<IEngineDataStore> OnCreateEngineDataStoreAsync();
+
+        private async Task<EngineDataStoreWrapper> CreateEngineDataStoreAsync()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            IEngineDataStore store = await this.OnCreateEngineDataStoreAsync();
+            EngineDataStoreWrapper result = new EngineDataStoreWrapper(store);
+
+            return result;
+        }
+
+
+        [Test]
+        public async Task CountJobsAsync_NoJobsAvailable_RetrunsZero()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            long result = await store.CountJobsAsync(CancellationToken.None);
+
+            Assert.That(result, Is.Zero);
+        }
+
+        [Test]
+        public async Task CountJobsAsync_MultipleJobsAvailable_RetrunsCorrectCount()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            DateTime timestamp = new DateTime(2022, 9, 11, 11, 23, 7, DateTimeKind.Utc);
+
+            Job job1 = new Job("DPJ-0001", timestamp, timestamp, JobState.Initializing);
+            Job job2 = new Job("DPJ-0002", timestamp, timestamp, JobState.Ready);
+            Job job3 = new Job("DPJ-0003", timestamp, timestamp, JobState.Processing);
+            Job job4 = new Job("DPJ-0004", timestamp, timestamp, JobState.Completed);
+            Job job5 = new Job("DPJ-0005", timestamp, timestamp, JobState.Failed);
+
+            await store.InsertJobAsync(job1, CancellationToken.None);
+            await store.InsertJobAsync(job2, CancellationToken.None);
+            await store.InsertJobAsync(job3, CancellationToken.None);
+            await store.InsertJobAsync(job4, CancellationToken.None);
+            await store.InsertJobAsync(job5, CancellationToken.None);
+
+            long result = await store.CountJobsAsync(CancellationToken.None);
+
+            Assert.That(result, Is.EqualTo(5L));
+        }
+
+
+        [Test]
+        public async Task InsertJobAsync_ArgumentJobIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
             Job job = null;
 
             Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertJobAsync(job, CancellationToken.None));
@@ -22,7 +69,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task InsertJobAsync_ArgumentJobIsValid_InsertsJob()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime timestamp = DateTime.UtcNow;
@@ -31,7 +78,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             await store.InsertJobAsync(job, CancellationToken.None);
 
-            Job retrieved = store.Jobs.First(j => j.Id == jobId);
+            Job retrieved = await store.RetrieveJobAsync(jobId, CancellationToken.None);
 
             Assert.That(retrieved, Is.EqualTo(job));
         }
@@ -39,7 +86,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task InsertJobAsync_JobWithSameIdentifierAlreadyExists_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string id = "DPJ-0001";
             DateTime timestamp = DateTime.UtcNow;
@@ -54,25 +101,25 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void UpdateJobAsync_ArgumentJoIdIsNull_ThrowsException()
+        public async Task UpdateJobAsync_ArgumentJoIdIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            Assert.Throws<ArgumentNullException>(() => store.UpdateJobAsync(null, DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateJobAsync(null, DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
         }
 
         [Test]
-        public void UpdateJobAsync_JobDoesNotExist_ThrowsException()
+        public async Task UpdateJobAsync_JobDoesNotExist_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            Assert.Throws<UnknownIdentifierException>(() => store.UpdateJobAsync("DPJ-0001", DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.UpdateJobAsync("DPJ-0001", DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
         }
 
         [Test]
         public async Task UpdateJobAsync_JobExists_JobIsUpdated()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string id = "DPJ-0001";
             DateTime created = new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc);
@@ -82,31 +129,53 @@ namespace EXBP.Dipren.Tests.Data.Memory
             await store.InsertJobAsync(job, CancellationToken.None);
 
             DateTime updated = new DateTime(2022, 9, 11, 13, 21, 49, DateTimeKind.Utc);
-            Exception exception = new NotSupportedException();
+            string error = "The connection to the data source was terminated.";
 
-            await store.UpdateJobAsync(id, updated, JobState.Failed, exception, CancellationToken.None);
+            await store.UpdateJobAsync(id, updated, JobState.Failed, error, CancellationToken.None);
 
             Job persisted = await store.RetrieveJobAsync(id, CancellationToken.None);
 
             Assert.That(persisted.Created, Is.EqualTo(created));
             Assert.That(persisted.Updated, Is.EqualTo(updated));
             Assert.That(persisted.State, Is.EqualTo(JobState.Failed));
-            Assert.That(persisted.Exception, Is.Not.Null);
-            Assert.That(persisted.Exception, Is.TypeOf<NotSupportedException>());
+            Assert.That(persisted.Error, Is.EqualTo(error));
         }
 
         [Test]
-        public void RetirveJobAsync_ArgumentIdIsNull_ThrowsException()
+        public async Task UpdateJobAsync_JobExists_ReturnsUpdatedJob()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            const string id = "DPJ-0001";
+            DateTime created = new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc);
+
+            Job job = new Job(id, created, created, JobState.Ready);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            DateTime updated = new DateTime(2022, 9, 11, 13, 21, 49, DateTimeKind.Utc);
+            string error = "The connection to the data source was terminated.";
+
+            Job persisted = await store.UpdateJobAsync(id, updated, JobState.Failed, error, CancellationToken.None);
+
+            Assert.That(persisted.Created, Is.EqualTo(created));
+            Assert.That(persisted.Updated, Is.EqualTo(updated));
+            Assert.That(persisted.State, Is.EqualTo(JobState.Failed));
+            Assert.That(persisted.Error, Is.EqualTo(error));
+        }
+
+        [Test]
+        public async Task RetirveJobAsync_ArgumentIdIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Assert.ThrowsAsync<ArgumentNullException>(() => store.RetrieveJobAsync(null, CancellationToken.None));
         }
 
         [Test]
-        public void RetirveJobAsync_JobDoesNotExist_ThrowsException()
+        public async Task RetirveJobAsync_JobDoesNotExist_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrieveJobAsync("DPJ-0001", CancellationToken.None));
         }
@@ -114,7 +183,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task RetirveJobAsync_JobExist_ReturnsJob()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string id = "DPJ-0001";
             DateTime timestamp = DateTime.UtcNow;
@@ -130,22 +199,22 @@ namespace EXBP.Dipren.Tests.Data.Memory
             Assert.That(retrieved.Created, Is.EqualTo(timestamp));
             Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
             Assert.That(retrieved.State, Is.EqualTo(JobState.Initializing));
-            Assert.That(retrieved.Exception, Is.Null);
+            Assert.That(retrieved.Error, Is.Null);
         }
 
         [Test]
-        public void InsertPartitionAsync_ArgumentPartitionIsNull_ThrowsException()
+        public async Task InsertPartitionAsync_ArgumentPartitionIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
             Partition partition = null;
 
             Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertPartitionAsync(partition, CancellationToken.None));
         }
 
         [Test]
-        public void InsertPartitionAsync_ReferencedJobDoesNotExist_ThrowsException()
+        public async Task InsertPartitionAsync_ReferencedJobDoesNotExist_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             Guid partitionId = Guid.NewGuid();
@@ -159,7 +228,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task InsertPartitionAsync_PartitionWithSameIdentifierAlreadyExists_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime timestamp = DateTime.UtcNow;
@@ -180,7 +249,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task InsertPartitionAsync_ArgumentPartitionIsValid_InsertsPartition()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime timestamp = DateTime.UtcNow;
@@ -199,9 +268,9 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void RetirvePartitionAsync_PartitionDoesNotExist_ThrowsException()
+        public async Task RetirvePartitionAsync_PartitionDoesNotExist_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Guid id = Guid.NewGuid();
 
@@ -211,7 +280,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task RetirvePartitionAsync_PartitionExists_ReturnsPartition()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -233,9 +302,9 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void TryAcquirePartitionsAsync_ArgumentJobIdIsNull_ThrowsException()
+        public async Task TryAcquirePartitionsAsync_ArgumentJobIdIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             DateTime now = DateTime.UtcNow;
             DateTime cut = now.AddMinutes(-2);
@@ -244,9 +313,9 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void TryAcquirePartitionsAsync_ArgumentRequesterIsNull_ThrowsException()
+        public async Task TryAcquirePartitionsAsync_ArgumentRequesterIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             DateTime now = DateTime.UtcNow;
             DateTime cut = now.AddMinutes(-2);
@@ -255,9 +324,9 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void TryAcquirePartitionsAsync_SpecifiedJobDoesNotExist_ThrowsException()
+        public async Task TryAcquirePartitionsAsync_SpecifiedJobDoesNotExist_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             DateTime now = DateTime.UtcNow;
             DateTime cut = now.AddMinutes(-2);
@@ -268,7 +337,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task TryAcquirePartitionsAsync_NoPartitionsExist_ReturnsNull()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime now = DateTime.UtcNow;
@@ -286,7 +355,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task TryAcquirePartitionsAsync_OnlyActivePartitionsExist_ReturnsNull()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -313,7 +382,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task TryAcquirePartitionsAsync_OnlyCompletedPartitionsExist_ReturnsNull()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -340,7 +409,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task TryAcquirePartitionsAsync_FreePartitionsExist_ReturnsPartition()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -369,7 +438,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task TryAcquirePartitionsAsync_AbandonedPartitionsExist_ReturnsPartition()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -396,9 +465,9 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void TryRequestSplitAsync_ArgumentJobIdIsNull_ThrowsException()
+        public async Task TryRequestSplitAsync_ArgumentJobIdIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             DateTime cut = DateTime.UtcNow.AddMinutes(-2);
 
@@ -406,9 +475,9 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void TryRequestSplitAsync_SpecifiedJobDoesNotExist_ThrowsException()
+        public async Task TryRequestSplitAsync_SpecifiedJobDoesNotExist_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             DateTime now = DateTime.UtcNow;
             DateTime cut = now.AddMinutes(-2);
@@ -419,7 +488,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task TryRequestSplitAsync_NoPartitionsExist_ReturnsFalse()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime now = DateTime.UtcNow;
@@ -437,7 +506,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task TryRequestSplitAsync_OnlyFreePartitionsExist_ReturnsFalse()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -463,7 +532,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task TryRequestSplitAsync_OnlyAbandonedPartitionsExist_ReturnsFalse()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -489,7 +558,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task TryRequestSplitAsync_OnlyCompletedPartitionsExist_ReturnsFalse()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -501,7 +570,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
             DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "z", 24L, 0L, "owner", false);
+            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "z", 24L, 0L, "owner", true);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
@@ -515,7 +584,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task TryRequestSplitAsync_OnlyPartitionsWithSplitRequestExist_ReturnsFalse()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -541,7 +610,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task TryRequestSplitAsync_ActivePartitionsExist_ReturnsTrue()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -569,9 +638,9 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void ReportProgressAsync_ArgumentOwnerIsNull_ThrowsException()
+        public async Task ReportProgressAsync_ArgumentOwnerIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Guid id = Guid.NewGuid();
             DateTime timestamp = DateTime.UtcNow;
@@ -580,9 +649,9 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void ReportProgressAsync_ArgumentPositionIsNull_ThrowsException()
+        public async Task ReportProgressAsync_ArgumentPositionIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Guid id = Guid.NewGuid();
             DateTime timestamp = DateTime.UtcNow;
@@ -591,9 +660,9 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void ReportProgressAsync_SpecifiedPartitionDoesNotExist_ThrowsException()
+        public async Task ReportProgressAsync_SpecifiedPartitionDoesNotExist_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Guid id = Guid.NewGuid();
             DateTime timestamp = DateTime.UtcNow;
@@ -604,7 +673,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task ReportProgressAsync_PartitionLockNoLongerOwned_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -628,7 +697,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task ReportProgressAsync_ValidArguments_UpdatesPartition()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -667,7 +736,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task ReportProgressAsync_ValidArguments_ReturnsUpdatedPartition()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -704,7 +773,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task InsertSplitPartition_ArgumentPartitionToUpdateIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -718,13 +787,13 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false);
 
-            Assert.Throws<ArgumentNullException>(() => store.InsertSplitPartitionAsync(null, partition, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertSplitPartitionAsync(null, partition, CancellationToken.None));
         }
 
         [Test]
         public async Task InsertSplitPartition_ArgumentPartitionToInsertIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime timestamp = DateTime.UtcNow;
@@ -740,13 +809,13 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
-            Assert.Throws<ArgumentNullException>(() => store.InsertSplitPartitionAsync(partition, null, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertSplitPartitionAsync(partition, null, CancellationToken.None));
         }
 
         [Test]
         public async Task InsertSplitPartition_PartitionToUpdateDoesNotExist_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -766,13 +835,13 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             Partition partitionToInsert = new Partition(partitionToInsertId, jobId, partitionToInsertCreated, partitionToInsertUpdated, "n", "z", true, null, 0L, 12L, null, false);
 
-            Assert.Throws<UnknownIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
         }
 
         [Test]
         public async Task InsertSplitPartition_PartitionToInsertAlreadyExists_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -796,13 +865,13 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             await store.InsertPartitionAsync(partitionToInsert, CancellationToken.None);
 
-            Assert.Throws<DuplicateIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
+            Assert.ThrowsAsync<DuplicateIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
         }
 
         [Test]
         public async Task InsertSplitPartition_ArgumensAreValid_UpdatesExistingAndInsertsNewPartition()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -810,13 +879,19 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             await store.InsertJobAsync(job, CancellationToken.None);
 
-            Guid partitionToUpdateId = Guid.NewGuid();
-            DateTime partitionToUpdateCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionToUpdateUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+            Guid partitionToSplitId = Guid.NewGuid();
+            DateTime partitionToSplitCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionToSplitUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partitionToUpdate = new Partition(partitionToUpdateId, jobId, partitionToUpdateCreated, partitionToUpdateUpdated, "a", "m", true, "c", 2L, 12L, "owner", false);
+            Partition partitionToSplit = new Partition(partitionToSplitId, jobId, partitionToSplitCreated, partitionToSplitUpdated, "a", "z", true, "c", 2L, 24L, "owner", false);
 
-            await store.InsertPartitionAsync(partitionToUpdate, CancellationToken.None);
+            await store.InsertPartitionAsync(partitionToSplit, CancellationToken.None);
+
+            Partition partitionToUpdate = partitionToSplit with
+            {
+                Last = "m",
+                Remaining = 10L
+            };
 
             Guid partitionToInsertId = Guid.NewGuid();
             DateTime partitionToInsertCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
@@ -826,7 +901,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
 
             await store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None);
 
-            Partition updated = await store.RetrievePartitionAsync(partitionToUpdateId, CancellationToken.None);
+            Partition updated = await store.RetrievePartitionAsync(partitionToSplitId, CancellationToken.None);
             Partition inserted = await store.RetrievePartitionAsync(partitionToInsertId, CancellationToken.None);
 
             Assert.That(updated, Is.EqualTo(partitionToUpdate));
@@ -834,17 +909,17 @@ namespace EXBP.Dipren.Tests.Data.Memory
         }
 
         [Test]
-        public void CountIncompletePartitionsAsync_ArgumentJobIdIsNull_ThrowsException()
+        public async Task CountIncompletePartitionsAsync_ArgumentJobIdIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Assert.ThrowsAsync<ArgumentNullException>(() => store.CountIncompletePartitionsAsync(null, CancellationToken.None));
         }
 
         [Test]
-        public void CountIncompletePartitionsAsync_JobDoesNotExist_ThrowsException()
+        public async Task CountIncompletePartitionsAsync_JobDoesNotExist_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Assert.ThrowsAsync<UnknownIdentifierException>(() => store.CountIncompletePartitionsAsync("DPJ-0001", CancellationToken.None));
         }
@@ -852,7 +927,7 @@ namespace EXBP.Dipren.Tests.Data.Memory
         [Test]
         public async Task CountIncompletePartitionsAsync_ContainsInclompletePartitions_ReturnsCount()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
             DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
@@ -879,6 +954,59 @@ namespace EXBP.Dipren.Tests.Data.Memory
             long count = await store.CountIncompletePartitionsAsync(jobId, CancellationToken.None);
 
             Assert.That(count, Is.EqualTo(1L));
+        }
+
+
+        [DebuggerStepThrough]
+        private class EngineDataStoreWrapper : IEngineDataStore, IDisposable
+        {
+            private readonly IEngineDataStore _store;
+
+            public EngineDataStoreWrapper(IEngineDataStore store)
+            {
+                Debug.Assert(store != null);
+
+                this._store = store;
+            }
+
+            public void Dispose()
+            {
+                (this._store as IDisposable)?.Dispose();
+
+                GC.SuppressFinalize(this);
+            }
+
+            public Task<long> CountIncompletePartitionsAsync(string id, CancellationToken cancellation)
+                => this._store.CountIncompletePartitionsAsync(id, cancellation);
+
+            public Task<long> CountJobsAsync(CancellationToken cancellation)
+                => this._store.CountJobsAsync(cancellation);
+
+            public Task InsertJobAsync(Job job, CancellationToken cancellation)
+                => this._store.InsertJobAsync(job, cancellation);
+
+            public Task InsertPartitionAsync(Partition partition, CancellationToken cancellation)
+                => this._store.InsertPartitionAsync(partition, cancellation);
+
+            public Task InsertSplitPartitionAsync(Partition partitionToUpdate, Partition partitionToInsert, CancellationToken cancellation)
+                => this._store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, cancellation);
+
+            public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, CancellationToken cancellation)
+                => this._store.ReportProgressAsync(id, owner, timestamp, position, progress, completed, cancellation);
+
+            public Task<Job> RetrieveJobAsync(string id, CancellationToken cancellation)
+                => this._store.RetrieveJobAsync(id, cancellation);
+
+            public Task<Partition> RetrievePartitionAsync(Guid id, CancellationToken cancellation)
+                => this._store.RetrievePartitionAsync(id, cancellation);
+
+            public Task<Partition> TryAcquirePartitionsAsync(string jobId, string requester, DateTime timestamp, DateTime active, CancellationToken cancellation)
+                => this._store.TryAcquirePartitionsAsync(jobId, requester, timestamp, active, cancellation);
+            public Task<bool> TryRequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation)
+                => this._store.TryRequestSplitAsync(jobId, active, cancellation);
+
+            public Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation)
+                => this._store.UpdateJobAsync(jobId, timestamp, state, error, cancellation);
         }
     }
 }

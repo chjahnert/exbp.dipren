@@ -169,6 +169,15 @@ namespace EXBP.Dipren {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The partition is too small to be split..
+        /// </summary>
+        internal static string EventPartitionTooSmallToBeSplit {
+            get {
+                return ResourceManager.GetString("EventPartitionTooSmallToBeSplit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Processing failed..
         /// </summary>
         internal static string EventProcessingFailed {

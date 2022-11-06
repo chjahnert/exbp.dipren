@@ -35,5 +35,21 @@ namespace EXBP.Dipren.Tests
             Assert.That(created.Last, Is.EqualTo(createdLast));
             Assert.That(created.IsInclusive, Is.EqualTo(inputInclusive));
         }
+
+        [TestCase(1, 1, true)]
+        [TestCase(1, 2, true)]
+        [TestCase(1, 3, false)]
+        public void Split_ArgumentRangeIsTooSmall_ReturnUnchangedRange(int inputFirst, int inputLast, bool inputInclusive)
+        {
+            Range<int> input = new Range<int>(inputFirst, inputLast, inputInclusive);
+
+            Range<int> returned = Int32KeyArithmetics.Default.Split(input, out Range<int> created);
+
+            Assert.That(returned.First, Is.EqualTo(input.First));
+            Assert.That(returned.Last, Is.EqualTo(input.Last));
+            Assert.That(returned.IsInclusive, Is.EqualTo(input.IsInclusive));
+
+            Assert.That(created, Is.Null);
+        }
     }
 }

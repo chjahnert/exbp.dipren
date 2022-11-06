@@ -445,24 +445,32 @@ namespace EXBP.Dipren
             {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
-                Task<long> remainingKeyRangeSize = job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
-                Task<long> excludedKeyRangeSize = job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
+                long excludedKeyRangeSize = await job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
 
-                DateTime timestamp = this.Clock.GetDateTime();
+                if (excludedKeyRangeSize >= job.BatchSize)
+                {
+                    long updatedKeyRangeSize = await job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
 
-                Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, remainingKeyRange, partition.Position, partition.Processed, await remainingKeyRangeSize, false, false);
-                Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
+                    DateTime timestamp = this.Clock.GetDateTime();
 
-                Guid id = Guid.NewGuid();
-                Partition<TKey> excludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, await excludedKeyRangeSize, false, false);
-                Partition excludedEntry = excludedPartition.ToEntry(job.Serializer);
+                    Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updatedKeyRange, partition.Position, partition.Processed, (updatedKeyRangeSize - 1), false, false);
+                    Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
 
-                await this.Store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);
+                    Guid id = Guid.NewGuid();
+                    Partition<TKey> excludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, excludedKeyRangeSize, false, false);
+                    Partition excludedEntry = excludedPartition.ToEntry(job.Serializer);
 
-                result = updatedPartition;
+                    await this.Store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);
 
-                string descriptionPartitionSplit = String.Format(CultureInfo.InvariantCulture, EngineResources.EventPartitionSplit, updatedPartition.Range.First, updatedPartition.Range.Last, excludedPartition.Id, excludedPartition.Range.First, excludedPartition.Range.Last, stopwatch.Elapsed.TotalMilliseconds);
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, descriptionPartitionSplit, cancellation);
+                    result = updatedPartition;
+
+                    string descriptionPartitionSplit = String.Format(CultureInfo.InvariantCulture, EngineResources.EventPartitionSplit, updatedPartition.Range.First, updatedPartition.Range.Last, excludedPartition.Id, excludedPartition.Range.First, excludedPartition.Range.Last, stopwatch.Elapsed.TotalMilliseconds);
+                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, descriptionPartitionSplit, cancellation);
+                }
+                else
+                {
+                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventPartitionTooSmallToBeSplit, cancellation);
+                }
             }
             else
             {

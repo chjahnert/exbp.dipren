@@ -12,10 +12,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AssertResources.resx</DependentUpon>
     </Compile>
-    <Compile Update="Data\Memory\InMemoryEngineDataStoreResources.Designer.cs">
+    <Compile Update="Data\EngineDataStoreResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>InMemoryEngineDataStoreResources.resx</DependentUpon>
+      <DependentUpon>EngineDataStoreResources.resx</DependentUpon>
     </Compile>
     <Compile Update="Diagnostics\AssertResources.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -44,9 +44,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AssertResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Data\Memory\InMemoryEngineDataStoreResources.resx">
+    <EmbeddedResource Update="Data\EngineDataStoreResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>InMemoryEngineDataStoreResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>EngineDataStoreResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Diagnostics\AssertResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

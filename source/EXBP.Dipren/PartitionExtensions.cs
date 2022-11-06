@@ -57,7 +57,8 @@ namespace EXBP.Dipren
         {
             Debug.Assert(source != null);
 
-            Range<TKey> result = new Range<TKey>(source.Position, source.Range.Last, source.Range.IsInclusive);
+            TKey first = ((source.Processed > 0L) ? source.Position : source.Range.First);
+            Range<TKey> result = new Range<TKey>(first, source.Range.Last, source.Range.IsInclusive);
 
             return result;
         }

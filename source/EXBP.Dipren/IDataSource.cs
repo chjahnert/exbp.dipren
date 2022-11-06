@@ -54,7 +54,7 @@ namespace EXBP.Dipren
         /// <param name="take">
         ///   The maximum number of items to return.
         /// </param>
-        /// <param name="canellation">
+        /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
         /// </param>
@@ -62,6 +62,6 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="IEnumerable{T}"/> that represents the asynchronous operation
         ///   and can be used to access the result.
         /// </returns>
-        Task<IEnumerable<KeyValuePair<TKey, TItem>>> GetNextBatchAsync(Range<TKey> range, int skip, int take, CancellationToken canellation);
+        Task<IEnumerable<KeyValuePair<TKey, TItem>>> GetNextBatchAsync(Range<TKey> range, int skip, int take, CancellationToken cancellation);
     }
 }

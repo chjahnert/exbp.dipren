@@ -117,73 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="EventBatchProcessed" xml:space="preserve">
-    <value>Processed a batch of {0} items. Took {1} ms.</value>
+  <data name="QueryEstimateRangeSize" xml:space="preserve">
+    <value>SELECT
+  COUNT() AS "count"
+FROM
+  "measurements"
+WHERE
+  ("id" &gt;= $first) AND
+  ((($inclusive = 1) AND ("id" &lt;= $last)) OR (($inclusive = 0) AND ("id" &lt; $last)));</value>
   </data>
-  <data name="EventBatchRetrieved" xml:space="preserve">
-    <value>Retrieved a batch of {0} items. Took {1} ms.</value>
+  <data name="QueryGetEntireRangeAscending" xml:space="preserve">
+    <value>SELECT
+  MIN("id") AS "first",
+  MAX("id") AS "last"
+FROM
+  "measurements";</value>
   </data>
-  <data name="EventCouldNotSplitPartition" xml:space="preserve">
-    <value>The partition could not be split.</value>
-  </data>
-  <data name="EventJobCompleted" xml:space="preserve">
-    <value>Job completed.</value>
-  </data>
-  <data name="EventJobNotScheduled" xml:space="preserve">
-    <value>The specified job is not scheduled.</value>
-  </data>
-  <data name="EventJobReady" xml:space="preserve">
-    <value>The job is ready to be processed.</value>
-  </data>
-  <data name="EventJobStarted" xml:space="preserve">
-    <value>Job started.</value>
-  </data>
-  <data name="EventPartitionAcquired" xml:space="preserve">
-    <value>Partition acquired.</value>
-  </data>
-  <data name="EventPartitionCompleted" xml:space="preserve">
-    <value>Partition completed.</value>
-  </data>
-  <data name="EventPartitionNotAcquired" xml:space="preserve">
-    <value>Could not acquire partition. None free or abandoned.</value>
-  </data>
-  <data name="EventPartitionSplit" xml:space="preserve">
-    <value>Partition updated to [{0}..{1}]. New partition {2} created with range [{3}..{4}]. Took {5} ms</value>
-  </data>
-  <data name="EventPartitionTaken" xml:space="preserve">
-    <value>The partition was taken by another processing node.</value>
-  </data>
-  <data name="EventPartitionTooSmallToBeSplit" xml:space="preserve">
-    <value>The partition is too small to be split.</value>
-  </data>
-  <data name="EventProcessingFailed" xml:space="preserve">
-    <value>Processing failed.</value>
-  </data>
-  <data name="EventProcessingPartition" xml:space="preserve">
-    <value>Processing partition.</value>
-  </data>
-  <data name="EventRequestingNextBatch" xml:space="preserve">
-    <value>Requesting {0} items from range [{1}..{2}]. Skipping {3}.</value>
-  </data>
-  <data name="EventRequestingSplit" xml:space="preserve">
-    <value>Requesting a partition to be split.</value>
-  </data>
-  <data name="EventSplitRequested" xml:space="preserve">
-    <value>Partition split requested.</value>
-  </data>
-  <data name="EventSplitRequestFailed" xml:space="preserve">
-    <value>No suitable partitions available.</value>
-  </data>
-  <data name="EventSplitRequestSucceeded" xml:space="preserve">
-    <value>Successfully requested a split.</value>
-  </data>
-  <data name="EventTryingToAcquirePartition" xml:space="preserve">
-    <value>Trying to acquire a partition.</value>
-  </data>
-  <data name="EventWaitingForJobToBeReady" xml:space="preserve">
-    <value>Waiting for the job to be ready.</value>
-  </data>
-  <data name="NoJobScheduledWithSpecifiedIdentifier" xml:space="preserve">
-    <value>A distributed processing job with the specified identifier is not scheduled.</value>
+  <data name="QueryGetNextBatchAscending" xml:space="preserve">
+    <value>SELECT
+  "id",
+  "width",
+  "height",
+  "depth"
+FROM
+  "measurements"
+WHERE
+  ("id" &gt;= $first) AND
+  ((($inclusive = 1) AND ("id" &lt;= $last)) OR (($inclusive = 0) AND ("id" &lt; $last)))
+ORDER BY
+  "id"
+LIMIT
+  $skip,
+  $take;</value>
   </data>
 </root>

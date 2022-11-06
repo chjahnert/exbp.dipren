@@ -4,7 +4,7 @@ namespace EXBP.Dipren
     /// <summary>
     ///   Implements an <see cref="IDateTimeProvider"/> that returns the current date and time, expressed as UTC time.
     /// </summary>
-    internal class UtcDateTimeProvider : IDateTimeProvider
+    public class UtcDateTimeProvider : IDateTimeProvider
     {
         /// <summary>
         ///   Gets a default instance of the <see cref="UtcDateTimeProvider"/> class.

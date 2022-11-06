@@ -11,7 +11,7 @@ namespace EXBP.Dipren.Tests
     [TestFixture]
     public class EngineTests
     {
-        private IEventHandler DefaultEventHandler { get; } = new CompositeEventHandler(ConsoleEventLogger.Debug, DebugEventLogger.Debug);
+        private IEventHandler DefaultEventHandler { get; } = new CompositeEventHandler(DebugEventLogger.Debug);
 
 
         [Test]
@@ -23,7 +23,7 @@ namespace EXBP.Dipren.Tests
         [Test]
         public void RunAsync_ArgumentJobIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Engine engine = new Engine(store);
 
             Assert.ThrowsAsync<ArgumentNullException>(() => engine.RunAsync<int, int>(null, false, CancellationToken.None));
@@ -39,7 +39,7 @@ namespace EXBP.Dipren.Tests
             TimeSpan timeout = TimeSpan.FromSeconds(2);
             Job<int, string> job = new Job<int, string>(jobId, source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
 
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);
@@ -51,7 +51,7 @@ namespace EXBP.Dipren.Tests
             Job persisted = await store.RetrieveJobAsync(jobId, CancellationToken.None);
 
             Assert.That(persisted.State, Is.EqualTo(JobState.Completed));
-            Assert.That(persisted.Exception, Is.Null);
+            Assert.That(persisted.Error, Is.Null);
         }
 
         [Test]
@@ -62,7 +62,7 @@ namespace EXBP.Dipren.Tests
             TimeSpan timeout = TimeSpan.FromSeconds(2);
             Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
 
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);
@@ -83,7 +83,7 @@ namespace EXBP.Dipren.Tests
             TimeSpan timeout = TimeSpan.FromSeconds(2);
             Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor, timeout, 4);
 
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, CancellationToken.None);
@@ -118,7 +118,7 @@ namespace EXBP.Dipren.Tests
             public Task<Range<int>> GetEntireRangeAsync(CancellationToken cancellation)
                 => Task.FromResult(new Range<int>(this._minimum, this._maximum, true));
 
-            public Task<IEnumerable<KeyValuePair<int, string>>> GetNextBatchAsync(Range<int> range, int skip, int take, CancellationToken canellation)
+            public Task<IEnumerable<KeyValuePair<int, string>>> GetNextBatchAsync(Range<int> range, int skip, int take, CancellationToken cancellation)
             {
                 List<KeyValuePair<int, string>> result = new List<KeyValuePair<int, string>>(take);
 

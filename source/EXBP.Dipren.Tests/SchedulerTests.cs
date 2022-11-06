@@ -13,7 +13,7 @@ namespace EXBP.Dipren.Tests
     [TestFixture]
     public class SchedulerTests
     {
-        private IEventHandler DefaultEventHandler { get; } = new CompositeEventHandler(ConsoleEventLogger.Debug, DebugEventLogger.Debug);
+        private IEventHandler DefaultEventHandler { get; } = new CompositeEventHandler(DebugEventLogger.Debug);
 
 
         [Test]
@@ -25,7 +25,7 @@ namespace EXBP.Dipren.Tests
         [Test]
         public void ScheduleAsync_ArgumentJobIsNull_ThrowsException()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store);
 
             Assert.ThrowsAsync<ArgumentNullException>( () => scheduler.ScheduleAsync<int, int>(null, CancellationToken.None));
@@ -34,7 +34,7 @@ namespace EXBP.Dipren.Tests
         [Test]
         public async Task ScheduleAsync_ArgumentJobIsValid_SchedulesJob()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             DummyDataSource source = new DummyDataSource(1, 1024);
@@ -49,7 +49,7 @@ namespace EXBP.Dipren.Tests
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
-            Assert.That(sj.Exception, Is.Null);
+            Assert.That(sj.Error, Is.Null);
 
             Partition sp = store.Partitions.First(p => p.JobId == job.Id);
 
@@ -66,7 +66,7 @@ namespace EXBP.Dipren.Tests
         [Test]
         public void ScheduleAsync_RangeQueryFails_CreatesJobInFailedState()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             IDataSource<int, int> source = Substitute.For<IDataSource<int,int>>();
@@ -90,14 +90,14 @@ namespace EXBP.Dipren.Tests
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
-            Assert.That(sj.Exception, Is.InstanceOf<ArgumentOutOfRangeException>());
+            Assert.That(sj.Error, Is.Not.Null);
             Assert.That(store.Partitions.Any(p => p.JobId == job.Id), Is.False);
         }
 
         [Test]
         public void ScheduleAsync_RangeSizeEstimationFails_CreatesJobInFailedState()
         {
-            InMemoryEngineDataStore store = new InMemoryEngineDataStore();
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             IDataSource<int, int> source = Substitute.For<IDataSource<int, int>>();
@@ -120,7 +120,7 @@ namespace EXBP.Dipren.Tests
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
-            Assert.That(sj.Exception, Is.InstanceOf<KeyNotFoundException>());
+            Assert.That(sj.Error, Is.Not.Null);
             Assert.That(store.Partitions.Any(p => p.JobId == job.Id), Is.False);
         }
 
@@ -139,7 +139,7 @@ namespace EXBP.Dipren.Tests
             public Task<Range<int>> GetEntireRangeAsync(CancellationToken cancellation)
                 => Task.FromResult(new Range<int>(this._minimum, this._maximum, true));
 
-            public Task<long> EstimateRangeSizeAsync(Range<int> range, CancellationToken canellation)
+            public Task<long> EstimateRangeSizeAsync(Range<int> range, CancellationToken cancellation)
             {
                 if (range == null)
                 {
