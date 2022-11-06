@@ -19,6 +19,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EXBP.Dipren.Data.SQLite", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EXBP.Dipren.Data.SQLite.Tests", "Store\SQLite\EXBP.Dipren.Data.SQLite.Tests\EXBP.Dipren.Data.SQLite.Tests.csproj", "{B97888F3-E402-45ED-B0F4-9322BB625523}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Postgres", "Postgres", "{4160AF97-5BD3-4C49-BB0C-D3645306EB0B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{3F7A4267-B6D9-419B-AB81-2C1AD4642EF6}"
+	ProjectSection(SolutionItems) = preProject
+		Store\Postgres\Database\dipren.sql = Store\Postgres\Database\dipren.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +61,8 @@ Global
 		{89074972-EF4C-4D9B-98A7-599FE890DD31} = {D529B460-3825-4679-A2AC-99D72D5F2468}
 		{20A67636-1C16-4CE8-BFF2-C1FC3139F02D} = {89074972-EF4C-4D9B-98A7-599FE890DD31}
 		{B97888F3-E402-45ED-B0F4-9322BB625523} = {89074972-EF4C-4D9B-98A7-599FE890DD31}
+		{4160AF97-5BD3-4C49-BB0C-D3645306EB0B} = {D529B460-3825-4679-A2AC-99D72D5F2468}
+		{3F7A4267-B6D9-419B-AB81-2C1AD4642EF6} = {4160AF97-5BD3-4C49-BB0C-D3645306EB0B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6D83ED20-9AD5-4338-BAD5-71D330135EF4}
