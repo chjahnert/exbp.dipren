@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\EXBP.Dipren.Tests\EXBP.Dipren.Tests.csproj" />
     <ProjectReference Include="..\EXBP.Dipren.Data.SQLite\EXBP.Dipren.Data.SQLite.csproj" />
-    <ProjectReference Include="..\EXBP.Dipren.Tests\EXBP.Dipren.Tests.csproj" />
   </ItemGroup>
 
 </Project>
