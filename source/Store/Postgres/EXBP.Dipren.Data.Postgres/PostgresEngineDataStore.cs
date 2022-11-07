@@ -12,6 +12,12 @@ using NpgsqlTypes;
 
 namespace EXBP.Dipren.Data.Postgres
 {
+    /// <summary>
+    ///   Implements an <see cref="IEngineDataStore"/> that uses Postgres SQL as its storage engine.
+    /// </summary>
+    /// <remarks>
+    ///   The implementation assumes that the required schema and table structure is already deployed.
+    /// </remarks>
     public class PostgresEngineDataStore : EngineDataStore, IEngineDataStore
     {
         private const string SQL_STATE_FOREIGN_KEY_VIOLATION = "23503";
@@ -35,9 +41,6 @@ namespace EXBP.Dipren.Data.Postgres
         /// <param name="connectionString">
         ///   The connection string to use when connecting to the database.
         /// </param>
-        /// <remarks>
-        ///   The implementation assumes that the required schema and table structure are already deployed.
-        /// </remarks>
         public PostgresEngineDataStore(string connectionString)
         {
             this._connectionString = connectionString;
