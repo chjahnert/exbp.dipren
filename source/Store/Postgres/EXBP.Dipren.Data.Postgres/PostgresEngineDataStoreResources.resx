@@ -275,7 +275,8 @@ UPDATE
   "dipren"."partitions" AS "target"
 SET
   "updated" = @updated,
-  "owner" = @owner
+  "owner" = @owner,
+  "acquired" = ("acquired" + 1)
 FROM
   "candidate"
 WHERE
