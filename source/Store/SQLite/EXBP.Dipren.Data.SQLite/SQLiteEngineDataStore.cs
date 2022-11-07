@@ -736,13 +736,6 @@ namespace EXBP.Dipren.Data.SQLite
             {
                 using SQLiteTransaction transaction = this._connection.BeginTransaction();
 
-                bool exists = await this.DoesJobExistAsync(transaction, jobId, cancellation);
-
-                if (exists == false)
-                {
-                    this.RaiseErrorUnknownJobIdentifier();
-                }
-
                 using SQLiteCommand command = new SQLiteCommand
                 {
                     CommandText = SQLiteEngineDataStoreResources.QueryTryRequestSplit,
@@ -754,6 +747,16 @@ namespace EXBP.Dipren.Data.SQLite
                 command.Parameters.AddWithValue("$active", active);
 
                 int affected = await command.ExecuteNonQueryAsync(cancellation);
+
+                if (affected == 0)
+                {
+                    bool exists = await this.DoesJobExistAsync(transaction, jobId, cancellation);
+
+                    if (exists == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+                }
 
                 transaction.Commit();
 
