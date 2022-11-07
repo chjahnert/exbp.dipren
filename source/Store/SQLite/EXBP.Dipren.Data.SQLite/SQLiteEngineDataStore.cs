@@ -820,13 +820,6 @@ namespace EXBP.Dipren.Data.SQLite
             {
                 using SQLiteTransaction transaction = this._connection.BeginTransaction();
 
-                bool exists = await this.DoesPartitionExistAsync(transaction, id, cancellation);
-
-                if (exists == false)
-                {
-                    this.RaiseErrorUnknownJobIdentifier();
-                }
-
                 using SQLiteCommand command = new SQLiteCommand
                 {
                     CommandText = SQLiteEngineDataStoreResources.QueryReportProgress,
@@ -850,6 +843,16 @@ namespace EXBP.Dipren.Data.SQLite
                     if (found == true)
                     {
                         result = this.ReadPartition(reader);
+                    }
+                }
+
+                if (result == null)
+                {
+                    bool exists = await this.DoesPartitionExistAsync(transaction, id, cancellation);
+
+                    if (exists == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
                     }
                     else
                     {
