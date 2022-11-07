@@ -15,11 +15,11 @@ namespace EXBP.Dipren.Demo.SQLite
         private const string TARGET_CONNECTION_STRING = "Data Source = target.sqlite.db; DateTimeKind = UTC;";
         private const string ENGINE_CONNECTION_STRING = "Data Source = dipren.sqlite.db; DateTimeKind = UTC;";
 
-        private const int SOURCE_ITEM_COUNT = 65536;
+        private const int SOURCE_ITEM_COUNT = 70000;
         private const int BATCH_PROCESSING_TIMEOUT = 1000;
-        private const int PROCESSING_THREADS = 4;
-        private const int POLLING_INTERVAL = 100;
-        private const int BATCH_SIZE = 16;
+        private const int PROCESSING_THREADS = 7;
+        private const int POLLING_INTERVAL = 25;
+        private const int BATCH_SIZE = 256;
 
         private static MeasurementBatchProcessor Processor { get; } = new MeasurementBatchProcessor(TARGET_CONNECTION_STRING, (BATCH_SIZE * PROCESSING_THREADS * 2));
 
@@ -67,8 +67,6 @@ namespace EXBP.Dipren.Demo.SQLite
                 for (int i = 0; i < tasks.Length; i++)
                 {
                     tasks[i] = Task.Run(async () => await EntryPoint.RunAsync(store, job));
-
-                    Thread.Sleep(1000);
                 }
 
                 Task.WaitAll(tasks);
