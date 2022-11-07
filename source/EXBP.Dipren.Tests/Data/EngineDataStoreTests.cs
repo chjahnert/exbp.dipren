@@ -308,40 +308,40 @@ namespace EXBP.Dipren.Tests.Data
         }
 
         [Test]
-        public async Task TryAcquirePartitionsAsync_ArgumentJobIdIsNull_ThrowsException()
+        public async Task TryAcquirePartitionAsync_ArgumentJobIdIsNull_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             DateTime now = DateTime.UtcNow;
             DateTime cut = now.AddMinutes(-2);
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.TryAcquirePartitionsAsync(null, "owner", now, cut, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.TryAcquirePartitionAsync(null, "owner", now, cut, CancellationToken.None));
         }
 
         [Test]
-        public async Task TryAcquirePartitionsAsync_ArgumentRequesterIsNull_ThrowsException()
+        public async Task TryAcquirePartitionAsync_ArgumentRequesterIsNull_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             DateTime now = DateTime.UtcNow;
             DateTime cut = now.AddMinutes(-2);
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.TryAcquirePartitionsAsync("DPJ-0001", null, now, cut, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.TryAcquirePartitionAsync("DPJ-0001", null, now, cut, CancellationToken.None));
         }
 
         [Test]
-        public async Task TryAcquirePartitionsAsync_SpecifiedJobDoesNotExist_ThrowsException()
+        public async Task TryAcquirePartitionAsync_SpecifiedJobDoesNotExist_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             DateTime now = DateTime.UtcNow;
             DateTime cut = now.AddMinutes(-2);
 
-            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.TryAcquirePartitionsAsync("DPJ-0001", "owner", now, cut, CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.TryAcquirePartitionAsync("DPJ-0001", "owner", now, cut, CancellationToken.None));
         }
 
         [Test]
-        public async Task TryAcquirePartitionsAsync_NoPartitionsExist_ReturnsNull()
+        public async Task TryAcquirePartitionAsync_NoPartitionsExist_ReturnsNull()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -353,13 +353,13 @@ namespace EXBP.Dipren.Tests.Data
 
             DateTime cut = now.AddMinutes(-2);
 
-            Partition partition = await store.TryAcquirePartitionsAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition partition = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
 
             Assert.That(partition, Is.Null);
         }
 
         [Test]
-        public async Task TryAcquirePartitionsAsync_OnlyActivePartitionsExist_ReturnsNull()
+        public async Task TryAcquirePartitionAsync_OnlyActivePartitionsExist_ReturnsNull()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -380,13 +380,13 @@ namespace EXBP.Dipren.Tests.Data
             DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
 
-            Partition acquired = await store.TryAcquirePartitionsAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition acquired = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
 
             Assert.That(acquired, Is.Null);
         }
 
         [Test]
-        public async Task TryAcquirePartitionsAsync_OnlyCompletedPartitionsExist_ReturnsNull()
+        public async Task TryAcquirePartitionAsync_OnlyCompletedPartitionsExist_ReturnsNull()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -407,13 +407,13 @@ namespace EXBP.Dipren.Tests.Data
             DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 32, DateTimeKind.Utc);
 
-            Partition acquired = await store.TryAcquirePartitionsAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition acquired = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
 
             Assert.That(acquired, Is.Null);
         }
 
         [Test]
-        public async Task TryAcquirePartitionsAsync_FreePartitionsExist_ReturnsPartition()
+        public async Task TryAcquirePartitionAsync_FreePartitionsExist_ReturnsPartition()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -434,7 +434,7 @@ namespace EXBP.Dipren.Tests.Data
             DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
             DateTime cut = new DateTime(2022, 9, 12, 16, 22, 10, DateTimeKind.Utc);
 
-            Partition acquired = await store.TryAcquirePartitionsAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition acquired = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
 
             Assert.That(acquired, Is.Not.Null);
             Assert.That(acquired.Owner, Is.EqualTo("owner"));
@@ -442,7 +442,7 @@ namespace EXBP.Dipren.Tests.Data
         }
 
         [Test]
-        public async Task TryAcquirePartitionsAsync_FreePartitionsExist_OnlyOneIsUpdated()
+        public async Task TryAcquirePartitionAsync_FreePartitionsExist_OnlyOneIsUpdated()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -466,7 +466,7 @@ namespace EXBP.Dipren.Tests.Data
             DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
             DateTime cut = new DateTime(2022, 9, 12, 16, 22, 10, DateTimeKind.Utc);
 
-            Partition acquired = await store.TryAcquirePartitionsAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition acquired = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
 
             Assert.That(acquired, Is.Not.Null);
             Assert.That(acquired.Owner, Is.EqualTo("owner"));
@@ -478,7 +478,7 @@ namespace EXBP.Dipren.Tests.Data
         }
 
         [Test]
-        public async Task TryAcquirePartitionsAsync_AbandonedPartitionsExist_ReturnsPartition()
+        public async Task TryAcquirePartitionAsync_AbandonedPartitionsExist_ReturnsPartition()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -499,7 +499,7 @@ namespace EXBP.Dipren.Tests.Data
             DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 32, DateTimeKind.Utc);
 
-            Partition acquired = await store.TryAcquirePartitionsAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition acquired = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
 
             Assert.That(acquired, Is.Not.Null);
             Assert.That(acquired.Owner, Is.EqualTo("owner"));
@@ -1042,8 +1042,8 @@ namespace EXBP.Dipren.Tests.Data
             public Task<Partition> RetrievePartitionAsync(Guid id, CancellationToken cancellation)
                 => this._store.RetrievePartitionAsync(id, cancellation);
 
-            public Task<Partition> TryAcquirePartitionsAsync(string jobId, string requester, DateTime timestamp, DateTime active, CancellationToken cancellation)
-                => this._store.TryAcquirePartitionsAsync(jobId, requester, timestamp, active, cancellation);
+            public Task<Partition> TryAcquirePartitionAsync(string jobId, string requester, DateTime timestamp, DateTime active, CancellationToken cancellation)
+                => this._store.TryAcquirePartitionAsync(jobId, requester, timestamp, active, cancellation);
             public Task<bool> TryRequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation)
                 => this._store.TryRequestSplitAsync(jobId, active, cancellation);
 

@@ -329,7 +329,7 @@ namespace EXBP.Dipren
             DateTime now = this.Clock.GetDateTime();
             DateTime cut = (now - job.Timeout - this._configuration.MaximumClockDrift);
 
-            Partition acquired = await this.Store.TryAcquirePartitionsAsync(job.Id, this.Id, now, cut, cancellation);
+            Partition acquired = await this.Store.TryAcquirePartitionAsync(job.Id, this.Id, now, cut, cancellation);
 
             Partition<TKey> result = null;
 
