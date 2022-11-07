@@ -442,6 +442,42 @@ namespace EXBP.Dipren.Tests.Data
         }
 
         [Test]
+        public async Task TryAcquirePartitionsAsync_FreePartitionsExist_OnlyOneIsUpdated()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionId1 = Guid.NewGuid();
+            Guid partitionId2 = Guid.NewGuid();
+            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+
+            Partition partition1 = new Partition(partitionId1, jobId, partitionCreated, partitionUpdated, "a", "c", true, "b", 1L, 1L, null, false);
+            Partition partition2 = new Partition(partitionId2, jobId, partitionCreated, partitionUpdated, "d", "f", true, "e", 1L, 1L, null, false);
+
+            await store.InsertPartitionAsync(partition1, CancellationToken.None);
+            await store.InsertPartitionAsync(partition2, CancellationToken.None);
+
+            DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
+            DateTime cut = new DateTime(2022, 9, 12, 16, 22, 10, DateTimeKind.Utc);
+
+            Partition acquired = await store.TryAcquirePartitionsAsync(jobId, "owner", now, cut, CancellationToken.None);
+
+            Assert.That(acquired, Is.Not.Null);
+            Assert.That(acquired.Owner, Is.EqualTo("owner"));
+            Assert.That(acquired.Updated, Is.EqualTo(now));
+
+            Partition partition = await store.RetrievePartitionAsync((acquired.Id == partitionId1) ? partitionId2 : partitionId1, CancellationToken.None);
+
+            Assert.That(partition.Owner, Is.Null);
+        }
+
+        [Test]
         public async Task TryAcquirePartitionsAsync_AbandonedPartitionsExist_ReturnsPartition()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
