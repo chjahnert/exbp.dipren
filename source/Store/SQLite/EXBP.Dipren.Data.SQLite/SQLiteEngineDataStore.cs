@@ -278,13 +278,6 @@ namespace EXBP.Dipren.Data.SQLite
             {
                 using SQLiteTransaction transaction = this._connection.BeginTransaction();
 
-                bool exists = await this.DoesJobExistAsync(transaction, partition.JobId, cancellation);
-
-                if (exists == false)
-                {
-                    this.RaiseErrorInvalidJobReference();
-                }
-
                 using SQLiteCommand command = new SQLiteCommand
                 {
                     CommandText = SQLiteEngineDataStoreResources.QueryInsertPartition,
@@ -314,7 +307,16 @@ namespace EXBP.Dipren.Data.SQLite
                 }
                 catch (SQLiteException ex) when (ex.ErrorCode == 19)
                 {
-                    this.RaiseErrorDuplicatePartitionIdentifier(ex);
+                    bool exists = await this.DoesJobExistAsync(transaction, partition.JobId, cancellation);
+
+                    if (exists == false)
+                    {
+                        this.RaiseErrorInvalidJobReference();
+                    }
+                    else
+                    {
+                        this.RaiseErrorDuplicatePartitionIdentifier(ex);
+                    }
                 }
 
                 transaction.Commit();
