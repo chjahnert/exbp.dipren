@@ -47,6 +47,9 @@ CREATE TABLE "dipren"."partitions"
   CONSTRAINT "fk_partitions_to_job" FOREIGN KEY ("job_id") REFERENCES "dipren"."jobs"("id") ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
+CREATE INDEX "ix_partitions_by_state" ON "dipren"."partitions" ("job_id", "updated", "owner") WHERE ("is_completed" = FALSE);
+CREATE INDEX "ux_partitions_owner" ON "dipren"."partitions" ("owner") WHERE ("owner" IS NOT NULL);
+
 COMMENT ON COLUMN "dipren"."partitions"."id" IS 'The unique identifier of the partition.';
 COMMENT ON COLUMN "dipren"."partitions"."job_id" IS 'The unique identifier of the job the partition belongs to.';
 COMMENT ON COLUMN "dipren"."partitions"."created" IS 'A timestamp value indicating when the partition was created.';
@@ -60,7 +63,5 @@ COMMENT ON COLUMN "dipren"."partitions"."processed" IS 'The number of keys proce
 COMMENT ON COLUMN "dipren"."partitions"."remaining" IS 'The estimated number of keys left to process.';
 COMMENT ON COLUMN "dipren"."partitions"."is_completed" IS 'Indicates whether the entire partition has been processed.';
 COMMENT ON COLUMN "dipren"."partitions"."is_split_requested" IS 'Indicates whether a split has been requested.';
-
-CREATE INDEX "ix_partitions_by_state" ON "dipren"."partitions" ("job_id", "updated", "owner") WHERE ("is_completed" = FALSE);
-
 COMMENT ON INDEX "dipren"."ix_partitions_by_state" IS 'Use when an idle processing node tries to acquire a partition.';
+COMMENT ON INDEX "dipren"."ux_partitions_owner" IS 'Ensures that each processing node can only acquire a single partition.';
