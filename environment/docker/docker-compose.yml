@@ -1,0 +1,17 @@
+
+version: '3.5'
+
+services:
+
+  postgres:
+    image: postgres:13
+    container_name: dipren-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: development
+    ports:
+      - "5432:5432"
+
+networks:
+  default:
+    name: dipren_network

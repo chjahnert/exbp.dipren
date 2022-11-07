@@ -12,6 +12,10 @@ namespace EXBP.Dipren.Tests.Data
     {
         protected abstract Task<IEngineDataStore> OnCreateEngineDataStoreAsync();
 
+        protected virtual DateTime FormatDateTime(DateTime source)
+            => source;
+
+
         private async Task<EngineDataStoreWrapper> CreateEngineDataStoreAsync()
         {
             IEngineDataStore store = await this.OnCreateEngineDataStoreAsync();
@@ -36,7 +40,7 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            DateTime timestamp = new DateTime(2022, 9, 11, 11, 23, 7, DateTimeKind.Utc);
+            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
 
             Job job1 = new Job("DPJ-0001", timestamp, timestamp, JobState.Initializing);
             Job job2 = new Job("DPJ-0002", timestamp, timestamp, JobState.Ready);
@@ -72,7 +76,7 @@ namespace EXBP.Dipren.Tests.Data
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
-            DateTime timestamp = DateTime.UtcNow;
+            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
 
             Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
 
@@ -89,7 +93,7 @@ namespace EXBP.Dipren.Tests.Data
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string id = "DPJ-0001";
-            DateTime timestamp = DateTime.UtcNow;
+            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
 
             Job first = new Job(id, timestamp, timestamp, JobState.Initializing);
 
@@ -186,7 +190,7 @@ namespace EXBP.Dipren.Tests.Data
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string id = "DPJ-0001";
-            DateTime timestamp = DateTime.UtcNow;
+            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
 
             Job inserted = new Job(id, timestamp, timestamp, JobState.Initializing);
 
@@ -218,7 +222,7 @@ namespace EXBP.Dipren.Tests.Data
 
             const string jobId = "DPJ-0001";
             Guid partitionId = Guid.NewGuid();
-            DateTime timestamp = DateTime.UtcNow;
+            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
 
             Partition partition = new Partition(partitionId, jobId, timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
 
@@ -231,7 +235,7 @@ namespace EXBP.Dipren.Tests.Data
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
-            DateTime timestamp = DateTime.UtcNow;
+            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
             Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
 
             await store.InsertJobAsync(job, CancellationToken.None);
@@ -252,13 +256,15 @@ namespace EXBP.Dipren.Tests.Data
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             const string jobId = "DPJ-0001";
-            DateTime timestamp = DateTime.UtcNow;
+            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow.AddMinutes(-3));
             Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
 
             await store.InsertJobAsync(job, CancellationToken.None);
 
             Guid partitionId = Guid.NewGuid();
-            Partition partition = new Partition(partitionId, jobId, timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
+            DateTime created = this.FormatDateTime(DateTime.UtcNow.AddMinutes(-2));
+            DateTime updated = this.FormatDateTime(DateTime.UtcNow.AddMinutes(-1));
+            Partition partition = new Partition(partitionId, jobId, created, updated, "a", "z", true, "g", 7L, 18L);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
@@ -433,6 +439,42 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(acquired, Is.Not.Null);
             Assert.That(acquired.Owner, Is.EqualTo("owner"));
             Assert.That(acquired.Updated, Is.EqualTo(now));
+        }
+
+        [Test]
+        public async Task TryAcquirePartitionsAsync_FreePartitionsExist_OnlyOneIsUpdated()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            const string jobId = "DPJ-0001";
+            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
+            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Guid partitionId1 = Guid.NewGuid();
+            Guid partitionId2 = Guid.NewGuid();
+            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+
+            Partition partition1 = new Partition(partitionId1, jobId, partitionCreated, partitionUpdated, "a", "c", true, "b", 1L, 1L, null, false);
+            Partition partition2 = new Partition(partitionId2, jobId, partitionCreated, partitionUpdated, "d", "f", true, "e", 1L, 1L, null, false);
+
+            await store.InsertPartitionAsync(partition1, CancellationToken.None);
+            await store.InsertPartitionAsync(partition2, CancellationToken.None);
+
+            DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
+            DateTime cut = new DateTime(2022, 9, 12, 16, 22, 10, DateTimeKind.Utc);
+
+            Partition acquired = await store.TryAcquirePartitionsAsync(jobId, "owner", now, cut, CancellationToken.None);
+
+            Assert.That(acquired, Is.Not.Null);
+            Assert.That(acquired.Owner, Is.EqualTo("owner"));
+            Assert.That(acquired.Updated, Is.EqualTo(now));
+
+            Partition partition = await store.RetrievePartitionAsync((acquired.Id == partitionId1) ? partitionId2 : partitionId1, CancellationToken.None);
+
+            Assert.That(partition.Owner, Is.Null);
         }
 
         [Test]

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EXBP.Dipren.Data.SQLite {
+namespace EXBP.Dipren.Data.Postgres {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace EXBP.Dipren.Data.SQLite {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class SQLiteEngineDataStoreResources {
+    internal class PostgresEngineDataStoreResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal SQLiteEngineDataStoreResources() {
+        internal PostgresEngineDataStoreResources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace EXBP.Dipren.Data.SQLite {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EXBP.Dipren.Data.SQLite.SQLiteEngineDataStoreResources", typeof(SQLiteEngineDataStoreResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EXBP.Dipren.Data.Postgres.PostgresEngineDataStoreResources", typeof(PostgresEngineDataStoreResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -62,8 +62,8 @@ namespace EXBP.Dipren.Data.SQLite {
         
         /// <summary>
         ///   Looks up a localized string similar to SELECT
-        ///  (SELECT COUNT() FROM &quot;jobs&quot; WHERE (&quot;id&quot; = $job_id)) AS &quot;job_count&quot;,
-        ///  (SELECT COUNT() FROM &quot;partitions&quot; WHERE (&quot;job_id&quot; = $job_id) AND (&quot;is_completed&quot; = 0)) AS &quot;partition_count&quot;;.
+        ///  (SELECT COUNT(1) FROM &quot;dipren&quot;.&quot;jobs&quot; WHERE (&quot;id&quot; = @job_id)) AS &quot;job_count&quot;,
+        ///  (SELECT COUNT(1) FROM &quot;dipren&quot;.&quot;partitions&quot; WHERE (&quot;job_id&quot; = @job_id) AND (&quot;is_completed&quot; = FALSE)) AS &quot;partition_count&quot;;.
         /// </summary>
         internal static string QueryCountIncompletePartitions {
             get {
@@ -73,9 +73,9 @@ namespace EXBP.Dipren.Data.SQLite {
         
         /// <summary>
         ///   Looks up a localized string similar to SELECT
-        ///  COUNT() AS &quot;count&quot;
+        ///  COUNT(1) AS &quot;count&quot;
         ///FROM
-        ///  &quot;jobs&quot;;.
+        ///  &quot;dipren&quot;.&quot;jobs&quot;;.
         /// </summary>
         internal static string QueryCountJobs {
             get {
@@ -84,43 +84,12 @@ namespace EXBP.Dipren.Data.SQLite {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CREATE TABLE IF NOT EXISTS &quot;jobs&quot;
-        ///(
-        ///  &quot;id&quot; VARCHAR(256) NOT NULL,
-        ///  &quot;created&quot; DATETIME NOT NULL,
-        ///  &quot;updated&quot; DATETIME NOT NULL,
-        ///  &quot;state&quot; INTEGER NOT NULL,
-        ///  &quot;error&quot; TEXT NULL,
-        ///  
-        ///  CONSTRAINT &quot;pk_jobs&quot; PRIMARY KEY (&quot;id&quot;)
-        ///)
-        ///WITHOUT ROWID;
-        ///
-        ///
-        ///CREATE TABLE IF NOT EXISTS &quot;partitions&quot;
-        ///(
-        ///  &quot;id&quot; CHAR(36) NOT NULL,
-        ///  &quot;job_id&quot; VARCHAR(256) NOT NULL,
-        ///  &quot;created&quot; DATETIME NOT NULL,
-        ///  &quot;updated&quot; DATETIME NOT NULL,
-        ///  &quot;owner&quot; VARCHAR(256) NULL,
-        ///  &quot;first&quot; TEXT NOT NULL,
-        ///  &quot;last&quot; TEXT NOT NULL,
-        ///  &quot;is_i [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string QueryCreateSchema {
-            get {
-                return ResourceManager.GetString("QueryCreateSchema", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to SELECT
-        ///  COUNT() AS &quot;count&quot;
+        ///  COUNT(1) AS &quot;count&quot;
         ///FROM
-        ///  &quot;jobs&quot;
+        ///  &quot;dipren&quot;.&quot;jobs&quot;
         ///WHERE
-        ///  (&quot;id&quot; = $id);.
+        ///  (&quot;id&quot; = @id);.
         /// </summary>
         internal static string QueryDoesJobExist {
             get {
@@ -130,11 +99,11 @@ namespace EXBP.Dipren.Data.SQLite {
         
         /// <summary>
         ///   Looks up a localized string similar to SELECT
-        ///  COUNT() AS &quot;count&quot;
+        ///  COUNT(1) AS &quot;count&quot;
         ///FROM
-        ///  &quot;partitions&quot;
+        ///  &quot;dipren&quot;.&quot;partitions&quot;
         ///WHERE
-        ///  (&quot;id&quot; = $id);.
+        ///  (&quot;id&quot; = @id);.
         /// </summary>
         internal static string QueryDoesPartitionExist {
             get {
@@ -143,16 +112,7 @@ namespace EXBP.Dipren.Data.SQLite {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to PRAGMA foreign_keys = ON;.
-        /// </summary>
-        internal static string QueryEnableForeignKeys {
-            get {
-                return ResourceManager.GetString("QueryEnableForeignKeys", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to INSERT INTO &quot;jobs&quot;
+        ///   Looks up a localized string similar to INSERT INTO &quot;dipren&quot;.&quot;jobs&quot;
         ///(
         ///  &quot;id&quot;,
         ///  &quot;created&quot;,
@@ -162,11 +122,11 @@ namespace EXBP.Dipren.Data.SQLite {
         ///)
         ///VALUES
         ///(
-        ///  $id,
-        ///  $created,
-        ///  $updated,
-        ///  $state,
-        ///  $error
+        ///  @id,
+        ///  @created,
+        ///  @updated,
+        ///  @state,
+        ///  @error
         ///);.
         /// </summary>
         internal static string QueryInsertJob {
@@ -176,7 +136,7 @@ namespace EXBP.Dipren.Data.SQLite {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to INSERT INTO &quot;partitions&quot;
+        ///   Looks up a localized string similar to INSERT INTO &quot;dipren&quot;.&quot;partitions&quot;
         ///(
         ///  &quot;id&quot;,
         ///  &quot;job_id&quot;,
@@ -194,19 +154,19 @@ namespace EXBP.Dipren.Data.SQLite {
         ///)
         ///VALUES
         ///(
-        ///  $id,
-        ///  $job_id,
-        ///  $created,
-        ///  $updated,
-        ///  $owner,
-        ///  $first,
-        ///  $last,
-        ///  $is_inclusive,
-        ///  $position,
-        ///  $processed,
-        ///  $remaining,
-        ///  $is_completed,
-        ///  $is_split_requested
+        ///  @id,
+        ///  @job_id,
+        ///  @created,
+        ///  @updated,
+        ///  @owner,
+        ///  @first,
+        ///  @last,
+        ///  @is_inclusive,
+        ///  @position,
+        ///  @processed,
+        ///  @remaining,
+        ///  @is_completed,
+        ///  @is_split_requested
         ///);.
         /// </summary>
         internal static string QueryInsertPartition {
@@ -217,16 +177,16 @@ namespace EXBP.Dipren.Data.SQLite {
         
         /// <summary>
         ///   Looks up a localized string similar to UPDATE
-        ///  &quot;partitions&quot;
+        ///  &quot;dipren&quot;.&quot;partitions&quot;
         ///SET
-        ///  &quot;updated&quot; = $updated,
-        ///  &quot;position&quot; = $position,
-        ///  &quot;processed&quot; = (&quot;processed&quot; + $progress),
-        ///  &quot;remaining&quot; = (&quot;remaining&quot; - $progress),
-        ///  &quot;is_completed&quot; = $completed
+        ///  &quot;updated&quot; = @updated,
+        ///  &quot;position&quot; = @position,
+        ///  &quot;processed&quot; = (&quot;processed&quot; + @progress),
+        ///  &quot;remaining&quot; = (&quot;remaining&quot; - @progress),
+        ///  &quot;is_completed&quot; = @completed
         ///WHERE
-        ///  (&quot;id&quot; = $id) AND
-        ///  (&quot;owner&quot; = $owner)
+        ///  (&quot;id&quot; = @id) AND
+        ///  (&quot;owner&quot; = @owner)
         ///RETURNING
         ///  &quot;id&quot; AS &quot;id&quot;,
         ///  &quot;job_id&quot; AS &quot;job_id&quot;,
@@ -237,7 +197,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;last&quot; AS &quot;last&quot;,
         ///  &quot;is_inclusive&quot; AS &quot;is_inclusive&quot;,
         ///  &quot;position&quot; AS &quot;position&quot;,
-        ///  &quot;processed&quot; AS &quot;proce [rest of string was truncated]&quot;;.
+        ///  &quot;processed&quot;  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryReportProgress {
             get {
@@ -253,9 +213,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;state&quot; AS &quot;state&quot;,
         ///  &quot;error&quot; AS &quot;error&quot;
         ///FROM
-        ///  &quot;jobs&quot;
+        ///  &quot;dipren&quot;.&quot;jobs&quot;
         ///WHERE
-        ///  &quot;id&quot; = $id;.
+        ///  (&quot;id&quot; = @id);.
         /// </summary>
         internal static string QueryRetrieveJobById {
             get {
@@ -279,9 +239,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;is_completed&quot; AS &quot;is_completed&quot;,
         ///  &quot;is_split_requested&quot; AS &quot;is_split_requested&quot;
         ///FROM
-        ///  &quot;partitions&quot;
+        ///  &quot;dipren&quot;.&quot;partitions&quot;
         ///WHERE
-        ///  (&quot;id&quot; = $id);.
+        ///  (&quot;id&quot; = @id);.
         /// </summary>
         internal static string QueryRetrievePartitionById {
             get {
@@ -290,28 +250,35 @@ namespace EXBP.Dipren.Data.SQLite {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UPDATE
-        ///  &quot;partitions&quot;
+        ///   Looks up a localized string similar to WITH &quot;candidate&quot; AS
+        ///(
+        ///  SELECT
+        ///    &quot;id&quot;
+        ///  FROM
+        ///    &quot;dipren&quot;.&quot;partitions&quot;
+        ///  WHERE
+        ///    (&quot;job_id&quot; = @job_id) AND
+        ///    ((&quot;owner&quot; IS NULL) OR (&quot;updated&quot; &lt; @active)) AND
+        ///    (&quot;is_completed&quot; = FALSE)
+        ///  ORDER BY
+        ///    &quot;remaining&quot; DESC
+        ///  LIMIT
+        ///    1
+        ///)
+        ///UPDATE
+        ///  &quot;dipren&quot;.&quot;partitions&quot; AS &quot;target&quot;
         ///SET
-        ///  &quot;updated&quot; = $updated,
-        ///  &quot;owner&quot; = $owner
+        ///  &quot;updated&quot; = @updated,
+        ///  &quot;owner&quot; = @owner
+        ///FROM
+        ///  &quot;candidate&quot;
         ///WHERE
-        ///  (&quot;job_id&quot; = $job_id) AND
-        ///  ((&quot;owner&quot; IS NULL) OR (&quot;updated&quot; &lt; $active)) AND
-        ///  (&quot;is_completed&quot; = 0)
+        ///  (&quot;target&quot;.&quot;id&quot; = &quot;candidate&quot;.&quot;id&quot;)
         ///RETURNING
-        ///  &quot;id&quot; AS &quot;id&quot;,
+        ///  &quot;target&quot;.&quot;id&quot; AS &quot;id&quot;,
         ///  &quot;job_id&quot; AS &quot;job_id&quot;,
         ///  &quot;created&quot; AS &quot;created&quot;,
-        ///  &quot;updated&quot; AS &quot;updated&quot;,
-        ///  &quot;owner&quot; AS &quot;owner&quot;,
-        ///  &quot;first&quot; AS &quot;first&quot;,
-        ///  &quot;last&quot; AS &quot;last&quot;,
-        ///  &quot;is_inclusive&quot; AS &quot;is_inclusive&quot;,
-        ///  &quot;position&quot; AS &quot;position&quot;,
-        ///  &quot;processed&quot; AS &quot;processed&quot;,
-        ///  &quot;remaining&quot; AS &quot;remaining&quot;,
-        ///  &quot;is_completed&quot; AS &quot;is_c [rest of string was truncated]&quot;;.
+        ///  &quot;upda [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryTryAcquirePartition {
             get {
@@ -320,21 +287,31 @@ namespace EXBP.Dipren.Data.SQLite {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UPDATE
-        ///  &quot;partitions&quot;
+        ///   Looks up a localized string similar to WITH &quot;candidate&quot; AS
+        ///(
+        ///  SELECT
+        ///    &quot;id&quot;
+        ///  FROM
+        ///    &quot;dipren&quot;.&quot;partitions&quot;
+        ///  WHERE
+        ///    (&quot;job_id&quot; = @job_id) AND
+        ///    (&quot;owner&quot; IS NOT NULL) AND
+        ///    (&quot;updated&quot; &gt;= @active) AND
+        ///    (&quot;is_completed&quot; = FALSE) AND
+        ///    (&quot;is_split_requested&quot; = FALSE)
+        ///  ORDER BY
+        ///    &quot;remaining&quot; DESC
+        ///  LIMIT
+        ///    1
+        ///)
+        ///UPDATE
+        ///  &quot;dipren&quot;.&quot;partitions&quot; AS &quot;target&quot;
         ///SET
-        ///  &quot;is_split_requested&quot; = 1
+        ///  &quot;is_split_requested&quot; = TRUE
+        ///FROM
+        ///  &quot;candidate&quot;
         ///WHERE
-        ///  (&quot;job_id&quot; = $job_id) AND
-        ///  (&quot;owner&quot; IS NOT NULL) AND
-        ///  (&quot;updated&quot; &gt;= $active) AND
-        ///  (&quot;is_completed&quot; = 0) AND
-        ///  (&quot;is_split_requested&quot; = 0)
-        ///ORDER BY
-        ///  &quot;remaining&quot; DESC
-        ///LIMIT
-        ///  1;
-        ///.
+        ///  (&quot;target&quot;.&quot;id&quot; = &quot;candidate&quot;.&quot;id&quot;);.
         /// </summary>
         internal static string QueryTryRequestSplit {
             get {
@@ -344,13 +321,13 @@ namespace EXBP.Dipren.Data.SQLite {
         
         /// <summary>
         ///   Looks up a localized string similar to UPDATE
-        ///  &quot;jobs&quot;
+        ///  &quot;dipren&quot;.&quot;jobs&quot;
         ///SET
-        ///  &quot;updated&quot; = $updated,
-        ///  &quot;state&quot; = $state,
-        ///  &quot;error&quot; = $error
+        ///  &quot;updated&quot; = @updated,
+        ///  &quot;state&quot; = @state,
+        ///  &quot;error&quot; = @error
         ///WHERE
-        ///  (&quot;id&quot; = $id)
+        ///  (&quot;id&quot; = @id)
         ///RETURNING
         ///  &quot;id&quot; AS &quot;id&quot;,
         ///  &quot;created&quot; AS &quot;created&quot;,
@@ -366,18 +343,18 @@ namespace EXBP.Dipren.Data.SQLite {
         
         /// <summary>
         ///   Looks up a localized string similar to UPDATE
-        ///  &quot;partitions&quot;
+        ///  &quot;dipren&quot;.&quot;partitions&quot;
         ///SET
-        ///  &quot;updated&quot; = $updated,
-        ///  &quot;last&quot; = $last,
-        ///  &quot;is_inclusive&quot; = $is_inclusive,
-        ///  &quot;position&quot; = $position,
-        ///  &quot;processed&quot; = $processed,
-        ///  &quot;remaining&quot; = $remaining,
-        ///  &quot;is_split_requested&quot; = $is_split_requested
+        ///  &quot;updated&quot; = @updated,
+        ///  &quot;last&quot; = @last,
+        ///  &quot;is_inclusive&quot; = @is_inclusive,
+        ///  &quot;position&quot; = @position,
+        ///  &quot;processed&quot; = @processed,
+        ///  &quot;remaining&quot; = @remaining,
+        ///  &quot;is_split_requested&quot; = @is_split_requested
         ///WHERE
-        ///  (&quot;id&quot; = $partition_id) AND
-        ///  (&quot;owner&quot; = $owner);.
+        ///  (&quot;id&quot; = @partition_id) AND
+        ///  (&quot;owner&quot; = @owner);.
         /// </summary>
         internal static string QueryUpdateSplitPartition {
             get {
