@@ -12,14 +12,31 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <PackageReference Include="Npgsql" Version="6.0.7" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit.Analyzers" Version="3.3.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\EXBP.Dipren.Tests\EXBP.Dipren.Tests.csproj" />
+    <ProjectReference Include="..\..\..\EXBP.Dipren\EXBP.Dipren.csproj" />
     <ProjectReference Include="..\EXBP.Dipren.Data.Postgres\EXBP.Dipren.Data.Postgres.csproj" />
-    <ProjectReference Include="..\EXBP.Dipren\EXBP.Dipren.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="PostgresEngineDataStoreTestsResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>PostgresEngineDataStoreTestsResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="PostgresEngineDataStoreTestsResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>PostgresEngineDataStoreTestsResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
