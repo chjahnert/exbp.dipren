@@ -96,7 +96,6 @@ namespace EXBP.Dipren.Data.SQLite {
         ///)
         ///WITHOUT ROWID;
         ///
-        ///
         ///CREATE TABLE IF NOT EXISTS &quot;partitions&quot;
         ///(
         ///  &quot;id&quot; CHAR(36) NOT NULL,
@@ -106,7 +105,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;owner&quot; VARCHAR(256) NULL,
         ///  &quot;first&quot; TEXT NOT NULL,
         ///  &quot;last&quot; TEXT NOT NULL,
-        ///  &quot;is_i [rest of string was truncated]&quot;;.
+        ///  &quot;is_inc [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryCreateSchema {
             get {

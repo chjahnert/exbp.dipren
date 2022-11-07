@@ -141,7 +141,6 @@ FROM
 )
 WITHOUT ROWID;
 
-
 CREATE TABLE IF NOT EXISTS "partitions"
 (
   "id" CHAR(36) NOT NULL,
@@ -163,7 +162,8 @@ CREATE TABLE IF NOT EXISTS "partitions"
 )
 WITHOUT ROWID;
 
-CREATE INDEX "ix_partitions_by_state" ON "partitions" ("job_id", "updated", "owner") WHERE ("is_completed" = 0);</value>
+CREATE INDEX "ix_partitions_by_state" ON "partitions" ("job_id", "updated", "owner") WHERE ("is_completed" = 0);
+CREATE INDEX "ux_partitions_owner" ON "partitions" ("owner") WHERE ("owner" IS NOT NULL);</value>
   </data>
   <data name="QueryDoesJobExist" xml:space="preserve">
     <value>SELECT
