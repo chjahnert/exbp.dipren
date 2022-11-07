@@ -269,7 +269,8 @@ namespace EXBP.Dipren.Data.Postgres {
         ///  &quot;dipren&quot;.&quot;partitions&quot; AS &quot;target&quot;
         ///SET
         ///  &quot;updated&quot; = @updated,
-        ///  &quot;owner&quot; = @owner
+        ///  &quot;owner&quot; = @owner,
+        ///  &quot;acquired&quot; = (&quot;acquired&quot; + 1)
         ///FROM
         ///  &quot;candidate&quot;
         ///WHERE
@@ -277,8 +278,7 @@ namespace EXBP.Dipren.Data.Postgres {
         ///RETURNING
         ///  &quot;target&quot;.&quot;id&quot; AS &quot;id&quot;,
         ///  &quot;job_id&quot; AS &quot;job_id&quot;,
-        ///  &quot;created&quot; AS &quot;created&quot;,
-        ///  &quot;upda [rest of string was truncated]&quot;;.
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryTryAcquirePartition {
             get {

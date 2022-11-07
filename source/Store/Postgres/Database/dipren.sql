@@ -34,6 +34,7 @@ CREATE TABLE "dipren"."partitions"
   "created" TIMESTAMP NOT NULL,
   "updated" TIMESTAMP NOT NULL,
   "owner" VARCHAR(256) NULL,
+  "acquired" INTEGER NOT NULL DEFAULT (0),
   "first" TEXT NOT NULL,
   "last" TEXT NOT NULL,
   "is_inclusive" BOOLEAN NOT NULL,
@@ -55,6 +56,7 @@ COMMENT ON COLUMN "dipren"."partitions"."job_id" IS 'The unique identifier of th
 COMMENT ON COLUMN "dipren"."partitions"."created" IS 'A timestamp value indicating when the partition was created.';
 COMMENT ON COLUMN "dipren"."partitions"."updated" IS 'A timestamp value indicating when the partition was last updated.';
 COMMENT ON COLUMN "dipren"."partitions"."owner" IS 'The unique identifier of the processing node owning the partition.';
+COMMENT ON COLUMN "dipren"."partitions"."acquired" IS 'The number of times the partition was acquired by a processing node.';
 COMMENT ON COLUMN "dipren"."partitions"."first" IS 'The first key of the key range associated with the partition.';
 COMMENT ON COLUMN "dipren"."partitions"."last" IS 'The last key of the key range associated with the partition.';
 COMMENT ON COLUMN "dipren"."partitions"."is_inclusive" IS 'Indicates whether the last key is included in the key range.';

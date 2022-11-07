@@ -103,9 +103,8 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;created&quot; DATETIME NOT NULL,
         ///  &quot;updated&quot; DATETIME NOT NULL,
         ///  &quot;owner&quot; VARCHAR(256) NULL,
-        ///  &quot;first&quot; TEXT NOT NULL,
-        ///  &quot;last&quot; TEXT NOT NULL,
-        ///  &quot;is_inc [rest of string was truncated]&quot;;.
+        ///  &quot;acquired&quot; INT NOT NULL DEFAULT (0),
+        ///  &quot;first&quot; TEXT NOT N [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryCreateSchema {
             get {
@@ -293,7 +292,8 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;partitions&quot;
         ///SET
         ///  &quot;updated&quot; = $updated,
-        ///  &quot;owner&quot; = $owner
+        ///  &quot;owner&quot; = $owner,
+        ///  &quot;acquired&quot; = (&quot;acquired&quot; + 1)
         ///WHERE
         ///  (&quot;job_id&quot; = $job_id) AND
         ///  ((&quot;owner&quot; IS NULL) OR (&quot;updated&quot; &lt; $active)) AND
@@ -309,8 +309,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;is_inclusive&quot; AS &quot;is_inclusive&quot;,
         ///  &quot;position&quot; AS &quot;position&quot;,
         ///  &quot;processed&quot; AS &quot;processed&quot;,
-        ///  &quot;remaining&quot; AS &quot;remaining&quot;,
-        ///  &quot;is_completed&quot; AS &quot;is_c [rest of string was truncated]&quot;;.
+        ///  &quot;remaining&quot; AS &quot;rema [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryTryAcquirePartition {
             get {

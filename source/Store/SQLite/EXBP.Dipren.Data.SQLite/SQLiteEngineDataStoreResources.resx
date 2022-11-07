@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS "partitions"
   "created" DATETIME NOT NULL,
   "updated" DATETIME NOT NULL,
   "owner" VARCHAR(256) NULL,
+  "acquired" INT NOT NULL DEFAULT (0),
   "first" TEXT NOT NULL,
   "last" TEXT NOT NULL,
   "is_inclusive" BOOLEAN NOT NULL,
@@ -300,7 +301,8 @@ WHERE
   "partitions"
 SET
   "updated" = $updated,
-  "owner" = $owner
+  "owner" = $owner,
+  "acquired" = ("acquired" + 1)
 WHERE
   ("job_id" = $job_id) AND
   (("owner" IS NULL) OR ("updated" &lt; $active)) AND
