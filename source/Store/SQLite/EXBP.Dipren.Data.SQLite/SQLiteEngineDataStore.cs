@@ -365,6 +365,43 @@ namespace EXBP.Dipren.Data.SQLite
                 {
                     using SQLiteCommand command = new SQLiteCommand
                     {
+                        CommandText = SQLiteEngineDataStoreResources.QueryUpdateSplitPartition,
+                        CommandType = CommandType.Text,
+                        Transaction = transaction
+                    };
+
+                    string id = partitionToUpdate.Id.ToString("d");
+
+                    command.Parameters.AddWithValue("$partition_id", id);
+                    command.Parameters.AddWithValue("$owner", partitionToUpdate.Owner);
+                    command.Parameters.AddWithValue("$updated", partitionToUpdate.Updated);
+                    command.Parameters.AddWithValue("$last", partitionToUpdate.Last);
+                    command.Parameters.AddWithValue("$is_inclusive", partitionToUpdate.IsInclusive);
+                    command.Parameters.AddWithValue("$position", partitionToUpdate.Position);
+                    command.Parameters.AddWithValue("$processed", partitionToUpdate.Processed);
+                    command.Parameters.AddWithValue("$remaining", partitionToUpdate.Remaining);
+                    command.Parameters.AddWithValue("$is_split_requested", partitionToUpdate.IsSplitRequested);
+
+                    int affected = await command.ExecuteNonQueryAsync(cancellation);
+
+                    if (affected != 1)
+                    {
+                        bool exists = await this.DoesPartitionExistAsync(transaction, partitionToUpdate.Id, cancellation);
+
+                        if (exists == false)
+                        {
+                            this.RaiseErrorUnknownPartitionIdentifier();
+                        }
+                        else
+                        {
+                            this.RaiseErrorLockNoLongerHeld();
+                        }
+                    }
+                }
+
+                {
+                    using SQLiteCommand command = new SQLiteCommand
+                    {
                         CommandText = SQLiteEngineDataStoreResources.QueryInsertPartition,
                         CommandType = CommandType.Text,
                         Transaction = transaction
@@ -393,41 +430,6 @@ namespace EXBP.Dipren.Data.SQLite
                     catch (SQLiteException ex) when (ex.ErrorCode == 19)
                     {
                         this.RaiseErrorDuplicatePartitionIdentifier(ex);
-                    }
-                }
-
-                bool exists = await this.DoesPartitionExistAsync(transaction, partitionToUpdate.Id, cancellation);
-
-                if (exists == false)
-                {
-                    this.RaiseErrorUnknownPartitionIdentifier();
-                }
-
-                {
-                    using SQLiteCommand command = new SQLiteCommand
-                    {
-                        CommandText = SQLiteEngineDataStoreResources.QueryUpdateSplitPartition,
-                        CommandType = CommandType.Text,
-                        Transaction = transaction
-                    };
-
-                    string id = partitionToUpdate.Id.ToString("d");
-
-                    command.Parameters.AddWithValue("$partition_id", id);
-                    command.Parameters.AddWithValue("$owner", partitionToUpdate.Owner);
-                    command.Parameters.AddWithValue("$updated", partitionToUpdate.Updated);
-                    command.Parameters.AddWithValue("$last", partitionToUpdate.Last);
-                    command.Parameters.AddWithValue("$is_inclusive", partitionToUpdate.IsInclusive);
-                    command.Parameters.AddWithValue("$position", partitionToUpdate.Position);
-                    command.Parameters.AddWithValue("$processed", partitionToUpdate.Processed);
-                    command.Parameters.AddWithValue("$remaining", partitionToUpdate.Remaining);
-                    command.Parameters.AddWithValue("$is_split_requested", partitionToUpdate.IsSplitRequested);
-
-                    int affected = await command.ExecuteNonQueryAsync(cancellation);
-
-                    if (affected != 1)
-                    {
-                        this.RaiseErrorLockNoLongerHeld();
                     }
                 }
 
