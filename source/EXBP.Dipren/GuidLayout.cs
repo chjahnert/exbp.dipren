@@ -10,7 +10,7 @@ namespace EXBP.Dipren
 
 
         /// <summary>
-        ///   Gets byte layout of an UUID value used by Microsoft SQL Server.
+        ///   Gets byte layout of an GUID value used by Microsoft SQL Server.
         /// </summary>
         /// <value>
         ///   An array of 16 <see cref="byte"/> values containing the layout for GUID values in little endian order
@@ -19,7 +19,7 @@ namespace EXBP.Dipren
         public static byte[] MicrosoftSqlServer { get; } = { 10, 11, 12, 13, 14, 15, 8, 9, 6, 7, 4, 5, 0, 1, 2, 3 };
 
         /// <summary>
-        ///   Gets byte layout of an UUID value in lexicographical order.
+        ///   Gets byte layout of an GUID value in lexicographical order.
         /// </summary>
         /// <value>
         ///   An array of 16 <see cref="byte"/> values containing the layout for GUID values in lexicographical order.
