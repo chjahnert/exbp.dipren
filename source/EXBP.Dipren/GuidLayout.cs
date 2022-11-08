@@ -18,6 +18,14 @@ namespace EXBP.Dipren
         /// </value>
         public static byte[] MicrosoftSqlServer { get; } = { 10, 11, 12, 13, 14, 15, 8, 9, 6, 7, 4, 5, 0, 1, 2, 3 };
 
+        /// <summary>
+        ///   Gets byte layout of an UUID value in lexicographical order.
+        /// </summary>
+        /// <value>
+        ///   An array of 16 <see cref="byte"/> values containing the layout for GUID values in lexicographical order.
+        /// </value>
+        public static byte[] LexicographicalOrder { get; } = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
 
         /// <summary>
         ///   Determines whether the specified <see cref="byte"/> array is a valid GUID layout.
