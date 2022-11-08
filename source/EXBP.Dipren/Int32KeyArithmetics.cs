@@ -26,13 +26,12 @@ namespace EXBP.Dipren
         ///   Initializes a new instance of the <see cref="Int32KeyArithmetics"/> class.
         /// </summary>
         /// <param name="comparer">
-        ///   The <see cref="IComparable{T}"/> of <see cref="int"/> object to use to compare key values.
+        ///   The <see cref="IComparable{T}"/> of <see cref="int"/> object to use to compare key values; or
+        ///   <see langword="null"/> to use the default comparer.
         /// </param>
-        public Int32KeyArithmetics(IComparer<int> comparer)
+        public Int32KeyArithmetics(IComparer<int> comparer = null)
         {
-            Assert.ArgumentIsNotNull(comparer, nameof(comparer));
-
-            this._comparer = comparer;
+            this._comparer = (comparer ?? Comparer<int>.Default);
         }
 
 
