@@ -1,5 +1,5 @@
 ﻿
-namespace EXBP.Dipren
+namespace EXBP.Dipren.Data
 {
     /// <summary>
     ///   Allows a type to implement a key serializer that can handle convert key values to strings and vice versa.
