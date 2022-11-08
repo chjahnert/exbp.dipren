@@ -10,7 +10,7 @@ namespace EXBP.Dipren
     /// <summary>
     ///   Implements key arithmetics for the <see cref="Guid"/> type.
     /// </summary>
-    public class GuidKeyArithmetics
+    public class GuidKeyArithmetics : IKeyArithmetics<Guid>
     {
         private const int GUID_LENGTH = 16;
 
