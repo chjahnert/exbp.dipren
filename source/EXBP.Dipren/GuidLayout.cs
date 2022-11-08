@@ -57,7 +57,7 @@ namespace EXBP.Dipren
 
                 for (int i = 0; i < GUID_LENGTH; i++)
                 {
-                    if (ordered[i] != 0)
+                    if (ordered[i] != i)
                     {
                         result = false;
                         break;
