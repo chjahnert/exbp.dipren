@@ -65,51 +65,13 @@ namespace EXBP.Dipren
             created = null;
 
             Range<BigInteger> rangeBi = this.ToBigIntegerRange(range);
-            Range<BigInteger> resultBi = this.Split(rangeBi, out Range<BigInteger> createdBi);
+            Range<BigInteger> resultBi = BigIntegerKeyArithmetics.Default.Split(rangeBi, out Range<BigInteger> createdBi);
 
             Range<Guid> result = this.ToGuidRange(resultBi);
 
             if (createdBi != null)
             {
                 created = this.ToGuidRange(createdBi);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        ///   Splits the specified range into two ranges.
-        /// </summary>
-        /// <param name="range">
-        ///   The <see cref="Range{TKey}"/> of <see cref="BigInteger"/> values to split.
-        /// </param>
-        /// <param name="created">
-        ///   A variable that receives the new <see cref="Range{TKey}"/> of <see cref="BigInteger"/> object.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Range{TKey}"/> of <see cref="BigInteger"/> object that is the updated
-        ///   <paramref name="range"/>.
-        /// </returns>
-        private Range<BigInteger> Split(Range<BigInteger> range, out Range<BigInteger> created)
-        {
-            Assert.ArgumentIsNotNull(range, nameof(range));
-
-            Range<BigInteger> result = range;
-            created = null;
-
-            BigInteger distance = BigInteger.Abs(range.Last - range.First);
-
-            if (((range.IsInclusive == true) && (distance >= 2)) || ((range.IsInclusive == false) && (distance >= 3)))
-            {
-                BigInteger half = (distance / 2);
-
-                if (range.Last < range.First)
-                {
-                    half *= -1;
-                }
-
-                result = new Range<BigInteger>(range.First, range.First + half, false);
-                created = new Range<BigInteger>(range.First + half, range.Last, range.IsInclusive);
             }
 
             return result;
