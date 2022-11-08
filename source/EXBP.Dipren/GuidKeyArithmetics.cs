@@ -1,5 +1,4 @@
 ﻿
-
 using System.Diagnostics;
 using System.Numerics;
 
@@ -25,6 +24,22 @@ namespace EXBP.Dipren
         ///   A <see cref="GuidKeyArithmetics"/> object that uses the GUID layout used by Microsoft SQL Server.
         /// </value>
         public static GuidKeyArithmetics MicrosoftSqlServer { get; } = new GuidKeyArithmetics(GuidLayout.MicrosoftSqlServer);
+
+        /// <summary>
+        ///   Gets a <see cref="GuidKeyArithmetics"/> object that uses a lexicographical GUID layout.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="GuidKeyArithmetics"/> object that uses a lexicographical GUID layout.
+        /// </value>
+        public static GuidKeyArithmetics LexicographicalOrder { get; } = new GuidKeyArithmetics(GuidLayout.LexicographicalOrder);
+
+        /// <summary>
+        ///   Gets a <see cref="GuidKeyArithmetics"/> object that uses the GUID layout used by the .NET Framework.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="GuidKeyArithmetics"/> object that uses the GUID layout used by the .NET Framework.
+        /// </value>
+        public static GuidKeyArithmetics DotNetFramework { get; } = new GuidKeyArithmetics(GuidLayout.DotNetFramework);
 
 
         /// <summary>
