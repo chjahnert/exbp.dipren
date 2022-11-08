@@ -21,7 +21,7 @@ namespace EXBP.Dipren.Tests
         [TestCase(8, 1, false, 8, 4, 4, 1)]
         [TestCase(-7, 5, false, -7, -1, -1, 5)]
         [TestCase(5, -7, false, 5, -1, -1, -7)]
-        public void Split_ValidArguments_SplitsRangeCorrectly(int inputFirst, int inputLast, bool inputInclusive, int returnedFirst, int returnedLast, int createdFirst, int createdLast)
+        public void Split_ArgumentRangeIsSplittable_SplitsRangeCorrectly(int inputFirst, int inputLast, bool inputInclusive, int returnedFirst, int returnedLast, int createdFirst, int createdLast)
         {
             Range<int> input = new Range<int>(inputFirst, inputLast, inputInclusive);
 
@@ -39,7 +39,7 @@ namespace EXBP.Dipren.Tests
         [TestCase(1, 1, true)]
         [TestCase(1, 2, true)]
         [TestCase(1, 3, false)]
-        public void Split_ArgumentRangeIsTooSmall_ReturnUnchangedRange(int inputFirst, int inputLast, bool inputInclusive)
+        public void Split_ArgumentRangeIsNotSplittable_ReturnUnchangedRange(int inputFirst, int inputLast, bool inputInclusive)
         {
             Range<int> input = new Range<int>(inputFirst, inputLast, inputInclusive);
 
