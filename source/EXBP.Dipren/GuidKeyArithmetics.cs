@@ -19,6 +19,15 @@ namespace EXBP.Dipren
 
 
         /// <summary>
+        ///   Gets a <see cref="GuidKeyArithmetics"/> object that uses the GUID layout used by Microsoft SQL Server.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="GuidKeyArithmetics"/> object that uses the GUID layout used by Microsoft SQL Server.
+        /// </value>
+        public static GuidKeyArithmetics MicrosoftSqlServer { get; } = new GuidKeyArithmetics(GuidLayout.MicrosoftSqlServer);
+
+
+        /// <summary>
         ///   Initializes a new instance of the <see cref="GuidKeyArithmetics"/> class.
         /// </summary>
         /// <param name="layout">
