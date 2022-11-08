@@ -33,7 +33,7 @@ namespace EXBP.Dipren
         ///   An array of 16 <see cref="byte"/> values containing the layout for GUID values in little endian order
         ///   used by the .NET Framework.
         /// </value>
-        public static byte[] DoNetFramework { get; } = { 3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15 };
+        public static byte[] DotNetFramework { get; } = { 3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15 };
 
 
         /// <summary>
