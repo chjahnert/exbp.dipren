@@ -117,9 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ApplicationDescription" xml:space="preserve">
+  <data name="DescriptionCommandDeploy" xml:space="preserve">
+    <value>Create the required database structure and populates the source database.</value>
+  </data>
+  <data name="DescriptionCommandRoot" xml:space="preserve">
     <value>Dipren Demo Application using Postgres
 
-This application demonstrates the capabilities of the Dipren framework. It requires a Postgres SQL Server up and running. The default connection string can be set in the configuration file.</value>
+This application demonstrates the capabilities of the Dipren framework. It requires a Postgres SQL Server up and running.</value>
+  </data>
+  <data name="DescriptionOptionDatabase" xml:space="preserve">
+    <value>The connection string to the Postgres SQL database to use.</value>
+  </data>
+  <data name="DescriptionOptionDatasetSize" xml:space="preserve">
+    <value>The number of rows to generate in the source database.</value>
   </data>
 </root>

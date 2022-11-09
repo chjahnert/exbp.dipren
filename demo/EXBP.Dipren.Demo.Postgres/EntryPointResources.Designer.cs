@@ -61,13 +61,40 @@ namespace EXBP.Dipren.Demo.Postgres {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create the required database structure and populates the source database..
+        /// </summary>
+        internal static string DescriptionCommandDeploy {
+            get {
+                return ResourceManager.GetString("DescriptionCommandDeploy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dipren Demo Application using Postgres
         ///
-        ///This application demonstrates the capabilities of the Dipren framework. It requires a Postgres SQL Server up and running. The default connection string can be set in the configuration file..
+        ///This application demonstrates the capabilities of the Dipren framework. It requires a Postgres SQL Server up and running..
         /// </summary>
-        internal static string ApplicationDescription {
+        internal static string DescriptionCommandRoot {
             get {
-                return ResourceManager.GetString("ApplicationDescription", resourceCulture);
+                return ResourceManager.GetString("DescriptionCommandRoot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The connection string to the Postgres SQL database to use..
+        /// </summary>
+        internal static string DescriptionOptionDatabase {
+            get {
+                return ResourceManager.GetString("DescriptionOptionDatabase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of rows to generate in the source database..
+        /// </summary>
+        internal static string DescriptionOptionDatasetSize {
+            get {
+                return ResourceManager.GetString("DescriptionOptionDatasetSize", resourceCulture);
             }
         }
     }
