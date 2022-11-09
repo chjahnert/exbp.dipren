@@ -12,7 +12,7 @@ namespace EXBP.Dipren
     /// <typeparam name="TKey">
     ///   The type of the key.
     /// </typeparam>
-    [DebuggerDisplay("Range = [{First}..{Last}], Inclusive = {IsInclusive}, Ascending = {IsAscending}")]
+    [DebuggerDisplay("Range = [{First}..{Last}], Inclusive = {IsInclusive}")]
     public class Range<TKey>
     {
         private readonly TKey _first;
