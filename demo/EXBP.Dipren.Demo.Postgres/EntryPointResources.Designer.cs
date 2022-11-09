@@ -61,7 +61,7 @@ namespace EXBP.Dipren.Demo.Postgres {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create the required database structure and populates the source database..
+        ///   Looks up a localized string similar to Creates the required database structure and populates the source database..
         /// </summary>
         internal static string DescriptionCommandDeploy {
             get {
@@ -90,6 +90,24 @@ namespace EXBP.Dipren.Demo.Postgres {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Runs a distributed processing job..
+        /// </summary>
+        internal static string DescriptionCommandRun {
+            get {
+                return ResourceManager.GetString("DescriptionCommandRun", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Schedules a distributed processing processing job..
+        /// </summary>
+        internal static string DescriptionCommandSchedule {
+            get {
+                return ResourceManager.GetString("DescriptionCommandSchedule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The connection string to the Postgres SQL database to use..
         /// </summary>
         internal static string DescriptionOptionDatabase {
@@ -101,9 +119,27 @@ namespace EXBP.Dipren.Demo.Postgres {
         /// <summary>
         ///   Looks up a localized string similar to The number of rows to generate in the source database..
         /// </summary>
-        internal static string DescriptionOptionDatasetSize {
+        internal static string DescriptionOptionDeployDatasetSize {
             get {
-                return ResourceManager.GetString("DescriptionOptionDatasetSize", resourceCulture);
+                return ResourceManager.GetString("DescriptionOptionDeployDatasetSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The name of the processing job..
+        /// </summary>
+        internal static string DescriptionOptionName {
+            get {
+                return ResourceManager.GetString("DescriptionOptionName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of processing threads to start..
+        /// </summary>
+        internal static string DescriptionOptionRunThreads {
+            get {
+                return ResourceManager.GetString("DescriptionOptionRunThreads", resourceCulture);
             }
         }
     }
