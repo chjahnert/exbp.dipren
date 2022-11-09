@@ -446,11 +446,10 @@ namespace EXBP.Dipren
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 long excludedKeyRangeSize = await job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
+                long updatedKeyRangeSize = await job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
 
-                if (excludedKeyRangeSize >= job.BatchSize)
+                if ((excludedKeyRangeSize >= job.BatchSize) && (updatedKeyRangeSize >= job.BatchSize))
                 {
-                    long updatedKeyRangeSize = await job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
-
                     DateTime timestamp = this.Clock.GetDateTime();
 
                     Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updatedKeyRange, partition.Position, partition.Processed, (updatedKeyRangeSize - 1), false, false);
