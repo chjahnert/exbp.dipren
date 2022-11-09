@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Npgsql" Version="6.0.7" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +23,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>DatabaseResources.resx</DependentUpon>
     </Compile>
+    <Compile Update="EntryPointResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>EntryPointResources.resx</DependentUpon>
+    </Compile>
     <Compile Update="MeasurementDataSourceResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -33,6 +39,10 @@
     <EmbeddedResource Update="DatabaseResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>DatabaseResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="EntryPointResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>EntryPointResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="MeasurementDataSourceResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

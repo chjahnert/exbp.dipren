@@ -1,11 +1,22 @@
 ﻿
+using System.CommandLine;
+
 namespace EXBP.Dipren.Demo.Postgres
 {
     internal class EntryPoint
     {
-        internal static Task<int> Main(string[] args)
+        internal static async Task<int> Main(string[] args)
         {
-            return Task.FromResult(0);
+            RootCommand root = new RootCommand(EntryPointResources.ApplicationDescription);
+
+            root.SetHandler(() =>
+            {
+                Console.WriteLine("Hello world!");
+            });
+
+            await root.InvokeAsync(args);
+
+            return 0;
         }
     }
 }
