@@ -1,4 +1,6 @@
 ﻿
+using EXBP.Dipren.Data;
+
 using NSubstitute;
 
 using NUnit.Framework;

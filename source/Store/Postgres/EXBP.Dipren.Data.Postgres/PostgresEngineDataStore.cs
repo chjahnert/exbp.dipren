@@ -6,7 +6,6 @@ using System.Diagnostics;
 using EXBP.Dipren.Diagnostics;
 
 using Npgsql;
-
 using NpgsqlTypes;
 
 

@@ -5,7 +5,7 @@ using EXBP.Dipren.Diagnostics;
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Implements key range arithmetics for the <see cref="Int32"/> based key ranges.
+    ///   Implements key arithmetics for the <see cref="int"/> type.
     /// </summary>
     public class Int32KeyArithmetics : IKeyArithmetics<int>
     {
@@ -26,13 +26,12 @@ namespace EXBP.Dipren
         ///   Initializes a new instance of the <see cref="Int32KeyArithmetics"/> class.
         /// </summary>
         /// <param name="comparer">
-        ///   The <see cref="IComparable{T}"/> of <see cref="int"/> object to use to compare key values.
+        ///   The <see cref="IComparable{T}"/> of <see cref="int"/> object to use to compare key values; or
+        ///   <see langword="null"/> to use the default comparer.
         /// </param>
-        public Int32KeyArithmetics(IComparer<int> comparer)
+        public Int32KeyArithmetics(IComparer<int> comparer = null)
         {
-            Assert.ArgumentIsNotNull(comparer, nameof(comparer));
-
-            this._comparer = comparer;
+            this._comparer = (comparer ?? Comparer<int>.Default);
         }
 
 
@@ -40,13 +39,13 @@ namespace EXBP.Dipren
         ///   Splits the specified range into two ranges.
         /// </summary>
         /// <param name="range">
-        ///   The <see cref="Range{TKey}"/> of <see cref="Int32"/> values to split.
+        ///   The <see cref="Range{TKey}"/> of <see cref="int"/> values to split.
         /// </param>
         /// <param name="created">
-        ///   A variable that receives the new <paramref name="range"/> object created.
+        ///   A variable that receives the new <see cref="Range{TKey}"/> of <see cref="int"/> object created.
         /// </param>
         /// <returns>
-        ///   A <see cref="Range{TKey}"/> of <see cref="Int32"/> objects that is the updated value of
+        ///   A <see cref="Range{TKey}"/> of <see cref="int"/> object that is the updated value of
         ///   <paramref name="range"/>.
         /// </returns>
         public Range<int> Split(Range<int> range, out Range<int> created)
@@ -62,7 +61,7 @@ namespace EXBP.Dipren
             {
                 int half = (int) Math.Round(distance / 2);
 
-                bool ascending = range.IsAscending(this._comparer); 
+                bool ascending = range.IsAscending(this._comparer);
 
                 if (ascending == false)
                 {

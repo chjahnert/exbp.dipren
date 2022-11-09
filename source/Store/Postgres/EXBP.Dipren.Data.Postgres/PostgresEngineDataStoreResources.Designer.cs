@@ -264,6 +264,7 @@ namespace EXBP.Dipren.Data.Postgres {
         ///    &quot;remaining&quot; DESC
         ///  LIMIT
         ///    1
+        ///  FOR UPDATE
         ///)
         ///UPDATE
         ///  &quot;dipren&quot;.&quot;partitions&quot; AS &quot;target&quot;
@@ -277,8 +278,7 @@ namespace EXBP.Dipren.Data.Postgres {
         ///  (&quot;target&quot;.&quot;id&quot; = &quot;candidate&quot;.&quot;id&quot;)
         ///RETURNING
         ///  &quot;target&quot;.&quot;id&quot; AS &quot;id&quot;,
-        ///  &quot;job_id&quot; AS &quot;job_id&quot;,
-        /// [rest of string was truncated]&quot;;.
+        ///  &quot;job_id&quot;  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryTryAcquirePartition {
             get {
@@ -303,6 +303,7 @@ namespace EXBP.Dipren.Data.Postgres {
         ///    &quot;remaining&quot; DESC
         ///  LIMIT
         ///    1
+        ///  FOR UPDATE
         ///)
         ///UPDATE
         ///  &quot;dipren&quot;.&quot;partitions&quot; AS &quot;target&quot;
