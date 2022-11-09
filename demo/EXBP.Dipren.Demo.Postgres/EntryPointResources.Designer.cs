@@ -70,6 +70,15 @@ namespace EXBP.Dipren.Demo.Postgres {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Removes all database objects..
+        /// </summary>
+        internal static string DescriptionCommandRemove {
+            get {
+                return ResourceManager.GetString("DescriptionCommandRemove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dipren Demo Application using Postgres
         ///
         ///This application demonstrates the capabilities of the Dipren framework. It requires a Postgres SQL Server up and running..

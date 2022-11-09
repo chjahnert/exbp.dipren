@@ -120,6 +120,9 @@
   <data name="DescriptionCommandDeploy" xml:space="preserve">
     <value>Create the required database structure and populates the source database.</value>
   </data>
+  <data name="DescriptionCommandRemove" xml:space="preserve">
+    <value>Removes all database objects.</value>
+  </data>
   <data name="DescriptionCommandRoot" xml:space="preserve">
     <value>Dipren Demo Application using Postgres
 

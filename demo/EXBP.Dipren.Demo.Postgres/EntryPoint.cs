@@ -12,23 +12,26 @@ namespace EXBP.Dipren.Demo.Postgres
         {
             RootCommand commandRoot = new RootCommand(EntryPointResources.DescriptionCommandRoot);
 
-            Command commandDeploy = new Command("deploy", EntryPointResources.DescriptionCommandDeploy);
+            commandRoot.SetHandler(EntryPoint.RootHandlerAsync);
 
             Option<string> optionDatabase = new Option<string>( "--database", EntryPointResources.DescriptionOptionDatabase)
             {
                 IsRequired = true
             };
 
-            Option<int> optionDatasetSize = new Option<int>("--size", () => DEFAULT_DATASET_SIZE, EntryPointResources.DescriptionOptionDatasetSize);
+            Command commandDeploy = new Command("deploy", EntryPointResources.DescriptionCommandDeploy);
+            Option<int> optionDeployDatasetSize = new Option<int>("--size", () => DEFAULT_DATASET_SIZE, EntryPointResources.DescriptionOptionDatasetSize);
 
             commandDeploy.AddOption(optionDatabase);
-            commandDeploy.AddOption(optionDatasetSize);
-
-            commandDeploy.SetHandler(EntryPoint.DeployHandlerAsync, optionDatabase, optionDatasetSize);
-
+            commandDeploy.AddOption(optionDeployDatasetSize);
+            commandDeploy.SetHandler(EntryPoint.DeployHandlerAsync, optionDatabase, optionDeployDatasetSize);
             commandRoot.Add(commandDeploy);
 
-            commandRoot.SetHandler(EntryPoint.RootHandlerAsync);
+            Command commandRemove = new Command("remove", EntryPointResources.DescriptionCommandRemove);
+
+            commandRemove.AddOption(optionDatabase);
+            commandRemove.SetHandler(EntryPoint.RemoveHandlerAsync, optionDatabase);
+            commandRoot.Add(commandRemove);
 
             await commandRoot.InvokeAsync(args);
 
@@ -46,6 +49,13 @@ namespace EXBP.Dipren.Demo.Postgres
         {
             Console.WriteLine($"db: {connectionString}");
             Console.WriteLine($"ds: {datasetSize}");
+
+            return Task.FromResult(0);
+        }
+
+        private static Task<int> RemoveHandlerAsync(string connectionString)
+        {
+            Console.WriteLine($"db: {connectionString}");
 
             return Task.FromResult(0);
         }
