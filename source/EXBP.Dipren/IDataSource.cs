@@ -32,7 +32,7 @@ namespace EXBP.Dipren
         /// <param name="range">
         ///   The key range to estimate.
         /// </param>
-        /// <param name="canellation">
+        /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
         /// </param>
@@ -40,7 +40,7 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="long"/> that represents the asynchronous operation and
         ///   can be used to access the result.
         /// </returns>
-        Task<long> EstimateRangeSizeAsync(Range<TKey> range, CancellationToken canellation);
+        Task<long> EstimateRangeSizeAsync(Range<TKey> range, CancellationToken cancellation);
 
         /// <summary>
         ///   Returns the next batch of items.
