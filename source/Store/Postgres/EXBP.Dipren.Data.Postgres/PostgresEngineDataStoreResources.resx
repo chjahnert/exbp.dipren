@@ -270,6 +270,7 @@ WHERE
     "remaining" DESC
   LIMIT
     1
+  FOR UPDATE
 )
 UPDATE
   "dipren"."partitions" AS "target"
@@ -313,6 +314,7 @@ RETURNING
     "remaining" DESC
   LIMIT
     1
+  FOR UPDATE
 )
 UPDATE
   "dipren"."partitions" AS "target"
