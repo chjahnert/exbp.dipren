@@ -69,8 +69,8 @@ namespace EXBP.Dipren
                     half *= -1;
                 }
 
-                result = new Range<BigInteger>(range.First, range.First + half, false);
-                created = new Range<BigInteger>(range.First + half, range.Last, range.IsInclusive);
+                result = new Range<BigInteger>(range.First, (range.First + half), false);
+                created = new Range<BigInteger>((range.First + half), range.Last, range.IsInclusive);
             }
             else
             {
