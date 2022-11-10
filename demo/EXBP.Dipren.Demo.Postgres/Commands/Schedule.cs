@@ -1,16 +1,44 @@
 ﻿
+using EXBP.Dipren.Data;
+using EXBP.Dipren.Data.Postgres;
+using EXBP.Dipren.Demo.Postgres.Processing;
+using EXBP.Dipren.Telemetry;
+
+
 namespace EXBP.Dipren.Demo.Postgres.Commands
 {
     internal static class Schedule
     {
-        internal static Task<int> HandleAsync(string connectionString, string name)
+        internal static async Task<int> HandleAsync(string connectionString, string name)
         {
-            Console.WriteLine("SCHEDULE");
-            Console.WriteLine();
-            Console.WriteLine($"database: {connectionString}");
-            Console.WriteLine($"name:     {name}");
+            int result = 0;
 
-            return Task.FromResult(0);
+            try
+            {
+                Console.Write(ScheduleResources.MessageSchedulingJob, name);
+
+                PostgresEngineDataStore store = new PostgresEngineDataStore(connectionString);
+                Scheduler scheduler = new Scheduler(store, DebugEventLogger.Debug);
+
+                TimeSpan timeout = TimeSpan.FromSeconds(1);
+                CuboidDataSource source = new CuboidDataSource(connectionString);
+                CubiodBatchProcessor processor = new CubiodBatchProcessor();
+                Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalOrder, GuidKeySerializer.Default, processor, timeout, 1);
+
+                await scheduler.ScheduleAsync(job, CancellationToken.None);
+
+                Console.WriteLine(RemoveResources.MessageDone);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(DeployResources.MessageFailed);
+                Console.WriteLine();
+                Console.WriteLine(ex);
+
+                result = -1;
+            }
+
+            return result;
         }
     }
 }

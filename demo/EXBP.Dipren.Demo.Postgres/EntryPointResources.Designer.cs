@@ -142,5 +142,14 @@ namespace EXBP.Dipren.Demo.Postgres {
                 return ResourceManager.GetString("DescriptionOptionProcessThreads", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The timeout for processing a single batch in milliseconds..
+        /// </summary>
+        internal static string DescriptionOptionTimeout {
+            get {
+                return ResourceManager.GetString("DescriptionOptionTimeout", resourceCulture);
+            }
+        }
     }
 }

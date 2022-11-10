@@ -38,6 +38,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>RemoveResources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Commands\ScheduleResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ScheduleResources.resx</DependentUpon>
+    </Compile>
     <Compile Update="DatabaseResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -71,6 +76,10 @@
     <EmbeddedResource Update="Commands\RemoveResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>RemoveResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Commands\ScheduleResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ScheduleResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="DatabaseResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

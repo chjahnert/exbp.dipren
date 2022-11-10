@@ -9,6 +9,7 @@ namespace EXBP.Dipren.Demo.Postgres
     internal class EntryPoint
     {
         private const int DEFAULT_DATASET_SIZE = 100_000;
+        private const int DEFAULT_BATCH_PROCESSING_TIMEOUT_MS = 1000;
         private const int DEFAULT_PROCESSING_THREADS = 7;
 
 
@@ -27,6 +28,8 @@ namespace EXBP.Dipren.Demo.Postgres
             {
                 IsRequired = true
             };
+
+            Option<TimeSpan> optionTimeout = new Option<TimeSpan>("--timeout", () => TimeSpan.FromMilliseconds(DEFAULT_BATCH_PROCESSING_TIMEOUT_MS), EntryPointResources.DescriptionOptionTimeout);
 
             Command commandDeploy = new Command("deploy", EntryPointResources.DescriptionCommandDeploy);
             Option<int> optionDeployDatasetSize = new Option<int>("--size", () => DEFAULT_DATASET_SIZE, EntryPointResources.DescriptionOptionDeployDatasetSize);
