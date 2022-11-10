@@ -3,24 +3,24 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
 {
     internal static class Deploy
     {
-        internal static async Task<int> HandleAsync(string database, int size)
+        internal static async Task<int> HandleAsync(string connectionString, int size)
         {
             int result = 0;
 
             try
             {
                 Console.Write(DeployResources.MessageCreatingDemoSchema);
-                await Database.ExecuteNonQueryAsync(database, DeployQueries.DropDemoDatabaseSchema);
-                await Database.ExecuteNonQueryAsync(database, DeployQueries.CreateDemoDatabaseSchema);
+                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.DropDemoDatabaseSchema);
+                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.CreateDemoDatabaseSchema);
                 Console.WriteLine(DeployResources.MessageDone);
 
                 Console.Write(DeployResources.MessageCreatingDiprenSchema);
-                await Database.ExecuteNonQueryAsync(database, DeployQueries.DropDiprenDatabaseSchema);
-                await Database.ExecuteNonQueryAsync(database, DeployQueries.CreateDiprenDatabaseSchema);
+                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.DropDiprenDatabaseSchema);
+                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.CreateDiprenDatabaseSchema);
                 Console.WriteLine(DeployResources.MessageDone);
 
                 Console.Write(DeployResources.MessageGeneratingDimensions, size);
-                await Database.ExecuteNonQueryAsync(database, DeployQueries.GenerateDimensions, ("@limit", size));
+                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.GenerateDimensions, ("@limit", size));
                 Console.WriteLine(DeployResources.MessageDone);
             }
             catch (Exception ex)
