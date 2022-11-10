@@ -1,0 +1,223 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CreateDemoDatabaseSchema" xml:space="preserve">
+    <value>CREATE SCHEMA "demo";
+
+CREATE TABLE "demo"."cuboids"
+(
+  "id" UUID NOT NULL,
+  "width" INT NOT NULL,
+  "height" INT NOT NULL,
+  "depth" INT NOT NULL,
+
+  CONSTRAINT "pk_cuboids" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "demo"."volumes"
+(
+  "id" UUID NOT NULL,
+  "volume" INT NOT NULL,
+
+  CONSTRAINT "pk_volumes" PRIMARY KEY ("id")
+);</value>
+  </data>
+  <data name="CreateDiprenDatabaseSchema" xml:space="preserve">
+    <value>CREATE SCHEMA "dipren";
+
+COMMENT ON SCHEMA "dipren" IS 'Defines the Dipren database objects';
+
+
+CREATE TABLE "dipren"."jobs"
+(
+  "id" VARCHAR(256) NOT NULL,
+  "created" TIMESTAMPTZ NOT NULL,
+  "updated" TIMESTAMPTZ NOT NULL,
+  "state" INTEGER NOT NULL,
+  "error" TEXT NULL,
+  
+  CONSTRAINT "pk_jobs" PRIMARY KEY ("id")
+);
+
+COMMENT ON COLUMN "dipren"."jobs"."id" IS 'The unique identifier of the distributed processing job';
+COMMENT ON COLUMN "dipren"."jobs"."created" IS 'A timestamp indicating when the job was created.';
+COMMENT ON COLUMN "dipren"."jobs"."updated" IS 'A timestamp indicating when the job was last updated.';
+COMMENT ON COLUMN "dipren"."jobs"."state" IS 'Indicates the state of the job such.';
+COMMENT ON COLUMN "dipren"."jobs"."error" IS 'Describes the error that caused the job to fail.';
+
+
+CREATE TABLE "dipren"."partitions"
+(
+  "id" CHAR(36) NOT NULL,
+  "job_id" VARCHAR(256) NOT NULL,
+  "created" TIMESTAMPTZ NOT NULL,
+  "updated" TIMESTAMPTZ NOT NULL,
+  "owner" VARCHAR(256) NULL,
+  "acquired" INTEGER NOT NULL DEFAULT (0),
+  "first" TEXT NOT NULL,
+  "last" TEXT NOT NULL,
+  "is_inclusive" BOOLEAN NOT NULL,
+  "position" TEXT NULL,
+  "processed" BIGINT NOT NULL,
+  "remaining" BIGINT NOT NULL,
+  "is_completed" BOOLEAN NOT NULL,
+  "is_split_requested" BOOLEAN NOT NULL,
+
+  CONSTRAINT "pk_partitions" PRIMARY KEY ("id"),
+  CONSTRAINT "fk_partitions_to_job" FOREIGN KEY ("job_id") REFERENCES "dipren"."jobs"("id") ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+
+CREATE INDEX "ix_partitions_by_state" ON "dipren"."partitions" ("job_id", "updated", "owner") WHERE ("is_completed" = FALSE);
+CREATE INDEX "ux_partitions_owner" ON "dipren"."partitions" ("owner") WHERE ("owner" IS NOT NULL);
+
+COMMENT ON COLUMN "dipren"."partitions"."id" IS 'The unique identifier of the partition.';
+COMMENT ON COLUMN "dipren"."partitions"."job_id" IS 'The unique identifier of the job the partition belongs to.';
+COMMENT ON COLUMN "dipren"."partitions"."created" IS 'A timestamp value indicating when the partition was created.';
+COMMENT ON COLUMN "dipren"."partitions"."updated" IS 'A timestamp value indicating when the partition was last updated.';
+COMMENT ON COLUMN "dipren"."partitions"."owner" IS 'The unique identifier of the processing node owning the partition.';
+COMMENT ON COLUMN "dipren"."partitions"."acquired" IS 'The number of times the partition was acquired by a processing node.';
+COMMENT ON COLUMN "dipren"."partitions"."first" IS 'The first key of the key range associated with the partition.';
+COMMENT ON COLUMN "dipren"."partitions"."last" IS 'The last key of the key range associated with the partition.';
+COMMENT ON COLUMN "dipren"."partitions"."is_inclusive" IS 'Indicates whether the last key is included in the key range.';
+COMMENT ON COLUMN "dipren"."partitions"."position" IS 'The last key that was processed.';
+COMMENT ON COLUMN "dipren"."partitions"."processed" IS 'The number of keys processed so far.';
+COMMENT ON COLUMN "dipren"."partitions"."remaining" IS 'The estimated number of keys left to process.';
+COMMENT ON COLUMN "dipren"."partitions"."is_completed" IS 'Indicates whether the entire partition has been processed.';
+COMMENT ON COLUMN "dipren"."partitions"."is_split_requested" IS 'Indicates whether a split has been requested.';
+COMMENT ON INDEX "dipren"."ix_partitions_by_state" IS 'Use when an idle processing node tries to acquire a partition.';
+COMMENT ON INDEX "dipren"."ux_partitions_owner" IS 'Ensures that each processing node can only acquire a single partition.';</value>
+  </data>
+  <data name="DropDemoDatabaseSchema" xml:space="preserve">
+    <value>DROP SCHEMA IF EXISTS "demo" CASCADE;</value>
+  </data>
+  <data name="DropDiprenDatabaseSchema" xml:space="preserve">
+    <value>DROP SCHEMA IF EXISTS "dipren" CASCADE;</value>
+  </data>
+  <data name="GenerateCuboids" xml:space="preserve">
+    <value>INSERT INTO
+  "demo"."cuboids"
+SELECT
+  gen_random_uuid() AS "id",
+  floor(random() * (100 - 1 + 1)) + 1 AS "width",
+  floor(random() * (100 - 1 + 1)) + 1 AS "height",
+  floor(random() * (100 - 1 + 1)) + 1 AS "depth"
+FROM
+  generate_series(1, @limit);</value>
+  </data>
+</root>

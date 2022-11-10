@@ -1,0 +1,24 @@
+{
+  "profiles": {
+    "EXBP.Dipren.Demo.Postgres: Help": {
+      "commandName": "Project",
+      "commandLineArgs": "--help"
+    },
+    "EXBP.Dipren.Demo.Postgres: Deploy": {
+      "commandName": "Project",
+      "commandLineArgs": "deploy --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --size 100000"
+    },
+    "EXBP.Dipren.Demo.Postgres: Remove": {
+      "commandName": "Project",
+      "commandLineArgs": "remove --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\""
+    },
+    "EXBP.Dipren.Demo.Postgres: Schedule": {
+      "commandName": "Project",
+      "commandLineArgs": "schedule --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --name cuboid-001"
+    },
+    "EXBP.Dipren.Demo.Postgres: Process": {
+      "commandName": "Project",
+      "commandLineArgs": "process --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --name cuboid-001 --batch-size 256 --batch-timeout 00:00:02 --clock-drift 00:00:00"
+    }
+  }
+}

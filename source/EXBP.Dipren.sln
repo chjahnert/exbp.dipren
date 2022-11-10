@@ -26,9 +26,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{3F
 		Store\Postgres\Database\dipren.sql = Store\Postgres\Database\dipren.sql
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EXBP.Dipren.Data.Postgres", "Store\Postgres\EXBP.Dipren.Data.Postgres\EXBP.Dipren.Data.Postgres.csproj", "{CF548BD6-2325-44AB-A036-16297B003C01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EXBP.Dipren.Data.Postgres", "Store\Postgres\EXBP.Dipren.Data.Postgres\EXBP.Dipren.Data.Postgres.csproj", "{CF548BD6-2325-44AB-A036-16297B003C01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EXBP.Dipren.Data.Postgres.Tests", "Store\Postgres\EXBP.Dipren.Data.Postgres.Tests\EXBP.Dipren.Data.Postgres.Tests.csproj", "{E5004944-53A9-4D90-B79F-652F04C8C1CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EXBP.Dipren.Data.Postgres.Tests", "Store\Postgres\EXBP.Dipren.Data.Postgres.Tests\EXBP.Dipren.Data.Postgres.Tests.csproj", "{E5004944-53A9-4D90-B79F-652F04C8C1CB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EXBP.Dipren.Demo.Postgres", "..\demo\EXBP.Dipren.Demo.Postgres\EXBP.Dipren.Demo.Postgres.csproj", "{8D246B96-EEF0-47C5-9BDE-992A127719E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +66,10 @@ Global
 		{E5004944-53A9-4D90-B79F-652F04C8C1CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5004944-53A9-4D90-B79F-652F04C8C1CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5004944-53A9-4D90-B79F-652F04C8C1CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D246B96-EEF0-47C5-9BDE-992A127719E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D246B96-EEF0-47C5-9BDE-992A127719E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D246B96-EEF0-47C5-9BDE-992A127719E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D246B96-EEF0-47C5-9BDE-992A127719E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +83,7 @@ Global
 		{3F7A4267-B6D9-419B-AB81-2C1AD4642EF6} = {4160AF97-5BD3-4C49-BB0C-D3645306EB0B}
 		{CF548BD6-2325-44AB-A036-16297B003C01} = {4160AF97-5BD3-4C49-BB0C-D3645306EB0B}
 		{E5004944-53A9-4D90-B79F-652F04C8C1CB} = {4160AF97-5BD3-4C49-BB0C-D3645306EB0B}
+		{8D246B96-EEF0-47C5-9BDE-992A127719E9} = {595E4C69-843D-467D-B643-9CD4425923D8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6D83ED20-9AD5-4338-BAD5-71D330135EF4}
