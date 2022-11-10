@@ -1,11 +1,11 @@
 ﻿
 namespace EXBP.Dipren.Demo.Postgres.Commands
 {
-    internal static class Run
+    internal static class Process
     {
         internal static Task<int> HandleAsync(string connectionString, string name, int threads)
         {
-            Console.WriteLine("RUN");
+            Console.WriteLine("PROCESS");
             Console.WriteLine();
             Console.WriteLine($"database: {connectionString}");
             Console.WriteLine($"name:     {name}");

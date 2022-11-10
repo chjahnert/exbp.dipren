@@ -120,6 +120,9 @@
   <data name="DescriptionCommandDeploy" xml:space="preserve">
     <value>Creates the required database structure and populates the source database.</value>
   </data>
+  <data name="DescriptionCommandProcess" xml:space="preserve">
+    <value>Runs a distributed processing job.</value>
+  </data>
   <data name="DescriptionCommandRemove" xml:space="preserve">
     <value>Removes all database objects.</value>
   </data>
@@ -127,9 +130,6 @@
     <value>Dipren Demo Application using Postgres
 
 This application demonstrates the capabilities of the Dipren framework. It requires a Postgres SQL Server up and running.</value>
-  </data>
-  <data name="DescriptionCommandRun" xml:space="preserve">
-    <value>Runs a distributed processing job.</value>
   </data>
   <data name="DescriptionCommandSchedule" xml:space="preserve">
     <value>Schedules a distributed processing processing job.</value>
@@ -143,7 +143,7 @@ This application demonstrates the capabilities of the Dipren framework. It requi
   <data name="DescriptionOptionName" xml:space="preserve">
     <value>The name of the processing job.</value>
   </data>
-  <data name="DescriptionOptionRunThreads" xml:space="preserve">
+  <data name="DescriptionOptionProcessThreads" xml:space="preserve">
     <value>The number of processing threads to start.</value>
   </data>
 </root>

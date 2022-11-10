@@ -70,6 +70,15 @@ namespace EXBP.Dipren.Demo.Postgres {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Runs a distributed processing job..
+        /// </summary>
+        internal static string DescriptionCommandProcess {
+            get {
+                return ResourceManager.GetString("DescriptionCommandProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Removes all database objects..
         /// </summary>
         internal static string DescriptionCommandRemove {
@@ -86,15 +95,6 @@ namespace EXBP.Dipren.Demo.Postgres {
         internal static string DescriptionCommandRoot {
             get {
                 return ResourceManager.GetString("DescriptionCommandRoot", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Runs a distributed processing job..
-        /// </summary>
-        internal static string DescriptionCommandRun {
-            get {
-                return ResourceManager.GetString("DescriptionCommandRun", resourceCulture);
             }
         }
         
@@ -137,9 +137,9 @@ namespace EXBP.Dipren.Demo.Postgres {
         /// <summary>
         ///   Looks up a localized string similar to The number of processing threads to start..
         /// </summary>
-        internal static string DescriptionOptionRunThreads {
+        internal static string DescriptionOptionProcessThreads {
             get {
-                return ResourceManager.GetString("DescriptionOptionRunThreads", resourceCulture);
+                return ResourceManager.GetString("DescriptionOptionProcessThreads", resourceCulture);
             }
         }
     }

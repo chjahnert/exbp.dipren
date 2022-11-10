@@ -49,14 +49,14 @@ namespace EXBP.Dipren.Demo.Postgres
             commandSchedule.SetHandler(Schedule.HandleAsync, optionDatabase, optionName);
             commandRoot.Add(commandSchedule);
 
-            Command commandRun = new Command("run", EntryPointResources.DescriptionCommandRun);
-            Option<int> optionRunThreads = new Option<int>("--threads", () => DEFAULT_PROCESSING_THREADS, EntryPointResources.DescriptionOptionRunThreads);
+            Command commandProcess = new Command("process", EntryPointResources.DescriptionCommandProcess);
+            Option<int> optionProcessThreads = new Option<int>("--threads", () => DEFAULT_PROCESSING_THREADS, EntryPointResources.DescriptionOptionProcessThreads);
 
-            commandRun.Add(optionDatabase);
-            commandRun.Add(optionName);
-            commandRun.Add(optionRunThreads);
-            commandRun.SetHandler(Run.HandleAsync, optionDatabase, optionName, optionRunThreads);
-            commandRoot.Add(commandRun);
+            commandProcess.Add(optionDatabase);
+            commandProcess.Add(optionName);
+            commandProcess.Add(optionProcessThreads);
+            commandProcess.SetHandler(Process.HandleAsync, optionDatabase, optionName, optionProcessThreads);
+            commandRoot.Add(commandProcess);
 
             await commandRoot.InvokeAsync(args);
 
