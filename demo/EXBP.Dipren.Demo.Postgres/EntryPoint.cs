@@ -1,6 +1,9 @@
 ﻿
 using System.CommandLine;
 
+using EXBP.Dipren.Demo.Postgres.Commands;
+
+
 namespace EXBP.Dipren.Demo.Postgres
 {
     internal class EntryPoint
@@ -13,7 +16,7 @@ namespace EXBP.Dipren.Demo.Postgres
         {
             RootCommand commandRoot = new RootCommand(EntryPointResources.DescriptionCommandRoot);
 
-            commandRoot.SetHandler(EntryPoint.RootHandlerAsync);
+            commandRoot.SetHandler(EntryPoint.HandleAsync);
 
             Option<string> optionDatabase = new Option<string>( "--database", EntryPointResources.DescriptionOptionDatabase)
             {
@@ -30,20 +33,20 @@ namespace EXBP.Dipren.Demo.Postgres
 
             commandDeploy.Add(optionDatabase);
             commandDeploy.Add(optionDeployDatasetSize);
-            commandDeploy.SetHandler(EntryPoint.DeployHandlerAsync, optionDatabase, optionDeployDatasetSize);
+            commandDeploy.SetHandler(Deploy.HandleAsync, optionDatabase, optionDeployDatasetSize);
             commandRoot.Add(commandDeploy);
 
             Command commandRemove = new Command("remove", EntryPointResources.DescriptionCommandRemove);
 
             commandRemove.Add(optionDatabase);
-            commandRemove.SetHandler(EntryPoint.RemoveHandlerAsync, optionDatabase);
+            commandRemove.SetHandler(Remove.HandleAsync, optionDatabase);
             commandRoot.Add(commandRemove);
 
             Command commandSchedule = new Command("schedule", EntryPointResources.DescriptionCommandSchedule);
 
             commandSchedule.Add(optionDatabase);
             commandSchedule.Add(optionName);
-            commandSchedule.SetHandler(EntryPoint.ScheduleHandlerAsync, optionDatabase, optionName);
+            commandSchedule.SetHandler(Schedule.HandleAsync, optionDatabase, optionName);
             commandRoot.Add(commandSchedule);
 
             Command commandRun = new Command("run", EntryPointResources.DescriptionCommandRun);
@@ -52,7 +55,7 @@ namespace EXBP.Dipren.Demo.Postgres
             commandRun.Add(optionDatabase);
             commandRun.Add(optionName);
             commandRun.Add(optionRunThreads);
-            commandRun.SetHandler(EntryPoint.RunHandlerAsync, optionDatabase, optionName, optionRunThreads);
+            commandRun.SetHandler(Run.HandleAsync, optionDatabase, optionName, optionRunThreads);
             commandRoot.Add(commandRun);
 
             await commandRoot.InvokeAsync(args);
@@ -60,49 +63,9 @@ namespace EXBP.Dipren.Demo.Postgres
             return 0;
         }
 
-        private static Task<int> RootHandlerAsync()
+        private static Task<int> HandleAsync()
         {
             Console.WriteLine(EntryPointResources.DescriptionCommandRoot);
-
-            return Task.FromResult(0);
-        }
-
-        private static Task<int> DeployHandlerAsync(string connectionString, int datasetSize)
-        {
-            Console.WriteLine("DEPLOY");
-            Console.WriteLine();
-            Console.WriteLine($"database: {connectionString}");
-            Console.WriteLine($"size:     {datasetSize}");
-
-            return Task.FromResult(0);
-        }
-
-        private static Task<int> RemoveHandlerAsync(string connectionString)
-        {
-            Console.WriteLine("REMOVE");
-            Console.WriteLine();
-            Console.WriteLine($"database: {connectionString}");
-
-            return Task.FromResult(0);
-        }
-
-        private static Task<int> ScheduleHandlerAsync(string connectionString, string name)
-        {
-            Console.WriteLine("SCHEDULE");
-            Console.WriteLine();
-            Console.WriteLine($"database: {connectionString}");
-            Console.WriteLine($"name:     {name}");
-
-            return Task.FromResult(0);
-        }
-
-        private static Task<int> RunHandlerAsync(string connectionString, string name, int threads)
-        {
-            Console.WriteLine("RUN");
-            Console.WriteLine();
-            Console.WriteLine($"database: {connectionString}");
-            Console.WriteLine($"name:     {name}");
-            Console.WriteLine($"threads:  {threads}");
 
             return Task.FromResult(0);
         }
