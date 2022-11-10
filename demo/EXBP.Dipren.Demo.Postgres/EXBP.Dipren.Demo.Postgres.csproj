@@ -18,6 +18,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Commands\DeployQueries.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DeployQueries.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Commands\DeployResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DeployResources.resx</DependentUpon>
+    </Compile>
     <Compile Update="DatabaseResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -36,6 +46,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Commands\DeployQueries.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>DeployQueries.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Commands\DeployResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>DeployResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="DatabaseResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>DatabaseResources.Designer.cs</LastGenOutput>
