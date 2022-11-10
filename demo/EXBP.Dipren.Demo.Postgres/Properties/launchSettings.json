@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "EXBP.Dipren.Demo.Postgres": {
-      "commandName": "Project",
-      "commandLineArgs": "deploy --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --size 4000"
-    }
-  }
-}
