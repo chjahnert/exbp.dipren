@@ -75,7 +75,7 @@ namespace EXBP.Dipren.Demo.Postgres
 
         private static Task<int> HandleAsync()
         {
-            Console.WriteLine(EntryPointResources.DescriptionCommandRoot);
+            Console.WriteLine(EntryPointResources.MessageIntroduction);
 
             return Task.FromResult(0);
         }

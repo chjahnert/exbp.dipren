@@ -171,5 +171,15 @@ namespace EXBP.Dipren.Demo.Postgres {
                 return ResourceManager.GetString("DescriptionOptionProcessThreads", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This is a demo application that demonstrates how to use Dipren.
+        ///For more details use arguent --help..
+        /// </summary>
+        internal static string MessageIntroduction {
+            get {
+                return ResourceManager.GetString("MessageIntroduction", resourceCulture);
+            }
+        }
     }
 }
