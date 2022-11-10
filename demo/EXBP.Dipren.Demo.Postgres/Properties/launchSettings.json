@@ -11,6 +11,10 @@
     "EXBP.Dipren.Demo.Postgres: Schedule": {
       "commandName": "Project",
       "commandLineArgs": "schedule --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --name dpj-002"
+    },
+    "EXBP.Dipren.Demo.Postgres: Process": {
+      "commandName": "Project",
+      "commandLineArgs": "process --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --name dpj-002 --batch-size 256 --batch-timeout 00:00:01 --clock-drift 00:00:00"
     }
   }
 }

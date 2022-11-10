@@ -28,6 +28,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>DeployResources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Commands\ProcessResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ProcessResources.resx</DependentUpon>
+    </Compile>
     <Compile Update="Commands\RemoveQueries.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -68,6 +73,10 @@
     <EmbeddedResource Update="Commands\DeployResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>DeployResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Commands\ProcessResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ProcessResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Commands\RemoveQueries.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -10,6 +10,8 @@ namespace EXBP.Dipren.Demo.Postgres
     {
         private const int DEFAULT_DATASET_SIZE = 100_000;
         private const int DEFAULT_BATCH_PROCESSING_TIMEOUT_MS = 1000;
+        private const int DEFAULT_BATCH_SIZE = 64;
+        private const int DEFAULT_CLOCK_DRIFT_MS = 1000;
         private const int DEFAULT_PROCESSING_THREADS = 7;
 
 
@@ -29,7 +31,6 @@ namespace EXBP.Dipren.Demo.Postgres
                 IsRequired = true
             };
 
-            Option<TimeSpan> optionTimeout = new Option<TimeSpan>("--timeout", () => TimeSpan.FromMilliseconds(DEFAULT_BATCH_PROCESSING_TIMEOUT_MS), EntryPointResources.DescriptionOptionTimeout);
 
             Command commandDeploy = new Command("deploy", EntryPointResources.DescriptionCommandDeploy);
             Option<int> optionDeployDatasetSize = new Option<int>("--size", () => DEFAULT_DATASET_SIZE, EntryPointResources.DescriptionOptionDeployDatasetSize);
@@ -54,11 +55,17 @@ namespace EXBP.Dipren.Demo.Postgres
 
             Command commandProcess = new Command("process", EntryPointResources.DescriptionCommandProcess);
             Option<int> optionProcessThreads = new Option<int>("--threads", () => DEFAULT_PROCESSING_THREADS, EntryPointResources.DescriptionOptionProcessThreads);
+            Option<TimeSpan> optionProcessBatchTimeout = new Option<TimeSpan>("--batch-timeout", () => TimeSpan.FromMilliseconds(DEFAULT_BATCH_PROCESSING_TIMEOUT_MS), EntryPointResources.DescriptionOptionProcessBatchTimeout);
+            Option<int> optionProcessBatchSize = new Option<int>("--batch-size", () => DEFAULT_BATCH_SIZE, EntryPointResources.DescriptionOptionProcessThreads);
+            Option<TimeSpan> optionProcessClockDrift = new Option<TimeSpan>("--clock-drift", () => TimeSpan.FromMilliseconds(DEFAULT_CLOCK_DRIFT_MS), EntryPointResources.DescriptionOptionProcessClockDrift);
 
             commandProcess.Add(optionDatabase);
             commandProcess.Add(optionName);
             commandProcess.Add(optionProcessThreads);
-            commandProcess.SetHandler(Process.HandleAsync, optionDatabase, optionName, optionProcessThreads);
+            commandProcess.Add(optionProcessBatchSize);
+            commandProcess.Add(optionProcessBatchTimeout);
+            commandProcess.Add(optionProcessClockDrift);
+            commandProcess.SetHandler(Process.HandleAsync, optionDatabase, optionProcessThreads, optionName, optionProcessBatchSize, optionProcessBatchTimeout, optionProcessClockDrift);
             commandRoot.Add(commandProcess);
 
             await commandRoot.InvokeAsync(args);

@@ -135,20 +135,38 @@ namespace EXBP.Dipren.Demo.Postgres {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The number of items to process per batch..
+        /// </summary>
+        internal static string DescriptionOptionProcessBatchSize {
+            get {
+                return ResourceManager.GetString("DescriptionOptionProcessBatchSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The timeout for processing a single batch (ms)..
+        /// </summary>
+        internal static string DescriptionOptionProcessBatchTimeout {
+            get {
+                return ResourceManager.GetString("DescriptionOptionProcessBatchTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The maximum time difference between processing nodes (ms)..
+        /// </summary>
+        internal static string DescriptionOptionProcessClockDrift {
+            get {
+                return ResourceManager.GetString("DescriptionOptionProcessClockDrift", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The number of processing threads to start..
         /// </summary>
         internal static string DescriptionOptionProcessThreads {
             get {
                 return ResourceManager.GetString("DescriptionOptionProcessThreads", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The timeout for processing a single batch in milliseconds..
-        /// </summary>
-        internal static string DescriptionOptionTimeout {
-            get {
-                return ResourceManager.GetString("DescriptionOptionTimeout", resourceCulture);
             }
         }
     }
