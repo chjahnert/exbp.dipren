@@ -127,6 +127,6 @@
     <value>failed.</value>
   </data>
   <data name="MessageStartingProcessing" xml:space="preserve">
-    <value>Starting up processing job '{0}' on {1} threads ... </value>
+    <value>Starting processing job '{0}' on {1} threads ... </value>
   </data>
 </root>

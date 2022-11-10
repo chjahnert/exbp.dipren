@@ -88,7 +88,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Starting up processing job &apos;{0}&apos; on {1} threads ... .
+        ///   Looks up a localized string similar to Starting processing job &apos;{0}&apos; on {1} threads ... .
         /// </summary>
         internal static string MessageStartingProcessing {
             get {
