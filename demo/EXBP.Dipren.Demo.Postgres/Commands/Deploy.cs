@@ -20,7 +20,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
                 Console.WriteLine(DeployResources.MessageDone);
 
                 Console.Write(DeployResources.MessageGeneratingDimensions, size);
-                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.GenerateDimensions, ("@limit", size));
+                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.GenerateCuboids, ("@limit", size));
                 Console.WriteLine(DeployResources.MessageDone);
             }
             catch (Exception ex)

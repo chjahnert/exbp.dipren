@@ -120,14 +120,14 @@
   <data name="CreateDemoDatabaseSchema" xml:space="preserve">
     <value>CREATE SCHEMA "demo";
 
-CREATE TABLE "demo"."dimensions"
+CREATE TABLE "demo"."cuboids"
 (
   "id" UUID NOT NULL,
   "width" INT NOT NULL,
   "height" INT NOT NULL,
   "depth" INT NOT NULL,
 
-  CONSTRAINT "pk_dimensions" PRIMARY KEY ("id")
+  CONSTRAINT "pk_cuboids" PRIMARY KEY ("id")
 );
 
 CREATE TABLE "demo"."volumes"
@@ -209,9 +209,9 @@ COMMENT ON INDEX "dipren"."ux_partitions_owner" IS 'Ensures that each processing
   <data name="DropDiprenDatabaseSchema" xml:space="preserve">
     <value>DROP SCHEMA IF EXISTS "dipren" CASCADE;</value>
   </data>
-  <data name="GenerateDimensions" xml:space="preserve">
+  <data name="GenerateCuboids" xml:space="preserve">
     <value>INSERT INTO
-  "demo"."dimensions"
+  "demo"."cuboids"
 SELECT
   gen_random_uuid() AS "id",
   floor(random() * (100 - 1 + 1)) + 1 AS "width",

@@ -97,7 +97,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Generating {0} random dimension records in the &apos;demo&apos; database ... .
+        ///   Looks up a localized string similar to Generating {0} random cuboid records in the &apos;demo&apos; database ... .
         /// </summary>
         internal static string MessageGeneratingDimensions {
             get {

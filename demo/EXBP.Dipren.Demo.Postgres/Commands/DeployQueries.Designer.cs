@@ -63,14 +63,14 @@ namespace EXBP.Dipren.Demo.Postgres.Commands {
         /// <summary>
         ///   Looks up a localized string similar to CREATE SCHEMA &quot;demo&quot;;
         ///
-        ///CREATE TABLE &quot;demo&quot;.&quot;dimensions&quot;
+        ///CREATE TABLE &quot;demo&quot;.&quot;cuboids&quot;
         ///(
         ///  &quot;id&quot; UUID NOT NULL,
         ///  &quot;width&quot; INT NOT NULL,
         ///  &quot;height&quot; INT NOT NULL,
         ///  &quot;depth&quot; INT NOT NULL,
         ///
-        ///  CONSTRAINT &quot;pk_dimensions&quot; PRIMARY KEY (&quot;id&quot;)
+        ///  CONSTRAINT &quot;pk_cuboids&quot; PRIMARY KEY (&quot;id&quot;)
         ///);
         ///
         ///CREATE TABLE &quot;demo&quot;.&quot;volumes&quot;
@@ -133,7 +133,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands {
         
         /// <summary>
         ///   Looks up a localized string similar to INSERT INTO
-        ///  &quot;demo&quot;.&quot;dimensions&quot;
+        ///  &quot;demo&quot;.&quot;cuboids&quot;
         ///SELECT
         ///  gen_random_uuid() AS &quot;id&quot;,
         ///  floor(random() * (100 - 1 + 1)) + 1 AS &quot;width&quot;,
@@ -142,9 +142,9 @@ namespace EXBP.Dipren.Demo.Postgres.Commands {
         ///FROM
         ///  generate_series(1, @limit);.
         /// </summary>
-        internal static string GenerateDimensions {
+        internal static string GenerateCuboids {
             get {
-                return ResourceManager.GetString("GenerateDimensions", resourceCulture);
+                return ResourceManager.GetString("GenerateCuboids", resourceCulture);
             }
         }
     }

@@ -130,6 +130,6 @@
     <value>failed.</value>
   </data>
   <data name="MessageGeneratingDimensions" xml:space="preserve">
-    <value>Generating {0} random dimension records in the 'demo' database ... </value>
+    <value>Generating {0} random cuboid records in the 'demo' database ... </value>
   </data>
 </root>
