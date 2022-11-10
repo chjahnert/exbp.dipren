@@ -6,6 +6,8 @@ using System.Diagnostics;
 using Npgsql;
 using NpgsqlTypes;
 
+using EXBP.Dipren.Demo.Postgres.Processing.Models;
+
 
 namespace EXBP.Dipren.Demo.Postgres.Processing
 {

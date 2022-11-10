@@ -1,5 +1,4 @@
-﻿
-namespace EXBP.Dipren.Demo.Postgres
+﻿namespace EXBP.Dipren.Demo.Postgres.Processing.Models
 {
     internal record Cuboid
     {

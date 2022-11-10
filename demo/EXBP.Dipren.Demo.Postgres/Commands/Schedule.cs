@@ -2,6 +2,7 @@
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Data.Postgres;
 using EXBP.Dipren.Demo.Postgres.Processing;
+using EXBP.Dipren.Demo.Postgres.Processing.Models;
 using EXBP.Dipren.Telemetry;
 
 
