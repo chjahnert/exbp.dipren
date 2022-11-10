@@ -445,18 +445,18 @@ namespace EXBP.Dipren
             {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
-                long excludedKeyRangeSize = await job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
-                long updatedKeyRangeSize = await job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
+                Task<long> excludedKeyRangeSize = job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
+                Task<long> updatedKeyRangeSize = job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
 
-                if ((excludedKeyRangeSize >= job.BatchSize) && (updatedKeyRangeSize >= job.BatchSize))
+                if ((await excludedKeyRangeSize >= job.BatchSize) && (await updatedKeyRangeSize >= job.BatchSize))
                 {
                     DateTime timestamp = this.Clock.GetDateTime();
 
-                    Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updatedKeyRange, partition.Position, partition.Processed, (updatedKeyRangeSize - 1), false, false);
+                    Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updatedKeyRange, partition.Position, partition.Processed, (await updatedKeyRangeSize - 1), false, false);
                     Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
 
                     Guid id = Guid.NewGuid();
-                    Partition<TKey> excludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, excludedKeyRangeSize, false, false);
+                    Partition<TKey> excludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, await excludedKeyRangeSize, false, false);
                     Partition excludedEntry = excludedPartition.ToEntry(job.Serializer);
 
                     await this.Store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);
