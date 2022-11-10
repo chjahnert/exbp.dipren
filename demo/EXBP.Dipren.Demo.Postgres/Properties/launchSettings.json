@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "EXBP.Dipren.Demo.Postgres: Deploy": {
+      "commandName": "Project",
+      "commandLineArgs": "deploy --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --size 1000000"
+    },
+    "EXBP.Dipren.Demo.Postgres: Remove": {
+      "commandName": "Project",
+      "commandLineArgs": "remove --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\""
+    },
+    "EXBP.Dipren.Demo.Postgres: Schedule": {
+      "commandName": "Project",
+      "commandLineArgs": "schedule --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --name dpj-002"
+    }
+  }
+}
