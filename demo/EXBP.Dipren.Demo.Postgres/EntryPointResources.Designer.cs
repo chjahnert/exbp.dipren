@@ -90,7 +90,9 @@ namespace EXBP.Dipren.Demo.Postgres {
         /// <summary>
         ///   Looks up a localized string similar to Dipren Demo Application using Postgres
         ///
-        ///This application demonstrates the capabilities of the Dipren framework. It requires a Postgres SQL Server up and running..
+        ///This demo application demonstrates how to process a large set of entries using Dipren. It requires a Postgres SQL Server up and running with an empty database created.
+        ///
+        ///Start by initializing the database using the &apos;deploy&apos; command. Executing the command will create the required database objects and generate the dataset to be processed. The size of the dataset can be configured. Once the dataset is generated, run the &apos;schedule&apos; command to schedule the job for proce [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string DescriptionCommandRoot {
             get {

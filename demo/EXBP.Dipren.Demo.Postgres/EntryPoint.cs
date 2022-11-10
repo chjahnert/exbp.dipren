@@ -9,10 +9,10 @@ namespace EXBP.Dipren.Demo.Postgres
     internal class EntryPoint
     {
         private const int DEFAULT_DATASET_SIZE = 100_000;
-        private const int DEFAULT_BATCH_PROCESSING_TIMEOUT_MS = 1000;
-        private const int DEFAULT_BATCH_SIZE = 64;
+        private const int DEFAULT_BATCH_PROCESSING_TIMEOUT_MS = 2000;
+        private const int DEFAULT_BATCH_SIZE = 128;
         private const int DEFAULT_CLOCK_DRIFT_MS = 1000;
-        private const int DEFAULT_PROCESSING_THREADS = 7;
+        private const int DEFAULT_PROCESSING_THREADS = 3;
 
 
         internal static async Task<int> Main(string[] args)
@@ -40,12 +40,6 @@ namespace EXBP.Dipren.Demo.Postgres
             commandDeploy.SetHandler(Deploy.HandleAsync, optionDatabase, optionDeployDatasetSize);
             commandRoot.Add(commandDeploy);
 
-            Command commandRemove = new Command("remove", EntryPointResources.DescriptionCommandRemove);
-
-            commandRemove.Add(optionDatabase);
-            commandRemove.SetHandler(Remove.HandleAsync, optionDatabase);
-            commandRoot.Add(commandRemove);
-
             Command commandSchedule = new Command("schedule", EntryPointResources.DescriptionCommandSchedule);
 
             commandSchedule.Add(optionDatabase);
@@ -67,6 +61,12 @@ namespace EXBP.Dipren.Demo.Postgres
             commandProcess.Add(optionProcessClockDrift);
             commandProcess.SetHandler(Process.HandleAsync, optionDatabase, optionProcessThreads, optionName, optionProcessBatchSize, optionProcessBatchTimeout, optionProcessClockDrift);
             commandRoot.Add(commandProcess);
+
+            Command commandRemove = new Command("remove", EntryPointResources.DescriptionCommandRemove);
+
+            commandRemove.Add(optionDatabase);
+            commandRemove.SetHandler(Remove.HandleAsync, optionDatabase);
+            commandRoot.Add(commandRemove);
 
             await commandRoot.InvokeAsync(args);
 

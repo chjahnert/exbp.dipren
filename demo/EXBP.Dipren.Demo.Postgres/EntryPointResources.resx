@@ -129,7 +129,11 @@
   <data name="DescriptionCommandRoot" xml:space="preserve">
     <value>Dipren Demo Application using Postgres
 
-This application demonstrates the capabilities of the Dipren framework. It requires a Postgres SQL Server up and running.</value>
+This demo application demonstrates how to process a large set of entries using Dipren. It requires a Postgres SQL Server up and running with an empty database created.
+
+Start by initializing the database using the 'deploy' command. Executing the command will create the required database objects and generate the dataset to be processed. The size of the dataset can be configured. Once the dataset is generated, run the 'schedule' command to schedule the job for processing. To process the entire dataset, run the 'process' command. This command will start processing the dataset on 3 threads. The number of threads can be configured, too. You can start several instances of the demo application with the same parameters to increase the number of processing nodes.
+
+For more information visit https://github.com/chjahnert/exbp.dipren/wiki</value>
   </data>
   <data name="DescriptionCommandSchedule" xml:space="preserve">
     <value>Schedules a distributed processing processing job.</value>
