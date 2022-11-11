@@ -100,7 +100,7 @@ namespace EXBP.Dipren.Demo.SQLite
         {
             TimeSpan pollinInterval = TimeSpan.FromMilliseconds(POLLING_INTERVAL);
             Configuration configuration = new Configuration(TimeSpan.Zero, pollinInterval);
-            Engine engine = new Engine(store, ConsoleEventLogger.Information, UtcDateTimeProvider.Default);
+            Engine engine = new Engine(store, ConsoleEventLogger.Information);
 
             await engine.RunAsync(job, false);
         }

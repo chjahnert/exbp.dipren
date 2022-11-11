@@ -20,26 +20,26 @@ namespace EXBP.Dipren
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
-        /// <param name="handler">
-        ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
-        /// </param>
         /// <param name="clock">
         ///   The <see cref="IDateTimeProvider"/> to use to generate timestamps.
         /// </param>
-        internal Scheduler(IEngineDataStore store, IEventHandler handler, IDateTimeProvider clock) : base(NodeType.Scheduler, store, clock, handler)
+        /// <param name="handler">
+        ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
+        /// </param>
+        internal Scheduler(IEngineDataStore store, IDateTimeProvider clock, IEventHandler handler) : base(NodeType.Scheduler, store, clock, handler)
         {
         }
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="Engine"/> class.
         /// </summary>
-        /// <param name="logger">
-        ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
-        /// </param>
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
-        public Scheduler(IEngineDataStore store, IEventHandler logger = null) : this(store, logger, UtcDateTimeProvider.Default)
+        /// <param name="handler">
+        ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
+        /// </param>
+        public Scheduler(IEngineDataStore store, IEventHandler handler = null) : this(store, UtcDateTimeProvider.Default, handler)
         {
         }
 
