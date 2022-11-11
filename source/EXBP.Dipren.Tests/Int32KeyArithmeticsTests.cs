@@ -21,6 +21,10 @@ namespace EXBP.Dipren.Tests
         [TestCase(8, 1, false, 8, 4, 4, 1)]
         [TestCase(-7, 5, false, -7, -1, -1, 5)]
         [TestCase(5, -7, false, 5, -1, -1, -7)]
+        [TestCase(int.MinValue, int.MaxValue, false, int.MinValue, 0, 0, int.MaxValue)]
+        [TestCase(int.MaxValue, int.MinValue, false, int.MaxValue, -1, -1, int.MinValue)]
+        [TestCase(int.MinValue, int.MaxValue, true, int.MinValue, 0, 0, int.MaxValue)]
+        [TestCase(int.MaxValue, int.MinValue, true, int.MaxValue, -1, -1, int.MinValue)]
         public void Split_ArgumentRangeIsSplittable_SplitsRangeCorrectly(int inputFirst, int inputLast, bool inputInclusive, int returnedFirst, int returnedLast, int createdFirst, int createdLast)
         {
             Range<int> input = new Range<int>(inputFirst, inputLast, inputInclusive);
