@@ -10,33 +10,37 @@ namespace EXBP.Dipren
 
 
         /// <summary>
-        ///   Gets byte layout of an GUID value used by Microsoft SQL Server.
+        ///   Gets byte layout of a GUID value used by Microsoft SQL Server.
         /// </summary>
         /// <value>
         ///   An array of 16 <see cref="byte"/> values containing the layout for GUID values used by Microsoft SQL
-        ///   Server. The positions are specified from the least significant on the left to the most significant on the
-        ///   right.
+        ///   Server.
         /// </value>
         public static byte[] MicrosoftSqlServer { get; } = { 10, 11, 12, 13, 14, 15, 8, 9, 6, 7, 4, 5, 0, 1, 2, 3 };
 
         /// <summary>
-        ///   Gets byte layout of an GUID value in lexicographical order.
+        ///   Gets the layout of a GUID value in byte-wise lexicographical order.
         /// </summary>
         /// <value>
-        ///   An array of 16 <see cref="byte"/> values containing the layout for GUID values in lexicographical order.
-        ///   The positions are specified from the least significant on the left to the most significant on the right.
+        ///   An array of 16 <see cref="byte"/> values containing the layout for GUID values in byte-wise
+        ///   lexicographical order.
         /// </value>
-        public static byte[] LexicographicalOrder { get; } = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+        /// <remarks>
+        ///   This is the layout used by <c>memcmp</c>.
+        /// </remarks>
+        public static byte[] LexicographicalBytewise { get; } = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 
         /// <summary>
-        ///   Gets byte layout of an GUID value used by .NET Framework.
+        ///   Gets the layout of a GUID value in member-wise lexicographical order.
         /// </summary>
         /// <value>
-        ///   An array of 16 <see cref="byte"/> values containing the layout for GUID values used by the .NET
-        ///   Framework. The positions are specified from the least significant on the left to the most significant on
-        ///   the right.
+        ///   An array of 16 <see cref="byte"/> values containing the layout for GUID values in member-wise
+        ///   lexicographical order.
         /// </value>
-        public static byte[] DotNetFramework { get; } = { 3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15 };
+        /// <remarks>
+        ///   The layout is used by the <see cref="Guid"/> type and by Postgres SQL Server.
+        /// </remarks>
+        public static byte[] LexicographicalMemberwise { get; } = { 3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15 };
 
 
         /// <summary>

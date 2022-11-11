@@ -50,15 +50,15 @@ namespace EXBP.Dipren.Tests
             yield return new object[] { GuidLayout.MicrosoftSqlServer, new Guid("00000000-0000-0000-0000-000000008000"), new Guid("00000000-0000-0000-0000-000000004000"), true, new Guid("00000000-0000-0000-0000-000000006000") };
             yield return new object[] { GuidLayout.MicrosoftSqlServer, new Guid("E0000000-0000-0000-0000-000000000000"), new Guid("A0000000-0000-0000-0000-000000000000"), false, new Guid("C0000000-0000-0000-0000-000000000000") };
 
-            yield return new object[] { GuidLayout.LexicographicalOrder, new Guid("00000000-0000-0000-0000-000000004000"), new Guid("00000000-0000-0000-0000-000000008000"), true, new Guid("00000000-0000-0000-0000-000000006000") };
-            yield return new object[] { GuidLayout.LexicographicalOrder, new Guid("A0000000-0000-0000-0000-000000000000"), new Guid("E0000000-0000-0000-0000-000000000000"), false, new Guid("C0000000-0000-0000-0000-000000000000") };
-            yield return new object[] { GuidLayout.LexicographicalOrder, new Guid("00000000-0000-0000-0000-000000008000"), new Guid("00000000-0000-0000-0000-000000004000"), true, new Guid("00000000-0000-0000-0000-000000006000") };
-            yield return new object[] { GuidLayout.LexicographicalOrder, new Guid("E0000000-0000-0000-0000-000000000000"), new Guid("A0000000-0000-0000-0000-000000000000"), false, new Guid("C0000000-0000-0000-0000-000000000000") };
+            yield return new object[] { GuidLayout.LexicographicalBytewise, new Guid("00000000-0000-0000-0000-000000004000"), new Guid("00000000-0000-0000-0000-000000008000"), true, new Guid("00000000-0000-0000-0000-000000006000") };
+            yield return new object[] { GuidLayout.LexicographicalBytewise, new Guid("A0000000-0000-0000-0000-000000000000"), new Guid("E0000000-0000-0000-0000-000000000000"), false, new Guid("C0000000-0000-0000-0000-000000000000") };
+            yield return new object[] { GuidLayout.LexicographicalBytewise, new Guid("00000000-0000-0000-0000-000000008000"), new Guid("00000000-0000-0000-0000-000000004000"), true, new Guid("00000000-0000-0000-0000-000000006000") };
+            yield return new object[] { GuidLayout.LexicographicalBytewise, new Guid("E0000000-0000-0000-0000-000000000000"), new Guid("A0000000-0000-0000-0000-000000000000"), false, new Guid("C0000000-0000-0000-0000-000000000000") };
 
-            yield return new object[] { GuidLayout.DotNetFramework, new Guid("00000000-0000-0000-0000-000000004000"), new Guid("00000000-0000-0000-0000-000000008000"), true, new Guid("00000000-0000-0000-0000-000000006000") };
-            yield return new object[] { GuidLayout.DotNetFramework, new Guid("A0000000-0000-0000-0000-000000000000"), new Guid("E0000000-0000-0000-0000-000000000000"), false, new Guid("C0000000-0000-0000-0000-000000000000") };
-            yield return new object[] { GuidLayout.DotNetFramework, new Guid("00000000-0000-0000-0000-000000008000"), new Guid("00000000-0000-0000-0000-000000004000"), true, new Guid("00000000-0000-0000-0000-000000006000") };
-            yield return new object[] { GuidLayout.DotNetFramework, new Guid("E0000000-0000-0000-0000-000000000000"), new Guid("A0000000-0000-0000-0000-000000000000"), false, new Guid("C0000000-0000-0000-0000-000000000000") };
+            yield return new object[] { GuidLayout.LexicographicalMemberwise, new Guid("00000000-0000-0000-0000-000000004000"), new Guid("00000000-0000-0000-0000-000000008000"), true, new Guid("00000000-0000-0000-0000-000000006000") };
+            yield return new object[] { GuidLayout.LexicographicalMemberwise, new Guid("A0000000-0000-0000-0000-000000000000"), new Guid("E0000000-0000-0000-0000-000000000000"), false, new Guid("C0000000-0000-0000-0000-000000000000") };
+            yield return new object[] { GuidLayout.LexicographicalMemberwise, new Guid("00000000-0000-0000-0000-000000008000"), new Guid("00000000-0000-0000-0000-000000004000"), true, new Guid("00000000-0000-0000-0000-000000006000") };
+            yield return new object[] { GuidLayout.LexicographicalMemberwise, new Guid("E0000000-0000-0000-0000-000000000000"), new Guid("A0000000-0000-0000-0000-000000000000"), false, new Guid("C0000000-0000-0000-0000-000000000000") };
         }
 
         [TestCaseSource(nameof(Split_ArgumentRangeIsNotSplittable_ParameterSource))]
@@ -86,18 +86,18 @@ namespace EXBP.Dipren.Tests
             yield return new object[] { GuidLayout.MicrosoftSqlServer, new Guid("05000000-0000-0000-0000-000000000000"), new Guid("04000000-0000-0000-0000-000000000000"), true };
             yield return new object[] { GuidLayout.MicrosoftSqlServer, new Guid("06000000-0000-0000-0000-000000000000"), new Guid("04000000-0000-0000-0000-000000000000"), false };
 
-            yield return new object[] { GuidLayout.LexicographicalOrder, new Guid("00000004-0000-0000-0000-000000000000"), new Guid("00000004-0000-0000-0000-000000000000"), true };
-            yield return new object[] { GuidLayout.LexicographicalOrder, new Guid("00000004-0000-0000-0000-000000000000"), new Guid("00000005-0000-0000-0000-000000000000"), true };
-            yield return new object[] { GuidLayout.LexicographicalOrder, new Guid("00000004-0000-0000-0000-000000000000"), new Guid("00000006-0000-0000-0000-000000000000"), false };
-            yield return new object[] { GuidLayout.LexicographicalOrder, new Guid("00000004-0000-0000-0000-000000000000"), new Guid("00000004-0000-0000-0000-000000000000"), true };
-            yield return new object[] { GuidLayout.LexicographicalOrder, new Guid("00000005-0000-0000-0000-000000000000"), new Guid("00000004-0000-0000-0000-000000000000"), true };
-            yield return new object[] { GuidLayout.LexicographicalOrder, new Guid("00000006-0000-0000-0000-000000000000"), new Guid("00000004-0000-0000-0000-000000000000"), false };
+            yield return new object[] { GuidLayout.LexicographicalBytewise, new Guid("00000000-0000-0000-0000-000000000004"), new Guid("00000000-0000-0000-0000-000000000004"), true };
+            yield return new object[] { GuidLayout.LexicographicalBytewise, new Guid("00000000-0000-0000-0000-000000000004"), new Guid("00000000-0000-0000-0000-000000000005"), true };
+            yield return new object[] { GuidLayout.LexicographicalBytewise, new Guid("00000000-0000-0000-0000-000000000004"), new Guid("00000000-0000-0000-0000-000000000006"), false };
+            yield return new object[] { GuidLayout.LexicographicalBytewise, new Guid("00000000-0000-0000-0000-000000000004"), new Guid("00000000-0000-0000-0000-000000000004"), true };
+            yield return new object[] { GuidLayout.LexicographicalBytewise, new Guid("00000000-0000-0000-0000-000000000005"), new Guid("00000000-0000-0000-0000-000000000004"), true };
+            yield return new object[] { GuidLayout.LexicographicalBytewise, new Guid("00000000-0000-0000-0000-000000000006"), new Guid("00000000-0000-0000-0000-000000000004"), false };
 
-            yield return new object[] { GuidLayout.DotNetFramework, new Guid("00000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000001"), true };
-            yield return new object[] { GuidLayout.DotNetFramework, new Guid("00000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000002"), true };
-            yield return new object[] { GuidLayout.DotNetFramework, new Guid("00000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000003"), false };
-            yield return new object[] { GuidLayout.DotNetFramework, new Guid("00000000-0000-0000-0000-000000000003"), new Guid("00000000-0000-0000-0000-000000000002"), true };
-            yield return new object[] { GuidLayout.DotNetFramework, new Guid("00000000-0000-0000-0000-000000000003"), new Guid("00000000-0000-0000-0000-000000000001"), false };
+            yield return new object[] { GuidLayout.LexicographicalMemberwise, new Guid("00000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000001"), true };
+            yield return new object[] { GuidLayout.LexicographicalMemberwise, new Guid("00000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000002"), true };
+            yield return new object[] { GuidLayout.LexicographicalMemberwise, new Guid("00000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000003"), false };
+            yield return new object[] { GuidLayout.LexicographicalMemberwise, new Guid("00000000-0000-0000-0000-000000000003"), new Guid("00000000-0000-0000-0000-000000000002"), true };
+            yield return new object[] { GuidLayout.LexicographicalMemberwise, new Guid("00000000-0000-0000-0000-000000000003"), new Guid("00000000-0000-0000-0000-000000000001"), false };
         }
     }
 }

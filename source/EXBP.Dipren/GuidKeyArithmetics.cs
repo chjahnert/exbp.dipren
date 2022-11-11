@@ -26,20 +26,20 @@ namespace EXBP.Dipren
         public static GuidKeyArithmetics MicrosoftSqlServer { get; } = new GuidKeyArithmetics(GuidLayout.MicrosoftSqlServer);
 
         /// <summary>
-        ///   Gets a <see cref="GuidKeyArithmetics"/> object that uses a lexicographical GUID layout.
+        ///   Gets a <see cref="GuidKeyArithmetics"/> object that uses a bytewise lexicographical GUID layout.
         /// </summary>
         /// <value>
-        ///   A <see cref="GuidKeyArithmetics"/> object that uses a lexicographical GUID layout.
+        ///   A <see cref="GuidKeyArithmetics"/> object that uses a bytewise lexicographical GUID layout.
         /// </value>
-        public static GuidKeyArithmetics LexicographicalOrder { get; } = new GuidKeyArithmetics(GuidLayout.LexicographicalOrder);
+        public static GuidKeyArithmetics LexicographicalBytewise { get; } = new GuidKeyArithmetics(GuidLayout.LexicographicalBytewise);
 
         /// <summary>
-        ///   Gets a <see cref="GuidKeyArithmetics"/> object that uses the GUID layout used by the .NET Framework.
+        ///   Gets a <see cref="GuidKeyArithmetics"/> object that uses a memberwise lexicographical GUID layout.
         /// </summary>
         /// <value>
-        ///   A <see cref="GuidKeyArithmetics"/> object that uses the GUID layout used by the .NET Framework.
+        ///   A <see cref="GuidKeyArithmetics"/> object that uses a memberwise lexicographical GUID layout.
         /// </value>
-        public static GuidKeyArithmetics DotNetFramework { get; } = new GuidKeyArithmetics(GuidLayout.DotNetFramework);
+        public static GuidKeyArithmetics LexicographicalMemberwise { get; } = new GuidKeyArithmetics(GuidLayout.LexicographicalMemberwise);
 
 
         /// <summary>
