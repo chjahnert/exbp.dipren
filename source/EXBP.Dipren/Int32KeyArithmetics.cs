@@ -55,7 +55,7 @@ namespace EXBP.Dipren
             Range<int> result = range;
             created = null;
 
-            double distance = Math.Abs(range.Last - range.First);
+            double distance = Math.Abs(((double) range.Last) - ((double) range.First));
 
             if (((range.IsInclusive == true) && (distance >= 2)) || ((range.IsInclusive == false) && (distance >= 3)))
             {
