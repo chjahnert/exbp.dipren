@@ -96,8 +96,8 @@ namespace EXBP.Dipren.Demo.Postgres.Commands {
         ///CREATE TABLE &quot;dipren&quot;.&quot;jobs&quot;
         ///(
         ///  &quot;id&quot; VARCHAR(256) NOT NULL,
-        ///  &quot;created&quot; TIMESTAMPTZ NOT NULL,
-        ///  &quot;updated&quot; TIMESTAMPTZ NOT NULL,
+        ///  &quot;created&quot; TIMESTAMP NOT NULL,
+        ///  &quot;updated&quot; TIMESTAMP NOT NULL,
         ///  &quot;state&quot; INTEGER NOT NULL,
         ///  &quot;error&quot; TEXT NULL,
         ///  
@@ -105,7 +105,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands {
         ///);
         ///
         ///COMMENT ON COLUMN &quot;dipren&quot;.&quot;jobs&quot;.&quot;id&quot; IS &apos;The unique identifier of the distributed processing job&apos;;
-        ///COMMENT ON COLUMN &quot;dipren&quot;.&quot;jobs&quot;.&quot;created&quot; IS &apos;A timestamp indicating  [rest of string was truncated]&quot;;.
+        ///COMMENT ON COLUMN &quot;dipren&quot;.&quot;jobs&quot;.&quot;created&quot; IS &apos;A timestamp indicating when [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CreateDiprenDatabaseSchema {
             get {

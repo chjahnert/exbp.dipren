@@ -12,8 +12,8 @@ COMMENT ON SCHEMA "dipren" IS 'Defines the Dipren database objects';
 CREATE TABLE "dipren"."jobs"
 (
   "id" VARCHAR(256) NOT NULL,
-  "created" TIMESTAMPTZ NOT NULL,
-  "updated" TIMESTAMPTZ NOT NULL,
+  "created" TIMESTAMP NOT NULL,
+  "updated" TIMESTAMP NOT NULL,
   "state" INTEGER NOT NULL,
   "error" TEXT NULL,
   
@@ -31,8 +31,8 @@ CREATE TABLE "dipren"."partitions"
 (
   "id" CHAR(36) NOT NULL,
   "job_id" VARCHAR(256) NOT NULL,
-  "created" TIMESTAMPTZ NOT NULL,
-  "updated" TIMESTAMPTZ NOT NULL,
+  "created" TIMESTAMP NOT NULL,
+  "updated" TIMESTAMP NOT NULL,
   "owner" VARCHAR(256) NULL,
   "acquired" INTEGER NOT NULL DEFAULT (0),
   "first" TEXT NOT NULL,
