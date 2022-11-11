@@ -26,7 +26,7 @@ namespace EXBP.Dipren.Tests
             MemoryEngineDataStore store = new MemoryEngineDataStore();
             Engine engine = new Engine(store);
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => engine.RunAsync<int, int>(null, false, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => engine.RunAsync<int, int>(null, false));
         }
 
         [Test]
@@ -42,11 +42,11 @@ namespace EXBP.Dipren.Tests
             MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
-            await scheduler.ScheduleAsync(job, CancellationToken.None);
+            await scheduler.ScheduleAsync(job);
 
             Engine engine = new Engine(store, this.DefaultEventHandler);
 
-            await engine.RunAsync(job, false, CancellationToken.None);
+            await engine.RunAsync(job, false);
 
             Job persisted = await store.RetrieveJobAsync(jobId, CancellationToken.None);
 
@@ -65,11 +65,11 @@ namespace EXBP.Dipren.Tests
             MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
-            await scheduler.ScheduleAsync(job, CancellationToken.None);
+            await scheduler.ScheduleAsync(job);
 
             Engine engine = new Engine(store, this.DefaultEventHandler);
 
-            await engine.RunAsync(job, false, CancellationToken.None);
+            await engine.RunAsync(job, false);
 
             Assert.That(processor.Items.Count, Is.EqualTo(128));
             CollectionAssert.IsOrdered(processor.Items);
@@ -86,11 +86,11 @@ namespace EXBP.Dipren.Tests
             MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
-            await scheduler.ScheduleAsync(job, CancellationToken.None);
+            await scheduler.ScheduleAsync(job);
 
             Engine engine = new Engine(store, this.DefaultEventHandler);
 
-            await engine.RunAsync(job, false, CancellationToken.None);
+            await engine.RunAsync(job, false);
 
             Assert.That(processor.Items.Count, Is.EqualTo(128));
             CollectionAssert.IsOrdered(processor.Items.Reverse());

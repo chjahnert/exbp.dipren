@@ -28,7 +28,7 @@ namespace EXBP.Dipren.Tests
             MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store);
 
-            Assert.ThrowsAsync<ArgumentNullException>( () => scheduler.ScheduleAsync<int, int>(null, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>( () => scheduler.ScheduleAsync<int, int>(null));
         }
 
         [Test]
@@ -45,7 +45,7 @@ namespace EXBP.Dipren.Tests
 
             Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor, timeout, 16);
 
-            await scheduler.ScheduleAsync(job, CancellationToken.None);
+            await scheduler.ScheduleAsync(job);
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
@@ -86,7 +86,7 @@ namespace EXBP.Dipren.Tests
 
             Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor, timeout, 16);
 
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => scheduler.ScheduleAsync(job, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => scheduler.ScheduleAsync(job));
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
@@ -116,7 +116,7 @@ namespace EXBP.Dipren.Tests
 
             Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor, timeout, 16);
 
-            Assert.ThrowsAsync<KeyNotFoundException>(() => scheduler.ScheduleAsync(job, CancellationToken.None));
+            Assert.ThrowsAsync<KeyNotFoundException>(() => scheduler.ScheduleAsync(job));
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
