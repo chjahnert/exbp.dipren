@@ -53,7 +53,7 @@ namespace EXBP.Dipren.Demo.SQLite
                 SQLiteEngineDataStore store = new SQLiteEngineDataStore(ENGINE_CONNECTION_STRING);
                 Scheduler scheduler = new Scheduler(store);
 
-                await scheduler.ScheduleAsync(job, CancellationToken.None);
+                await scheduler.ScheduleAsync(job);
 
                 Console.WriteLine("done.");
 

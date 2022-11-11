@@ -63,7 +63,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        public async Task ScheduleAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation)
+        public async Task ScheduleAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation = default)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 

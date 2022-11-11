@@ -42,7 +42,7 @@ namespace EXBP.Dipren.Tests
             MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
-            await scheduler.ScheduleAsync(job, CancellationToken.None);
+            await scheduler.ScheduleAsync(job);
 
             Engine engine = new Engine(store, this.DefaultEventHandler);
 
@@ -65,7 +65,7 @@ namespace EXBP.Dipren.Tests
             MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
-            await scheduler.ScheduleAsync(job, CancellationToken.None);
+            await scheduler.ScheduleAsync(job);
 
             Engine engine = new Engine(store, this.DefaultEventHandler);
 
@@ -86,7 +86,7 @@ namespace EXBP.Dipren.Tests
             MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
-            await scheduler.ScheduleAsync(job, CancellationToken.None);
+            await scheduler.ScheduleAsync(job);
 
             Engine engine = new Engine(store, this.DefaultEventHandler);
 

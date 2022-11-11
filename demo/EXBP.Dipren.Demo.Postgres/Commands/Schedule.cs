@@ -26,7 +26,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
                 CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
                 Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalOrder, GuidKeySerializer.Default, processor, timeout, 1);
 
-                await scheduler.ScheduleAsync(job, CancellationToken.None);
+                await scheduler.ScheduleAsync(job);
 
                 Console.WriteLine(RemoveResources.MessageDone);
             }
