@@ -60,7 +60,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
 
             CuboidDataSource source = new CuboidDataSource(connectionString);
             CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
-            Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalOrder, GuidKeySerializer.Default, processor, batchTimeout, batchSize);
+            Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor, batchTimeout, batchSize);
 
             await engine.RunAsync(job, false);
         }
