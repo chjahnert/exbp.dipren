@@ -19,14 +19,14 @@ namespace EXBP.Dipren.Data
         /// <summary>
         ///   Converts the specified <see cref="BigInteger"/> value to its string representation.
         /// </summary>
-        /// <param name="key">
+        /// <param name="value">
         ///   The <see cref="BigInteger"/> value to convert to a <see cref="string"/>.
         /// </param>
         /// <returns>
-        ///   A <see cref="string"/> value containing the string representation of <paramref name="key"/>.
+        ///   A <see cref="string"/> value containing the string representation of <paramref name="value"/>.
         /// </returns>
-        public string Serialize(BigInteger key)
-            => key.ToString(CultureInfo.InvariantCulture);
+        public string Serialize(BigInteger value)
+            => value.ToString(CultureInfo.InvariantCulture);
 
         /// <summary>
         ///   Converts the <see cref="string"/> representation of a <see cref="BigInteger"/> value to its original

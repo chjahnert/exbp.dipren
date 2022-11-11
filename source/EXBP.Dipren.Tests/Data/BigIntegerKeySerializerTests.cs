@@ -13,7 +13,7 @@ namespace EXBP.Dipren.Tests.Data
     public class BigIntegerKeySerializerTests
     {
         [Test]
-        public void Serialize_ArgumentKeyIsValid_SerializesValueCorrectly()
+        public void Serialize_ArgumentValueIsValid_SerializesValueCorrectly()
         {
             const string sv = "367523562837956287356287356289346598576295789345793456792356797347659";
 
