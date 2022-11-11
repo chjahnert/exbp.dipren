@@ -77,7 +77,7 @@ namespace EXBP.Dipren
         ///     wait for the job to be scheduled.
         ///   </para>
         /// </remarks>
-        public async Task RunAsync<TKey, TItem>(Job<TKey, TItem> job, bool wait, CancellationToken cancellation)
+        public async Task RunAsync<TKey, TItem>(Job<TKey, TItem> job, bool wait, CancellationToken cancellation = default)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 

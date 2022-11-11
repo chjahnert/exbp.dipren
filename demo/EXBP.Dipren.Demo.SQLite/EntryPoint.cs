@@ -102,7 +102,7 @@ namespace EXBP.Dipren.Demo.SQLite
             Configuration configuration = new Configuration(TimeSpan.Zero, pollinInterval);
             Engine engine = new Engine(store, ConsoleEventLogger.Information, UtcDateTimeProvider.Default);
 
-            await engine.RunAsync(job, false, CancellationToken.None);
+            await engine.RunAsync(job, false);
         }
     }
 }
