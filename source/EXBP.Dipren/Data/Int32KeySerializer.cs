@@ -18,14 +18,14 @@ namespace EXBP.Dipren.Data
         /// <summary>
         ///   Converts the specified integer value to its string representation.
         /// </summary>
-        /// <param name="key">
+        /// <param name="value">
         ///   The integer value to convert to a <see cref="string"/>.
         /// </param>
         /// <returns>
-        ///   A <see cref="string"/> value containing the string representation of <paramref name="key"/>.
+        ///   A <see cref="string"/> value containing the string representation of <paramref name="value"/>.
         /// </returns>
-        public string Serialize(int key)
-            => key.ToString(CultureInfo.InvariantCulture);
+        public string Serialize(int value)
+            => value.ToString(CultureInfo.InvariantCulture);
 
         /// <summary>
         ///   Converts the <see cref="string"/> representation of an integer value to its original value.

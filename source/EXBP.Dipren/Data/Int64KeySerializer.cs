@@ -18,14 +18,14 @@ namespace EXBP.Dipren.Data
         /// <summary>
         ///   Converts the specified <see cref="long"/> value to its string representation.
         /// </summary>
-        /// <param name="key">
+        /// <param name="value">
         ///   The <see cref="long"/> value to convert to a <see cref="string"/>.
         /// </param>
         /// <returns>
-        ///   A <see cref="string"/> value containing the string representation of <paramref name="key"/>.
+        ///   A <see cref="string"/> value containing the string representation of <paramref name="value"/>.
         /// </returns>
-        public string Serialize(long key)
-            => key.ToString(CultureInfo.InvariantCulture);
+        public string Serialize(long value)
+            => value.ToString(CultureInfo.InvariantCulture);
 
         /// <summary>
         ///   Converts the <see cref="string"/> representation of a <see cref="long"/> value to its original value.

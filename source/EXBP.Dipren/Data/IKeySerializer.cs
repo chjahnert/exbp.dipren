@@ -12,13 +12,13 @@ namespace EXBP.Dipren.Data
         /// <summary>
         ///   Converts the specified key value to its string representation.
         /// </summary>
-        /// <param name="key">
+        /// <param name="value">
         ///   The key to convert to a <see cref="string"/>.
         /// </param>
         /// <returns>
-        ///   A <see cref="string"/> value containing the string representation of <paramref name="key"/>.
+        ///   A <see cref="string"/> value containing the string representation of <paramref name="value"/>.
         /// </returns>
-        string Serialize(TKey key);
+        string Serialize(TKey value);
 
         /// <summary>
         ///   Converts the <see cref="string"/> representation of a key to its original value.
