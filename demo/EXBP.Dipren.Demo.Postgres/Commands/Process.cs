@@ -12,7 +12,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
 {
     internal static class Process
     {
-        internal static async Task<int> HandleAsync(string connectionString, int threads, string name, int batchSize, TimeSpan batchTimeout, TimeSpan clockDrift)
+        internal static async Task<int> HandleAsync(string connectionString, int threads, string name, bool reverse, int batchSize, TimeSpan batchTimeout, TimeSpan clockDrift)
         {
             int result = 0;
 

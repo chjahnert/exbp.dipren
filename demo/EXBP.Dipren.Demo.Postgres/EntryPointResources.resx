@@ -159,6 +159,9 @@ For more information visit https://github.com/chjahnert/exbp.dipren/wiki</value>
   <data name="DescriptionOptionProcessThreads" xml:space="preserve">
     <value>The number of processing threads to start.</value>
   </data>
+  <data name="DescriptionOptionReverse" xml:space="preserve">
+    <value>Process the key range in descending order.</value>
+  </data>
   <data name="MessageIntroduction" xml:space="preserve">
     <value>This is a demo application that demonstrates how to use Dipren.
 For more details use arguent --help.</value>

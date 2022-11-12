@@ -173,6 +173,15 @@ namespace EXBP.Dipren.Demo.Postgres {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Process the key range in descending order..
+        /// </summary>
+        internal static string DescriptionOptionReverse {
+            get {
+                return ResourceManager.GetString("DescriptionOptionReverse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This is a demo application that demonstrates how to use Dipren.
         ///For more details use arguent --help..
         /// </summary>

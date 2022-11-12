@@ -10,7 +10,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
 {
     internal static class Schedule
     {
-        internal static async Task<int> HandleAsync(string connectionString, string name)
+        internal static async Task<int> HandleAsync(string connectionString, string name, bool reverse)
         {
             int result = 0;
 
