@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DescriptionArgumentJobName" xml:space="preserve">
+    <value>The name of the processing job.</value>
+  </data>
   <data name="DescriptionCommandDeploy" xml:space="preserve">
     <value>Creates the required database structure and populates the source database.</value>
   </data>
@@ -143,9 +146,6 @@ For more information visit https://github.com/chjahnert/exbp.dipren/wiki</value>
   </data>
   <data name="DescriptionOptionDeployDatasetSize" xml:space="preserve">
     <value>The number of rows to generate in the source database.</value>
-  </data>
-  <data name="DescriptionOptionName" xml:space="preserve">
-    <value>The name of the processing job.</value>
   </data>
   <data name="DescriptionOptionProcessBatchSize" xml:space="preserve">
     <value>The number of items to process per batch.</value>

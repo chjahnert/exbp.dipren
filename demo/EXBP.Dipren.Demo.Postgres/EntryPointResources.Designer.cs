@@ -61,6 +61,15 @@ namespace EXBP.Dipren.Demo.Postgres {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The name of the processing job..
+        /// </summary>
+        internal static string DescriptionArgumentJobName {
+            get {
+                return ResourceManager.GetString("DescriptionArgumentJobName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Creates the required database structure and populates the source database..
         /// </summary>
         internal static string DescriptionCommandDeploy {
@@ -124,15 +133,6 @@ namespace EXBP.Dipren.Demo.Postgres {
         internal static string DescriptionOptionDeployDatasetSize {
             get {
                 return ResourceManager.GetString("DescriptionOptionDeployDatasetSize", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The name of the processing job..
-        /// </summary>
-        internal static string DescriptionOptionName {
-            get {
-                return ResourceManager.GetString("DescriptionOptionName", resourceCulture);
             }
         }
         
