@@ -27,7 +27,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
 
                 for (int i = 0; i < tasks.Length; i++)
                 {
-                    tasks[i] = Task.Run(async () => await Process.RunAsync(connectionString, name, batchSize, batchTimeout, clockDrift));
+                    tasks[i] = Task.Run(async () => await Process.RunAsync(connectionString, name, reverse, batchSize, batchTimeout, clockDrift));
                 }
 
                 await Task.WhenAll(tasks);
@@ -47,7 +47,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
             return result;
         }
 
-        internal static async Task RunAsync(string connectionString, string name, int batchSize, TimeSpan batchTimeout, TimeSpan clockDrift)
+        internal static async Task RunAsync(string connectionString, string name, bool reverse, int batchSize, TimeSpan batchTimeout, TimeSpan clockDrift)
         {
             Configuration configuration = new Configuration
             {
@@ -58,7 +58,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
             PostgresEngineDataStore store = new PostgresEngineDataStore(connectionString);
             Engine engine = new Engine(store, ConsoleEventLogger.Information, configuration: configuration);
 
-            CuboidAscendingDataSource source = new CuboidAscendingDataSource(connectionString);
+            IDataSource<Guid, Cuboid> source = reverse ? new CuboidDescendingDataSource(connectionString) : new CuboidAscendingDataSource(connectionString);
             CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
             Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor, batchTimeout, batchSize);
 
