@@ -48,8 +48,6 @@ namespace EXBP.Dipren.Demo.Postgres.Processing
                         // progress it has made, the last batch may be reprocessed in which case we could end up with
                         // a primary key violation error.
                         //
-
-                        Debug.WriteLine("PRIMARY KEY VIOLATION");
                     }
                 }
             }
