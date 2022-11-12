@@ -22,7 +22,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
                 Scheduler scheduler = new Scheduler(store, DebugEventLogger.Debug);
 
                 TimeSpan timeout = TimeSpan.FromSeconds(1);
-                CuboidDataSource source = new CuboidDataSource(connectionString);
+                CuboidAscendingDataSource source = new CuboidAscendingDataSource(connectionString);
                 CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
                 Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor, timeout, 1);
 

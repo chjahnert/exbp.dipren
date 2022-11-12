@@ -58,7 +58,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
             PostgresEngineDataStore store = new PostgresEngineDataStore(connectionString);
             Engine engine = new Engine(store, ConsoleEventLogger.Information, configuration: configuration);
 
-            CuboidDataSource source = new CuboidDataSource(connectionString);
+            CuboidAscendingDataSource source = new CuboidAscendingDataSource(connectionString);
             CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
             Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor, batchTimeout, batchSize);
 
