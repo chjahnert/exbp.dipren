@@ -26,11 +26,9 @@ namespace EXBP.Dipren.Demo.Postgres
                 IsRequired = true
             };
 
-            Option<string> optionName = new Option<string>("--name", EntryPointResources.DescriptionOptionName)
-            {
-                IsRequired = true
-            };
+            Argument<string> argumentJob = new Argument<string>("job-name", EntryPointResources.DescriptionArgumentJobName);
 
+            Option<bool> optionsReverse = new Option<bool>("--reverse", () => false, EntryPointResources.DescriptionOptionReverse);
 
             Command commandDeploy = new Command("deploy", EntryPointResources.DescriptionCommandDeploy);
             Option<int> optionDeployDatasetSize = new Option<int>("--size", () => DEFAULT_DATASET_SIZE, EntryPointResources.DescriptionOptionDeployDatasetSize);
@@ -43,8 +41,9 @@ namespace EXBP.Dipren.Demo.Postgres
             Command commandSchedule = new Command("schedule", EntryPointResources.DescriptionCommandSchedule);
 
             commandSchedule.Add(optionDatabase);
-            commandSchedule.Add(optionName);
-            commandSchedule.SetHandler(Schedule.HandleAsync, optionDatabase, optionName);
+            commandSchedule.Add(argumentJob);
+            commandSchedule.Add(optionsReverse);
+            commandSchedule.SetHandler(Schedule.HandleAsync, optionDatabase, argumentJob, optionsReverse);
             commandRoot.Add(commandSchedule);
 
             Command commandProcess = new Command("process", EntryPointResources.DescriptionCommandProcess);
@@ -54,12 +53,13 @@ namespace EXBP.Dipren.Demo.Postgres
             Option<TimeSpan> optionProcessClockDrift = new Option<TimeSpan>("--clock-drift", () => TimeSpan.FromMilliseconds(DEFAULT_CLOCK_DRIFT_MS), EntryPointResources.DescriptionOptionProcessClockDrift);
 
             commandProcess.Add(optionDatabase);
-            commandProcess.Add(optionName);
+            commandProcess.Add(argumentJob);
+            commandProcess.Add(optionsReverse);
             commandProcess.Add(optionProcessThreads);
             commandProcess.Add(optionProcessBatchSize);
             commandProcess.Add(optionProcessBatchTimeout);
             commandProcess.Add(optionProcessClockDrift);
-            commandProcess.SetHandler(Process.HandleAsync, optionDatabase, optionProcessThreads, optionName, optionProcessBatchSize, optionProcessBatchTimeout, optionProcessClockDrift);
+            commandProcess.SetHandler(Process.HandleAsync, optionDatabase, optionProcessThreads, argumentJob, optionsReverse, optionProcessBatchSize, optionProcessBatchTimeout, optionProcessClockDrift);
             commandRoot.Add(commandProcess);
 
             Command commandRemove = new Command("remove", EntryPointResources.DescriptionCommandRemove);

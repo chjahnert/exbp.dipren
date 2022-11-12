@@ -14,11 +14,11 @@
     },
     "EXBP.Dipren.Demo.Postgres: Schedule": {
       "commandName": "Project",
-      "commandLineArgs": "schedule --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --name cuboid-001"
+      "commandLineArgs": "schedule \"cuboid-001\" --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\""
     },
     "EXBP.Dipren.Demo.Postgres: Process": {
       "commandName": "Project",
-      "commandLineArgs": "process --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --name cuboid-001 --batch-size 256 --batch-timeout 00:00:02 --clock-drift 00:00:00"
+      "commandLineArgs": "process \"cuboid-001\" --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --batch-size 256 --batch-timeout 00:00:02 --clock-drift 00:00:00"
     }
   }
 }

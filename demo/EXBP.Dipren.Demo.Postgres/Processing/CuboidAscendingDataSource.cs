@@ -11,11 +11,11 @@ using EXBP.Dipren.Demo.Postgres.Processing.Models;
 
 namespace EXBP.Dipren.Demo.Postgres.Processing
 {
-    internal class CuboidDataSource : IDataSource<Guid, Cuboid>
+    internal class CuboidAscendingDataSource : IDataSource<Guid, Cuboid>
     {
         private readonly string _connectionString;
 
-        internal CuboidDataSource(string connectionString)
+        internal CuboidAscendingDataSource(string connectionString)
         {
             Debug.Assert(connectionString != null);
 
