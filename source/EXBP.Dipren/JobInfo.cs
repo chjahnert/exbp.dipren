@@ -1,4 +1,6 @@
 ﻿
+using EXBP.Dipren.Diagnostics;
+
 namespace EXBP.Dipren
 {
     /// <summary>
@@ -32,10 +34,10 @@ namespace EXBP.Dipren
         public DateTime Updated { get; }
 
         /// <summary>
-        ///   Gets a value indicating the state of the current job.
+        ///   Gets the last observed state of the current job.
         /// </summary>
         /// <value>
-        ///   A <see cref="JobState"/> value indicating the state of the current job.
+        ///   A <see cref="JobState"/> value containing the last observed state of the job.
         /// </value>
         public JobState State { get; }
 
@@ -49,28 +51,26 @@ namespace EXBP.Dipren
         public string Error { get; }
 
         /// <summary>
-        ///   Gets the number of partitions that were created, but were not yet picked up by a processing node.
+        ///   Gets the number of partitions not yet started.
         /// </summary>
         /// <value>
-        ///   A <see cref="long"/> value containing the number of partitions that were created, but were not yet picked
-        ///   up by a processing node.
+        ///   A <see cref="long"/> value containing the number of partitions not yet started.
         /// </value>
         public long PartitionsWaiting { get; }
 
         /// <summary>
-        ///   Gets the number of partitions picked up by a processing node, but are not yet complete.
+        ///   Gets the number of partially completed partitions.
         /// </summary>
         /// <value>
-        ///   A <see cref="long"/> value containing the number of partitions picked up by a processing node, but are
-        ///   not yet complete.
+        ///   A <see cref="long"/> value containing the number of partially completed partitions.
         /// </value>
         public long PartitionsStarted { get; }
 
         /// <summary>
-        ///   Gets the number of partitions completed.
+        ///   Gets the number of completed partitions.
         /// </summary>
         /// <value>
-        ///   A <see cref="long"/> value containing the number of partitions completed.
+        ///   A <see cref="long"/> value containing the number of completed partitions.
         /// </value>
         public long PartitionsCompleted { get; }
 
@@ -91,11 +91,11 @@ namespace EXBP.Dipren
         public long KeysCompleted { get; }
 
         /// <summary>
-        ///   Gets the date and time of the last activity observed on any partition.
+        ///   Gets the date and time of the last activity observed on the job or any partition.
         /// </summary>
         /// <value>
         ///   A <see cref="DateTime"/> value that contains the date and time, in UTC, of the last activity observed on
-        ///   any partition.
+        ///   the job or any partition.
         /// </value>
         public DateTime LastActivity { get; }
 
@@ -138,21 +138,58 @@ namespace EXBP.Dipren
         /// <summary>
         ///   Initializes a new instance of the <see cref="JobInfo"/> class.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="created"></param>
-        /// <param name="updated"></param>
-        /// <param name="state"></param>
-        /// <param name="error"></param>
-        /// <param name="partitionsWaiting"></param>
-        /// <param name="partitionsStarted"></param>
-        /// <param name="partitionsCompleted"></param>
-        /// <param name="keysRemaining"></param>
-        /// <param name="keysCompleted"></param>
-        /// <param name="lastActivity"></param>
-        /// <param name="ownershipChanges"></param>
-        /// <param name="pendingSplitRequests"></param>
+        /// <param name="id">
+        ///   The unique identifier (or name) of the distributed processing job.
+        /// </param>
+        /// <param name="created">
+        ///   The date and time when the job was created.
+        /// </param>
+        /// <param name="updated">
+        ///   The date and time when the job was last updated.
+        /// </param>
+        /// <param name="state">
+        ///   The last observed state of the job.
+        /// </param>
+        /// <param name="error">
+        ///   The description of the error that is the reason the job failed; or <see langword="null"/> if no error
+        ///   occurred.
+        /// </param>
+        /// <param name="partitionsWaiting">
+        ///   The number of partitions not yet started.
+        /// </param>
+        /// <param name="partitionsStarted">
+        ///   The number of partially completed partitions.
+        /// </param>
+        /// <param name="partitionsCompleted">
+        ///   The number of completed partitions.
+        /// </param>
+        /// <param name="keysRemaining">
+        ///   The number of keys left to process.
+        /// </param>
+        /// <param name="keysCompleted">
+        ///   The number of keys completed.
+        /// </param>
+        /// <param name="lastActivity">
+        ///   The date and time of the last activity observed on the job or any partition.
+        /// </param>
+        /// <param name="ownershipChanges">
+        ///   A number indicating how often a processing node resumed a partition started by another processing node.
+        /// </param>
+        /// <param name="pendingSplitRequests">
+        ///   The number of pending split requests.
+        /// </param>
         public JobInfo(string id, DateTime created, DateTime updated, JobState state, string error, long partitionsWaiting, long partitionsStarted, long partitionsCompleted, long keysRemaining, long keysCompleted, DateTime lastActivity, long ownershipChanges, long pendingSplitRequests)
         {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+            Assert.ArgumentIsDefined(state, nameof(state));
+            Assert.ArgumentIsGreaterOrEqual(partitionsWaiting, 0L, nameof(partitionsWaiting));
+            Assert.ArgumentIsGreaterOrEqual(partitionsStarted, 0L, nameof(partitionsStarted));
+            Assert.ArgumentIsGreaterOrEqual(partitionsCompleted, 0L, nameof(partitionsCompleted));
+            Assert.ArgumentIsGreaterOrEqual(keysRemaining, 0L, nameof(keysRemaining));
+            Assert.ArgumentIsGreaterOrEqual(keysCompleted, 0L, nameof(keysCompleted));
+            Assert.ArgumentIsGreaterOrEqual(ownershipChanges, 0L, nameof(ownershipChanges));
+            Assert.ArgumentIsGreaterOrEqual(pendingSplitRequests, 0L, nameof(pendingSplitRequests));
+
             this.Id = id;
             this.Created = created;
             this.Updated = updated;
