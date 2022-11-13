@@ -1044,11 +1044,21 @@ namespace EXBP.Dipren.Tests.Data
 
             public Task<Partition> TryAcquirePartitionAsync(string jobId, string requester, DateTime timestamp, DateTime active, CancellationToken cancellation)
                 => this._store.TryAcquirePartitionAsync(jobId, requester, timestamp, active, cancellation);
+
             public Task<bool> TryRequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation)
                 => this._store.TryRequestSplitAsync(jobId, active, cancellation);
 
             public Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation)
                 => this._store.UpdateJobAsync(jobId, timestamp, state, error, cancellation);
+
+            public Task<Job> MarkJobStartedAsync(string jobId, DateTime timestamp, CancellationToken cancellation)
+                => this._store.MarkJobStartedAsync(jobId, timestamp, cancellation);
+
+            public Task<Job> MarkJobCompletedAsync(string jobId, DateTime timestamp, CancellationToken cancellation)
+                => this._store.MarkJobCompletedAsync(jobId, timestamp, cancellation);
+
+            public Task<Job> MarkJobFailedAsync(string jobId, DateTime timestamp, string error, CancellationToken cancellation)
+                => this._store.MarkJobFailedAsync(jobId, timestamp, error, cancellation);
         }
     }
 }

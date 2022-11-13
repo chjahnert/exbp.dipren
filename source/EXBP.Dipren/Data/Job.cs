@@ -38,6 +38,24 @@ namespace EXBP.Dipren.Data
         public DateTime Updated { get; init; }
 
         /// <summary>
+        ///   Gets the date and time the current job was started; or <see langword="null"/> if not yet started.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="Nullable{T}"/> of <see cref="DateTime"/> value containing the date and time, in UTC, the
+        ///   current job was started.
+        /// </value>
+        public DateTime? Started { get; init; }
+
+        /// <summary>
+        ///   Gets the date and time the current job was completed; or <see langword="null"/> if not yet completed.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="Nullable{T}"/> of <see cref="DateTime"/> value containing the date and time, in UTC, the
+        ///   current job was completed.
+        /// </value>
+        public DateTime? Completed { get; init; }
+
+        /// <summary>
         ///   Gets a value indicating the state of the current job.
         /// </summary>
         /// <value>
@@ -85,13 +103,15 @@ namespace EXBP.Dipren.Data
         /// <param name="error">
         ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
         /// </param>
-        public Job(string id, DateTime created, DateTime updated, JobState state, string error = null)
+        public Job(string id, DateTime created, DateTime updated, JobState state, DateTime? started = null, DateTime? completed = null, string error = null)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
             this.Id = id;
             this.Created = created;
             this.Updated = updated;
+            this.Started = started;
+            this.Completed = completed;
             this.State = state;
             this.Error = error;
         }
