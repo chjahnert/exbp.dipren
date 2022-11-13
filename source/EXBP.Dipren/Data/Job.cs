@@ -58,7 +58,7 @@ namespace EXBP.Dipren.Data
         }
 
         /// <summary>
-        ///   Gets the exception that is the reason the current job failed.
+        ///   Gets the description of the error that is the reason the current job failed.
         /// </summary>
         /// <value>
         ///   A <see cref="string"/> value that contains a description of the error that occurred; or
