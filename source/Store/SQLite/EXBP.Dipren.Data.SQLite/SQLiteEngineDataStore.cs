@@ -229,6 +229,8 @@ namespace EXBP.Dipren.Data.SQLite
                 command.Parameters.AddWithValue("$id", job.Id);
                 command.Parameters.AddWithValue("$created", job.Created);
                 command.Parameters.AddWithValue("$updated", job.Updated);
+                command.Parameters.AddWithValue("$started", job.Started);
+                command.Parameters.AddWithValue("$completed", job.Completed);
                 command.Parameters.AddWithValue("$state", job.State);
                 command.Parameters.AddWithValue("$error", job.Error);
 

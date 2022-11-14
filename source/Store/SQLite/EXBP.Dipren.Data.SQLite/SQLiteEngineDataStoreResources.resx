@@ -193,6 +193,8 @@ WHERE
   "id",
   "created",
   "updated",
+  "started",
+  "completed",
   "state",
   "error"
 )
@@ -201,6 +203,8 @@ VALUES
   $id,
   $created,
   $updated,
+  $started,
+  $completed,
   $state,
   $error
 );</value>
