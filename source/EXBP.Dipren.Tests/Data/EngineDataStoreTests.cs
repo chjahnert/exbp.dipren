@@ -1032,8 +1032,8 @@ namespace EXBP.Dipren.Tests.Data
             public Task<Job> MarkJobAsStartedAsync(string id, DateTime timestamp, CancellationToken cancellation)
                 => this._store.MarkJobAsStartedAsync(id, timestamp, cancellation);
 
-            public Task<Job> MarkJobCompletedAsync(string jobId, DateTime timestamp, CancellationToken cancellation)
-                => this._store.MarkJobCompletedAsync(jobId, timestamp, cancellation);
+            public Task<Job> MarkJobAsCompletedAsync(string jobId, DateTime timestamp, CancellationToken cancellation)
+                => this._store.MarkJobAsCompletedAsync(jobId, timestamp, cancellation);
 
             public Task<Job> MarkJobFailedAsync(string jobId, DateTime timestamp, string error, CancellationToken cancellation)
                 => this._store.MarkJobFailedAsync(jobId, timestamp, error, cancellation);

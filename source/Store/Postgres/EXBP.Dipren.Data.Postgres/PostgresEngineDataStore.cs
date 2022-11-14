@@ -881,7 +881,7 @@ namespace EXBP.Dipren.Data.Postgres
         }
 
         /// <summary>
-        ///   Marks a job completed.
+        ///   Marks a job as completed.
         /// </summary>
         /// <param name="jobId">
         ///   The unique identifier of the job to update.
@@ -903,7 +903,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public async Task<Job> MarkJobCompletedAsync(string jobId, DateTime timestamp, CancellationToken cancellation)
+        public async Task<Job> MarkJobAsCompletedAsync(string jobId, DateTime timestamp, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
