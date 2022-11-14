@@ -133,7 +133,7 @@ namespace EXBP.Dipren.Data
         /// <summary>
         ///   Marks a job as completed.
         /// </summary>
-        /// <param name="jobId">
+        /// <param name="id">
         ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="timestamp">
@@ -153,7 +153,7 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        Task<Job> MarkJobAsCompletedAsync(string jobId, DateTime timestamp, CancellationToken cancellation);
+        Task<Job> MarkJobAsCompletedAsync(string id, DateTime timestamp, CancellationToken cancellation);
 
         /// <summary>
         ///   Updates the state of an existing job.
