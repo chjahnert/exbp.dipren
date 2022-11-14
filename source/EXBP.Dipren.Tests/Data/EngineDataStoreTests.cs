@@ -205,26 +205,36 @@ namespace EXBP.Dipren.Tests.Data
             Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrieveJobAsync("DPJ-0001", CancellationToken.None));
         }
 
-        [Test]
-        public async Task RetirveJobAsync_JobExist_ReturnsJob()
+        [TestCaseSource(typeof(EngineDataStoreTests), nameof(RetirveJobAsync_ArgumentIdIsValidAndJobExists_ParameterSource))]
+        public async Task RetirveJobAsync_ArgumentIdIsValidAndJobExists_RetrievesJob(string id, DateTime created, DateTime updated, JobState state, DateTime? started, DateTime? completed, string error)
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string id = "DPJ-0001";
-            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
+            created = this.FormatDateTime(created);
+            updated = this.FormatDateTime(updated);
+            started = this.FormatDateTime(started);
+            completed = this.FormatDateTime(completed);
 
-            Job inserted = new Job(id, timestamp, timestamp, JobState.Initializing);
+            Job job = new Job(id, created, updated, state, started, completed, error);
 
-            await store.InsertJobAsync(inserted, CancellationToken.None);
+            await store.InsertJobAsync(job, CancellationToken.None);
 
-            Job retrieved = await store.RetrieveJobAsync("DPJ-0001", CancellationToken.None);
+            Job retrieved = await store.RetrieveJobAsync(id, CancellationToken.None);
 
-            Assert.That(retrieved, Is.Not.Null);
-            Assert.That(retrieved.Id, Is.EqualTo(id));
-            Assert.That(retrieved.Created, Is.EqualTo(timestamp));
-            Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
-            Assert.That(retrieved.State, Is.EqualTo(JobState.Initializing));
-            Assert.That(retrieved.Error, Is.Null);
+            Assert.That(retrieved, Is.EqualTo(job));
+        }
+
+        public static IEnumerable RetirveJobAsync_ArgumentIdIsValidAndJobExists_ParameterSource()
+        {
+            DateTime created = new DateTime(2022, 9, 21, 11, 12, 13, DateTimeKind.Utc);
+            DateTime started = new DateTime(2022, 9, 21, 11, 16, 27, DateTimeKind.Utc);
+            DateTime completed = new DateTime(2022, 9, 23, 17, 48, 48, DateTimeKind.Utc);
+
+            yield return new object[] { "DPJ-0001", created, created, JobState.Initializing, null, null, null };
+            yield return new object[] { "DPJ-0002", created, created, JobState.Ready, null, null, null };
+            yield return new object[] { "DPJ-0003", created, started, JobState.Processing, started, null, null };
+            yield return new object[] { "DPJ-0004", created, completed, JobState.Completed, started, completed, null };
+            yield return new object[] { "DPJ-0005", created, started, JobState.Failed, null, null, "error description" };
         }
 
         [Test]
