@@ -144,6 +144,35 @@ FROM
 WHERE
   ("id" = @id);</value>
   </data>
+  <data name="QueryGetJobStateSnapshot" xml:space="preserve">
+    <value>SELECT
+  t1."id" AS "id",
+  t1."created" AS "created",
+  t1."updated" AS "updated",
+  t1."started" AS "started",
+  t1."completed" AS "completed",
+  t1."state" AS "state",
+  t1."error" AS "error",
+  COUNT(1) FILTER (WHERE (t2."is_completed" = FALSE) AND (t2."owner" IS NULL) AND (t2."processed" = 0)) AS "partitons_waiting",
+  COUNT(1) FILTER (WHERE (t2."is_completed" = FALSE) AND (t2."owner" IS NOT NULL)) AS "partitons_started",
+  COUNT(1) FILTER (WHERE t2."is_completed" = TRUE) AS "partitions_completed",
+  COALESCE(SUM(t2."remaining"), 0) AS "keys_remaining",
+  COALESCE(SUM(t2."processed"), 0) AS "keys_completed",
+  COALESCE(MAX(t2."updated"), t1."updated") AS "last_activity",
+  COALESCE(SUM(t2."acquired") - COUNT(1), 0) AS "ownership_changes",
+  COUNT(1) FILTER (WHERE (t1."state" = 1) AND (t2."is_split_requested" = TRUE)) AS "split_requests_pending"
+FROM
+  "dipren"."jobs" t1
+  INNER JOIN "dipren"."partitions" t2 ON (t1."id" = t2."job_id")
+WHERE
+  (t1."id" = @id)
+GROUP BY
+  t1."id",
+  t1."created",
+  t1."updated",
+  t1."state",
+  t1."error";</value>
+  </data>
   <data name="QueryInsertJob" xml:space="preserve">
     <value>INSERT INTO "dipren"."jobs"
 (
