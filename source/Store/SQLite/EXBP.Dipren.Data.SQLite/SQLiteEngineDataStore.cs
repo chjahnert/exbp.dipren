@@ -625,7 +625,7 @@ namespace EXBP.Dipren.Data.SQLite
 
                 using SQLiteCommand command = new SQLiteCommand
                 {
-                    CommandText = SQLiteEngineDataStoreResources.QueryMarkJobStarted,
+                    CommandText = SQLiteEngineDataStoreResources.QueryMarkJobAsStarted,
                     CommandType = CommandType.Text,
                     Transaction = transaction
                 };
@@ -693,7 +693,7 @@ namespace EXBP.Dipren.Data.SQLite
 
                 using SQLiteCommand command = new SQLiteCommand
                 {
-                    CommandText = SQLiteEngineDataStoreResources.QueryMarkJobCompleted,
+                    CommandText = SQLiteEngineDataStoreResources.QueryMarkJobAsCompleted,
                     CommandType = CommandType.Text,
                     Transaction = transaction
                 };
@@ -764,7 +764,7 @@ namespace EXBP.Dipren.Data.SQLite
 
                 using SQLiteCommand command = new SQLiteCommand
                 {
-                    CommandText = SQLiteEngineDataStoreResources.QueryMarkJobFailed,
+                    CommandText = SQLiteEngineDataStoreResources.QueryMarkJobAsFailed,
                     CommandType = CommandType.Text,
                     Transaction = transaction
                 };

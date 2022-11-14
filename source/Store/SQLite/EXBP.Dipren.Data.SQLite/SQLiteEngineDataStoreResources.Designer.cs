@@ -223,6 +223,54 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;jobs&quot;
         ///SET
         ///  &quot;updated&quot; = $timestamp,
+        ///  &quot;completed&quot; = $timestamp,
+        ///  &quot;state&quot; = $state
+        ///WHERE
+        ///  (&quot;id&quot; = $id)
+        ///RETURNING
+        ///  &quot;id&quot; AS &quot;id&quot;,
+        ///  &quot;created&quot; AS &quot;created&quot;,
+        ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;started&quot; AS &quot;started&quot;,
+        ///  &quot;completed&quot; AS &quot;completed&quot;,
+        ///  &quot;state&quot; AS &quot;state&quot;,
+        ///  &quot;error&quot; AS &quot;error&quot;;.
+        /// </summary>
+        internal static string QueryMarkJobAsCompleted {
+            get {
+                return ResourceManager.GetString("QueryMarkJobAsCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE
+        ///  &quot;jobs&quot;
+        ///SET
+        ///  &quot;updated&quot; = $timestamp,
+        ///  &quot;state&quot; = $state,
+        ///  &quot;error&quot; = $error
+        ///WHERE
+        ///  (&quot;id&quot; = $id)
+        ///RETURNING
+        ///  &quot;id&quot; AS &quot;id&quot;,
+        ///  &quot;created&quot; AS &quot;created&quot;,
+        ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;started&quot; AS &quot;started&quot;,
+        ///  &quot;completed&quot; AS &quot;completed&quot;,
+        ///  &quot;state&quot; AS &quot;state&quot;,
+        ///  &quot;error&quot; AS &quot;error&quot;;.
+        /// </summary>
+        internal static string QueryMarkJobAsFailed {
+            get {
+                return ResourceManager.GetString("QueryMarkJobAsFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE
+        ///  &quot;jobs&quot;
+        ///SET
+        ///  &quot;updated&quot; = $timestamp,
         ///  &quot;state&quot; = $state
         ///WHERE
         ///  (&quot;id&quot; = $id)
@@ -246,54 +294,6 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;jobs&quot;
         ///SET
         ///  &quot;updated&quot; = $timestamp,
-        ///  &quot;completed&quot; = $timestamp,
-        ///  &quot;state&quot; = $state
-        ///WHERE
-        ///  (&quot;id&quot; = $id)
-        ///RETURNING
-        ///  &quot;id&quot; AS &quot;id&quot;,
-        ///  &quot;created&quot; AS &quot;created&quot;,
-        ///  &quot;updated&quot; AS &quot;updated&quot;,
-        ///  &quot;started&quot; AS &quot;started&quot;,
-        ///  &quot;completed&quot; AS &quot;completed&quot;,
-        ///  &quot;state&quot; AS &quot;state&quot;,
-        ///  &quot;error&quot; AS &quot;error&quot;;.
-        /// </summary>
-        internal static string QueryMarkJobCompleted {
-            get {
-                return ResourceManager.GetString("QueryMarkJobCompleted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to UPDATE
-        ///  &quot;jobs&quot;
-        ///SET
-        ///  &quot;updated&quot; = $timestamp,
-        ///  &quot;state&quot; = $state,
-        ///  &quot;error&quot; = $error
-        ///WHERE
-        ///  (&quot;id&quot; = $id)
-        ///RETURNING
-        ///  &quot;id&quot; AS &quot;id&quot;,
-        ///  &quot;created&quot; AS &quot;created&quot;,
-        ///  &quot;updated&quot; AS &quot;updated&quot;,
-        ///  &quot;started&quot; AS &quot;started&quot;,
-        ///  &quot;completed&quot; AS &quot;completed&quot;,
-        ///  &quot;state&quot; AS &quot;state&quot;,
-        ///  &quot;error&quot; AS &quot;error&quot;;.
-        /// </summary>
-        internal static string QueryMarkJobFailed {
-            get {
-                return ResourceManager.GetString("QueryMarkJobFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to UPDATE
-        ///  &quot;jobs&quot;
-        ///SET
-        ///  &quot;updated&quot; = $timestamp,
         ///  &quot;started&quot; = $timestamp,
         ///  &quot;state&quot; = $state
         ///WHERE
@@ -307,9 +307,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;state&quot; AS &quot;state&quot;,
         ///  &quot;error&quot; AS &quot;error&quot;;.
         /// </summary>
-        internal static string QueryMarkJobStarted {
+        internal static string QueryMarkJobAsStarted {
             get {
-                return ResourceManager.GetString("QueryMarkJobStarted", resourceCulture);
+                return ResourceManager.GetString("QueryMarkJobAsStarted", resourceCulture);
             }
         }
         
