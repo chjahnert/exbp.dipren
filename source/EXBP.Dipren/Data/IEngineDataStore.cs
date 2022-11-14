@@ -158,7 +158,7 @@ namespace EXBP.Dipren.Data
         /// <summary>
         ///   Marks a job as failed.
         /// </summary>
-        /// <param name="jobId">
+        /// <param name="id">
         ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="timestamp">
@@ -176,12 +176,12 @@ namespace EXBP.Dipren.Data
         ///   provides access to the result of the operation.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
         /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        Task<Job> MarkJobAsFailedAsync(string jobId, DateTime timestamp, string error, CancellationToken cancellation);
+        Task<Job> MarkJobAsFailedAsync(string id, DateTime timestamp, string error, CancellationToken cancellation);
 
         /// <summary>
         ///   Retrieves the job with the specified identifier from the data store.

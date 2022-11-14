@@ -943,7 +943,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// <summary>
         ///   Marks a job as failed.
         /// </summary>
-        /// <param name="jobId">
+        /// <param name="id">
         ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="timestamp">
@@ -961,14 +961,14 @@ namespace EXBP.Dipren.Data.Postgres
         ///   provides access to the result of the operation.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
         /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public async Task<Job> MarkJobAsFailedAsync(string jobId, DateTime timestamp, string error, CancellationToken cancellation)
+        public async Task<Job> MarkJobAsFailedAsync(string id, DateTime timestamp, string error, CancellationToken cancellation)
         {
-            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+            Assert.ArgumentIsNotNull(id, nameof(id));
 
             DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
 
@@ -983,7 +983,7 @@ namespace EXBP.Dipren.Data.Postgres
                     Connection = connection
                 };
 
-                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, jobId);
+                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
                 command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
                 command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Failed);
                 command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, ((object) error) ?? DBNull.Value);
