@@ -83,7 +83,7 @@ namespace EXBP.Dipren.Data
         /// <summary>
         ///   Marks a job as ready.
         /// </summary>
-        /// <param name="jobId">
+        /// <param name="id">
         ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="timestamp">
@@ -98,12 +98,12 @@ namespace EXBP.Dipren.Data
         ///   provides access to the result of the operation.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
         /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        Task<Job> MarkJobAsReadyAsync(string jobId, DateTime timestamp, CancellationToken cancellation);
+        Task<Job> MarkJobAsReadyAsync(string id, DateTime timestamp, CancellationToken cancellation);
 
         /// <summary>
         ///   Marks a job started.
