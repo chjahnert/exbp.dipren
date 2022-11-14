@@ -362,9 +362,9 @@ namespace EXBP.Dipren.Data.Memory
         }
 
         /// <summary>
-        ///   Marks a job started.
+        ///   Marks a job as started.
         /// </summary>
-        /// <param name="jobId">
+        /// <param name="id">
         ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="timestamp">
@@ -384,29 +384,29 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<Job> MarkJobAsStartedAsync(string jobId, DateTime timestamp, CancellationToken cancellation)
+        public Task<Job> MarkJobAsStartedAsync(string id, DateTime timestamp, CancellationToken cancellation)
         {
-            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+            Assert.ArgumentIsNotNull(id, nameof(id));
 
             Job result = null;
 
             lock (this._syncRoot)
             {
-                bool exists = this._jobs.Contains(jobId);
+                bool exists = this._jobs.Contains(id);
 
                 if (exists == false)
                 {
                     this.RaiseErrorUnknownJobIdentifier();
                 }
 
-                result = this._jobs[jobId] with
+                result = this._jobs[id] with
                 {
                     Updated = timestamp,
                     Started = timestamp,
                     State = JobState.Processing
                 };
 
-                this._jobs.Remove(jobId);
+                this._jobs.Remove(id);
                 this._jobs.Add(result);
             }
 

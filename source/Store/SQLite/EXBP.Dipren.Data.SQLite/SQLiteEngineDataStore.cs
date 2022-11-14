@@ -589,9 +589,9 @@ namespace EXBP.Dipren.Data.SQLite
         }
 
         /// <summary>
-        ///   Marks a job started.
+        ///   Marks a job as started.
         /// </summary>
-        /// <param name="jobId">
+        /// <param name="id">
         ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="timestamp">
@@ -606,14 +606,14 @@ namespace EXBP.Dipren.Data.SQLite
         ///   provides access to the result of the operation.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="jobId"/> is a <see langword="null"/> reference.
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
         /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public async Task<Job> MarkJobAsStartedAsync(string jobId, DateTime timestamp, CancellationToken cancellation)
+        public async Task<Job> MarkJobAsStartedAsync(string id, DateTime timestamp, CancellationToken cancellation)
         {
-            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+            Assert.ArgumentIsNotNull(id, nameof(id));
 
             Job result = null;
 
@@ -630,7 +630,7 @@ namespace EXBP.Dipren.Data.SQLite
                     Transaction = transaction
                 };
 
-                command.Parameters.AddWithValue("$id", jobId);
+                command.Parameters.AddWithValue("$id", id);
                 command.Parameters.AddWithValue("$timestamp", timestamp);
                 command.Parameters.AddWithValue("$state", JobState.Processing);
 
