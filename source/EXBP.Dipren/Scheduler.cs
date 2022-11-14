@@ -190,7 +190,7 @@ namespace EXBP.Dipren
         private async Task<Job> MarkJobAsReadyAsync(string jobId, CancellationToken cancellation)
         {
             DateTime timestamp = this.Clock.GetDateTime();
-            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Ready, null, cancellation);
+            Job result = await this.Store.MarkJobAsReadyAsync(jobId, timestamp, cancellation);
 
             return result;
         }
@@ -215,7 +215,7 @@ namespace EXBP.Dipren
         private async Task<Job> MarkJobAsFailedAsync(string jobId, Exception exception, CancellationToken cancellation)
         {
             DateTime timestamp = this.Clock.GetDateTime();
-            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Failed, exception?.Message, cancellation);
+            Job result = await this.Store.MarkJobAsFailedAsync(jobId, timestamp, exception?.Message, cancellation);
 
             return result;
         }

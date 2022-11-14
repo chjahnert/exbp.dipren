@@ -514,7 +514,7 @@ namespace EXBP.Dipren
         private async Task<Job> MarkJobAsCompletedAsync(string jobId, CancellationToken cancellation)
         {
             DateTime timestamp = this.Clock.GetDateTime();
-            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Completed, null, cancellation);
+            Job result = await this.Store.MarkJobAsCompletedAsync(jobId, timestamp, cancellation);
 
             return result;
         }
