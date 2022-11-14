@@ -126,6 +126,240 @@ namespace EXBP.Dipren.Tests.Data
         }
 
         [Test]
+        public async Task MarkJobAsReadyAsync_ArgumentIdIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.MarkJobAsReadyAsync(null, DateTime.UtcNow, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsReadyAsync_JobDoesNotExist_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.MarkJobAsReadyAsync("DPJ-0001", DateTime.UtcNow, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsReadyAsync_JobExists_UpdatesJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+
+            await store.MarkJobAsReadyAsync(persisted.Id, timestamp, CancellationToken.None);
+
+            Job retrieved = await store.RetrieveJobAsync(persisted.Id, CancellationToken.None);
+
+            Assert.That(retrieved, Is.Not.Null);
+            Assert.That(retrieved.Created, Is.EqualTo(persisted.Created));
+            Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
+            Assert.That(retrieved.State, Is.EqualTo(JobState.Ready));
+            Assert.That(retrieved.Started, Is.Null);
+            Assert.That(retrieved.Completed, Is.Null);
+            Assert.That(retrieved.Error, Is.Null);
+        }
+
+        [Test]
+        public async Task MarkJobAsReadyAsync_JobExists_ReturnsUpdatedJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+
+            Job updated = await store.MarkJobAsReadyAsync(persisted.Id, timestamp, CancellationToken.None);
+
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.Created, Is.EqualTo(persisted.Created));
+            Assert.That(updated.Updated, Is.EqualTo(timestamp));
+            Assert.That(updated.State, Is.EqualTo(JobState.Ready));
+            Assert.That(updated.Started, Is.Null);
+            Assert.That(updated.Completed, Is.Null);
+            Assert.That(updated.Error, Is.Null);
+        }
+
+        [Test]
+        public async Task MarkJobAsStartedAsync_ArgumentIdIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.MarkJobAsStartedAsync(null, DateTime.UtcNow, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsStartedAsync_JobDoesNotExist_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.MarkJobAsStartedAsync("DPJ-0001", DateTime.UtcNow, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsStartedAsync_JobExists_UpdatesJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Ready);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+
+            await store.MarkJobAsStartedAsync(persisted.Id, timestamp, CancellationToken.None);
+
+            Job retrieved = await store.RetrieveJobAsync(persisted.Id, CancellationToken.None);
+
+            Assert.That(retrieved, Is.Not.Null);
+            Assert.That(retrieved.Created, Is.EqualTo(persisted.Created));
+            Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
+            Assert.That(retrieved.State, Is.EqualTo(JobState.Processing));
+            Assert.That(retrieved.Started, Is.EqualTo(timestamp));
+            Assert.That(retrieved.Completed, Is.Null);
+            Assert.That(retrieved.Error, Is.Null);
+        }
+
+        [Test]
+        public async Task MarkJobAsStartedAsync_JobExists_ReturnsUpdatedJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Ready);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+
+            Job updated = await store.MarkJobAsStartedAsync(persisted.Id, timestamp, CancellationToken.None);
+
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.Created, Is.EqualTo(persisted.Created));
+            Assert.That(updated.Updated, Is.EqualTo(timestamp));
+            Assert.That(updated.State, Is.EqualTo(JobState.Processing));
+            Assert.That(updated.Started, Is.EqualTo(timestamp));
+            Assert.That(updated.Completed, Is.Null);
+            Assert.That(updated.Error, Is.Null);
+        }
+
+        [Test]
+        public async Task MarkJobAsCompletedAsync_ArgumentIdIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.MarkJobAsCompletedAsync(null, DateTime.UtcNow, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsCompletedAsync_JobDoesNotExist_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.MarkJobAsCompletedAsync("DPJ-0001", DateTime.UtcNow, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsCompletedAsync_JobExists_UpdatesJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Processing);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+
+            await store.MarkJobAsCompletedAsync(persisted.Id, timestamp, CancellationToken.None);
+
+            Job retrieved = await store.RetrieveJobAsync(persisted.Id, CancellationToken.None);
+
+            Assert.That(retrieved, Is.Not.Null);
+            Assert.That(retrieved.Created, Is.EqualTo(persisted.Created));
+            Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
+            Assert.That(retrieved.State, Is.EqualTo(JobState.Completed));
+            Assert.That(retrieved.Started, Is.EqualTo(persisted.Started));
+            Assert.That(retrieved.Completed, Is.EqualTo(timestamp));
+            Assert.That(retrieved.Error, Is.Null);
+        }
+
+        [Test]
+        public async Task MarkJobAsCompletedAsync_JobExists_ReturnsUpdatedJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Processing);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+
+            Job updated = await store.MarkJobAsCompletedAsync(persisted.Id, timestamp, CancellationToken.None);
+
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.Created, Is.EqualTo(persisted.Created));
+            Assert.That(updated.Updated, Is.EqualTo(timestamp));
+            Assert.That(updated.State, Is.EqualTo(JobState.Completed));
+            Assert.That(updated.Started, Is.EqualTo(persisted.Started));
+            Assert.That(updated.Completed, Is.EqualTo(timestamp));
+            Assert.That(updated.Error, Is.Null);
+        }
+
+        [Test]
+        public async Task MarkJobAsFailedAsync_ArgumentIdIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.MarkJobAsFailedAsync(null, DateTime.UtcNow, "The description of the error.", CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsFailedAsync_JobDoesNotExist_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.MarkJobAsFailedAsync("DPJ-0001", DateTime.UtcNow, "The description of the error.", CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsFailedAsync_JobExists_UpdatesJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+            const string error = "The description of the error.";
+
+            await store.MarkJobAsFailedAsync(persisted.Id, timestamp, error, CancellationToken.None);
+
+            Job retrieved = await store.RetrieveJobAsync(persisted.Id, CancellationToken.None);
+
+            Assert.That(retrieved, Is.Not.Null);
+            Assert.That(retrieved.Created, Is.EqualTo(persisted.Created));
+            Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
+            Assert.That(retrieved.State, Is.EqualTo(JobState.Failed));
+            Assert.That(retrieved.Started, Is.Null);
+            Assert.That(retrieved.Completed, Is.Null);
+            Assert.That(retrieved.Error, Is.EqualTo(error));
+        }
+
+        [Test]
+        public async Task MarkJobAsFailedAsync_JobExists_ReturnsUpdatedJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+            const string error = "The description of the error.";
+
+            Job updated = await store.MarkJobAsFailedAsync(persisted.Id, timestamp, error, CancellationToken.None);
+
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.Created, Is.EqualTo(persisted.Created));
+            Assert.That(updated.Updated, Is.EqualTo(timestamp));
+            Assert.That(updated.State, Is.EqualTo(JobState.Failed));
+            Assert.That(updated.Started, Is.Null);
+            Assert.That(updated.Completed, Is.Null);
+            Assert.That(updated.Error, Is.EqualTo(error));
+        }
+
+        [Test]
         public async Task UpdateJobAsync_ArgumentJoIdIsNull_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
