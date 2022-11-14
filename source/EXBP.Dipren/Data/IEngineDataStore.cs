@@ -128,7 +128,7 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        Task<Job> MarkJobStartedAsync(string jobId, DateTime timestamp, CancellationToken cancellation);
+        Task<Job> MarkJobAsStartedAsync(string jobId, DateTime timestamp, CancellationToken cancellation);
 
         /// <summary>
         ///   Marks a job completed.

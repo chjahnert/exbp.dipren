@@ -611,7 +611,7 @@ namespace EXBP.Dipren.Data.SQLite
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public async Task<Job> MarkJobStartedAsync(string jobId, DateTime timestamp, CancellationToken cancellation)
+        public async Task<Job> MarkJobAsStartedAsync(string jobId, DateTime timestamp, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
