@@ -1,4 +1,5 @@
 ﻿
+using System.Collections;
 using System.Diagnostics;
 
 using EXBP.Dipren.Data;
@@ -15,6 +16,8 @@ namespace EXBP.Dipren.Tests.Data
         protected virtual DateTime FormatDateTime(DateTime source)
             => source;
 
+        protected virtual DateTime? FormatDateTime(DateTime? source)
+            => (source != null) ? this.FormatDateTime(source.Value) : source;
 
         private async Task<EngineDataStoreWrapper> CreateEngineDataStoreAsync()
         {
@@ -40,13 +43,15 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
+            DateTime created = this.FormatDateTime(new DateTime(2022, 9, 21, 11, 12, 13, DateTimeKind.Utc));
+            DateTime started = this.FormatDateTime(new DateTime(2022, 9, 21, 11, 16, 27, DateTimeKind.Utc));
+            DateTime completed = this.FormatDateTime(new DateTime(2022, 9, 23, 17, 48, 48, DateTimeKind.Utc));
 
-            Job job1 = new Job("DPJ-0001", timestamp, timestamp, JobState.Initializing);
-            Job job2 = new Job("DPJ-0002", timestamp, timestamp, JobState.Ready);
-            Job job3 = new Job("DPJ-0003", timestamp, timestamp, JobState.Processing);
-            Job job4 = new Job("DPJ-0004", timestamp, timestamp, JobState.Completed);
-            Job job5 = new Job("DPJ-0005", timestamp, timestamp, JobState.Failed);
+            Job job1 = new Job("DPJ-0001", created, created, JobState.Initializing, null, null);
+            Job job2 = new Job("DPJ-0002", created, created, JobState.Ready, null, null);
+            Job job3 = new Job("DPJ-0003", created, started, JobState.Processing, started, null);
+            Job job4 = new Job("DPJ-0004", created, completed, JobState.Completed, started, completed);
+            Job job5 = new Job("DPJ-0005", created, started, JobState.Failed);
 
             await store.InsertJobAsync(job1, CancellationToken.None);
             await store.InsertJobAsync(job2, CancellationToken.None);
@@ -70,22 +75,38 @@ namespace EXBP.Dipren.Tests.Data
             Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertJobAsync(job, CancellationToken.None));
         }
 
-        [Test]
-        public async Task InsertJobAsync_ArgumentJobIsValid_InsertsJob()
+        [TestCaseSource(typeof(EngineDataStoreTests), nameof(InsertJobAsync_ArgumentJobIsValid_ParameterSource))]
+        public async Task InsertJobAsync_ArgumentJobIsValid_InsertsJob(string id, DateTime created, DateTime updated, JobState state, DateTime? started, DateTime? completed, string error)
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
+            created = this.FormatDateTime(created);
+            updated = this.FormatDateTime(updated);
+            started = this.FormatDateTime(started);
+            completed = this.FormatDateTime(completed);
 
-            Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
+            Job job = new Job(id, created, updated, state, started, completed, error);
 
             await store.InsertJobAsync(job, CancellationToken.None);
 
-            Job retrieved = await store.RetrieveJobAsync(jobId, CancellationToken.None);
+            Job retrieved = await store.RetrieveJobAsync(id, CancellationToken.None);
 
             Assert.That(retrieved, Is.EqualTo(job));
         }
+
+        public static IEnumerable InsertJobAsync_ArgumentJobIsValid_ParameterSource()
+        {
+            DateTime created = new DateTime(2022, 9, 21, 11, 12, 13, DateTimeKind.Utc);
+            DateTime started = new DateTime(2022, 9, 21, 11, 16, 27, DateTimeKind.Utc);
+            DateTime completed = new DateTime(2022, 9, 23, 17, 48, 48, DateTimeKind.Utc);
+
+            yield return new object[] { "DPJ-0001", created, created, JobState.Initializing, null, null, null };
+            yield return new object[] { "DPJ-0002", created, created, JobState.Ready, null, null, null };
+            yield return new object[] { "DPJ-0003", created, started, JobState.Processing, started, null, null };
+            yield return new object[] { "DPJ-0004", created, completed, JobState.Completed, started, completed, null };
+            yield return new object[] { "DPJ-0005", created, started, JobState.Failed, null, null, "error description" };
+        }
+
 
         [Test]
         public async Task InsertJobAsync_JobWithSameIdentifierAlreadyExists_ThrowsException()
