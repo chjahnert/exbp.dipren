@@ -1120,6 +1120,8 @@ namespace EXBP.Dipren.Data.Postgres
 
             created = DateTime.SpecifyKind(created, DateTimeKind.Utc);
             updated = DateTime.SpecifyKind(updated, DateTimeKind.Utc);
+            started = (started != null) ? DateTime.SpecifyKind(started.Value, DateTimeKind.Utc) : null;
+            completed = (completed != null) ? DateTime.SpecifyKind(completed.Value, DateTimeKind.Utc) : null;
 
             Job result = new Job(id, created, updated, state, started, completed, error);
 
