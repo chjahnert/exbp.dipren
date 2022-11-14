@@ -78,6 +78,7 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
+        [Obsolete]
         Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation);
 
         /// <summary>
