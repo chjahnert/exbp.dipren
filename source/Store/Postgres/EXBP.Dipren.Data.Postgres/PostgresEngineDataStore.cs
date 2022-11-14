@@ -855,7 +855,7 @@ namespace EXBP.Dipren.Data.Postgres
             {
                 using NpgsqlCommand command = new NpgsqlCommand
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobStarted,
+                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobAsStarted,
                     CommandType = CommandType.Text,
                     Connection = connection
                 };
@@ -915,7 +915,7 @@ namespace EXBP.Dipren.Data.Postgres
             {
                 using NpgsqlCommand command = new NpgsqlCommand
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobCompleted,
+                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobAsCompleted,
                     CommandType = CommandType.Text,
                     Connection = connection
                 };
@@ -978,7 +978,7 @@ namespace EXBP.Dipren.Data.Postgres
             {
                 using NpgsqlCommand command = new NpgsqlCommand
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobFailed,
+                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobAsFailed,
                     CommandType = CommandType.Text,
                     Connection = connection
                 };
