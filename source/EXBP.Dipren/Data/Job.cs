@@ -38,7 +38,7 @@ namespace EXBP.Dipren.Data
         public DateTime Updated { get; init; }
 
         /// <summary>
-        ///   Gets the date and time the current job was started; or <see langword="null"/> if not yet started.
+        ///   Gets the date and time the current job was started.
         /// </summary>
         /// <value>
         ///   A <see cref="Nullable{T}"/> of <see cref="DateTime"/> value containing the date and time, in UTC, the
@@ -47,7 +47,7 @@ namespace EXBP.Dipren.Data
         public DateTime? Started { get; init; }
 
         /// <summary>
-        ///   Gets the date and time the current job was completed; or <see langword="null"/> if not yet completed.
+        ///   Gets the date and time the current job was completed.
         /// </summary>
         /// <value>
         ///   A <see cref="Nullable{T}"/> of <see cref="DateTime"/> value containing the date and time, in UTC, the
