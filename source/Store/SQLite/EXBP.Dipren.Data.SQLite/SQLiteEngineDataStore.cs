@@ -725,7 +725,7 @@ namespace EXBP.Dipren.Data.SQLite
         }
 
         /// <summary>
-        ///   Marks a job failed.
+        ///   Marks a job as failed.
         /// </summary>
         /// <param name="jobId">
         ///   The unique identifier of the job to update.
@@ -750,7 +750,7 @@ namespace EXBP.Dipren.Data.SQLite
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public async Task<Job> MarkJobFailedAsync(string jobId, DateTime timestamp, string error, CancellationToken cancellation)
+        public async Task<Job> MarkJobAsFailedAsync(string jobId, DateTime timestamp, string error, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 

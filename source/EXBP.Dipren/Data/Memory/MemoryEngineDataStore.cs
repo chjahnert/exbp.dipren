@@ -466,7 +466,7 @@ namespace EXBP.Dipren.Data.Memory
         }
 
         /// <summary>
-        ///   Updates the state of an existing job.
+        ///   Marks a job as failed.
         /// </summary>
         /// <param name="jobId">
         ///   The unique identifier of the job to update.
@@ -491,7 +491,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<Job> MarkJobFailedAsync(string jobId, DateTime timestamp, string error, CancellationToken cancellation)
+        public Task<Job> MarkJobAsFailedAsync(string jobId, DateTime timestamp, string error, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
 
