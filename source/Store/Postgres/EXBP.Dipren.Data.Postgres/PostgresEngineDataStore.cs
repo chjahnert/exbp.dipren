@@ -159,12 +159,17 @@ namespace EXBP.Dipren.Data.Postgres
 
                 DateTime uktsCreated = DateTime.SpecifyKind(job.Created, DateTimeKind.Unspecified);
                 DateTime uktsUpdated = DateTime.SpecifyKind(job.Updated, DateTimeKind.Unspecified);
+                object uktsStarted = ((job.Started != null) ? DateTime.SpecifyKind(job.Started.Value, DateTimeKind.Unspecified) : DBNull.Value);
+                object uktsCompleted = ((job.Completed != null) ? DateTime.SpecifyKind(job.Completed.Value, DateTimeKind.Unspecified) : DBNull.Value);
+                object error = ((job.Error != null) ? job.Error : DBNull.Value);
 
                 command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, job.Id);
                 command.Parameters.AddWithValue("@created", NpgsqlDbType.Timestamp, uktsCreated);
                 command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsUpdated);
+                command.Parameters.AddWithValue("@started", NpgsqlDbType.Timestamp, uktsStarted);
+                command.Parameters.AddWithValue("@completed", NpgsqlDbType.Timestamp, uktsCompleted);
                 command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) job.State);
-                command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, ((object) job.Error) ?? DBNull.Value);
+                command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, error);
 
                 try
                 {

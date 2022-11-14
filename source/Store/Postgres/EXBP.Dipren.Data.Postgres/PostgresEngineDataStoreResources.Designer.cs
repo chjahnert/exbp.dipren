@@ -117,6 +117,8 @@ namespace EXBP.Dipren.Data.Postgres {
         ///  &quot;id&quot;,
         ///  &quot;created&quot;,
         ///  &quot;updated&quot;,
+        ///  &quot;started&quot;,
+        ///  &quot;completed&quot;,
         ///  &quot;state&quot;,
         ///  &quot;error&quot;
         ///)
@@ -125,6 +127,8 @@ namespace EXBP.Dipren.Data.Postgres {
         ///  @id,
         ///  @created,
         ///  @updated,
+        ///  @started,
+        ///  @completed,
         ///  @state,
         ///  @error
         ///);.
