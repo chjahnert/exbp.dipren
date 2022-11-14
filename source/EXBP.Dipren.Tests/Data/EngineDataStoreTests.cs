@@ -75,7 +75,7 @@ namespace EXBP.Dipren.Tests.Data
             Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertJobAsync(job, CancellationToken.None));
         }
 
-        [TestCaseSource(typeof(EngineDataStoreTests), nameof(InsertJobAsync_ArgumentJobIsValid_ParameterSource))]
+        [TestCaseSource(nameof(InsertJobAsync_ArgumentJobIsValid_ParameterSource))]
         public async Task InsertJobAsync_ArgumentJobIsValid_InsertsJob(string id, DateTime created, DateTime updated, JobState state, DateTime? started, DateTime? completed, string error)
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
@@ -205,7 +205,7 @@ namespace EXBP.Dipren.Tests.Data
             Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrieveJobAsync("DPJ-0001", CancellationToken.None));
         }
 
-        [TestCaseSource(typeof(EngineDataStoreTests), nameof(RetirveJobAsync_ArgumentIdIsValidAndJobExists_ParameterSource))]
+        [TestCaseSource(nameof(RetirveJobAsync_ArgumentIdIsValidAndJobExists_ParameterSource))]
         public async Task RetirveJobAsync_ArgumentIdIsValidAndJobExists_RetrievesJob(string id, DateTime created, DateTime updated, JobState state, DateTime? started, DateTime? completed, string error)
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
