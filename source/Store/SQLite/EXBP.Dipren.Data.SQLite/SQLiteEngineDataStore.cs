@@ -521,6 +521,74 @@ namespace EXBP.Dipren.Data.SQLite
         }
 
         /// <summary>
+        ///   Marks a job ready.
+        /// </summary>
+        /// <param name="jobId">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="jobId"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public async Task<Job> MarkJobAsReadyAsync(string jobId, DateTime timestamp, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+
+            Job result = null;
+
+            this._lock.EnterWriteLock();
+
+            try
+            {
+                using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
+                using SQLiteCommand command = new SQLiteCommand
+                {
+                    CommandText = SQLiteEngineDataStoreResources.QueryMarkJobAsReady,
+                    CommandType = CommandType.Text,
+                    Transaction = transaction
+                };
+
+                command.Parameters.AddWithValue("$id", jobId);
+                command.Parameters.AddWithValue("$timestamp", timestamp);
+                command.Parameters.AddWithValue("$state", JobState.Ready);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool found = await reader.ReadAsync(cancellation);
+
+                    if (found == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+                    result = this.ReadJob(reader);
+                }
+
+                transaction.Commit();
+            }
+            finally
+            {
+                this._lock.ExitWriteLock();
+            }
+
+            return result;
+        }
+
+        /// <summary>
         ///   Marks a job started.
         /// </summary>
         /// <param name="jobId">

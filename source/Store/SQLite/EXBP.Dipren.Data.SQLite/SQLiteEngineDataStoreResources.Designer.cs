@@ -223,6 +223,29 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;jobs&quot;
         ///SET
         ///  &quot;updated&quot; = $timestamp,
+        ///  &quot;state&quot; = $state
+        ///WHERE
+        ///  (&quot;id&quot; = $id)
+        ///RETURNING
+        ///  &quot;id&quot; AS &quot;id&quot;,
+        ///  &quot;created&quot; AS &quot;created&quot;,
+        ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;started&quot; AS &quot;started&quot;,
+        ///  &quot;completed&quot; AS &quot;completed&quot;,
+        ///  &quot;state&quot; AS &quot;state&quot;,
+        ///  &quot;error&quot; AS &quot;error&quot;;.
+        /// </summary>
+        internal static string QueryMarkJobAsReady {
+            get {
+                return ResourceManager.GetString("QueryMarkJobAsReady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE
+        ///  &quot;jobs&quot;
+        ///SET
+        ///  &quot;updated&quot; = $timestamp,
         ///  &quot;completed&quot; = $timestamp,
         ///  &quot;state&quot; = $state
         ///WHERE

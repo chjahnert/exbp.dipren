@@ -243,6 +243,23 @@ VALUES
   $is_split_requested
 );</value>
   </data>
+  <data name="QueryMarkJobAsReady" xml:space="preserve">
+    <value>UPDATE
+  "jobs"
+SET
+  "updated" = $timestamp,
+  "state" = $state
+WHERE
+  ("id" = $id)
+RETURNING
+  "id" AS "id",
+  "created" AS "created",
+  "updated" AS "updated",
+  "started" AS "started",
+  "completed" AS "completed",
+  "state" AS "state",
+  "error" AS "error";</value>
+  </data>
   <data name="QueryMarkJobCompleted" xml:space="preserve">
     <value>UPDATE
   "jobs"

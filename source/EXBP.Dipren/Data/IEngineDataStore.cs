@@ -81,6 +81,31 @@ namespace EXBP.Dipren.Data
         Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation);
 
         /// <summary>
+        ///   Marks a job as ready.
+        /// </summary>
+        /// <param name="jobId">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        Task<Job> MarkJobAsReadyAsync(string jobId, DateTime timestamp, CancellationToken cancellation);
+
+        /// <summary>
         ///   Marks a job started.
         /// </summary>
         /// <param name="jobId">
