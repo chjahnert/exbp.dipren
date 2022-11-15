@@ -329,8 +329,8 @@ WHERE
     SUM(t2."remaining") AS "keys_remaining",
     SUM(t2."processed") AS "keys_completed",
     COALESCE(MAX(t2."updated"), t1."updated") AS "last_activity",
-    COALESCE(SUM(t2."acquired") - COUNT(1), 0) AS "ownership_changes",
-    COUNT(1) FILTER (WHERE (t1."state" = 1) AND (t2."is_split_requested" = TRUE)) AS "split_requests_pending"
+    COALESCE(SUM(t2."acquired"), 0) AS "ownership_changes",
+    COUNT(1) FILTER (WHERE (t1."state" = 2) AND (t2."is_split_requested" = TRUE)) AS "split_requests_pending"
   FROM
     "dipren"."jobs" t1
     LEFT JOIN "dipren"."partitions" t2 ON (t1."id" = t2."job_id")
@@ -357,7 +357,7 @@ SELECT
   "keys_remaining" AS "keys_remaining",
   "keys_completed" AS "keys_completed",
   "last_activity" AS "last_activity",
-  ("ownership_changes" + "partitons_waiting") AS "ownership_changes",
+  ("ownership_changes" - "partitons_started" - "partitions_completed") AS "ownership_changes",
   "split_requests_pending" AS "split_requests_pending"
 FROM
   "summary";</value>
