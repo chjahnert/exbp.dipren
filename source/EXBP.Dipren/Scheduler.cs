@@ -15,7 +15,7 @@ namespace EXBP.Dipren
     public class Scheduler : Node
     {
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Engine"/> class.
+        ///   Initializes a new instance of the <see cref="Scheduler"/> class.
         /// </summary>
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
@@ -31,7 +31,7 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Engine"/> class.
+        ///   Initializes a new instance of the <see cref="Scheduler"/> class.
         /// </summary>
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
@@ -81,6 +81,23 @@ namespace EXBP.Dipren
                 throw;
             }
         }
+
+        /// <summary>
+        ///   Gets the state of the job with the specified unique identifier.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        public async Task<Summary> GetJobStateAsync(string id, CancellationToken cancellation)
+            => await this.Store.RetrieveJobSummaryAsync(id, cancellation);
 
         /// <summary>
         ///   Creates a job entry for the specified job in the engine data store.
