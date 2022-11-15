@@ -1063,7 +1063,7 @@ namespace EXBP.Dipren.Data.Postgres
                         Error = job.Error,
 
                         LastActivity = reader.GetDateTime("last_activity"),
-                        OwnershipChanges = reader.GetInt64("ownership_changes") + reader.GetInt64("partitons_waiting"),
+                        OwnershipChanges = reader.GetInt64("ownership_changes"),
                         PendingSplitRequests = reader.GetInt64("split_requests_pending"),
 
                         Partitions = new JobStateSnapshot.PartitionCounts
