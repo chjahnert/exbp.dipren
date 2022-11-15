@@ -188,33 +188,54 @@ WHERE
     <value>PRAGMA foreign_keys = ON;</value>
   </data>
   <data name="QueryGetJobStateSnapshot" xml:space="preserve">
-    <value>SELECT
-  t1."id" AS "id",
-  t1."created" AS "created",
-  t1."updated" AS "updated",
-  t1."started" AS "started",
-  t1."completed" AS "completed",
-  t1."state" AS "state",
-  t1."error" AS "error",
-  (SELECT COUNT(1) FROM "partitions" WHERE ("partitions"."job_id" = $id) AND ("is_completed" = 0) AND ("owner" IS NULL) AND ("processed" = 0)) AS "partitons_waiting",
-  (SELECT COUNT(1) FROM "partitions" WHERE ("partitions"."job_id" = $id) AND ("is_completed" = 0) AND (("owner" IS NOT NULL) OR ("processed" > 0))) AS "partitons_started",
-  (SELECT COUNT(1) FROM "partitions" WHERE ("partitions"."job_id" = $id) AND ("is_completed" = 1)) AS "partitions_completed",
-  SUM(t2."remaining") AS "keys_remaining",
-  SUM(t2."processed") AS "keys_completed",
-  COALESCE(MAX(t2."updated"), t1."updated") AS "last_activity",
-  COALESCE(SUM(t2."acquired") - COUNT(1), 0) AS "ownership_changes",
-  (SELECT COUNT(1) FROM "partitions" WHERE ("partitions"."job_id" = $id) AND ("is_split_requested" = 1)) AS "split_requests_pending"
+    <value>WITH "summary" AS
+(
+  SELECT
+    t1."id" AS "id",
+    t1."created" AS "created",
+    t1."updated" AS "updated",
+    t1."started" AS "started",
+    t1."completed" AS "completed",
+    t1."state" AS "state",
+    t1."error" AS "error",
+    (SELECT COUNT(1) FROM "partitions" WHERE ("partitions"."job_id" = $id) AND ("is_completed" = 0) AND ("owner" IS NULL) AND ("processed" = 0)) AS "partitons_waiting",
+    (SELECT COUNT(1) FROM "partitions" WHERE ("partitions"."job_id" = $id) AND ("is_completed" = 0) AND (("owner" IS NOT NULL) OR ("processed" > 0))) AS "partitons_started",
+    (SELECT COUNT(1) FROM "partitions" WHERE ("partitions"."job_id" = $id) AND ("is_completed" = 1)) AS "partitions_completed",
+    SUM(t2."remaining") AS "keys_remaining",
+    SUM(t2."processed") AS "keys_completed",
+    COALESCE(MAX(t2."updated"), t1."updated") AS "last_activity",
+    COALESCE(SUM(t2."acquired") - COUNT(1), 0) AS "ownership_changes",
+    (SELECT COUNT(1) FROM "partitions" WHERE ("partitions"."job_id" = $id) AND ("is_split_requested" = 1)) AS "split_requests_pending"
+  FROM
+    "jobs" t1
+    LEFT JOIN "partitions" t2 ON (t1."id" = t2."job_id")
+  WHERE
+    (t1."id" = $id)
+  GROUP BY
+    t1."id",
+    t1."created",
+    t1."updated",
+    t1."state",
+    t1."error"
+)
+SELECT
+  "id" AS "id",
+  "created" AS "created",
+  "updated" AS "updated",
+  "started" AS "started",
+  "completed" AS "completed",
+  "state" AS "state",
+  "error" AS "error",
+  "partitons_waiting" AS "partitons_waiting",
+  "partitons_started" AS "partitons_started",
+  "partitions_completed" AS "partitions_completed",
+  "keys_remaining" AS "keys_remaining",
+  "keys_completed" AS "keys_completed",
+  "last_activity" AS "last_activity",
+  ("ownership_changes" + "partitons_waiting") AS "ownership_changes",
+  "split_requests_pending" AS "split_requests_pending"
 FROM
-  "jobs" t1
-  LEFT JOIN "partitions" t2 ON (t1."id" = t2."job_id")
-WHERE
-  (t1."id" = $id)
-GROUP BY
-  t1."id",
-  t1."created",
-  t1."updated",
-  t1."state",
-  t1."error";</value>
+  "summary";</value>
   </data>
   <data name="QueryInsertJob" xml:space="preserve">
     <value>INSERT INTO "jobs"
