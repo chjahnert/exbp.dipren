@@ -1307,7 +1307,7 @@ namespace EXBP.Dipren.Tests.Data
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "80", "80", true, "82", 3L, 8L, "owner-1", false, true);
+                Partition partition = new Partition(id, job.Id, created, updated, "80", "90", true, "82", 3L, 8L, "owner-1", false, true);
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1389,6 +1389,101 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Keys.Total, Is.EqualTo(71L));
 
             Assert.That(result.PendingSplitRequests, Is.EqualTo(2));
+        }
+
+        [Test]
+        public async Task RetrieveJobSummaryAsync_JobIsCompleted_ReturnsCorrectResult()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Completed);
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "80", "90", true, "90", 11L, 0L, "owner-1", true, true);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 16, 33, 37, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "10", "20", false, "19", 10L, 0L, "owner-2", true, true);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 16, 25, 21, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "20", "30", false, "29", 10L, 0L, "owner-3", true, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "30", "40", false, "39", 10L, 0L, "owner-1", true, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 48, 29, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 29, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "40", "50", false, "49", 10L, 0L, "owner-2", true, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 17, 16, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "50", "60", false, "59", 10L, 0L, "owner-4", true, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 17, 16, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "60", "70", false, "69", 10L, 0L, "owner-5", true, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            Summary result = await store.RetrieveJobSummaryAsync(job.Id, CancellationToken.None);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Id, Is.EqualTo(job.Id));
+            Assert.That(result.Created, Is.EqualTo(job.Created));
+            Assert.That(result.Updated, Is.EqualTo(job.Updated));
+            Assert.That(result.Started, Is.EqualTo(job.Started));
+            Assert.That(result.Completed, Is.EqualTo(job.Completed));
+            Assert.That(result.State, Is.EqualTo(job.State));
+            Assert.That(result.Error, Is.EqualTo(job.Error));
+
+            Assert.That(result.Partitions, Is.Not.Null);
+            Assert.That(result.Partitions.Waiting, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Started, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Completed, Is.EqualTo(7L));
+            Assert.That(result.Partitions.Total, Is.EqualTo(7L));
+
+            Assert.That(result.Keys, Is.Not.Null);
+            Assert.That(result.Keys.Remaining, Is.EqualTo(0L));
+            Assert.That(result.Keys.Completed, Is.EqualTo(71L));
+            Assert.That(result.Keys.Total, Is.EqualTo(71L));
+
+            Assert.That(result.PendingSplitRequests, Is.EqualTo(0));
         }
 
 

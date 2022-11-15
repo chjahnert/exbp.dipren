@@ -836,7 +836,7 @@ namespace EXBP.Dipren.Data.Memory
 
                     LastActivity = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id)).Max(p => p.Updated) : job.Updated,
                     OwnershipChanges = 0L,
-                    PendingSplitRequests = this._partitions.Count(p => (p.JobId == job.Id) && (p.IsSplitRequested == true)),
+                    PendingSplitRequests = (job.State == JobState.Processing) ? this._partitions.Count(p => (p.JobId == job.Id) && (p.IsSplitRequested == true)) : 0L,
 
                     Partitions = new Summary.PartitionCounts
                     {
