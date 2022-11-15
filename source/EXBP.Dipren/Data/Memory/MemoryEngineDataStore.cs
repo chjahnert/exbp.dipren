@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.ObjectModel;
+using System.Reflection.PortableExecutable;
 
 using EXBP.Dipren.Diagnostics;
 
@@ -781,6 +782,76 @@ namespace EXBP.Dipren.Data.Memory
                 this._partitions.Add(result);
             }
 
+
+            return Task.FromResult(result);
+        }
+
+        /// <summary>
+        ///   Gets the state of the job with the specified identifier along with some statistics.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public Task<JobStateSnapshot> GetJobStateSnapshotAsync(string id, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            JobStateSnapshot result = null;
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._jobs.Contains(id);
+
+                if (exists == false)
+                {
+                    this.RaiseErrorUnknownJobIdentifier();
+                }
+
+                Job job = this._jobs[id];
+                int partitions = this._partitions.Count(p => (p.JobId == job.Id));
+
+                result = new JobStateSnapshot
+                {
+                    Id = job.Id,
+                    Created = job.Created,
+                    Updated = job.Updated,
+                    Started = job.Started,
+                    Completed = job.Completed,
+                    State = job.State,
+                    Error = job.Error,
+
+                    LastActivity = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id)).Max(p => p.Updated) : job.Updated,
+                    OwnershipChanges = 0L,
+                    PendingSplitRequests = this._partitions.Count(p => (p.JobId == job.Id) && (p.IsSplitRequested == true)),
+
+                    Partitions = new JobStateSnapshot.PartitionCounts
+                    {
+                        Waiting = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner == null) && (p.IsCompleted == false)),
+                        Started = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner != null) && (p.IsCompleted == false)),
+                        Completed = this._partitions.Count(p => (p.JobId == job.Id) && (p.IsCompleted == true))
+                    },
+
+                    Keys = new JobStateSnapshot.KeyCounts
+                    {
+                        Remaining = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id) && (p.IsCompleted == false)).Sum(p => p.Remaining) : null,
+                        Completed = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id)).Sum(p => p.Processed) : null
+                    }
+                };
+            }
 
             return Task.FromResult(result);
         }

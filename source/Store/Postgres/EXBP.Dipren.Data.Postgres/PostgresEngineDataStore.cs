@@ -1075,10 +1075,9 @@ namespace EXBP.Dipren.Data.Postgres
 
                         Keys = new JobStateSnapshot.KeyCounts
                         {
-                            Remaining = reader.GetInt64("keys_remaining"),
-                            Completed = reader.GetInt64("keys_completed")
-                        },
-
+                            Remaining = reader.GetNullableInt64("keys_remaining"),
+                            Completed = reader.GetNullableInt64("keys_completed")
+                        }
                     };
                 }
             }

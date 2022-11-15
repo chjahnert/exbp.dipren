@@ -1151,6 +1151,94 @@ namespace EXBP.Dipren.Data.SQLite
         }
 
         /// <summary>
+        ///   Gets the state of the job with the specified identifier along with some statistics.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public async Task<JobStateSnapshot> GetJobStateSnapshotAsync(string id, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            JobStateSnapshot result = null;
+
+            this._lock.EnterReadLock();
+
+            try
+            {
+                using SQLiteCommand command = new SQLiteCommand
+                {
+                    CommandText = SQLiteEngineDataStoreResources.QueryGetJobStateSnapshot,
+                    CommandType = CommandType.Text,
+                    Connection = this._connection
+                };
+
+                command.Parameters.AddWithValue("$id", id);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool exists = await reader.ReadAsync(cancellation);
+
+                    if (exists == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+
+                    Job job = this.ReadJob(reader);
+
+                    result = new JobStateSnapshot
+                    {
+                        Id = job.Id,
+                        Created = job.Created,
+                        Updated = job.Updated,
+                        Started = job.Started,
+                        Completed = job.Completed,
+                        State = job.State,
+                        Error = job.Error,
+
+                        LastActivity = reader.GetDateTime("last_activity"),
+                        OwnershipChanges = reader.GetInt64("ownership_changes"),
+                        PendingSplitRequests = reader.GetInt64("split_requests_pending"),
+
+                        Partitions = new JobStateSnapshot.PartitionCounts
+                        {
+                            Waiting = reader.GetInt64("partitons_waiting"),
+                            Started = reader.GetInt64("partitons_started"),
+                            Completed = reader.GetInt64("partitions_completed")
+                        },
+
+                        Keys = new JobStateSnapshot.KeyCounts
+                        {
+                            Remaining = reader.GetNullableInt64("keys_remaining"),
+                            Completed = reader.GetNullableInt64("keys_completed")
+                        }
+                    };
+                }
+            }
+            finally
+            {
+                this._lock.ExitReadLock();
+            }
+
+            return result;
+        }
+
+        /// <summary>
         ///   Determines if a job with the specified unique identifier exists.
         /// </summary>
         /// <param name="transaction">

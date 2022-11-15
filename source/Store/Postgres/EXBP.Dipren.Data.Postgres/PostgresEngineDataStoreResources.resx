@@ -156,14 +156,14 @@ WHERE
   COUNT(1) FILTER (WHERE (t2."is_completed" = FALSE) AND (t2."owner" IS NULL) AND (t2."processed" = 0)) AS "partitons_waiting",
   COUNT(1) FILTER (WHERE (t2."is_completed" = FALSE) AND (t2."owner" IS NOT NULL)) AS "partitons_started",
   COUNT(1) FILTER (WHERE t2."is_completed" = TRUE) AS "partitions_completed",
-  COALESCE(SUM(t2."remaining"), 0) AS "keys_remaining",
-  COALESCE(SUM(t2."processed"), 0) AS "keys_completed",
+  SUM(t2."remaining") AS "keys_remaining",
+  SUM(t2."processed") AS "keys_completed",
   COALESCE(MAX(t2."updated"), t1."updated") AS "last_activity",
   COALESCE(SUM(t2."acquired") - COUNT(1), 0) AS "ownership_changes",
   COUNT(1) FILTER (WHERE (t1."state" = 1) AND (t2."is_split_requested" = TRUE)) AS "split_requests_pending"
 FROM
   "dipren"."jobs" t1
-  INNER JOIN "dipren"."partitions" t2 ON (t1."id" = t2."job_id")
+  LEFT JOIN "dipren"."partitions" t2 ON (t1."id" = t2."job_id")
 WHERE
   (t1."id" = @id)
 GROUP BY

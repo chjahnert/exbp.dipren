@@ -99,7 +99,7 @@ namespace EXBP.Dipren
         ///   A <see cref="long"/> value containing a number indicating how often a processing node resumed a partition
         ///   started by another processing node.
         /// </value>
-        public long OwnershipChanges { get; init; }
+        public long? OwnershipChanges { get; init; }
 
         /// <summary>
         ///   Gets the number of pending split requests.
@@ -107,7 +107,7 @@ namespace EXBP.Dipren
         /// <value>
         ///   A <see cref="long"/> value containing the number of active split requests.
         /// </value>
-        public long PendingSplitRequests { get; init; }
+        public long? PendingSplitRequests { get; init; }
 
         /// <summary>
         ///   Holds the number of partitions grouped by their state.
@@ -158,7 +158,7 @@ namespace EXBP.Dipren
             /// <value>
             ///   A <see cref="long"/> value containing the estimated number of keys left to process.
             /// </value>
-            public long Remaining { get; init; }
+            public long? Remaining { get; init; }
 
             /// <summary>
             ///   Gets the number of keys completed.
@@ -166,7 +166,7 @@ namespace EXBP.Dipren
             /// <value>
             ///   A <see cref="long"/> value containing the number of keys completed.
             /// </value>
-            public long Completed { get; init; }
+            public long? Completed { get; init; }
 
             /// <summary>
             ///   Gets the estimated number of keys.
@@ -174,7 +174,7 @@ namespace EXBP.Dipren
             /// <value>
             ///   A <see cref="long"/> value containing the estimated number of keys.
             /// </value>
-            public long Total => (this.Completed + this.Remaining);
+            public long? Total => (this.Completed + this.Remaining);
         }
     }
 }

@@ -1207,6 +1207,55 @@ namespace EXBP.Dipren.Tests.Data
             return result;
         }
 
+        [Test]
+        public async Task GetJobStateSnapshotAsync_ArgumentIdIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.GetJobStateSnapshotAsync(null, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task GetJobStateSnapshotAsync_JobDoesNotExist_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.GetJobStateSnapshotAsync("DPJ-0001", CancellationToken.None));
+        }
+
+        [Test]
+        public async Task GetJobStateSnapshotAsync_JobIsBeingInitialized_ReturnsCorrectResult()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
+
+            JobStateSnapshot result = await store.GetJobStateSnapshotAsync(job.Id, CancellationToken.None);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Id, Is.EqualTo(job.Id));
+            Assert.That(result.Created, Is.EqualTo(job.Created));
+            Assert.That(result.Updated, Is.EqualTo(job.Updated));
+            Assert.That(result.Started, Is.EqualTo(job.Started));
+            Assert.That(result.Completed, Is.EqualTo(job.Completed));
+            Assert.That(result.State, Is.EqualTo(job.State));
+            Assert.That(result.Error, Is.EqualTo(job.Error));
+
+            Assert.That(result.Partitions, Is.Not.Null);
+            Assert.That(result.Partitions.Waiting, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Started, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Completed, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Total, Is.EqualTo(0L));
+
+            Assert.That(result.Keys, Is.Not.Null);
+            Assert.That(result.Keys.Remaining, Is.Null);
+            Assert.That(result.Keys.Completed, Is.Null);
+            Assert.That(result.Keys.Total, Is.Null);
+
+            Assert.That(result.OwnershipChanges, Is.Zero);
+            Assert.That(result.PendingSplitRequests, Is.Zero);
+        }
+
 
         [DebuggerStepThrough]
         private class EngineDataStoreWrapper : IEngineDataStore, IDisposable
@@ -1271,6 +1320,9 @@ namespace EXBP.Dipren.Tests.Data
 
             public Task<Job> MarkJobAsFailedAsync(string id, DateTime timestamp, string error, CancellationToken cancellation)
                 => this._store.MarkJobAsFailedAsync(id, timestamp, error, cancellation);
+
+            public Task<JobStateSnapshot> GetJobStateSnapshotAsync(string id, CancellationToken cancellation)
+                => this._store.GetJobStateSnapshotAsync(id, cancellation);
         }
     }
 }
