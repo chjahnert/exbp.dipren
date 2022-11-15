@@ -79,6 +79,15 @@ namespace EXBP.Dipren.Demo.Postgres {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Monitors a distributed processing job..
+        /// </summary>
+        internal static string DescriptionCommandMonitor {
+            get {
+                return ResourceManager.GetString("DescriptionCommandMonitor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Runs a distributed processing job..
         /// </summary>
         internal static string DescriptionCommandProcess {

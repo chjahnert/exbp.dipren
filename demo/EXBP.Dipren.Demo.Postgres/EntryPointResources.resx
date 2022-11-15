@@ -123,6 +123,9 @@
   <data name="DescriptionCommandDeploy" xml:space="preserve">
     <value>Creates the required database structure and populates the source database.</value>
   </data>
+  <data name="DescriptionCommandMonitor" xml:space="preserve">
+    <value>Monitors a distributed processing job.</value>
+  </data>
   <data name="DescriptionCommandProcess" xml:space="preserve">
     <value>Runs a distributed processing job.</value>
   </data>

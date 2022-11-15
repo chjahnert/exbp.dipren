@@ -3,6 +3,8 @@ using System.CommandLine;
 
 using EXBP.Dipren.Demo.Postgres.Commands;
 
+using Monitor = EXBP.Dipren.Demo.Postgres.Commands.Monitor;
+
 
 namespace EXBP.Dipren.Demo.Postgres
 {
@@ -67,6 +69,13 @@ namespace EXBP.Dipren.Demo.Postgres
             commandRemove.Add(optionDatabase);
             commandRemove.SetHandler(Remove.HandleAsync, optionDatabase);
             commandRoot.Add(commandRemove);
+
+            Command commandMonitor = new Command("monitor", EntryPointResources.DescriptionCommandMonitor);
+
+            commandMonitor.Add(optionDatabase);
+            commandMonitor.Add(argumentJob);
+            commandMonitor.SetHandler(Monitor.HandleAsync, optionDatabase, argumentJob);
+            commandRoot.Add(commandMonitor);
 
             await commandRoot.InvokeAsync(args);
 
