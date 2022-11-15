@@ -333,9 +333,9 @@ namespace EXBP.Dipren.Data.Postgres {
         ///  t1.&quot;completed&quot; AS &quot;completed&quot;,
         ///  t1.&quot;state&quot; AS &quot;state&quot;,
         ///  t1.&quot;error&quot; AS &quot;error&quot;,
-        ///  COUNT(1) FILTER (WHERE (t2.&quot;is_completed&quot; = FALSE) AND (t2.&quot;owner&quot; IS NULL) AND (t2.&quot;processed&quot; = 0)) AS &quot;partitons_waiting&quot;,
-        ///  COUNT(1) FILTER (WHERE (t2.&quot;is_completed&quot; = FALSE) AND ((t2.&quot;owner&quot; IS NOT NULL) OR (t2.&quot;processed&quot; &gt; 0))) AS &quot;partitons_started&quot;,
-        ///  COUNT(1) FILTER (WHERE t2.&quot;is_completed&quot; =  [rest of string was truncated]&quot;;.
+        ///  COUNT(1) FILTER (WHERE (t2.&quot;is_completed&quot; = FALSE) AND (t2.&quot;owner&quot; IS NULL) AND (t2.&quot;processed&quot; = 0)) AS &quot;partitons_untouched&quot;,
+        ///  COUNT(1) FILTER (WHERE (t2.&quot;is_completed&quot; = FALSE) AND ((t2.&quot;owner&quot; IS NOT NULL) OR (t2.&quot;processed&quot; &gt; 0))) AS &quot;partitons_in_progress&quot;,
+        ///  COUNT(1) FILTER (WHERE t2.&quot;is_complet [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryRetrieveJobSummary {
             get {

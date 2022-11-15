@@ -118,12 +118,12 @@ namespace EXBP.Dipren
         public class PartitionCounts
         {
             /// <summary>
-            ///   Gets the number of partitions not yet started.
+            ///   Gets the number of partitions that are ready for processing.
             /// </summary>
             /// <value>
-            ///   A <see cref="long"/> value containing the number of partitions not yet started.
+            ///   A <see cref="long"/> value containing the number of partitions ready for processing.
             /// </value>
-            public long Waiting { get; init; }
+            public long Untouched { get; init; }
 
             /// <summary>
             ///   Gets the number of partially completed partitions.
@@ -131,7 +131,7 @@ namespace EXBP.Dipren
             /// <value>
             ///   A <see cref="long"/> value containing the number of partially completed partitions.
             /// </value>
-            public long Started { get; init; }
+            public long InProgress { get; init; }
 
             /// <summary>
             ///   Gets the number of completed partitions.
@@ -147,7 +147,7 @@ namespace EXBP.Dipren
             /// <value>
             ///   An <see cref="Int64"/> value containing the total number of partitions.
             /// </value>
-            public long Total => (this.Waiting + this.Started + this.Completed);
+            public long Total => (this.Untouched + this.InProgress + this.Completed);
         }
 
         /// <summary>

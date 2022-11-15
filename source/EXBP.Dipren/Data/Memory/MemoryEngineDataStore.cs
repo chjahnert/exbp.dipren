@@ -840,8 +840,8 @@ namespace EXBP.Dipren.Data.Memory
 
                     Partitions = new Summary.PartitionCounts
                     {
-                        Waiting = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner == null) && (p.IsCompleted == false)),
-                        Started = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner != null) && (p.IsCompleted == false)),
+                        Untouched = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner == null) && (p.IsCompleted == false)),
+                        InProgress = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner != null) && (p.IsCompleted == false)),
                         Completed = this._partitions.Count(p => (p.JobId == job.Id) && (p.IsCompleted == true))
                     },
 

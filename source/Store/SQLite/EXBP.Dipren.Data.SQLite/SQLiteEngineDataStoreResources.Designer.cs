@@ -372,8 +372,8 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  t1.&quot;completed&quot; AS &quot;completed&quot;,
         ///  t1.&quot;state&quot; AS &quot;state&quot;,
         ///  t1.&quot;error&quot; AS &quot;error&quot;,
-        ///  (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;job_id&quot; = t1.&quot;id&quot;) AND (&quot;is_completed&quot; = 0) AND (&quot;owner&quot; IS NULL) AND (&quot;processed&quot; = 0)) AS &quot;partitons_waiting&quot;,
-        ///  (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;job_id&quot; = t1.&quot;id&quot;) AND (&quot;is_completed&quot; = 0) AND ((&quot;owner&quot; IS NOT NULL) OR (&quot;processed&quot; &gt; 0))) AS &quot;partit [rest of string was truncated]&quot;;.
+        ///  (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;job_id&quot; = t1.&quot;id&quot;) AND (&quot;is_completed&quot; = 0) AND (&quot;owner&quot; IS NULL) AND (&quot;processed&quot; = 0)) AS &quot;partitons_untouched&quot;,
+        ///  (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;job_id&quot; = t1.&quot;id&quot;) AND (&quot;is_completed&quot; = 0) AND ((&quot;owner&quot; IS NOT NULL) OR (&quot;processed&quot; &gt; 0))) AS &quot;part [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryRetrieveJobSummary {
             get {

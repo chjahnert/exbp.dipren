@@ -1242,8 +1242,8 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Error, Is.EqualTo(job.Error));
 
             Assert.That(result.Partitions, Is.Not.Null);
-            Assert.That(result.Partitions.Waiting, Is.EqualTo(0L));
-            Assert.That(result.Partitions.Started, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Untouched, Is.EqualTo(0L));
+            Assert.That(result.Partitions.InProgress, Is.EqualTo(0L));
             Assert.That(result.Partitions.Completed, Is.EqualTo(0L));
             Assert.That(result.Partitions.Total, Is.EqualTo(0L));
 
@@ -1282,8 +1282,8 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Error, Is.EqualTo(job.Error));
 
             Assert.That(result.Partitions, Is.Not.Null);
-            Assert.That(result.Partitions.Waiting, Is.EqualTo(1L));
-            Assert.That(result.Partitions.Started, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Untouched, Is.EqualTo(1L));
+            Assert.That(result.Partitions.InProgress, Is.EqualTo(0L));
             Assert.That(result.Partitions.Completed, Is.EqualTo(0L));
             Assert.That(result.Partitions.Total, Is.EqualTo(1L));
 
@@ -1378,8 +1378,8 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Error, Is.EqualTo(job.Error));
 
             Assert.That(result.Partitions, Is.Not.Null);
-            Assert.That(result.Partitions.Waiting, Is.EqualTo(2L));
-            Assert.That(result.Partitions.Started, Is.EqualTo(4L));
+            Assert.That(result.Partitions.Untouched, Is.EqualTo(2L));
+            Assert.That(result.Partitions.InProgress, Is.EqualTo(4L));
             Assert.That(result.Partitions.Completed, Is.EqualTo(1L));
             Assert.That(result.Partitions.Total, Is.EqualTo(7L));
 
@@ -1473,8 +1473,8 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Error, Is.EqualTo(job.Error));
 
             Assert.That(result.Partitions, Is.Not.Null);
-            Assert.That(result.Partitions.Waiting, Is.EqualTo(0L));
-            Assert.That(result.Partitions.Started, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Untouched, Is.EqualTo(0L));
+            Assert.That(result.Partitions.InProgress, Is.EqualTo(0L));
             Assert.That(result.Partitions.Completed, Is.EqualTo(7L));
             Assert.That(result.Partitions.Total, Is.EqualTo(7L));
 

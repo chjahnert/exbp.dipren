@@ -1217,8 +1217,8 @@ namespace EXBP.Dipren.Data.SQLite
 
                         Partitions = new Summary.PartitionCounts
                         {
-                            Waiting = reader.GetInt64("partitons_waiting"),
-                            Started = reader.GetInt64("partitons_started"),
+                            Untouched = reader.GetInt64("partitons_untouched"),
+                            InProgress = reader.GetInt64("partitons_in_progress"),
                             Completed = reader.GetInt64("partitions_completed")
                         },
 
