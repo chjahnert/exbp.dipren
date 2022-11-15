@@ -1224,7 +1224,7 @@ namespace EXBP.Dipren.Tests.Data
         }
 
         [Test]
-        public async Task GetJobStateSnapshotAsync_JobIsBeingInitialized_ReturnsCorrectResult()
+        public async Task GetJobStateSnapshotAsync_JobIsInitializing_ReturnsCorrectResult()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1251,6 +1251,46 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Keys.Remaining, Is.Null);
             Assert.That(result.Keys.Completed, Is.Null);
             Assert.That(result.Keys.Total, Is.Null);
+
+            Assert.That(result.OwnershipChanges, Is.Zero);
+            Assert.That(result.PendingSplitRequests, Is.Zero);
+        }
+
+        [Test]
+        public async Task GetJobStateSnapshotAsync_JobIsReady_ReturnsCorrectResult()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
+
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 0L, 26L, null, false);
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            JobStateSnapshot result = await store.GetJobStateSnapshotAsync(job.Id, CancellationToken.None);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Id, Is.EqualTo(job.Id));
+            Assert.That(result.Created, Is.EqualTo(job.Created));
+            Assert.That(result.Updated, Is.EqualTo(job.Updated));
+            Assert.That(result.Started, Is.EqualTo(job.Started));
+            Assert.That(result.Completed, Is.EqualTo(job.Completed));
+            Assert.That(result.State, Is.EqualTo(job.State));
+            Assert.That(result.Error, Is.EqualTo(job.Error));
+
+            Assert.That(result.Partitions, Is.Not.Null);
+            Assert.That(result.Partitions.Waiting, Is.EqualTo(1L));
+            Assert.That(result.Partitions.Started, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Completed, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Total, Is.EqualTo(1L));
+
+            Assert.That(result.Keys, Is.Not.Null);
+            Assert.That(result.Keys.Remaining, Is.EqualTo(26L));
+            Assert.That(result.Keys.Completed, Is.EqualTo(0L));
+            Assert.That(result.Keys.Total, Is.EqualTo(26L));
 
             Assert.That(result.OwnershipChanges, Is.Zero);
             Assert.That(result.PendingSplitRequests, Is.Zero);
