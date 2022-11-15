@@ -1170,11 +1170,11 @@ namespace EXBP.Dipren.Data.SQLite
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public async Task<JobStateSnapshot> GetJobStateSnapshotAsync(string id, CancellationToken cancellation)
+        public async Task<Summary> RetrieveJobSummaryAsync(string id, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
-            JobStateSnapshot result = null;
+            Summary result = null;
 
             this._lock.EnterReadLock();
 
@@ -1182,7 +1182,7 @@ namespace EXBP.Dipren.Data.SQLite
             {
                 using SQLiteCommand command = new SQLiteCommand
                 {
-                    CommandText = SQLiteEngineDataStoreResources.QueryGetJobStateSnapshot,
+                    CommandText = SQLiteEngineDataStoreResources.QueryRetrieveJobSummary,
                     CommandType = CommandType.Text,
                     Connection = this._connection
                 };
@@ -1201,7 +1201,7 @@ namespace EXBP.Dipren.Data.SQLite
 
                     Job job = this.ReadJob(reader);
 
-                    result = new JobStateSnapshot
+                    result = new Summary
                     {
                         Id = job.Id,
                         Created = job.Created,
@@ -1215,14 +1215,14 @@ namespace EXBP.Dipren.Data.SQLite
                         OwnershipChanges = reader.GetInt64("ownership_changes"),
                         PendingSplitRequests = reader.GetInt64("split_requests_pending"),
 
-                        Partitions = new JobStateSnapshot.PartitionCounts
+                        Partitions = new Summary.PartitionCounts
                         {
                             Waiting = reader.GetInt64("partitons_waiting"),
                             Started = reader.GetInt64("partitons_started"),
                             Completed = reader.GetInt64("partitions_completed")
                         },
 
-                        Keys = new JobStateSnapshot.KeyCounts
+                        Keys = new Summary.KeyCounts
                         {
                             Remaining = reader.GetNullableInt64("keys_remaining"),
                             Completed = reader.GetNullableInt64("keys_completed")

@@ -1,10 +1,13 @@
 ﻿
+using System.Diagnostics;
+
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Provides information about a distributed processing job.
+    ///   Holds a summary of details for a distributed processing job.
     /// </summary>
-    public class JobStateSnapshot
+    [DebuggerDisplay("Id = {Id}, State = {State}, Error = {Error}")]
+    public class Summary
     {
         /// <summary>
         ///   Gets the unique identifier (or name) of the current distributed processing job.

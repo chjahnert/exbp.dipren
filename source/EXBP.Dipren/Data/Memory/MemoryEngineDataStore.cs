@@ -806,11 +806,11 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<JobStateSnapshot> GetJobStateSnapshotAsync(string id, CancellationToken cancellation)
+        public Task<Summary> RetrieveJobSummaryAsync(string id, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
-            JobStateSnapshot result = null;
+            Summary result = null;
 
             lock (this._syncRoot)
             {
@@ -824,7 +824,7 @@ namespace EXBP.Dipren.Data.Memory
                 Job job = this._jobs[id];
                 int partitions = this._partitions.Count(p => (p.JobId == job.Id));
 
-                result = new JobStateSnapshot
+                result = new Summary
                 {
                     Id = job.Id,
                     Created = job.Created,
@@ -838,14 +838,14 @@ namespace EXBP.Dipren.Data.Memory
                     OwnershipChanges = 0L,
                     PendingSplitRequests = this._partitions.Count(p => (p.JobId == job.Id) && (p.IsSplitRequested == true)),
 
-                    Partitions = new JobStateSnapshot.PartitionCounts
+                    Partitions = new Summary.PartitionCounts
                     {
                         Waiting = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner == null) && (p.IsCompleted == false)),
                         Started = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner != null) && (p.IsCompleted == false)),
                         Completed = this._partitions.Count(p => (p.JobId == job.Id) && (p.IsCompleted == true))
                     },
 
-                    Keys = new JobStateSnapshot.KeyCounts
+                    Keys = new Summary.KeyCounts
                     {
                         Remaining = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id) && (p.IsCompleted == false)).Sum(p => p.Remaining) : null,
                         Completed = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id)).Sum(p => p.Processed) : null

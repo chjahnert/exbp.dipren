@@ -112,27 +112,6 @@ namespace EXBP.Dipren.Data.Postgres {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to WITH &quot;summary&quot; AS
-        ///(
-        ///  SELECT
-        ///    t1.&quot;id&quot; AS &quot;id&quot;,
-        ///    t1.&quot;created&quot; AS &quot;created&quot;,
-        ///    t1.&quot;updated&quot; AS &quot;updated&quot;,
-        ///    t1.&quot;started&quot; AS &quot;started&quot;,
-        ///    t1.&quot;completed&quot; AS &quot;completed&quot;,
-        ///    t1.&quot;state&quot; AS &quot;state&quot;,
-        ///    t1.&quot;error&quot; AS &quot;error&quot;,
-        ///    COUNT(1) FILTER (WHERE (t2.&quot;is_completed&quot; = FALSE) AND (t2.&quot;owner&quot; IS NULL) AND (t2.&quot;processed&quot; = 0)) AS &quot;partitons_waiting&quot;,
-        ///    COUNT(1) FILTER (WHERE (t2.&quot;is_completed&quot; = FALSE) AND ((t2.&quot;owner&quot; IS NOT NULL) OR (t2.&quot;processed&quot; &gt; 0))) AS &quot;partitons_started&quot;,
-        ///    [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string QueryGetJobStateSnapshot {
-            get {
-                return ResourceManager.GetString("QueryGetJobStateSnapshot", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to INSERT INTO &quot;dipren&quot;.&quot;jobs&quot;
         ///(
         ///  &quot;id&quot;,
@@ -342,6 +321,27 @@ namespace EXBP.Dipren.Data.Postgres {
         internal static string QueryRetrieveJobById {
             get {
                 return ResourceManager.GetString("QueryRetrieveJobById", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WITH &quot;summary&quot; AS
+        ///(
+        ///  SELECT
+        ///    t1.&quot;id&quot; AS &quot;id&quot;,
+        ///    t1.&quot;created&quot; AS &quot;created&quot;,
+        ///    t1.&quot;updated&quot; AS &quot;updated&quot;,
+        ///    t1.&quot;started&quot; AS &quot;started&quot;,
+        ///    t1.&quot;completed&quot; AS &quot;completed&quot;,
+        ///    t1.&quot;state&quot; AS &quot;state&quot;,
+        ///    t1.&quot;error&quot; AS &quot;error&quot;,
+        ///    COUNT(1) FILTER (WHERE (t2.&quot;is_completed&quot; = FALSE) AND (t2.&quot;owner&quot; IS NULL) AND (t2.&quot;processed&quot; = 0)) AS &quot;partitons_waiting&quot;,
+        ///    COUNT(1) FILTER (WHERE (t2.&quot;is_completed&quot; = FALSE) AND ((t2.&quot;owner&quot; IS NOT NULL) OR (t2.&quot;processed&quot; &gt; 0))) AS &quot;partitons_started&quot;,
+        ///    [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string QueryRetrieveJobSummary {
+            get {
+                return ResourceManager.GetString("QueryRetrieveJobSummary", resourceCulture);
             }
         }
         

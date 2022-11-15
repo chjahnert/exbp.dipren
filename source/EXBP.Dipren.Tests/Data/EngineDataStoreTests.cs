@@ -1208,29 +1208,29 @@ namespace EXBP.Dipren.Tests.Data
         }
 
         [Test]
-        public async Task GetJobStateSnapshotAsync_ArgumentIdIsNull_ThrowsException()
+        public async Task RetrieveJobSummaryAsync_ArgumentIdIsNull_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.GetJobStateSnapshotAsync(null, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.RetrieveJobSummaryAsync(null, CancellationToken.None));
         }
 
         [Test]
-        public async Task GetJobStateSnapshotAsync_JobDoesNotExist_ThrowsException()
+        public async Task RetrieveJobSummaryAsync_JobDoesNotExist_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.GetJobStateSnapshotAsync("DPJ-0001", CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrieveJobSummaryAsync("DPJ-0001", CancellationToken.None));
         }
 
         [Test]
-        public async Task GetJobStateSnapshotAsync_JobIsInitializing_ReturnsCorrectResult()
+        public async Task RetrieveJobSummaryAsync_JobIsInitializing_ReturnsCorrectResult()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Job job = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
 
-            JobStateSnapshot result = await store.GetJobStateSnapshotAsync(job.Id, CancellationToken.None);
+            Summary result = await store.RetrieveJobSummaryAsync(job.Id, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
@@ -1257,7 +1257,7 @@ namespace EXBP.Dipren.Tests.Data
         }
 
         [Test]
-        public async Task GetJobStateSnapshotAsync_JobIsReady_ReturnsCorrectResult()
+        public async Task RetrieveJobSummaryAsync_JobIsReady_ReturnsCorrectResult()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1270,7 +1270,7 @@ namespace EXBP.Dipren.Tests.Data
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
-            JobStateSnapshot result = await store.GetJobStateSnapshotAsync(job.Id, CancellationToken.None);
+            Summary result = await store.RetrieveJobSummaryAsync(job.Id, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
@@ -1361,8 +1361,8 @@ namespace EXBP.Dipren.Tests.Data
             public Task<Job> MarkJobAsFailedAsync(string id, DateTime timestamp, string error, CancellationToken cancellation)
                 => this._store.MarkJobAsFailedAsync(id, timestamp, error, cancellation);
 
-            public Task<JobStateSnapshot> GetJobStateSnapshotAsync(string id, CancellationToken cancellation)
-                => this._store.GetJobStateSnapshotAsync(id, cancellation);
+            public Task<Summary> RetrieveJobSummaryAsync(string id, CancellationToken cancellation)
+                => this._store.RetrieveJobSummaryAsync(id, cancellation);
         }
     }
 }

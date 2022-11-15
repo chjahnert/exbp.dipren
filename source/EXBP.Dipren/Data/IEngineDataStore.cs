@@ -363,6 +363,6 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<JobStateSnapshot> GetJobStateSnapshotAsync(string id, CancellationToken cancellation);
+        public Task<Summary> RetrieveJobSummaryAsync(string id, CancellationToken cancellation);
     }
 }

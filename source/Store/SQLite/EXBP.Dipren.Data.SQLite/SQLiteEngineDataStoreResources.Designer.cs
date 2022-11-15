@@ -151,26 +151,6 @@ namespace EXBP.Dipren.Data.SQLite {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to WITH &quot;summary&quot; AS
-        ///(
-        ///  SELECT
-        ///    t1.&quot;id&quot; AS &quot;id&quot;,
-        ///    t1.&quot;created&quot; AS &quot;created&quot;,
-        ///    t1.&quot;updated&quot; AS &quot;updated&quot;,
-        ///    t1.&quot;started&quot; AS &quot;started&quot;,
-        ///    t1.&quot;completed&quot; AS &quot;completed&quot;,
-        ///    t1.&quot;state&quot; AS &quot;state&quot;,
-        ///    t1.&quot;error&quot; AS &quot;error&quot;,
-        ///    (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;partitions&quot;.&quot;job_id&quot; = $id) AND (&quot;is_completed&quot; = 0) AND (&quot;owner&quot; IS NULL) AND (&quot;processed&quot; = 0)) AS &quot;partitons_waiting&quot;,
-        ///    (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;partitions&quot;.&quot;job_id&quot; = $id) AND (&quot;is_completed&quot; = 0)  [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string QueryGetJobStateSnapshot {
-            get {
-                return ResourceManager.GetString("QueryGetJobStateSnapshot", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to INSERT INTO &quot;jobs&quot;
         ///(
         ///  &quot;id&quot;,
@@ -380,6 +360,26 @@ namespace EXBP.Dipren.Data.SQLite {
         internal static string QueryRetrieveJobById {
             get {
                 return ResourceManager.GetString("QueryRetrieveJobById", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WITH &quot;summary&quot; AS
+        ///(
+        ///  SELECT
+        ///    t1.&quot;id&quot; AS &quot;id&quot;,
+        ///    t1.&quot;created&quot; AS &quot;created&quot;,
+        ///    t1.&quot;updated&quot; AS &quot;updated&quot;,
+        ///    t1.&quot;started&quot; AS &quot;started&quot;,
+        ///    t1.&quot;completed&quot; AS &quot;completed&quot;,
+        ///    t1.&quot;state&quot; AS &quot;state&quot;,
+        ///    t1.&quot;error&quot; AS &quot;error&quot;,
+        ///    (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;partitions&quot;.&quot;job_id&quot; = $id) AND (&quot;is_completed&quot; = 0) AND (&quot;owner&quot; IS NULL) AND (&quot;processed&quot; = 0)) AS &quot;partitons_waiting&quot;,
+        ///    (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;partitions&quot;.&quot;job_id&quot; = $id) AND (&quot;is_completed&quot; = 0)  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string QueryRetrieveJobSummary {
+            get {
+                return ResourceManager.GetString("QueryRetrieveJobSummary", resourceCulture);
             }
         }
         
