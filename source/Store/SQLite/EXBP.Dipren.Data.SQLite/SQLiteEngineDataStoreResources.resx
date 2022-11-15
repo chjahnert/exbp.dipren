@@ -381,6 +381,8 @@ GROUP BY
   t1."id",
   t1."created",
   t1."updated",
+  t1."started",
+  t1."completed",
   t1."state",
   t1."error";</value>
   </data>
