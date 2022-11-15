@@ -453,24 +453,6 @@ LIMIT
   1;
 </value>
   </data>
-  <data name="QueryUpdateJobById" xml:space="preserve">
-    <value>UPDATE
-  "jobs"
-SET
-  "updated" = $updated,
-  "state" = $state,
-  "error" = $error
-WHERE
-  ("id" = $id)
-RETURNING
-  "id" AS "id",
-  "created" AS "created",
-  "updated" AS "updated",
-  "started" AS "started",
-  "completed" AS "completed",
-  "state" AS "state",
-  "error" AS "error";</value>
-  </data>
   <data name="QueryUpdateSplitPartition" xml:space="preserve">
     <value>UPDATE
   "partitions"

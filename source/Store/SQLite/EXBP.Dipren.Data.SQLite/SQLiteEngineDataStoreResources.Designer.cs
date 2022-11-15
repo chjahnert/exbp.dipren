@@ -462,30 +462,6 @@ namespace EXBP.Dipren.Data.SQLite {
         
         /// <summary>
         ///   Looks up a localized string similar to UPDATE
-        ///  &quot;jobs&quot;
-        ///SET
-        ///  &quot;updated&quot; = $updated,
-        ///  &quot;state&quot; = $state,
-        ///  &quot;error&quot; = $error
-        ///WHERE
-        ///  (&quot;id&quot; = $id)
-        ///RETURNING
-        ///  &quot;id&quot; AS &quot;id&quot;,
-        ///  &quot;created&quot; AS &quot;created&quot;,
-        ///  &quot;updated&quot; AS &quot;updated&quot;,
-        ///  &quot;started&quot; AS &quot;started&quot;,
-        ///  &quot;completed&quot; AS &quot;completed&quot;,
-        ///  &quot;state&quot; AS &quot;state&quot;,
-        ///  &quot;error&quot; AS &quot;error&quot;;.
-        /// </summary>
-        internal static string QueryUpdateJobById {
-            get {
-                return ResourceManager.GetString("QueryUpdateJobById", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to UPDATE
         ///  &quot;partitions&quot;
         ///SET
         ///  &quot;updated&quot; = $updated,

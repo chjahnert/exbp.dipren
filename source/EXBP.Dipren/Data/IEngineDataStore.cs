@@ -54,34 +54,6 @@ namespace EXBP.Dipren.Data
         Task InsertJobAsync(Job job, CancellationToken cancellation);
 
         /// <summary>
-        ///   Updates the state of an existing job.
-        /// </summary>
-        /// <param name="jobId">
-        ///   The unique identifier of the job to update.
-        /// </param>
-        /// <param name="timestamp">
-        ///   The current date and time value.
-        /// </param>
-        /// <param name="state">
-        ///   The new state of the job.
-        /// </param>
-        /// <param name="error">
-        ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
-        /// </param>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task"/> object that represents the asynchronous operation.
-        /// </returns>
-        /// <exception cref="UnknownIdentifierException">
-        ///   A job with the specified unique identifier does not exist in the data store.
-        /// </exception>
-        [Obsolete]
-        Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation);
-
-        /// <summary>
         ///   Marks a job as ready.
         /// </summary>
         /// <param name="id">

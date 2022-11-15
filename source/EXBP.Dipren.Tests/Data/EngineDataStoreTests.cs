@@ -360,70 +360,6 @@ namespace EXBP.Dipren.Tests.Data
         }
 
         [Test]
-        public async Task UpdateJobAsync_ArgumentJoIdIsNull_ThrowsException()
-        {
-            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
-
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateJobAsync(null, DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
-        }
-
-        [Test]
-        public async Task UpdateJobAsync_JobDoesNotExist_ThrowsException()
-        {
-            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
-
-            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.UpdateJobAsync("DPJ-0001", DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
-        }
-
-        [Test]
-        public async Task UpdateJobAsync_JobExists_JobIsUpdated()
-        {
-            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
-
-            const string id = "DPJ-0001";
-            DateTime created = new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc);
-
-            Job job = new Job(id, created, created, JobState.Ready);
-
-            await store.InsertJobAsync(job, CancellationToken.None);
-
-            DateTime updated = new DateTime(2022, 9, 11, 13, 21, 49, DateTimeKind.Utc);
-            string error = "The connection to the data source was terminated.";
-
-            await store.UpdateJobAsync(id, updated, JobState.Failed, error, CancellationToken.None);
-
-            Job persisted = await store.RetrieveJobAsync(id, CancellationToken.None);
-
-            Assert.That(persisted.Created, Is.EqualTo(created));
-            Assert.That(persisted.Updated, Is.EqualTo(updated));
-            Assert.That(persisted.State, Is.EqualTo(JobState.Failed));
-            Assert.That(persisted.Error, Is.EqualTo(error));
-        }
-
-        [Test]
-        public async Task UpdateJobAsync_JobExists_ReturnsUpdatedJob()
-        {
-            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
-
-            const string id = "DPJ-0001";
-            DateTime created = new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc);
-
-            Job job = new Job(id, created, created, JobState.Ready);
-
-            await store.InsertJobAsync(job, CancellationToken.None);
-
-            DateTime updated = new DateTime(2022, 9, 11, 13, 21, 49, DateTimeKind.Utc);
-            string error = "The connection to the data source was terminated.";
-
-            Job persisted = await store.UpdateJobAsync(id, updated, JobState.Failed, error, CancellationToken.None);
-
-            Assert.That(persisted.Created, Is.EqualTo(created));
-            Assert.That(persisted.Updated, Is.EqualTo(updated));
-            Assert.That(persisted.State, Is.EqualTo(JobState.Failed));
-            Assert.That(persisted.Error, Is.EqualTo(error));
-        }
-
-        [Test]
         public async Task RetirveJobAsync_ArgumentIdIsNull_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
@@ -1535,9 +1471,6 @@ namespace EXBP.Dipren.Tests.Data
 
             public Task<bool> TryRequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation)
                 => this._store.TryRequestSplitAsync(jobId, active, cancellation);
-
-            public Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation)
-                => this._store.UpdateJobAsync(jobId, timestamp, state, error, cancellation);
 
             public Task<Job> MarkJobAsReadyAsync(string id, DateTime timestamp, CancellationToken cancellation)
                 => this._store.MarkJobAsReadyAsync(id, timestamp, cancellation);
