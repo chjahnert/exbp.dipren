@@ -96,7 +96,7 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="StatusReport"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
-        public async Task<StatusReport> GetStatusReportAsync(string id, CancellationToken cancellation)
+        public async Task<StatusReport> GetStatusReportAsync(string id, CancellationToken cancellation = default)
             => await this.Store.RetrieveJobStatusReportAsync(id, cancellation);
 
         /// <summary>
