@@ -162,13 +162,22 @@ namespace EXBP.Dipren
                     }
                 }
 
+                //
+                // Mark the job as started if necessary.
+                //
+
+                if (persisted.State == JobState.Ready)
+                {
+                    persisted = await this.MarkJobAsStartedAsync(persisted.Id, cancellation);
+                }
+
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobReady, cancellation);
 
                 //
                 // Processing is only started if the scheduled job is in either Ready or Processing state.
                 //
 
-                while ((persisted?.State == JobState.Ready) || (persisted?.State == JobState.Processing))
+                while (persisted?.State == JobState.Processing)
                 {
                     //
                     // Acquire a partition that is ready to be processed or request an existing partition to be split.
@@ -498,9 +507,9 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
-        ///   Marks a job entry as completed.
+        ///   Marks a job entry as started.
         /// </summary>
-        /// <param name="jobId">
+        /// <param name="id">
         ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="cancellation">
@@ -511,10 +520,32 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
-        private async Task<Job> MarkJobAsCompletedAsync(string jobId, CancellationToken cancellation)
+        private async Task<Job> MarkJobAsStartedAsync(string id, CancellationToken cancellation)
         {
             DateTime timestamp = this.Clock.GetDateTime();
-            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Completed, null, cancellation);
+            Job result = await this.Store.MarkJobAsStartedAsync(id, timestamp, cancellation);
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Marks a job entry as completed.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        private async Task<Job> MarkJobAsCompletedAsync(string id, CancellationToken cancellation)
+        {
+            DateTime timestamp = this.Clock.GetDateTime();
+            Job result = await this.Store.MarkJobAsCompletedAsync(id, timestamp, cancellation);
 
             return result;
         }

@@ -149,6 +149,8 @@ CREATE TABLE "dipren"."jobs"
   "id" VARCHAR(256) NOT NULL,
   "created" TIMESTAMP NOT NULL,
   "updated" TIMESTAMP NOT NULL,
+  "started" TIMESTAMP NULL,
+  "completed" TIMESTAMP NULL,
   "state" INTEGER NOT NULL,
   "error" TEXT NULL,
   
@@ -158,6 +160,8 @@ CREATE TABLE "dipren"."jobs"
 COMMENT ON COLUMN "dipren"."jobs"."id" IS 'The unique identifier of the distributed processing job';
 COMMENT ON COLUMN "dipren"."jobs"."created" IS 'A timestamp indicating when the job was created.';
 COMMENT ON COLUMN "dipren"."jobs"."updated" IS 'A timestamp indicating when the job was last updated.';
+COMMENT ON COLUMN "dipren"."jobs"."started" IS 'A timestamp indicating when the job was started.';
+COMMENT ON COLUMN "dipren"."jobs"."completed" IS 'A timestamp indicating when the job was completed.';
 COMMENT ON COLUMN "dipren"."jobs"."state" IS 'Indicates the state of the job such.';
 COMMENT ON COLUMN "dipren"."jobs"."error" IS 'Describes the error that caused the job to fail.';
 

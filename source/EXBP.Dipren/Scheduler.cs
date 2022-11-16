@@ -15,7 +15,7 @@ namespace EXBP.Dipren
     public class Scheduler : Node
     {
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Engine"/> class.
+        ///   Initializes a new instance of the <see cref="Scheduler"/> class.
         /// </summary>
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
@@ -31,7 +31,7 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Engine"/> class.
+        ///   Initializes a new instance of the <see cref="Scheduler"/> class.
         /// </summary>
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
@@ -81,6 +81,23 @@ namespace EXBP.Dipren
                 throw;
             }
         }
+
+        /// <summary>
+        ///   Gets a status report of the job with the specified unique identifier.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="StatusReport"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        public async Task<StatusReport> GetStatusReportAsync(string id, CancellationToken cancellation = default)
+            => await this.Store.RetrieveJobStatusReportAsync(id, cancellation);
 
         /// <summary>
         ///   Creates a job entry for the specified job in the engine data store.
@@ -190,7 +207,7 @@ namespace EXBP.Dipren
         private async Task<Job> MarkJobAsReadyAsync(string jobId, CancellationToken cancellation)
         {
             DateTime timestamp = this.Clock.GetDateTime();
-            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Ready, null, cancellation);
+            Job result = await this.Store.MarkJobAsReadyAsync(jobId, timestamp, cancellation);
 
             return result;
         }
@@ -215,7 +232,7 @@ namespace EXBP.Dipren
         private async Task<Job> MarkJobAsFailedAsync(string jobId, Exception exception, CancellationToken cancellation)
         {
             DateTime timestamp = this.Clock.GetDateTime();
-            Job result = await this.Store.UpdateJobAsync(jobId, timestamp, JobState.Failed, exception?.Message, cancellation);
+            Job result = await this.Store.MarkJobAsFailedAsync(jobId, timestamp, exception?.Message, cancellation);
 
             return result;
         }

@@ -159,12 +159,17 @@ namespace EXBP.Dipren.Data.Postgres
 
                 DateTime uktsCreated = DateTime.SpecifyKind(job.Created, DateTimeKind.Unspecified);
                 DateTime uktsUpdated = DateTime.SpecifyKind(job.Updated, DateTimeKind.Unspecified);
+                object uktsStarted = ((job.Started != null) ? DateTime.SpecifyKind(job.Started.Value, DateTimeKind.Unspecified) : DBNull.Value);
+                object uktsCompleted = ((job.Completed != null) ? DateTime.SpecifyKind(job.Completed.Value, DateTimeKind.Unspecified) : DBNull.Value);
+                object error = ((job.Error != null) ? job.Error : DBNull.Value);
 
                 command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, job.Id);
                 command.Parameters.AddWithValue("@created", NpgsqlDbType.Timestamp, uktsCreated);
                 command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsUpdated);
+                command.Parameters.AddWithValue("@started", NpgsqlDbType.Timestamp, uktsStarted);
+                command.Parameters.AddWithValue("@completed", NpgsqlDbType.Timestamp, uktsCompleted);
                 command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) job.State);
-                command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, ((object) job.Error) ?? DBNull.Value);
+                command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, error);
 
                 try
                 {
@@ -689,16 +694,193 @@ namespace EXBP.Dipren.Data.Postgres
         }
 
         /// <summary>
-        ///   Updates the state of an existing job.
+        ///   Marks a job as ready.
         /// </summary>
-        /// <param name="jobId">
+        /// <param name="id">
         ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="timestamp">
         ///   The current date and time value.
         /// </param>
-        /// <param name="state">
-        ///   The new state of the job.
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public async Task<Job> MarkJobAsReadyAsync(string id, DateTime timestamp, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
+
+            Job result = null;
+
+            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            {
+                using NpgsqlCommand command = new NpgsqlCommand
+                {
+                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobAsReady,
+                    CommandType = CommandType.Text,
+                    Connection = connection
+                };
+
+                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
+                command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
+                command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Ready);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool found = await reader.ReadAsync(cancellation);
+
+                    if (found == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+                    result = this.ReadJob(reader);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Marks a job as started.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public async Task<Job> MarkJobAsStartedAsync(string id, DateTime timestamp, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
+
+            Job result = null;
+
+            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            {
+                using NpgsqlCommand command = new NpgsqlCommand
+                {
+                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobAsStarted,
+                    CommandType = CommandType.Text,
+                    Connection = connection
+                };
+
+                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
+                command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
+                command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Processing);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool found = await reader.ReadAsync(cancellation);
+
+                    if (found == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+                    result = this.ReadJob(reader);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Marks a job as completed.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public async Task<Job> MarkJobAsCompletedAsync(string id, DateTime timestamp, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
+
+            Job result = null;
+
+            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            {
+                using NpgsqlCommand command = new NpgsqlCommand
+                {
+                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobAsCompleted,
+                    CommandType = CommandType.Text,
+                    Connection = connection
+                };
+
+                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
+                command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
+                command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Completed);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool found = await reader.ReadAsync(cancellation);
+
+                    if (found == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+                    result = this.ReadJob(reader);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Marks a job as failed.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
         /// </param>
         /// <param name="error">
         ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
@@ -712,14 +894,14 @@ namespace EXBP.Dipren.Data.Postgres
         ///   provides access to the result of the operation.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
         /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public async Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation)
+        public async Task<Job> MarkJobAsFailedAsync(string id, DateTime timestamp, string error, CancellationToken cancellation)
         {
-            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+            Assert.ArgumentIsNotNull(id, nameof(id));
 
             DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
 
@@ -729,14 +911,14 @@ namespace EXBP.Dipren.Data.Postgres
             {
                 using NpgsqlCommand command = new NpgsqlCommand
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryUpdateJobById,
+                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobAsFailed,
                     CommandType = CommandType.Text,
                     Connection = connection
                 };
 
-                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, jobId);
-                command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsTimestamp);
-                command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) state);
+                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
+                command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
+                command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Failed);
                 command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, ((object) error) ?? DBNull.Value);
 
                 using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
@@ -749,6 +931,87 @@ namespace EXBP.Dipren.Data.Postgres
                     }
 
                     result = this.ReadJob(reader);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Gets a status report for the job with the specified identifier.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public async Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            StatusReport result = null;
+
+            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            {
+                using NpgsqlCommand command = new NpgsqlCommand
+                {
+                    CommandText = PostgresEngineDataStoreResources.QueryRetrieveJobStatusReport,
+                    CommandType = CommandType.Text,
+                    Connection = connection
+                };
+
+                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool found = await reader.ReadAsync(cancellation);
+
+                    if (found == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+                    Job job = this.ReadJob(reader);
+
+                    result = new StatusReport
+                    {
+                        Id = job.Id,
+                        Created = job.Created,
+                        Updated = job.Updated,
+                        Started = job.Started,
+                        Completed = job.Completed,
+                        State = job.State,
+                        Error = job.Error,
+
+                        LastActivity = reader.GetDateTime("last_activity"),
+                        OwnershipChanges = reader.GetInt64("ownership_changes"),
+                        PendingSplitRequests = reader.GetInt64("split_requests_pending"),
+
+                        Partitions = new StatusReport.PartitionsReport
+                        {
+                            Untouched = reader.GetInt64("partitons_untouched"),
+                            InProgress = reader.GetInt64("partitons_in_progress"),
+                            Completed = reader.GetInt64("partitions_completed")
+                        },
+
+                        Progress = new StatusReport.ProgressReport
+                        {
+                            Remaining = reader.GetNullableInt64("keys_remaining"),
+                            Completed = reader.GetNullableInt64("keys_completed")
+                        }
+                    };
                 }
             }
 
@@ -864,13 +1127,17 @@ namespace EXBP.Dipren.Data.Postgres
             string id = reader.GetString("id");
             DateTime created = reader.GetDateTime("created");
             DateTime updated = reader.GetDateTime("updated");
+            DateTime? started = reader.GetNullableDateTime("started");
+            DateTime? completed = reader.GetNullableDateTime("completed");
             JobState state = (JobState) reader.GetInt32("state");
             string error = reader.GetNullableString("error");
 
             created = DateTime.SpecifyKind(created, DateTimeKind.Utc);
             updated = DateTime.SpecifyKind(updated, DateTimeKind.Utc);
+            started = (started != null) ? DateTime.SpecifyKind(started.Value, DateTimeKind.Utc) : null;
+            completed = (completed != null) ? DateTime.SpecifyKind(completed.Value, DateTimeKind.Utc) : null;
 
-            Job result = new Job(id, created, updated, state, error);
+            Job result = new Job(id, created, updated, state, started, completed, error);
 
             return result;
         }

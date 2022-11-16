@@ -229,6 +229,8 @@ namespace EXBP.Dipren.Data.SQLite
                 command.Parameters.AddWithValue("$id", job.Id);
                 command.Parameters.AddWithValue("$created", job.Created);
                 command.Parameters.AddWithValue("$updated", job.Updated);
+                command.Parameters.AddWithValue("$started", job.Started);
+                command.Parameters.AddWithValue("$completed", job.Completed);
                 command.Parameters.AddWithValue("$state", job.State);
                 command.Parameters.AddWithValue("$error", job.Error);
 
@@ -444,19 +446,13 @@ namespace EXBP.Dipren.Data.SQLite
         }
 
         /// <summary>
-        ///   Updates the state of an existing job.
+        ///   Marks a job as ready.
         /// </summary>
-        /// <param name="jobId">
+        /// <param name="id">
         ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="timestamp">
         ///   The current date and time value.
-        /// </param>
-        /// <param name="state">
-        ///   The new state of the job.
-        /// </param>
-        /// <param name="error">
-        ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
@@ -467,14 +463,14 @@ namespace EXBP.Dipren.Data.SQLite
         ///   provides access to the result of the operation.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
         /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public async Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation)
+        public async Task<Job> MarkJobAsReadyAsync(string id, DateTime timestamp, CancellationToken cancellation)
         {
-            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+            Assert.ArgumentIsNotNull(id, nameof(id));
 
             Job result = null;
 
@@ -486,14 +482,221 @@ namespace EXBP.Dipren.Data.SQLite
 
                 using SQLiteCommand command = new SQLiteCommand
                 {
-                    CommandText = SQLiteEngineDataStoreResources.QueryUpdateJobById,
+                    CommandText = SQLiteEngineDataStoreResources.QueryMarkJobAsReady,
                     CommandType = CommandType.Text,
                     Transaction = transaction
                 };
 
-                command.Parameters.AddWithValue("$id", jobId);
-                command.Parameters.AddWithValue("$updated", timestamp);
-                command.Parameters.AddWithValue("$state", state);
+                command.Parameters.AddWithValue("$id", id);
+                command.Parameters.AddWithValue("$timestamp", timestamp);
+                command.Parameters.AddWithValue("$state", JobState.Ready);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool found = await reader.ReadAsync(cancellation);
+
+                    if (found == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+                    result = this.ReadJob(reader);
+                }
+
+                transaction.Commit();
+            }
+            finally
+            {
+                this._lock.ExitWriteLock();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Marks a job as started.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public async Task<Job> MarkJobAsStartedAsync(string id, DateTime timestamp, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            Job result = null;
+
+            this._lock.EnterWriteLock();
+
+            try
+            {
+                using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
+                using SQLiteCommand command = new SQLiteCommand
+                {
+                    CommandText = SQLiteEngineDataStoreResources.QueryMarkJobAsStarted,
+                    CommandType = CommandType.Text,
+                    Transaction = transaction
+                };
+
+                command.Parameters.AddWithValue("$id", id);
+                command.Parameters.AddWithValue("$timestamp", timestamp);
+                command.Parameters.AddWithValue("$state", JobState.Processing);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool found = await reader.ReadAsync(cancellation);
+
+                    if (found == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+                    result = this.ReadJob(reader);
+                }
+
+                transaction.Commit();
+            }
+            finally
+            {
+                this._lock.ExitWriteLock();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Marks a job as completed.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public async Task<Job> MarkJobAsCompletedAsync(string id, DateTime timestamp, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            Job result = null;
+
+            this._lock.EnterWriteLock();
+
+            try
+            {
+                using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
+                using SQLiteCommand command = new SQLiteCommand
+                {
+                    CommandText = SQLiteEngineDataStoreResources.QueryMarkJobAsCompleted,
+                    CommandType = CommandType.Text,
+                    Transaction = transaction
+                };
+
+                command.Parameters.AddWithValue("$id", id);
+                command.Parameters.AddWithValue("$timestamp", timestamp);
+                command.Parameters.AddWithValue("$state", JobState.Completed);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool found = await reader.ReadAsync(cancellation);
+
+                    if (found == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+                    result = this.ReadJob(reader);
+                }
+
+                transaction.Commit();
+            }
+            finally
+            {
+                this._lock.ExitWriteLock();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Marks a job as failed.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
+        /// </param>
+        /// <param name="error">
+        ///   The description of the error that caused the job to fail.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public async Task<Job> MarkJobAsFailedAsync(string id, DateTime timestamp, string error, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            Job result = null;
+
+            this._lock.EnterWriteLock();
+
+            try
+            {
+                using SQLiteTransaction transaction = this._connection.BeginTransaction();
+
+                using SQLiteCommand command = new SQLiteCommand
+                {
+                    CommandText = SQLiteEngineDataStoreResources.QueryMarkJobAsFailed,
+                    CommandType = CommandType.Text,
+                    Transaction = transaction
+                };
+
+                command.Parameters.AddWithValue("$id", id);
+                command.Parameters.AddWithValue("$timestamp", timestamp);
+                command.Parameters.AddWithValue("$state", JobState.Failed);
                 command.Parameters.AddWithValue("$error", error);
 
                 using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
@@ -873,6 +1076,94 @@ namespace EXBP.Dipren.Data.SQLite
         }
 
         /// <summary>
+        ///   Gets a status report for the job with the specified identifier.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public async Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            StatusReport result = null;
+
+            this._lock.EnterReadLock();
+
+            try
+            {
+                using SQLiteCommand command = new SQLiteCommand
+                {
+                    CommandText = SQLiteEngineDataStoreResources.QueryRetrieveJobStatusReport,
+                    CommandType = CommandType.Text,
+                    Connection = this._connection
+                };
+
+                command.Parameters.AddWithValue("$id", id);
+
+                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                {
+                    bool exists = await reader.ReadAsync(cancellation);
+
+                    if (exists == false)
+                    {
+                        this.RaiseErrorUnknownJobIdentifier();
+                    }
+
+
+                    Job job = this.ReadJob(reader);
+
+                    result = new StatusReport
+                    {
+                        Id = job.Id,
+                        Created = job.Created,
+                        Updated = job.Updated,
+                        Started = job.Started,
+                        Completed = job.Completed,
+                        State = job.State,
+                        Error = job.Error,
+
+                        LastActivity = reader.GetDateTime("last_activity"),
+                        OwnershipChanges = reader.GetInt64("ownership_changes"),
+                        PendingSplitRequests = reader.GetInt64("split_requests_pending"),
+
+                        Partitions = new StatusReport.PartitionsReport
+                        {
+                            Untouched = reader.GetInt64("partitons_untouched"),
+                            InProgress = reader.GetInt64("partitons_in_progress"),
+                            Completed = reader.GetInt64("partitions_completed")
+                        },
+
+                        Progress = new StatusReport.ProgressReport
+                        {
+                            Remaining = reader.GetNullableInt64("keys_remaining"),
+                            Completed = reader.GetNullableInt64("keys_completed")
+                        }
+                    };
+                }
+            }
+            finally
+            {
+                this._lock.ExitReadLock();
+            }
+
+            return result;
+        }
+
+        /// <summary>
         ///   Determines if a job with the specified unique identifier exists.
         /// </summary>
         /// <param name="transaction">
@@ -963,10 +1254,12 @@ namespace EXBP.Dipren.Data.SQLite
             string id = reader.GetString("id");
             DateTime created = reader.GetDateTime("created");
             DateTime updated = reader.GetDateTime("updated");
+            DateTime? started = reader.GetNullableDateTime("started");
+            DateTime? completed = reader.GetNullableDateTime("completed");
             JobState state = (JobState) reader.GetInt32("state");
             string error = reader.GetNullableString("error");
 
-            Job result = new Job(id, created, updated, state, error);
+            Job result = new Job(id, created, updated, state, started, completed, error);
 
             return result;
         }

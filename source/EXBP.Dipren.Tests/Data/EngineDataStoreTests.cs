@@ -1,4 +1,5 @@
 ﻿
+using System.Collections;
 using System.Diagnostics;
 
 using EXBP.Dipren.Data;
@@ -15,6 +16,8 @@ namespace EXBP.Dipren.Tests.Data
         protected virtual DateTime FormatDateTime(DateTime source)
             => source;
 
+        protected virtual DateTime? FormatDateTime(DateTime? source)
+            => (source != null) ? this.FormatDateTime(source.Value) : source;
 
         private async Task<EngineDataStoreWrapper> CreateEngineDataStoreAsync()
         {
@@ -40,13 +43,15 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
+            DateTime created = this.FormatDateTime(new DateTime(2022, 9, 21, 11, 12, 13, DateTimeKind.Utc));
+            DateTime started = this.FormatDateTime(new DateTime(2022, 9, 21, 11, 16, 27, DateTimeKind.Utc));
+            DateTime completed = this.FormatDateTime(new DateTime(2022, 9, 23, 17, 48, 48, DateTimeKind.Utc));
 
-            Job job1 = new Job("DPJ-0001", timestamp, timestamp, JobState.Initializing);
-            Job job2 = new Job("DPJ-0002", timestamp, timestamp, JobState.Ready);
-            Job job3 = new Job("DPJ-0003", timestamp, timestamp, JobState.Processing);
-            Job job4 = new Job("DPJ-0004", timestamp, timestamp, JobState.Completed);
-            Job job5 = new Job("DPJ-0005", timestamp, timestamp, JobState.Failed);
+            Job job1 = new Job("DPJ-0001", created, created, JobState.Initializing, null, null);
+            Job job2 = new Job("DPJ-0002", created, created, JobState.Ready, null, null);
+            Job job3 = new Job("DPJ-0003", created, started, JobState.Processing, started, null);
+            Job job4 = new Job("DPJ-0004", created, completed, JobState.Completed, started, completed);
+            Job job5 = new Job("DPJ-0005", created, started, JobState.Failed);
 
             await store.InsertJobAsync(job1, CancellationToken.None);
             await store.InsertJobAsync(job2, CancellationToken.None);
@@ -70,22 +75,38 @@ namespace EXBP.Dipren.Tests.Data
             Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertJobAsync(job, CancellationToken.None));
         }
 
-        [Test]
-        public async Task InsertJobAsync_ArgumentJobIsValid_InsertsJob()
+        [TestCaseSource(nameof(InsertJobAsync_ArgumentJobIsValid_ParameterSource))]
+        public async Task InsertJobAsync_ArgumentJobIsValid_InsertsJob(string id, DateTime created, DateTime updated, JobState state, DateTime? started, DateTime? completed, string error)
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
+            created = this.FormatDateTime(created);
+            updated = this.FormatDateTime(updated);
+            started = this.FormatDateTime(started);
+            completed = this.FormatDateTime(completed);
 
-            Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
+            Job job = new Job(id, created, updated, state, started, completed, error);
 
             await store.InsertJobAsync(job, CancellationToken.None);
 
-            Job retrieved = await store.RetrieveJobAsync(jobId, CancellationToken.None);
+            Job retrieved = await store.RetrieveJobAsync(id, CancellationToken.None);
 
             Assert.That(retrieved, Is.EqualTo(job));
         }
+
+        public static IEnumerable InsertJobAsync_ArgumentJobIsValid_ParameterSource()
+        {
+            DateTime created = new DateTime(2022, 9, 21, 11, 12, 13, DateTimeKind.Utc);
+            DateTime started = new DateTime(2022, 9, 21, 11, 16, 27, DateTimeKind.Utc);
+            DateTime completed = new DateTime(2022, 9, 23, 17, 48, 48, DateTimeKind.Utc);
+
+            yield return new object[] { "DPJ-0001", created, created, JobState.Initializing, null, null, null };
+            yield return new object[] { "DPJ-0002", created, created, JobState.Ready, null, null, null };
+            yield return new object[] { "DPJ-0003", created, started, JobState.Processing, started, null, null };
+            yield return new object[] { "DPJ-0004", created, completed, JobState.Completed, started, completed, null };
+            yield return new object[] { "DPJ-0005", created, started, JobState.Failed, null, null, "error description" };
+        }
+
 
         [Test]
         public async Task InsertJobAsync_JobWithSameIdentifierAlreadyExists_ThrowsException()
@@ -105,67 +126,237 @@ namespace EXBP.Dipren.Tests.Data
         }
 
         [Test]
-        public async Task UpdateJobAsync_ArgumentJoIdIsNull_ThrowsException()
+        public async Task MarkJobAsReadyAsync_ArgumentIdIsNull_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateJobAsync(null, DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.MarkJobAsReadyAsync(null, DateTime.UtcNow, CancellationToken.None));
         }
 
         [Test]
-        public async Task UpdateJobAsync_JobDoesNotExist_ThrowsException()
+        public async Task MarkJobAsReadyAsync_JobDoesNotExist_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.UpdateJobAsync("DPJ-0001", DateTime.UtcNow, JobState.Completed, null, CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.MarkJobAsReadyAsync("DPJ-0001", DateTime.UtcNow, CancellationToken.None));
         }
 
         [Test]
-        public async Task UpdateJobAsync_JobExists_JobIsUpdated()
+        public async Task MarkJobAsReadyAsync_JobExists_UpdatesJob()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string id = "DPJ-0001";
-            DateTime created = new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc);
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
 
-            Job job = new Job(id, created, created, JobState.Ready);
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            await store.MarkJobAsReadyAsync(persisted.Id, timestamp, CancellationToken.None);
 
-            DateTime updated = new DateTime(2022, 9, 11, 13, 21, 49, DateTimeKind.Utc);
-            string error = "The connection to the data source was terminated.";
+            Job retrieved = await store.RetrieveJobAsync(persisted.Id, CancellationToken.None);
 
-            await store.UpdateJobAsync(id, updated, JobState.Failed, error, CancellationToken.None);
-
-            Job persisted = await store.RetrieveJobAsync(id, CancellationToken.None);
-
-            Assert.That(persisted.Created, Is.EqualTo(created));
-            Assert.That(persisted.Updated, Is.EqualTo(updated));
-            Assert.That(persisted.State, Is.EqualTo(JobState.Failed));
-            Assert.That(persisted.Error, Is.EqualTo(error));
+            Assert.That(retrieved, Is.Not.Null);
+            Assert.That(retrieved.Created, Is.EqualTo(persisted.Created));
+            Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
+            Assert.That(retrieved.State, Is.EqualTo(JobState.Ready));
+            Assert.That(retrieved.Started, Is.Null);
+            Assert.That(retrieved.Completed, Is.Null);
+            Assert.That(retrieved.Error, Is.Null);
         }
 
         [Test]
-        public async Task UpdateJobAsync_JobExists_ReturnsUpdatedJob()
+        public async Task MarkJobAsReadyAsync_JobExists_ReturnsUpdatedJob()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string id = "DPJ-0001";
-            DateTime created = new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc);
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
 
-            Job job = new Job(id, created, created, JobState.Ready);
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Job updated = await store.MarkJobAsReadyAsync(persisted.Id, timestamp, CancellationToken.None);
 
-            DateTime updated = new DateTime(2022, 9, 11, 13, 21, 49, DateTimeKind.Utc);
-            string error = "The connection to the data source was terminated.";
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.Created, Is.EqualTo(persisted.Created));
+            Assert.That(updated.Updated, Is.EqualTo(timestamp));
+            Assert.That(updated.State, Is.EqualTo(JobState.Ready));
+            Assert.That(updated.Started, Is.Null);
+            Assert.That(updated.Completed, Is.Null);
+            Assert.That(updated.Error, Is.Null);
+        }
 
-            Job persisted = await store.UpdateJobAsync(id, updated, JobState.Failed, error, CancellationToken.None);
+        [Test]
+        public async Task MarkJobAsStartedAsync_ArgumentIdIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            Assert.That(persisted.Created, Is.EqualTo(created));
-            Assert.That(persisted.Updated, Is.EqualTo(updated));
-            Assert.That(persisted.State, Is.EqualTo(JobState.Failed));
-            Assert.That(persisted.Error, Is.EqualTo(error));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.MarkJobAsStartedAsync(null, DateTime.UtcNow, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsStartedAsync_JobDoesNotExist_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.MarkJobAsStartedAsync("DPJ-0001", DateTime.UtcNow, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsStartedAsync_JobExists_UpdatesJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Ready);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+
+            await store.MarkJobAsStartedAsync(persisted.Id, timestamp, CancellationToken.None);
+
+            Job retrieved = await store.RetrieveJobAsync(persisted.Id, CancellationToken.None);
+
+            Assert.That(retrieved, Is.Not.Null);
+            Assert.That(retrieved.Created, Is.EqualTo(persisted.Created));
+            Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
+            Assert.That(retrieved.State, Is.EqualTo(JobState.Processing));
+            Assert.That(retrieved.Started, Is.EqualTo(timestamp));
+            Assert.That(retrieved.Completed, Is.Null);
+            Assert.That(retrieved.Error, Is.Null);
+        }
+
+        [Test]
+        public async Task MarkJobAsStartedAsync_JobExists_ReturnsUpdatedJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Ready);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+
+            Job updated = await store.MarkJobAsStartedAsync(persisted.Id, timestamp, CancellationToken.None);
+
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.Created, Is.EqualTo(persisted.Created));
+            Assert.That(updated.Updated, Is.EqualTo(timestamp));
+            Assert.That(updated.State, Is.EqualTo(JobState.Processing));
+            Assert.That(updated.Started, Is.EqualTo(timestamp));
+            Assert.That(updated.Completed, Is.Null);
+            Assert.That(updated.Error, Is.Null);
+        }
+
+        [Test]
+        public async Task MarkJobAsCompletedAsync_ArgumentIdIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.MarkJobAsCompletedAsync(null, DateTime.UtcNow, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsCompletedAsync_JobDoesNotExist_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.MarkJobAsCompletedAsync("DPJ-0001", DateTime.UtcNow, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsCompletedAsync_JobExists_UpdatesJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Processing);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+
+            await store.MarkJobAsCompletedAsync(persisted.Id, timestamp, CancellationToken.None);
+
+            Job retrieved = await store.RetrieveJobAsync(persisted.Id, CancellationToken.None);
+
+            Assert.That(retrieved, Is.Not.Null);
+            Assert.That(retrieved.Created, Is.EqualTo(persisted.Created));
+            Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
+            Assert.That(retrieved.State, Is.EqualTo(JobState.Completed));
+            Assert.That(retrieved.Started, Is.EqualTo(persisted.Started));
+            Assert.That(retrieved.Completed, Is.EqualTo(timestamp));
+            Assert.That(retrieved.Error, Is.Null);
+        }
+
+        [Test]
+        public async Task MarkJobAsCompletedAsync_JobExists_ReturnsUpdatedJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Processing);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+
+            Job updated = await store.MarkJobAsCompletedAsync(persisted.Id, timestamp, CancellationToken.None);
+
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.Created, Is.EqualTo(persisted.Created));
+            Assert.That(updated.Updated, Is.EqualTo(timestamp));
+            Assert.That(updated.State, Is.EqualTo(JobState.Completed));
+            Assert.That(updated.Started, Is.EqualTo(persisted.Started));
+            Assert.That(updated.Completed, Is.EqualTo(timestamp));
+            Assert.That(updated.Error, Is.Null);
+        }
+
+        [Test]
+        public async Task MarkJobAsFailedAsync_ArgumentIdIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.MarkJobAsFailedAsync(null, DateTime.UtcNow, "The description of the error.", CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsFailedAsync_JobDoesNotExist_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.MarkJobAsFailedAsync("DPJ-0001", DateTime.UtcNow, "The description of the error.", CancellationToken.None));
+        }
+
+        [Test]
+        public async Task MarkJobAsFailedAsync_JobExists_UpdatesJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+            const string error = "The description of the error.";
+
+            await store.MarkJobAsFailedAsync(persisted.Id, timestamp, error, CancellationToken.None);
+
+            Job retrieved = await store.RetrieveJobAsync(persisted.Id, CancellationToken.None);
+
+            Assert.That(retrieved, Is.Not.Null);
+            Assert.That(retrieved.Created, Is.EqualTo(persisted.Created));
+            Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
+            Assert.That(retrieved.State, Is.EqualTo(JobState.Failed));
+            Assert.That(retrieved.Started, Is.Null);
+            Assert.That(retrieved.Completed, Is.Null);
+            Assert.That(retrieved.Error, Is.EqualTo(error));
+        }
+
+        [Test]
+        public async Task MarkJobAsFailedAsync_JobExists_ReturnsUpdatedJob()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job persisted = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
+
+            DateTime timestamp = this.FormatDateTime(new DateTime(2022, 9, 11, 11, 6, 1, DateTimeKind.Utc));
+            const string error = "The description of the error.";
+
+            Job updated = await store.MarkJobAsFailedAsync(persisted.Id, timestamp, error, CancellationToken.None);
+
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.Created, Is.EqualTo(persisted.Created));
+            Assert.That(updated.Updated, Is.EqualTo(timestamp));
+            Assert.That(updated.State, Is.EqualTo(JobState.Failed));
+            Assert.That(updated.Started, Is.Null);
+            Assert.That(updated.Completed, Is.Null);
+            Assert.That(updated.Error, Is.EqualTo(error));
         }
 
         [Test]
@@ -184,26 +375,36 @@ namespace EXBP.Dipren.Tests.Data
             Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrieveJobAsync("DPJ-0001", CancellationToken.None));
         }
 
-        [Test]
-        public async Task RetirveJobAsync_JobExist_ReturnsJob()
+        [TestCaseSource(nameof(RetirveJobAsync_ArgumentIdIsValidAndJobExists_ParameterSource))]
+        public async Task RetirveJobAsync_ArgumentIdIsValidAndJobExists_RetrievesJob(string id, DateTime created, DateTime updated, JobState state, DateTime? started, DateTime? completed, string error)
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string id = "DPJ-0001";
-            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
+            created = this.FormatDateTime(created);
+            updated = this.FormatDateTime(updated);
+            started = this.FormatDateTime(started);
+            completed = this.FormatDateTime(completed);
 
-            Job inserted = new Job(id, timestamp, timestamp, JobState.Initializing);
+            Job job = new Job(id, created, updated, state, started, completed, error);
 
-            await store.InsertJobAsync(inserted, CancellationToken.None);
+            await store.InsertJobAsync(job, CancellationToken.None);
 
-            Job retrieved = await store.RetrieveJobAsync("DPJ-0001", CancellationToken.None);
+            Job retrieved = await store.RetrieveJobAsync(id, CancellationToken.None);
 
-            Assert.That(retrieved, Is.Not.Null);
-            Assert.That(retrieved.Id, Is.EqualTo(id));
-            Assert.That(retrieved.Created, Is.EqualTo(timestamp));
-            Assert.That(retrieved.Updated, Is.EqualTo(timestamp));
-            Assert.That(retrieved.State, Is.EqualTo(JobState.Initializing));
-            Assert.That(retrieved.Error, Is.Null);
+            Assert.That(retrieved, Is.EqualTo(job));
+        }
+
+        public static IEnumerable RetirveJobAsync_ArgumentIdIsValidAndJobExists_ParameterSource()
+        {
+            DateTime created = new DateTime(2022, 9, 21, 11, 12, 13, DateTimeKind.Utc);
+            DateTime started = new DateTime(2022, 9, 21, 11, 16, 27, DateTimeKind.Utc);
+            DateTime completed = new DateTime(2022, 9, 23, 17, 48, 48, DateTimeKind.Utc);
+
+            yield return new object[] { "DPJ-0001", created, created, JobState.Initializing, null, null, null };
+            yield return new object[] { "DPJ-0002", created, created, JobState.Ready, null, null, null };
+            yield return new object[] { "DPJ-0003", created, started, JobState.Processing, started, null, null };
+            yield return new object[] { "DPJ-0004", created, completed, JobState.Completed, started, completed, null };
+            yield return new object[] { "DPJ-0005", created, started, JobState.Failed, null, null, "error description" };
         }
 
         [Test]
@@ -234,14 +435,12 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
-            Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
-
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
             Guid partitionId = Guid.NewGuid();
-            Partition first = new Partition(partitionId, jobId, timestamp, timestamp, "a", "z", true, "g", 7L, 18L);
+            DateTime created = this.FormatDateTime(new DateTime(2022, 9, 12, 11, 28, 44, DateTimeKind.Utc));
+            DateTime updated = this.FormatDateTime(new DateTime(2022, 9, 12, 18, 33, 54, DateTimeKind.Utc));
+            Partition first = new Partition(partitionId, job.Id, created, updated, "a", "z", true, "g", 7L, 18L);
 
             await store.InsertPartitionAsync(first, CancellationToken.None);
 
@@ -255,20 +454,16 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime timestamp = this.FormatDateTime(DateTime.UtcNow.AddMinutes(-3));
-            Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
-
-            Guid partitionId = Guid.NewGuid();
-            DateTime created = this.FormatDateTime(DateTime.UtcNow.AddMinutes(-2));
-            DateTime updated = this.FormatDateTime(DateTime.UtcNow.AddMinutes(-1));
-            Partition partition = new Partition(partitionId, jobId, created, updated, "a", "z", true, "g", 7L, 18L);
+            Guid id = Guid.NewGuid();
+            DateTime created = this.FormatDateTime(new DateTime(2022, 9, 12, 11, 28, 44, DateTimeKind.Utc));
+            DateTime updated = this.FormatDateTime(new DateTime(2022, 9, 12, 18, 33, 54, DateTimeKind.Utc));
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "g", 7L, 18L);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
-            Partition retrieved = await store.RetrievePartitionAsync(partitionId, CancellationToken.None);
+            Partition retrieved = await store.RetrievePartitionAsync(id, CancellationToken.None);
 
             Assert.That(retrieved, Is.EqualTo(partition));
         }
@@ -288,21 +483,16 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
-
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false);
+            Guid id = Guid.NewGuid();
+            DateTime created = this.FormatDateTime(new DateTime(2022, 9, 12, 11, 28, 44, DateTimeKind.Utc));
+            DateTime updated = this.FormatDateTime(new DateTime(2022, 9, 12, 18, 33, 54, DateTimeKind.Utc));
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
-            Partition persisted = await store.RetrievePartitionAsync(partitionId, CancellationToken.None);
+            Partition persisted = await store.RetrievePartitionAsync(id, CancellationToken.None);
 
             Assert.That(persisted, Is.EqualTo(partition));
         }
@@ -345,15 +535,12 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime now = DateTime.UtcNow;
-            Job job = new Job(jobId, now, now, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            DateTime now = this.FormatDateTime(new DateTime(2022, 9, 13, 14, 11, 52, DateTimeKind.Utc));
+            DateTime cut = this.FormatDateTime(new DateTime(2022, 9, 13, 14, 11, 50, DateTimeKind.Utc));
 
-            DateTime cut = now.AddMinutes(-2);
-
-            Partition partition = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition partition = await store.TryAcquirePartitionAsync(job.Id, "owner", now, cut, CancellationToken.None);
 
             Assert.That(partition, Is.Null);
         }
@@ -363,24 +550,20 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 13, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 13, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "b", 1L, 23L, "owner", false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "b", 1L, 23L, "owner", false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
-            DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
-            DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
+            DateTime now = new DateTime(2022, 9, 13, 16, 40, 0, DateTimeKind.Utc);
+            DateTime cut = new DateTime(2022, 9, 13, 16, 23, 30, DateTimeKind.Utc);
 
-            Partition acquired = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition acquired = await store.TryAcquirePartitionAsync(job.Id, "owner", now, cut, CancellationToken.None);
 
             Assert.That(acquired, Is.Null);
         }
@@ -390,24 +573,20 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "z", 24L, 0L, null, true, false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "z", 24L, 0L, null, true, false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 32, DateTimeKind.Utc);
 
-            Partition acquired = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition acquired = await store.TryAcquirePartitionAsync(job.Id, "owner", now, cut, CancellationToken.None);
 
             Assert.That(acquired, Is.Null);
         }
@@ -417,24 +596,20 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "b", 1L, 23L, null, false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "b", 1L, 23L, null, false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
             DateTime cut = new DateTime(2022, 9, 12, 16, 22, 10, DateTimeKind.Utc);
 
-            Partition acquired = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition acquired = await store.TryAcquirePartitionAsync(job.Id, "owner", now, cut, CancellationToken.None);
 
             Assert.That(acquired, Is.Not.Null);
             Assert.That(acquired.Owner, Is.EqualTo("owner"));
@@ -446,19 +621,15 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id1 = Guid.NewGuid();
+            Guid id2 = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
 
-            Guid partitionId1 = Guid.NewGuid();
-            Guid partitionId2 = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-
-            Partition partition1 = new Partition(partitionId1, jobId, partitionCreated, partitionUpdated, "a", "c", true, "b", 1L, 1L, null, false);
-            Partition partition2 = new Partition(partitionId2, jobId, partitionCreated, partitionUpdated, "d", "f", true, "e", 1L, 1L, null, false);
+            Partition partition1 = new Partition(id1, job.Id, created, updated, "a", "c", true, "b", 1L, 1L, null, false);
+            Partition partition2 = new Partition(id2, job.Id, created, updated, "d", "f", true, "e", 1L, 1L, null, false);
 
             await store.InsertPartitionAsync(partition1, CancellationToken.None);
             await store.InsertPartitionAsync(partition2, CancellationToken.None);
@@ -466,13 +637,13 @@ namespace EXBP.Dipren.Tests.Data
             DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
             DateTime cut = new DateTime(2022, 9, 12, 16, 22, 10, DateTimeKind.Utc);
 
-            Partition acquired = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition acquired = await store.TryAcquirePartitionAsync(job.Id, "owner", now, cut, CancellationToken.None);
 
             Assert.That(acquired, Is.Not.Null);
             Assert.That(acquired.Owner, Is.EqualTo("owner"));
             Assert.That(acquired.Updated, Is.EqualTo(now));
 
-            Partition partition = await store.RetrievePartitionAsync((acquired.Id == partitionId1) ? partitionId2 : partitionId1, CancellationToken.None);
+            Partition partition = await store.RetrievePartitionAsync((acquired.Id == id1) ? id2 : id1, CancellationToken.None);
 
             Assert.That(partition.Owner, Is.Null);
         }
@@ -482,24 +653,20 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "b", 1L, 23L, "other", false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "b", 1L, 23L, "other", false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 32, DateTimeKind.Utc);
 
-            Partition acquired = await store.TryAcquirePartitionAsync(jobId, "owner", now, cut, CancellationToken.None);
+            Partition acquired = await store.TryAcquirePartitionAsync(job.Id, "owner", now, cut, CancellationToken.None);
 
             Assert.That(acquired, Is.Not.Null);
             Assert.That(acquired.Owner, Is.EqualTo("owner"));
@@ -521,8 +688,8 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            DateTime now = DateTime.UtcNow;
-            DateTime cut = now.AddMinutes(-2);
+            DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
+            DateTime cut = new DateTime(2022, 9, 12, 16, 23, 32, DateTimeKind.Utc);
 
             Assert.ThrowsAsync<UnknownIdentifierException>(() => store.TryRequestSplitAsync("DPJ-0001", cut, CancellationToken.None));
         }
@@ -532,15 +699,12 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime now = DateTime.UtcNow;
-            Job job = new Job(jobId, now, now, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
+            DateTime cut = new DateTime(2022, 9, 12, 16, 23, 32, DateTimeKind.Utc);
 
-            DateTime cut = now.AddMinutes(-2);
-
-            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
 
             Assert.That(result, Is.False);
         }
@@ -550,23 +714,19 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "a", 0L, 24L, null, false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "a", 0L, 24L, null, false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
 
-            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
 
             Assert.That(result, Is.False);
         }
@@ -576,23 +736,19 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "b", 1L, 23L, "owner", false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "b", 1L, 23L, "owner", false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
 
             Assert.That(result, Is.False);
         }
@@ -602,23 +758,19 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "z", 24L, 0L, "owner", true);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "z", 24L, 0L, "owner", true);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
 
-            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
 
             Assert.That(result, Is.False);
         }
@@ -628,23 +780,19 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false, true);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false, true);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
 
-            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
 
             Assert.That(result, Is.False);
         }
@@ -654,29 +802,25 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
 
-            bool result = await store.TryRequestSplitAsync(jobId, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
 
             Assert.That(result, Is.True);
 
-            Partition updated = await store.RetrievePartitionAsync(partitionId, CancellationToken.None);
+            Partition persisted = await store.RetrievePartitionAsync(id, CancellationToken.None);
 
-            Assert.That(updated.IsSplitRequested, Is.True);
+            Assert.That(persisted.IsSplitRequested, Is.True);
         }
 
         [Test]
@@ -717,23 +861,19 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "other", false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "other", false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
 
-            Assert.ThrowsAsync<LockException>(() => store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3, false, CancellationToken.None));
+            Assert.ThrowsAsync<LockException>(() => store.ReportProgressAsync(id, "owner", progressUpdated, "g", 3, false, CancellationToken.None));
         }
 
         [Test]
@@ -741,25 +881,21 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false, false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false, false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
 
-            await store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3L, true, CancellationToken.None);
+            await store.ReportProgressAsync(id, "owner", progressUpdated, "g", 3L, true, CancellationToken.None);
 
-            Partition persisted = await store.RetrievePartitionAsync(partitionId, CancellationToken.None);
+            Partition persisted = await store.RetrievePartitionAsync(id, CancellationToken.None);
 
             Assert.That(persisted.JobId, Is.EqualTo(partition.JobId));
             Assert.That(persisted.Created, Is.EqualTo(partition.Created));
@@ -780,23 +916,19 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
 
-            Partition returned = await store.ReportProgressAsync(partitionId, "owner", progressUpdated, "g", 3L, true, CancellationToken.None);
+            Partition returned = await store.ReportProgressAsync(id, "owner", progressUpdated, "g", 3L, true, CancellationToken.None);
 
             Assert.That(returned.JobId, Is.EqualTo(partition.JobId));
             Assert.That(returned.Created, Is.EqualTo(partition.Created));
@@ -817,17 +949,13 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "c", 2L, 22L, "owner", false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false);
 
             Assert.ThrowsAsync<ArgumentNullException>(() => store.InsertSplitPartitionAsync(null, partition, CancellationToken.None));
         }
@@ -837,17 +965,13 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime timestamp = DateTime.UtcNow;
-            Job job = new Job(jobId, timestamp, timestamp, JobState.Initializing);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Guid partitionId = Guid.NewGuid();
-            DateTime partitionCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
-            DateTime partitionUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-
-            Partition partition = new Partition(partitionId, jobId, partitionCreated, partitionUpdated, "a", "z", true, "g", 7L, 18L, "owner", false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "g", 7L, 18L, "owner", false);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
@@ -859,23 +983,19 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
-
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
             Guid partitionToUpdateId = Guid.NewGuid();
             DateTime partitionToUpdateCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime partitionToUpdateUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partitionToUpdate = new Partition(partitionToUpdateId, jobId, partitionToUpdateCreated, partitionToUpdateUpdated, "a", "m", true, "c", 2L, 12L, "owner", false);
+            Partition partitionToUpdate = new Partition(partitionToUpdateId, job.Id, partitionToUpdateCreated, partitionToUpdateUpdated, "a", "m", true, "c", 2L, 12L, "owner", false);
 
             Guid partitionToInsertId = Guid.NewGuid();
             DateTime partitionToInsertCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime partitionToInsertUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partitionToInsert = new Partition(partitionToInsertId, jobId, partitionToInsertCreated, partitionToInsertUpdated, "n", "z", true, null, 0L, 12L, null, false);
+            Partition partitionToInsert = new Partition(partitionToInsertId, job.Id, partitionToInsertCreated, partitionToInsertUpdated, "n", "z", true, null, 0L, 12L, null, false);
 
             Assert.ThrowsAsync<UnknownIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
         }
@@ -885,17 +1005,13 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
-
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
             Guid partitionToUpdateId = Guid.NewGuid();
             DateTime partitionToUpdateCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime partitionToUpdateUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partitionToUpdate = new Partition(partitionToUpdateId, jobId, partitionToUpdateCreated, partitionToUpdateUpdated, "a", "m", true, "c", 2L, 12L, "owner", false);
+            Partition partitionToUpdate = new Partition(partitionToUpdateId, job.Id, partitionToUpdateCreated, partitionToUpdateUpdated, "a", "m", true, "c", 2L, 12L, "owner", false);
 
             await store.InsertPartitionAsync(partitionToUpdate, CancellationToken.None);
 
@@ -903,7 +1019,7 @@ namespace EXBP.Dipren.Tests.Data
             DateTime partitionToInsertCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime partitionToInsertUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partitionToInsert = new Partition(partitionToInsertId, jobId, partitionToInsertCreated, partitionToInsertUpdated, "n", "z", true, null, 0L, 12L, null, false);
+            Partition partitionToInsert = new Partition(partitionToInsertId, job.Id, partitionToInsertCreated, partitionToInsertUpdated, "n", "z", true, null, 0L, 12L, null, false);
 
             await store.InsertPartitionAsync(partitionToInsert, CancellationToken.None);
 
@@ -915,17 +1031,13 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
-
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
             Guid partitionToSplitId = Guid.NewGuid();
             DateTime partitionToSplitCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime partitionToSplitUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partitionToSplit = new Partition(partitionToSplitId, jobId, partitionToSplitCreated, partitionToSplitUpdated, "a", "z", true, "c", 2L, 24L, "owner", false);
+            Partition partitionToSplit = new Partition(partitionToSplitId, job.Id, partitionToSplitCreated, partitionToSplitUpdated, "a", "z", true, "c", 2L, 24L, "owner", false);
 
             await store.InsertPartitionAsync(partitionToSplit, CancellationToken.None);
 
@@ -939,7 +1051,7 @@ namespace EXBP.Dipren.Tests.Data
             DateTime partitionToInsertCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime partitionToInsertUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partitionToInsert = new Partition(partitionToInsertId, jobId, partitionToInsertCreated, partitionToInsertUpdated, "n", "z", true, null, 0L, 12L, null, false);
+            Partition partitionToInsert = new Partition(partitionToInsertId, job.Id, partitionToInsertCreated, partitionToInsertUpdated, "n", "z", true, null, 0L, 12L, null, false);
 
             await store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None);
 
@@ -971,17 +1083,13 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            const string jobId = "DPJ-0001";
-            DateTime jobCreated = new DateTime(2022, 9, 12, 16, 21, 48, DateTimeKind.Utc);
-            Job job = new Job(jobId, jobCreated, jobCreated, JobState.Processing);
-
-            await store.InsertJobAsync(job, CancellationToken.None);
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
 
             Guid completedId = Guid.NewGuid();
             DateTime completedCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime completedUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition completed = new Partition(completedId, jobId, completedCreated, completedUpdated, "a", "m", false, "l", 13L, 0L, "owner1", true, false);
+            Partition completed = new Partition(completedId, job.Id, completedCreated, completedUpdated, "a", "m", false, "l", 13L, 0L, "owner1", true, false);
 
             await store.InsertPartitionAsync(completed, CancellationToken.None);
 
@@ -989,13 +1097,333 @@ namespace EXBP.Dipren.Tests.Data
             DateTime pendingCreated = new DateTime(2022, 9, 12, 16, 23, 12, DateTimeKind.Utc);
             DateTime pendingUpdated = new DateTime(2022, 9, 12, 16, 24, 32, DateTimeKind.Utc);
 
-            Partition pending = new Partition(pendingId, jobId, pendingCreated, pendingUpdated, "n", "z", true, "x", 8L, 2L, "owner2", false, false);
+            Partition pending = new Partition(pendingId, job.Id, pendingCreated, pendingUpdated, "n", "z", true, "x", 8L, 2L, "owner2", false, false);
 
             await store.InsertPartitionAsync(pending, CancellationToken.None);
 
-            long count = await store.CountIncompletePartitionsAsync(jobId, CancellationToken.None);
+            long count = await store.CountIncompletePartitionsAsync(job.Id, CancellationToken.None);
 
             Assert.That(count, Is.EqualTo(1L));
+        }
+
+        private async Task<Job> EnsurePersistedJobAsync(IEngineDataStore store, JobState state, string id = "DPJ-0001", CancellationToken cancellation = default)
+        {
+            DateTime created = this.FormatDateTime(new DateTime(2022, 9, 07, 16, 21, 48, DateTimeKind.Utc));
+            DateTime updated = created;
+            DateTime? started = null;
+            DateTime? completed = null;
+            string error = null;
+
+            switch (state)
+            {
+                case JobState.Initializing:
+                case JobState.Ready:
+                    break;
+
+                case JobState.Failed:
+                    error = "Could not schedule job due to some error.";
+                    break;
+
+                case JobState.Processing:
+                    started = this.FormatDateTime(new DateTime(2022, 9, 12, 11, 27, 28, DateTimeKind.Utc));
+                    updated = started.Value;
+                    break;
+
+                case JobState.Completed:
+                    started = this.FormatDateTime(new DateTime(2022, 9, 12, 11, 27, 28, DateTimeKind.Utc));
+                    completed = this.FormatDateTime(new DateTime(2022, 9, 25, 22, 23, 56, DateTimeKind.Utc));
+                    updated = completed.Value;
+                    break;
+            }
+
+            Job result = new Job(id, created, updated, state, started, completed, error);
+
+            await store.InsertJobAsync(result, cancellation);
+
+            return result;
+        }
+
+        [Test]
+        public async Task RetrieveJobStatusReportAsync_ArgumentIdIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.RetrieveJobStatusReportAsync(null, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task RetrieveJobStatusReportAsync_JobDoesNotExist_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrieveJobStatusReportAsync("DPJ-0001", CancellationToken.None));
+        }
+
+        [Test]
+        public async Task RetrieveJobStatusReportAsync_JobIsInitializing_ReturnsCorrectResult()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
+
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Id, Is.EqualTo(job.Id));
+            Assert.That(result.Created, Is.EqualTo(job.Created));
+            Assert.That(result.Updated, Is.EqualTo(job.Updated));
+            Assert.That(result.Started, Is.EqualTo(job.Started));
+            Assert.That(result.Completed, Is.EqualTo(job.Completed));
+            Assert.That(result.State, Is.EqualTo(job.State));
+            Assert.That(result.Error, Is.EqualTo(job.Error));
+
+            Assert.That(result.Partitions, Is.Not.Null);
+            Assert.That(result.Partitions.Untouched, Is.EqualTo(0L));
+            Assert.That(result.Partitions.InProgress, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Completed, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Total, Is.EqualTo(0L));
+
+            Assert.That(result.Progress, Is.Not.Null);
+            Assert.That(result.Progress.Remaining, Is.Null);
+            Assert.That(result.Progress.Completed, Is.Null);
+            Assert.That(result.Progress.Total, Is.Null);
+            Assert.That(result.Progress.Ratio, Is.Null);
+
+            Assert.That(result.OwnershipChanges, Is.Zero);
+            Assert.That(result.PendingSplitRequests, Is.Zero);
+        }
+
+        [Test]
+        public async Task RetrieveJobStatusReportAsync_JobIsReady_ReturnsCorrectResult()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Ready);
+
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 0L, 26L, null, false);
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Id, Is.EqualTo(job.Id));
+            Assert.That(result.Created, Is.EqualTo(job.Created));
+            Assert.That(result.Updated, Is.EqualTo(job.Updated));
+            Assert.That(result.Started, Is.EqualTo(job.Started));
+            Assert.That(result.Completed, Is.EqualTo(job.Completed));
+            Assert.That(result.State, Is.EqualTo(job.State));
+            Assert.That(result.Error, Is.EqualTo(job.Error));
+
+            Assert.That(result.Partitions, Is.Not.Null);
+            Assert.That(result.Partitions.Untouched, Is.EqualTo(1L));
+            Assert.That(result.Partitions.InProgress, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Completed, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Total, Is.EqualTo(1L));
+
+            Assert.That(result.Progress, Is.Not.Null);
+            Assert.That(result.Progress.Remaining, Is.EqualTo(26L));
+            Assert.That(result.Progress.Completed, Is.EqualTo(0L));
+            Assert.That(result.Progress.Total, Is.EqualTo(26L));
+            Assert.That(result.Progress.Ratio, Is.EqualTo(0D));
+
+            Assert.That(result.OwnershipChanges, Is.Zero);
+            Assert.That(result.PendingSplitRequests, Is.Zero);
+        }
+
+        [Test]
+        public async Task RetrieveJobStatusReportAsync_JobIsProcessing_ReturnsCorrectResult()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "80", "90", true, "82", 3L, 8L, "owner-1", false, true);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 16, 33, 37, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "10", "20", false, "13", 4L, 6L, "owner-2", false, true);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 16, 25, 21, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "20", "30", false, "14", 5L, 5L, "owner-3", false, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "30", "40", false, null, 0L, 10L, null, false, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 48, 29, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 29, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "40", "50", false, null, 0L, 10L, null, false, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 17, 16, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "50", "60", false, "51", 2L, 8L, "owner-4", false, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 17, 16, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "60", "70", false, "69", 10L, 0L, "owner-5", true, true);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Id, Is.EqualTo(job.Id));
+            Assert.That(result.Created, Is.EqualTo(job.Created));
+            Assert.That(result.Updated, Is.EqualTo(job.Updated));
+            Assert.That(result.Started, Is.EqualTo(job.Started));
+            Assert.That(result.Completed, Is.EqualTo(job.Completed));
+            Assert.That(result.State, Is.EqualTo(job.State));
+            Assert.That(result.Error, Is.EqualTo(job.Error));
+
+            Assert.That(result.Partitions, Is.Not.Null);
+            Assert.That(result.Partitions.Untouched, Is.EqualTo(2L));
+            Assert.That(result.Partitions.InProgress, Is.EqualTo(4L));
+            Assert.That(result.Partitions.Completed, Is.EqualTo(1L));
+            Assert.That(result.Partitions.Total, Is.EqualTo(7L));
+
+            Assert.That(result.Progress, Is.Not.Null);
+            Assert.That(result.Progress.Remaining, Is.EqualTo(47L));
+            Assert.That(result.Progress.Completed, Is.EqualTo(24L));
+            Assert.That(result.Progress.Total, Is.EqualTo(71L));
+            Assert.That(result.Progress.Ratio, Is.EqualTo(0.338).Within(0.001D));
+
+            Assert.That(result.PendingSplitRequests, Is.EqualTo(2));
+        }
+
+        [Test]
+        public async Task RetrieveJobStatusReportAsync_JobIsCompleted_ReturnsCorrectResult()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Completed);
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "80", "90", true, "90", 11L, 0L, "owner-1", true, true);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 16, 33, 37, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "10", "20", false, "19", 10L, 0L, "owner-2", true, true);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 16, 25, 21, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "20", "30", false, "29", 10L, 0L, "owner-3", true, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "30", "40", false, "39", 10L, 0L, "owner-1", true, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 48, 29, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 29, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "40", "50", false, "49", 10L, 0L, "owner-2", true, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 17, 16, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "50", "60", false, "59", 10L, 0L, "owner-4", true, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            {
+                Guid id = Guid.NewGuid();
+                DateTime created = new DateTime(2022, 9, 12, 17, 17, 16, DateTimeKind.Utc);
+                DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
+                Partition partition = new Partition(id, job.Id, created, updated, "60", "70", false, "69", 10L, 0L, "owner-5", true, false);
+
+                await store.InsertPartitionAsync(partition, CancellationToken.None);
+            }
+
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Id, Is.EqualTo(job.Id));
+            Assert.That(result.Created, Is.EqualTo(job.Created));
+            Assert.That(result.Updated, Is.EqualTo(job.Updated));
+            Assert.That(result.Started, Is.EqualTo(job.Started));
+            Assert.That(result.Completed, Is.EqualTo(job.Completed));
+            Assert.That(result.State, Is.EqualTo(job.State));
+            Assert.That(result.Error, Is.EqualTo(job.Error));
+
+            Assert.That(result.Partitions, Is.Not.Null);
+            Assert.That(result.Partitions.Untouched, Is.EqualTo(0L));
+            Assert.That(result.Partitions.InProgress, Is.EqualTo(0L));
+            Assert.That(result.Partitions.Completed, Is.EqualTo(7L));
+            Assert.That(result.Partitions.Total, Is.EqualTo(7L));
+
+            Assert.That(result.Progress, Is.Not.Null);
+            Assert.That(result.Progress.Remaining, Is.EqualTo(0L));
+            Assert.That(result.Progress.Completed, Is.EqualTo(71L));
+            Assert.That(result.Progress.Total, Is.EqualTo(71L));
+            Assert.That(result.Progress.Ratio, Is.EqualTo(1D));
+
+            Assert.That(result.PendingSplitRequests, Is.EqualTo(0));
         }
 
 
@@ -1044,11 +1472,24 @@ namespace EXBP.Dipren.Tests.Data
 
             public Task<Partition> TryAcquirePartitionAsync(string jobId, string requester, DateTime timestamp, DateTime active, CancellationToken cancellation)
                 => this._store.TryAcquirePartitionAsync(jobId, requester, timestamp, active, cancellation);
+
             public Task<bool> TryRequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation)
                 => this._store.TryRequestSplitAsync(jobId, active, cancellation);
 
-            public Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation)
-                => this._store.UpdateJobAsync(jobId, timestamp, state, error, cancellation);
+            public Task<Job> MarkJobAsReadyAsync(string id, DateTime timestamp, CancellationToken cancellation)
+                => this._store.MarkJobAsReadyAsync(id, timestamp, cancellation);
+
+            public Task<Job> MarkJobAsStartedAsync(string id, DateTime timestamp, CancellationToken cancellation)
+                => this._store.MarkJobAsStartedAsync(id, timestamp, cancellation);
+
+            public Task<Job> MarkJobAsCompletedAsync(string id, DateTime timestamp, CancellationToken cancellation)
+                => this._store.MarkJobAsCompletedAsync(id, timestamp, cancellation);
+
+            public Task<Job> MarkJobAsFailedAsync(string id, DateTime timestamp, string error, CancellationToken cancellation)
+                => this._store.MarkJobAsFailedAsync(id, timestamp, error, cancellation);
+
+            public Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation)
+                => this._store.RetrieveJobStatusReportAsync(id, cancellation);
         }
     }
 }

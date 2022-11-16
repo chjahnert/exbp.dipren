@@ -134,6 +134,8 @@ FROM
   "id" VARCHAR(256) NOT NULL,
   "created" DATETIME NOT NULL,
   "updated" DATETIME NOT NULL,
+  "started" DATETIME NULL,
+  "completed" DATETIME NULL,
   "state" INTEGER NOT NULL,
   "error" TEXT NULL,
   
@@ -191,6 +193,8 @@ WHERE
   "id",
   "created",
   "updated",
+  "started",
+  "completed",
   "state",
   "error"
 )
@@ -199,6 +203,8 @@ VALUES
   $id,
   $created,
   $updated,
+  $started,
+  $completed,
   $state,
   $error
 );</value>
@@ -237,6 +243,77 @@ VALUES
   $is_split_requested
 );</value>
   </data>
+  <data name="QueryMarkJobAsCompleted" xml:space="preserve">
+    <value>UPDATE
+  "jobs"
+SET
+  "updated" = $timestamp,
+  "completed" = $timestamp,
+  "state" = $state
+WHERE
+  ("id" = $id)
+RETURNING
+  "id" AS "id",
+  "created" AS "created",
+  "updated" AS "updated",
+  "started" AS "started",
+  "completed" AS "completed",
+  "state" AS "state",
+  "error" AS "error";</value>
+  </data>
+  <data name="QueryMarkJobAsFailed" xml:space="preserve">
+    <value>UPDATE
+  "jobs"
+SET
+  "updated" = $timestamp,
+  "state" = $state,
+  "error" = $error
+WHERE
+  ("id" = $id)
+RETURNING
+  "id" AS "id",
+  "created" AS "created",
+  "updated" AS "updated",
+  "started" AS "started",
+  "completed" AS "completed",
+  "state" AS "state",
+  "error" AS "error";</value>
+  </data>
+  <data name="QueryMarkJobAsReady" xml:space="preserve">
+    <value>UPDATE
+  "jobs"
+SET
+  "updated" = $timestamp,
+  "state" = $state
+WHERE
+  ("id" = $id)
+RETURNING
+  "id" AS "id",
+  "created" AS "created",
+  "updated" AS "updated",
+  "started" AS "started",
+  "completed" AS "completed",
+  "state" AS "state",
+  "error" AS "error";</value>
+  </data>
+  <data name="QueryMarkJobAsStarted" xml:space="preserve">
+    <value>UPDATE
+  "jobs"
+SET
+  "updated" = $timestamp,
+  "started" = $timestamp,
+  "state" = $state
+WHERE
+  ("id" = $id)
+RETURNING
+  "id" AS "id",
+  "created" AS "created",
+  "updated" AS "updated",
+  "started" AS "started",
+  "completed" AS "completed",
+  "state" AS "state",
+  "error" AS "error";</value>
+  </data>
   <data name="QueryReportProgress" xml:space="preserve">
     <value>UPDATE
   "partitions"
@@ -269,12 +346,45 @@ RETURNING
   "id" AS "id",
   "created" AS "created",
   "updated" AS "updated",
+  "started" AS "started",
+  "completed" AS "completed",
   "state" AS "state",
   "error" AS "error"
 FROM
   "jobs"
 WHERE
   "id" = $id;</value>
+  </data>
+  <data name="QueryRetrieveJobStatusReport" xml:space="preserve">
+    <value>SELECT
+  t1."id" AS "id",
+  t1."created" AS "created",
+  t1."updated" AS "updated",
+  t1."started" AS "started",
+  t1."completed" AS "completed",
+  t1."state" AS "state",
+  t1."error" AS "error",
+  (SELECT COUNT(1) FROM "partitions" WHERE ("job_id" = t1."id") AND ("is_completed" = 0) AND ("owner" IS NULL) AND ("processed" = 0)) AS "partitons_untouched",
+  (SELECT COUNT(1) FROM "partitions" WHERE ("job_id" = t1."id") AND ("is_completed" = 0) AND (("owner" IS NOT NULL) OR ("processed" &gt; 0))) AS "partitons_in_progress",
+  (SELECT COUNT(1) FROM "partitions" WHERE ("job_id" = t1."id") AND ("is_completed" = 1)) AS "partitions_completed",
+  SUM(t2."remaining") AS "keys_remaining",
+  SUM(t2."processed") AS "keys_completed",
+  COALESCE(MAX(t2."updated"), t1."updated") AS "last_activity",
+  COALESCE((SELECT SUM(t2."acquired") - COUNT(1) FROM "partitions" WHERE ("job_id" = t1."id") AND ("acquired" &gt; 0)), 0) AS "ownership_changes",
+  (SELECT COUNT(1) FROM "partitions" WHERE ("job_id" = t1."id") AND (t1."state" = 2) AND ("is_completed" = 0) AND ("is_split_requested" = 1)) AS "split_requests_pending"
+FROM
+  "jobs" t1
+  LEFT JOIN "partitions" t2 ON (t1."id" = t2."job_id")
+WHERE
+  (t1."id" = $id)
+GROUP BY
+  t1."id",
+  t1."created",
+  t1."updated",
+  t1."started",
+  t1."completed",
+  t1."state",
+  t1."error";</value>
   </data>
   <data name="QueryRetrievePartitionById" xml:space="preserve">
     <value>SELECT
@@ -342,22 +452,6 @@ ORDER BY
 LIMIT
   1;
 </value>
-  </data>
-  <data name="QueryUpdateJobById" xml:space="preserve">
-    <value>UPDATE
-  "jobs"
-SET
-  "updated" = $updated,
-  "state" = $state,
-  "error" = $error
-WHERE
-  ("id" = $id)
-RETURNING
-  "id" AS "id",
-  "created" AS "created",
-  "updated" AS "updated",
-  "state" AS "state",
-  "error" AS "error";</value>
   </data>
   <data name="QueryUpdateSplitPartition" xml:space="preserve">
     <value>UPDATE

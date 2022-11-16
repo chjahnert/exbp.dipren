@@ -19,6 +19,10 @@
     "EXBP.Dipren.Demo.Postgres: Process": {
       "commandName": "Project",
       "commandLineArgs": "process \"cuboid-001\" --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\" --batch-size 256 --batch-timeout 00:00:02 --clock-drift 00:00:00"
+    },
+    "EXBP.Dipren.Demo.Postgres: Monitor": {
+      "commandName": "Project",
+      "commandLineArgs": "monitor \"cuboid-001\" --database \"Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development\""
     }
   }
 }

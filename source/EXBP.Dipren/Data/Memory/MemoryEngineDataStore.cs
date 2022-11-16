@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.ObjectModel;
+using System.Reflection.PortableExecutable;
 
 using EXBP.Dipren.Diagnostics;
 
@@ -253,19 +254,64 @@ namespace EXBP.Dipren.Data.Memory
         }
 
         /// <summary>
-        ///   Updates the state of an existing job.
+        ///   Marks a job as ready.
         /// </summary>
-        /// <param name="jobId">
+        /// <param name="id">
         ///   The unique identifier of the job to update.
         /// </param>
         /// <param name="timestamp">
         ///   The current date and time value.
         /// </param>
-        /// <param name="state">
-        ///   The new state of the job.
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
         /// </param>
-        /// <param name="error">
-        ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public Task<Job> MarkJobAsReadyAsync(string id, DateTime timestamp, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            Job result = null;
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._jobs.Contains(id);
+
+                if (exists == false)
+                {
+                    this.RaiseErrorUnknownJobIdentifier();
+                }
+
+                result = this._jobs[id] with
+                {
+                    Updated = timestamp,
+                    State = JobState.Ready
+                };
+
+                this._jobs.Remove(id);
+                this._jobs.Add(result);
+            }
+
+            return Task.FromResult(result);
+        }
+
+        /// <summary>
+        ///   Marks a job as started.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
@@ -281,29 +327,136 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<Job> UpdateJobAsync(string jobId, DateTime timestamp, JobState state, string error, CancellationToken cancellation)
+        public Task<Job> MarkJobAsStartedAsync(string id, DateTime timestamp, CancellationToken cancellation)
         {
-            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+            Assert.ArgumentIsNotNull(id, nameof(id));
 
             Job result = null;
 
             lock (this._syncRoot)
             {
-                bool exists = this._jobs.Contains(jobId);
+                bool exists = this._jobs.Contains(id);
 
                 if (exists == false)
                 {
                     this.RaiseErrorUnknownJobIdentifier();
                 }
 
-                result = this._jobs[jobId] with
+                result = this._jobs[id] with
                 {
                     Updated = timestamp,
-                    State = state,
+                    Started = timestamp,
+                    State = JobState.Processing
+                };
+
+                this._jobs.Remove(id);
+                this._jobs.Add(result);
+            }
+
+            return Task.FromResult(result);
+        }
+
+        /// <summary>
+        ///   Marks a job as completed.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public Task<Job> MarkJobAsCompletedAsync(string id, DateTime timestamp, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            Job result = null;
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._jobs.Contains(id);
+
+                if (exists == false)
+                {
+                    this.RaiseErrorUnknownJobIdentifier();
+                }
+
+                result = this._jobs[id] with
+                {
+                    Updated = timestamp,
+                    Completed = timestamp,
+                    State = JobState.Completed
+                };
+
+                this._jobs.Remove(id);
+                this._jobs.Add(result);
+            }
+
+            return Task.FromResult(result);
+        }
+
+        /// <summary>
+        ///   Marks a job as failed.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job to update.
+        /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time value.
+        /// </param>
+        /// <param name="error">
+        ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public Task<Job> MarkJobAsFailedAsync(string id, DateTime timestamp, string error, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            Job result = null;
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._jobs.Contains(id);
+
+                if (exists == false)
+                {
+                    this.RaiseErrorUnknownJobIdentifier();
+                }
+
+                result = this._jobs[id] with
+                {
+                    Updated = timestamp,
+                    State = JobState.Failed,
                     Error = error
                 };
 
-                this._jobs.Remove(jobId);
+                this._jobs.Remove(id);
                 this._jobs.Add(result);
             }
 
@@ -571,6 +724,76 @@ namespace EXBP.Dipren.Data.Memory
                 this._partitions.Add(result);
             }
 
+
+            return Task.FromResult(result);
+        }
+
+        /// <summary>
+        ///   Gets a status report for the job with the specified identifier.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
+        ///   provides access to the result of the operation.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
+        public Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(id, nameof(id));
+
+            StatusReport result = null;
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._jobs.Contains(id);
+
+                if (exists == false)
+                {
+                    this.RaiseErrorUnknownJobIdentifier();
+                }
+
+                Job job = this._jobs[id];
+                int partitions = this._partitions.Count(p => (p.JobId == job.Id));
+
+                result = new StatusReport
+                {
+                    Id = job.Id,
+                    Created = job.Created,
+                    Updated = job.Updated,
+                    Started = job.Started,
+                    Completed = job.Completed,
+                    State = job.State,
+                    Error = job.Error,
+
+                    LastActivity = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id)).Max(p => p.Updated) : job.Updated,
+                    OwnershipChanges = 0L,
+                    PendingSplitRequests = (job.State == JobState.Processing) ? this._partitions.Count(p => (p.JobId == job.Id) && (p.IsCompleted == false) && (p.IsSplitRequested == true)) : 0L,
+
+                    Partitions = new StatusReport.PartitionsReport
+                    {
+                        Untouched = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner == null) && (p.IsCompleted == false)),
+                        InProgress = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner != null) && (p.IsCompleted == false)),
+                        Completed = this._partitions.Count(p => (p.JobId == job.Id) && (p.IsCompleted == true))
+                    },
+
+                    Progress = new StatusReport.ProgressReport
+                    {
+                        Remaining = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id) && (p.IsCompleted == false)).Sum(p => p.Remaining) : null,
+                        Completed = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id)).Sum(p => p.Processed) : null
+                    }
+                };
+            }
 
             return Task.FromResult(result);
         }
