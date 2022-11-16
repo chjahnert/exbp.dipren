@@ -122,7 +122,7 @@ namespace EXBP.Dipren
         private async Task<Job> CreateJobEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation)
         {
             DateTime timestamp = this.Clock.GetDateTime();
-            Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing);
+            Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing, job.BatchSize, job.Timeout);
 
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, SchedulerResources.EventCreatingJob, cancellation);
 

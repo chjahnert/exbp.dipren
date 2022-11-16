@@ -149,6 +149,8 @@ CREATE TABLE "dipren"."jobs"
   "id" VARCHAR(256) NOT NULL,
   "created" TIMESTAMP NOT NULL,
   "updated" TIMESTAMP NOT NULL,
+  "batch_size" INTEGER NOT NULL,
+  "timeout" BIGINT NOT NULL,
   "started" TIMESTAMP NULL,
   "completed" TIMESTAMP NULL,
   "state" INTEGER NOT NULL,

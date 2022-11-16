@@ -229,6 +229,8 @@ namespace EXBP.Dipren.Data.SQLite
                 command.Parameters.AddWithValue("$id", job.Id);
                 command.Parameters.AddWithValue("$created", job.Created);
                 command.Parameters.AddWithValue("$updated", job.Updated);
+                command.Parameters.AddWithValue("$batch_size", job.BatchSize);
+                command.Parameters.AddWithValue("$timeout", job.Timeout.Ticks);
                 command.Parameters.AddWithValue("$started", job.Started);
                 command.Parameters.AddWithValue("$completed", job.Completed);
                 command.Parameters.AddWithValue("$state", job.State);
@@ -1254,12 +1256,16 @@ namespace EXBP.Dipren.Data.SQLite
             string id = reader.GetString("id");
             DateTime created = reader.GetDateTime("created");
             DateTime updated = reader.GetDateTime("updated");
+            int batchSize = reader.GetInt32("batch_size");
+            long ticks = reader.GetInt64("timeout");
             DateTime? started = reader.GetNullableDateTime("started");
             DateTime? completed = reader.GetNullableDateTime("completed");
             JobState state = (JobState) reader.GetInt32("state");
             string error = reader.GetNullableString("error");
 
-            Job result = new Job(id, created, updated, state, started, completed, error);
+            TimeSpan timeout = TimeSpan.FromTicks(ticks);
+
+            Job result = new Job(id, created, updated, state, batchSize, timeout, started, completed, error);
 
             return result;
         }

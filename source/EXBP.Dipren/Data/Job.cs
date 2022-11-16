@@ -38,6 +38,23 @@ namespace EXBP.Dipren.Data
         public DateTime Updated { get; init; }
 
         /// <summary>
+        ///   Gets the maximum number of keys to include in a batch.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="int"/> value that contains the maximum number of items to include in a batch.
+        /// </value>
+        public int BatchSize { get; }
+
+        /// <summary>
+        ///   Gets the amount of time after which the processing of a partition is considered unsuccessful or stalled.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="TimeSpan"/> value that specifies the amount of time after which the processing of a
+        ///   partition is considered unsuccessful or stalled.
+        /// </value>
+        public TimeSpan Timeout { get; }
+
+        /// <summary>
         ///   Gets the date and time the current job was started.
         /// </summary>
         /// <value>
@@ -100,16 +117,32 @@ namespace EXBP.Dipren.Data
         /// <param name="state">
         ///   The state of the job.
         /// </param>
+        /// <param name="batchSize">
+        ///   The maximum number of keys to include in a batch.
+        /// </param>
+        /// <param name="timeout">
+        ///   The amount of time after which the processing of a partition is considered unsuccessful or stalled.
+        /// </param>
+        /// <param name="started">
+        ///   The date and time the current job was started.
+        /// </param>
+        /// <param name="completed">
+        ///   The date and time the current job was completed.
+        /// </param>
         /// <param name="error">
         ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
         /// </param>
-        public Job(string id, DateTime created, DateTime updated, JobState state, DateTime? started = null, DateTime? completed = null, string error = null)
+        public Job(string id, DateTime created, DateTime updated, JobState state, int batchSize, TimeSpan timeout, DateTime? started = null, DateTime? completed = null, string error = null)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
+            Assert.ArgumentIsGreater(batchSize, 0, nameof(batchSize));
+            Assert.ArgumentIsGreater(timeout, TimeSpan.Zero, nameof(timeout));
 
             this.Id = id;
             this.Created = created;
             this.Updated = updated;
+            this.BatchSize = batchSize;
+            this.Timeout = timeout;
             this.Started = started;
             this.Completed = completed;
             this.State = state;
