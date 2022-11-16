@@ -1299,7 +1299,7 @@ namespace EXBP.Dipren.Tests.Data
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 17, 17, 16, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "60", "70", false, "69", 10L, 0L, "owner-5", true, false);
+                Partition partition = new Partition(id, job.Id, created, updated, "60", "70", false, "69", 10L, 0L, "owner-5", true, true);
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
