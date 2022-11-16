@@ -337,9 +337,9 @@ namespace EXBP.Dipren.Data.Postgres {
         ///  COUNT(1) FILTER (WHERE (t2.&quot;is_completed&quot; = FALSE) AND ((t2.&quot;owner&quot; IS NOT NULL) OR (t2.&quot;processed&quot; &gt; 0))) AS &quot;partitons_in_progress&quot;,
         ///  COUNT(1) FILTER (WHERE t2.&quot;is_complet [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string QueryRetrieveJobSummary {
+        internal static string QueryRetrieveJobStatusReport {
             get {
-                return ResourceManager.GetString("QueryRetrieveJobSummary", resourceCulture);
+                return ResourceManager.GetString("QueryRetrieveJobStatusReport", resourceCulture);
             }
         }
         

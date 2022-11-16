@@ -1144,29 +1144,29 @@ namespace EXBP.Dipren.Tests.Data
         }
 
         [Test]
-        public async Task RetrieveJobSummaryAsync_ArgumentIdIsNull_ThrowsException()
+        public async Task RetrieveJobStatusReportAsync_ArgumentIdIsNull_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.RetrieveJobSummaryAsync(null, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.RetrieveJobStatusReportAsync(null, CancellationToken.None));
         }
 
         [Test]
-        public async Task RetrieveJobSummaryAsync_JobDoesNotExist_ThrowsException()
+        public async Task RetrieveJobStatusReportAsync_JobDoesNotExist_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrieveJobSummaryAsync("DPJ-0001", CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrieveJobStatusReportAsync("DPJ-0001", CancellationToken.None));
         }
 
         [Test]
-        public async Task RetrieveJobSummaryAsync_JobIsInitializing_ReturnsCorrectResult()
+        public async Task RetrieveJobStatusReportAsync_JobIsInitializing_ReturnsCorrectResult()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Job job = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
 
-            Summary result = await store.RetrieveJobSummaryAsync(job.Id, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
@@ -1183,17 +1183,18 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Partitions.Completed, Is.EqualTo(0L));
             Assert.That(result.Partitions.Total, Is.EqualTo(0L));
 
-            Assert.That(result.Keys, Is.Not.Null);
-            Assert.That(result.Keys.Remaining, Is.Null);
-            Assert.That(result.Keys.Completed, Is.Null);
-            Assert.That(result.Keys.Total, Is.Null);
+            Assert.That(result.Progress, Is.Not.Null);
+            Assert.That(result.Progress.Remaining, Is.Null);
+            Assert.That(result.Progress.Completed, Is.Null);
+            Assert.That(result.Progress.Total, Is.Null);
+            Assert.That(result.Progress.Ratio, Is.Null);
 
             Assert.That(result.OwnershipChanges, Is.Zero);
             Assert.That(result.PendingSplitRequests, Is.Zero);
         }
 
         [Test]
-        public async Task RetrieveJobSummaryAsync_JobIsReady_ReturnsCorrectResult()
+        public async Task RetrieveJobStatusReportAsync_JobIsReady_ReturnsCorrectResult()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1206,7 +1207,7 @@ namespace EXBP.Dipren.Tests.Data
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
-            Summary result = await store.RetrieveJobSummaryAsync(job.Id, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
@@ -1223,17 +1224,18 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Partitions.Completed, Is.EqualTo(0L));
             Assert.That(result.Partitions.Total, Is.EqualTo(1L));
 
-            Assert.That(result.Keys, Is.Not.Null);
-            Assert.That(result.Keys.Remaining, Is.EqualTo(26L));
-            Assert.That(result.Keys.Completed, Is.EqualTo(0L));
-            Assert.That(result.Keys.Total, Is.EqualTo(26L));
+            Assert.That(result.Progress, Is.Not.Null);
+            Assert.That(result.Progress.Remaining, Is.EqualTo(26L));
+            Assert.That(result.Progress.Completed, Is.EqualTo(0L));
+            Assert.That(result.Progress.Total, Is.EqualTo(26L));
+            Assert.That(result.Progress.Ratio, Is.EqualTo(0D));
 
             Assert.That(result.OwnershipChanges, Is.Zero);
             Assert.That(result.PendingSplitRequests, Is.Zero);
         }
 
         [Test]
-        public async Task RetrieveJobSummaryAsync_JobIsProcessing_ReturnsCorrectResult()
+        public async Task RetrieveJobStatusReportAsync_JobIsProcessing_ReturnsCorrectResult()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1302,7 +1304,7 @@ namespace EXBP.Dipren.Tests.Data
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
 
-            Summary result = await store.RetrieveJobSummaryAsync(job.Id, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
@@ -1319,16 +1321,17 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Partitions.Completed, Is.EqualTo(1L));
             Assert.That(result.Partitions.Total, Is.EqualTo(7L));
 
-            Assert.That(result.Keys, Is.Not.Null);
-            Assert.That(result.Keys.Remaining, Is.EqualTo(47L));
-            Assert.That(result.Keys.Completed, Is.EqualTo(24L));
-            Assert.That(result.Keys.Total, Is.EqualTo(71L));
+            Assert.That(result.Progress, Is.Not.Null);
+            Assert.That(result.Progress.Remaining, Is.EqualTo(47L));
+            Assert.That(result.Progress.Completed, Is.EqualTo(24L));
+            Assert.That(result.Progress.Total, Is.EqualTo(71L));
+            Assert.That(result.Progress.Ratio, Is.EqualTo(0.338).Within(0.001D));
 
             Assert.That(result.PendingSplitRequests, Is.EqualTo(2));
         }
 
         [Test]
-        public async Task RetrieveJobSummaryAsync_JobIsCompleted_ReturnsCorrectResult()
+        public async Task RetrieveJobStatusReportAsync_JobIsCompleted_ReturnsCorrectResult()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1397,7 +1400,7 @@ namespace EXBP.Dipren.Tests.Data
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
 
-            Summary result = await store.RetrieveJobSummaryAsync(job.Id, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
@@ -1414,10 +1417,11 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Partitions.Completed, Is.EqualTo(7L));
             Assert.That(result.Partitions.Total, Is.EqualTo(7L));
 
-            Assert.That(result.Keys, Is.Not.Null);
-            Assert.That(result.Keys.Remaining, Is.EqualTo(0L));
-            Assert.That(result.Keys.Completed, Is.EqualTo(71L));
-            Assert.That(result.Keys.Total, Is.EqualTo(71L));
+            Assert.That(result.Progress, Is.Not.Null);
+            Assert.That(result.Progress.Remaining, Is.EqualTo(0L));
+            Assert.That(result.Progress.Completed, Is.EqualTo(71L));
+            Assert.That(result.Progress.Total, Is.EqualTo(71L));
+            Assert.That(result.Progress.Ratio, Is.EqualTo(1D));
 
             Assert.That(result.PendingSplitRequests, Is.EqualTo(0));
         }
@@ -1484,8 +1488,8 @@ namespace EXBP.Dipren.Tests.Data
             public Task<Job> MarkJobAsFailedAsync(string id, DateTime timestamp, string error, CancellationToken cancellation)
                 => this._store.MarkJobAsFailedAsync(id, timestamp, error, cancellation);
 
-            public Task<Summary> RetrieveJobSummaryAsync(string id, CancellationToken cancellation)
-                => this._store.RetrieveJobSummaryAsync(id, cancellation);
+            public Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation)
+                => this._store.RetrieveJobStatusReportAsync(id, cancellation);
         }
     }
 }

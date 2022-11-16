@@ -5,10 +5,10 @@ using System.Diagnostics;
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Holds details about a distributed processing job.
+    ///   Represents a status report generated for a distributed processing job.
     /// </summary>
     [DebuggerDisplay("Id = {Id}, State = {State}, Error = {Error}")]
-    public class Summary
+    public class StatusReport
     {
         /// <summary>
         ///   Gets the unique identifier (or name) of the current distributed processing job.
@@ -74,17 +74,17 @@ namespace EXBP.Dipren
         ///   Gets the partition count grouped by their state.
         /// </summary>
         /// <value>
-        ///   A <see cref="KeyCounts"/> object containing the number of partitions grouped by their state.
+        ///   A <see cref="ProgressReport"/> object containing the number of partitions grouped by their state.
         /// </value>
-        public PartitionCounts Partitions { get; init; }
+        public PartitionsReport Partitions { get; init; }
 
         /// <summary>
-        ///   Gets the key count grouped by their state.
+        ///   Gets details about the progress made.
         /// </summary>
         /// <value>
-        ///   A <see cref="KeyCounts"/> object containing the number of keys grouped by their state.
+        ///   A <see cref="ProgressReport"/> object containing the amount of keys processed and remaining.
         /// </value>
-        public KeyCounts Keys { get; init; }
+        public ProgressReport Progress { get; init; }
 
         /// <summary>
         ///   Gets the date and time of the last activity observed on the job or any partition.
@@ -116,7 +116,7 @@ namespace EXBP.Dipren
         /// <summary>
         ///   Holds the number of partitions grouped by their state.
         /// </summary>
-        public class PartitionCounts
+        public class PartitionsReport
         {
             /// <summary>
             ///   Gets the number of partitions that are ready for processing.
@@ -152,20 +152,20 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
-        ///   Holds the number of keys by their state.
+        ///   Provides information about the number of keys processed and remaining.
         /// </summary>
-        public class KeyCounts
+        public class ProgressReport
         {
             /// <summary>
-            ///   Gets the estimated number of keys left to process.
+            ///   Gets the estimated size of the dataset (the number of keys) not yet completed.
             /// </summary>
             /// <value>
-            ///   A <see cref="long"/> value containing the estimated number of keys left to process.
+            ///   A <see cref="long"/> value containing the estimated number of keys not yet completed.
             /// </value>
             public long? Remaining { get; init; }
 
             /// <summary>
-            ///   Gets the number of keys completed.
+            ///   Gets the size of the dataset (the number of keys) completed.
             /// </summary>
             /// <value>
             ///   A <see cref="long"/> value containing the number of keys completed.
@@ -173,12 +173,20 @@ namespace EXBP.Dipren
             public long? Completed { get; init; }
 
             /// <summary>
-            ///   Gets the estimated number of keys.
+            ///   Gets the estimated size of the dataset.
             /// </summary>
             /// <value>
-            ///   A <see cref="long"/> value containing the estimated number of keys.
+            ///   A <see cref="long"/> value containing the total number of keys estimated.
             /// </value>
             public long? Total => (this.Completed + this.Remaining);
+
+            /// <summary>
+            ///   Gets the ratio of completed keys.
+            /// </summary>
+            /// <value>
+            ///   A nullable <see cref="double"/> value containing the ratio of completed keys.
+            /// </value>
+            public double? Ratio => ((double?) this.Completed / this.Total);
         }
     }
 }

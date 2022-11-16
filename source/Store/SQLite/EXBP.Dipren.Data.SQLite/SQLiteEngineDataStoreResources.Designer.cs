@@ -375,9 +375,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;job_id&quot; = t1.&quot;id&quot;) AND (&quot;is_completed&quot; = 0) AND (&quot;owner&quot; IS NULL) AND (&quot;processed&quot; = 0)) AS &quot;partitons_untouched&quot;,
         ///  (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;job_id&quot; = t1.&quot;id&quot;) AND (&quot;is_completed&quot; = 0) AND ((&quot;owner&quot; IS NOT NULL) OR (&quot;processed&quot; &gt; 0))) AS &quot;part [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string QueryRetrieveJobSummary {
+        internal static string QueryRetrieveJobStatusReport {
             get {
-                return ResourceManager.GetString("QueryRetrieveJobSummary", resourceCulture);
+                return ResourceManager.GetString("QueryRetrieveJobStatusReport", resourceCulture);
             }
         }
         

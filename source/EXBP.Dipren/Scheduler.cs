@@ -83,7 +83,7 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
-        ///   Gets the state of the job with the specified unique identifier.
+        ///   Gets a status report of the job with the specified unique identifier.
         /// </summary>
         /// <param name="id">
         ///   The unique identifier of the job.
@@ -93,11 +93,11 @@ namespace EXBP.Dipren
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous
+        ///   A <see cref="Task{TResult}"/> of <see cref="StatusReport"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
-        public async Task<Summary> GetJobStateAsync(string id, CancellationToken cancellation)
-            => await this.Store.RetrieveJobSummaryAsync(id, cancellation);
+        public async Task<StatusReport> GetStatusReportAsync(string id, CancellationToken cancellation)
+            => await this.Store.RetrieveJobStatusReportAsync(id, cancellation);
 
         /// <summary>
         ///   Creates a job entry for the specified job in the engine data store.

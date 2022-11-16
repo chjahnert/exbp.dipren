@@ -316,7 +316,7 @@ namespace EXBP.Dipren.Data
         Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, CancellationToken cancellation);
 
         /// <summary>
-        ///   Gets the state of the job with the specified identifier along with some statistics.
+        ///   Gets a status report for the job with the specified identifier.
         /// </summary>
         /// <param name="id">
         ///   The unique identifier of the job.
@@ -335,6 +335,6 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<Summary> RetrieveJobSummaryAsync(string id, CancellationToken cancellation);
+        public Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation);
     }
 }

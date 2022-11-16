@@ -1076,7 +1076,7 @@ namespace EXBP.Dipren.Data.SQLite
         }
 
         /// <summary>
-        ///   Gets the state of the job with the specified identifier along with some statistics.
+        ///   Gets a status report for the job with the specified identifier.
         /// </summary>
         /// <param name="id">
         ///   The unique identifier of the job.
@@ -1095,11 +1095,11 @@ namespace EXBP.Dipren.Data.SQLite
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public async Task<Summary> RetrieveJobSummaryAsync(string id, CancellationToken cancellation)
+        public async Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
-            Summary result = null;
+            StatusReport result = null;
 
             this._lock.EnterReadLock();
 
@@ -1107,7 +1107,7 @@ namespace EXBP.Dipren.Data.SQLite
             {
                 using SQLiteCommand command = new SQLiteCommand
                 {
-                    CommandText = SQLiteEngineDataStoreResources.QueryRetrieveJobSummary,
+                    CommandText = SQLiteEngineDataStoreResources.QueryRetrieveJobStatusReport,
                     CommandType = CommandType.Text,
                     Connection = this._connection
                 };
@@ -1126,7 +1126,7 @@ namespace EXBP.Dipren.Data.SQLite
 
                     Job job = this.ReadJob(reader);
 
-                    result = new Summary
+                    result = new StatusReport
                     {
                         Id = job.Id,
                         Created = job.Created,
@@ -1140,14 +1140,14 @@ namespace EXBP.Dipren.Data.SQLite
                         OwnershipChanges = reader.GetInt64("ownership_changes"),
                         PendingSplitRequests = reader.GetInt64("split_requests_pending"),
 
-                        Partitions = new Summary.PartitionCounts
+                        Partitions = new StatusReport.PartitionsReport
                         {
                             Untouched = reader.GetInt64("partitons_untouched"),
                             InProgress = reader.GetInt64("partitons_in_progress"),
                             Completed = reader.GetInt64("partitions_completed")
                         },
 
-                        Keys = new Summary.KeyCounts
+                        Progress = new StatusReport.ProgressReport
                         {
                             Remaining = reader.GetNullableInt64("keys_remaining"),
                             Completed = reader.GetNullableInt64("keys_completed")

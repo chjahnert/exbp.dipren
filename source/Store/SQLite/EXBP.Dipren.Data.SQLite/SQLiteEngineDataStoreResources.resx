@@ -355,7 +355,7 @@ FROM
 WHERE
   "id" = $id;</value>
   </data>
-  <data name="QueryRetrieveJobSummary" xml:space="preserve">
+  <data name="QueryRetrieveJobStatusReport" xml:space="preserve">
     <value>SELECT
   t1."id" AS "id",
   t1."created" AS "created",

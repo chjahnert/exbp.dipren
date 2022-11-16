@@ -729,7 +729,7 @@ namespace EXBP.Dipren.Data.Memory
         }
 
         /// <summary>
-        ///   Gets the state of the job with the specified identifier along with some statistics.
+        ///   Gets a status report for the job with the specified identifier.
         /// </summary>
         /// <param name="id">
         ///   The unique identifier of the job.
@@ -748,11 +748,11 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<Summary> RetrieveJobSummaryAsync(string id, CancellationToken cancellation)
+        public Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
-            Summary result = null;
+            StatusReport result = null;
 
             lock (this._syncRoot)
             {
@@ -766,7 +766,7 @@ namespace EXBP.Dipren.Data.Memory
                 Job job = this._jobs[id];
                 int partitions = this._partitions.Count(p => (p.JobId == job.Id));
 
-                result = new Summary
+                result = new StatusReport
                 {
                     Id = job.Id,
                     Created = job.Created,
@@ -780,14 +780,14 @@ namespace EXBP.Dipren.Data.Memory
                     OwnershipChanges = 0L,
                     PendingSplitRequests = (job.State == JobState.Processing) ? this._partitions.Count(p => (p.JobId == job.Id) && (p.IsSplitRequested == true)) : 0L,
 
-                    Partitions = new Summary.PartitionCounts
+                    Partitions = new StatusReport.PartitionsReport
                     {
                         Untouched = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner == null) && (p.IsCompleted == false)),
                         InProgress = this._partitions.Count(p => (p.JobId == job.Id) && (p.Owner != null) && (p.IsCompleted == false)),
                         Completed = this._partitions.Count(p => (p.JobId == job.Id) && (p.IsCompleted == true))
                     },
 
-                    Keys = new Summary.KeyCounts
+                    Progress = new StatusReport.ProgressReport
                     {
                         Remaining = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id) && (p.IsCompleted == false)).Sum(p => p.Remaining) : null,
                         Completed = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id)).Sum(p => p.Processed) : null
