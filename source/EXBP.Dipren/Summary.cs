@@ -1,10 +1,11 @@
 ﻿
 using System.Diagnostics;
 
+
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Holds a summary of details for a distributed processing job.
+    ///   Holds details about a distributed processing job.
     /// </summary>
     [DebuggerDisplay("Id = {Id}, State = {State}, Error = {Error}")]
     public class Summary
