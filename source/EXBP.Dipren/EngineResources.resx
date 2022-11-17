@@ -177,6 +177,9 @@
   <data name="EventSplitRequestSucceeded" xml:space="preserve">
     <value>Successfully requested a split.</value>
   </data>
+  <data name="EventTimeoutValueTooLow" xml:space="preserve">
+    <value>Processing the batch took longer than the specified timeout. The timeout value specified might be too low.</value>
+  </data>
   <data name="EventTryingToAcquirePartition" xml:space="preserve">
     <value>Trying to acquire a partition.</value>
   </data>

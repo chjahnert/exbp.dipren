@@ -282,6 +282,8 @@ namespace EXBP.Dipren
             // 5. Repeat from step 1 until completed.
             //
 
+            long timeoutTooLow = 0L;
+
             while (partition.IsCompleted == false)
             {
                 TKey first = ((partition.Processed == 0L) ? partition.Range.First : partition.Position);
@@ -314,6 +316,16 @@ namespace EXBP.Dipren
 
                     string descriptionBatchProcessed = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessed, progress, stopwatch.Elapsed.TotalMilliseconds);
                     await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchProcessed, cancellation);
+
+                    if (stopwatch.Elapsed >= settings.Timeout)
+                    {
+                        if (timeoutTooLow == 0L)
+                        {
+                            await this.Dispatcher.DispatchEventAsync(EventSeverity.Warning, job.Id, partition.Id, EngineResources.EventTimeoutValueTooLow, cancellation);
+                        }
+
+                        timeoutTooLow += 1L;
+                    }
                 }
 
                 bool completed = (progress < settings.BatchSize);
