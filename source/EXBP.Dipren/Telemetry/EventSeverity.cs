@@ -17,6 +17,11 @@ namespace EXBP.Dipren.Telemetry
         Information,
 
         /// <summary>
+        ///   The log message provides details about a possible error condition.
+        /// </summary>
+        Warning,
+
+        /// <summary>
         ///   The log message provides details about a error condition.
         /// </summary>
         Error

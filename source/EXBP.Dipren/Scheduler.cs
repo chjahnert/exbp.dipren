@@ -74,7 +74,7 @@ namespace EXBP.Dipren
 
             try
             {
-                await this.CreatePartitionEntryAsync(job, cancellation);
+                await this.CreatePartitionEntryAsync(job, settings, cancellation);
                 await this.MarkJobAsReadyAsync(entry.Id, cancellation);
             }
             catch (Exception ex)
@@ -151,6 +151,9 @@ namespace EXBP.Dipren
         /// <param name="job">
         ///   The <see cref="Job{TKey, TItem}"/> object for which to create the entry.
         /// </param>
+        /// <param name="settings">
+        ///   The job settings to use.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -159,8 +162,11 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
-        private async Task<Partition> CreatePartitionEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation)
+        private async Task<Partition> CreatePartitionEntryAsync<TKey, TItem>(Job<TKey, TItem> job, Settings settings, CancellationToken cancellation)
         {
+            Debug.Assert(job != null);
+            Debug.Assert(settings != null);
+
             Guid partitionId = Guid.NewGuid();
 
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, SchedulerResources.EventCreatingInitialPartition, cancellation);
@@ -184,6 +190,11 @@ namespace EXBP.Dipren
 
             string descriptionRangeSizeEstimated = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeSizeEstimated, remaining, stopwatch.Elapsed.TotalMilliseconds);
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, descriptionRangeSizeEstimated, cancellation);
+
+            if (stopwatch.Elapsed <= settings.Timeout)
+            {
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Warning, job.Id, partitionId, SchedulerResources.EventTimeoutValueTooLow, cancellation);
+            }
 
             DateTime timestampPartitionCreated = this.Clock.GetDateTime();
             Partition<TKey> partition = new Partition<TKey>(partitionId, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false, false);
