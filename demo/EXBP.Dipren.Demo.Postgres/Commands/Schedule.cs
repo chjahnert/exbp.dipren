@@ -10,7 +10,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
 {
     internal static class Schedule
     {
-        internal static async Task<int> HandleAsync(string connectionString, string name, bool reverse)
+        internal static async Task<int> HandleAsync(string connectionString, string name, int batchSize, TimeSpan batchTimeout, TimeSpan clockDrift, bool reverse)
         {
             int result = 0;
 
@@ -21,12 +21,12 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
                 PostgresEngineDataStore store = new PostgresEngineDataStore(connectionString);
                 Scheduler scheduler = new Scheduler(store, DebugEventLogger.Debug);
 
-                TimeSpan timeout = TimeSpan.FromSeconds(1);
                 IDataSource<Guid, Cuboid> source = reverse ? new CuboidDescendingDataSource(connectionString) : new CuboidAscendingDataSource(connectionString);
                 CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
-                Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor, timeout, 1);
+                Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor);
+                Settings settings = new Settings(batchSize, batchTimeout, clockDrift);
 
-                await scheduler.ScheduleAsync(job);
+                await scheduler.ScheduleAsync(job, settings);
 
                 Console.WriteLine(RemoveResources.MessageDone);
             }

@@ -166,6 +166,9 @@ namespace EXBP.Dipren.Data.Postgres
                 command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, job.Id);
                 command.Parameters.AddWithValue("@created", NpgsqlDbType.Timestamp, uktsCreated);
                 command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsUpdated);
+                command.Parameters.AddWithValue("@batch_size", NpgsqlDbType.Integer, job.BatchSize);
+                command.Parameters.AddWithValue("@timeout", NpgsqlDbType.Bigint, job.Timeout.Ticks);
+                command.Parameters.AddWithValue("@clock_drift", NpgsqlDbType.Bigint, job.ClockDrift.Ticks);
                 command.Parameters.AddWithValue("@started", NpgsqlDbType.Timestamp, uktsStarted);
                 command.Parameters.AddWithValue("@completed", NpgsqlDbType.Timestamp, uktsCompleted);
                 command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) job.State);
@@ -990,6 +993,8 @@ namespace EXBP.Dipren.Data.Postgres
                         Id = job.Id,
                         Created = job.Created,
                         Updated = job.Updated,
+                        BatchSize = job.BatchSize,
+                        Timeout = job.Timeout,
                         Started = job.Started,
                         Completed = job.Completed,
                         State = job.State,
@@ -1130,6 +1135,9 @@ namespace EXBP.Dipren.Data.Postgres
             DateTime? started = reader.GetNullableDateTime("started");
             DateTime? completed = reader.GetNullableDateTime("completed");
             JobState state = (JobState) reader.GetInt32("state");
+            int batchSize = reader.GetInt32("batch_size");
+            long ticksTimeout = reader.GetInt64("timeout");
+            long ticksClockDrift = reader.GetInt64("clock_drift");
             string error = reader.GetNullableString("error");
 
             created = DateTime.SpecifyKind(created, DateTimeKind.Utc);
@@ -1137,7 +1145,10 @@ namespace EXBP.Dipren.Data.Postgres
             started = (started != null) ? DateTime.SpecifyKind(started.Value, DateTimeKind.Utc) : null;
             completed = (completed != null) ? DateTime.SpecifyKind(completed.Value, DateTimeKind.Utc) : null;
 
-            Job result = new Job(id, created, updated, state, started, completed, error);
+            TimeSpan timeout = TimeSpan.FromTicks(ticksTimeout);
+            TimeSpan clockDrift = TimeSpan.FromTicks(ticksClockDrift);
+
+            Job result = new Job(id, created, updated, state, batchSize, timeout, clockDrift, started, completed, error);
 
             return result;
         }

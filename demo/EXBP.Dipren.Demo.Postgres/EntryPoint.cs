@@ -11,7 +11,7 @@ namespace EXBP.Dipren.Demo.Postgres
     internal class EntryPoint
     {
         private const int DEFAULT_DATASET_SIZE = 100_000;
-        private const int DEFAULT_BATCH_PROCESSING_TIMEOUT_MS = 2000;
+        private const int DEFAULT_PROCESSING_TIMEOUT_MS = 2000;
         private const int DEFAULT_BATCH_SIZE = 128;
         private const int DEFAULT_CLOCK_DRIFT_MS = 1000;
         private const int DEFAULT_PROCESSING_THREADS = 3;
@@ -41,27 +41,27 @@ namespace EXBP.Dipren.Demo.Postgres
             commandRoot.Add(commandDeploy);
 
             Command commandSchedule = new Command("schedule", EntryPointResources.DescriptionCommandSchedule);
+            Option<int> optionScheduleBatchSize = new Option<int>("--batch-size", () => DEFAULT_BATCH_SIZE, EntryPointResources.DescriptionOptionProcessThreads);
+            Option<TimeSpan> optionScheduleBatchTimeout = new Option<TimeSpan>("--batch-timeout", () => TimeSpan.FromMilliseconds(DEFAULT_PROCESSING_TIMEOUT_MS), EntryPointResources.DescriptionOptionScheduleBatchTimeout);
+            Option<TimeSpan> optionScheduleClockDrift = new Option<TimeSpan>("--clock-drift", () => TimeSpan.FromMilliseconds(DEFAULT_CLOCK_DRIFT_MS), EntryPointResources.DescriptionOptionScheduleClockDrift);
 
             commandSchedule.Add(optionDatabase);
             commandSchedule.Add(argumentJob);
+            commandSchedule.Add(optionScheduleBatchSize);
+            commandSchedule.Add(optionScheduleBatchTimeout);
+            commandSchedule.Add(optionScheduleClockDrift);
             commandSchedule.Add(optionsReverse);
-            commandSchedule.SetHandler(Schedule.HandleAsync, optionDatabase, argumentJob, optionsReverse);
+            commandSchedule.SetHandler(Schedule.HandleAsync, optionDatabase, argumentJob, optionScheduleBatchSize, optionScheduleBatchTimeout, optionScheduleClockDrift, optionsReverse);
             commandRoot.Add(commandSchedule);
 
             Command commandProcess = new Command("process", EntryPointResources.DescriptionCommandProcess);
             Option<int> optionProcessThreads = new Option<int>("--threads", () => DEFAULT_PROCESSING_THREADS, EntryPointResources.DescriptionOptionProcessThreads);
-            Option<TimeSpan> optionProcessBatchTimeout = new Option<TimeSpan>("--batch-timeout", () => TimeSpan.FromMilliseconds(DEFAULT_BATCH_PROCESSING_TIMEOUT_MS), EntryPointResources.DescriptionOptionProcessBatchTimeout);
-            Option<int> optionProcessBatchSize = new Option<int>("--batch-size", () => DEFAULT_BATCH_SIZE, EntryPointResources.DescriptionOptionProcessThreads);
-            Option<TimeSpan> optionProcessClockDrift = new Option<TimeSpan>("--clock-drift", () => TimeSpan.FromMilliseconds(DEFAULT_CLOCK_DRIFT_MS), EntryPointResources.DescriptionOptionProcessClockDrift);
 
             commandProcess.Add(optionDatabase);
             commandProcess.Add(argumentJob);
             commandProcess.Add(optionsReverse);
             commandProcess.Add(optionProcessThreads);
-            commandProcess.Add(optionProcessBatchSize);
-            commandProcess.Add(optionProcessBatchTimeout);
-            commandProcess.Add(optionProcessClockDrift);
-            commandProcess.SetHandler(Process.HandleAsync, optionDatabase, optionProcessThreads, argumentJob, optionsReverse, optionProcessBatchSize, optionProcessBatchTimeout, optionProcessClockDrift);
+            commandProcess.SetHandler(Process.HandleAsync, optionDatabase, optionProcessThreads, argumentJob, optionsReverse);
             commandRoot.Add(commandProcess);
 
             Command commandRemove = new Command("remove", EntryPointResources.DescriptionCommandRemove);

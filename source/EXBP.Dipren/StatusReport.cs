@@ -36,6 +36,23 @@ namespace EXBP.Dipren
         public DateTime Updated { get; init; }
 
         /// <summary>
+        ///   Gets the maximum number of items that are included in a batch.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="int"/> value that contains the maximum number of items that are included in a batch.
+        /// </value>
+        public int BatchSize { get; init; }
+
+        /// <summary>
+        ///   Gets the amount of time after which the processing of a partition is considered unsuccessful or stalled.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="TimeSpan"/> value that specifies the amount of time after which the processing of a
+        ///   partition is considered unsuccessful or stalled.
+        /// </value>
+        public TimeSpan Timeout { get; init; }
+
+        /// <summary>
         ///   Gets the date and time the current job was started.
         /// </summary>
         /// <value>

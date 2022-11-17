@@ -56,6 +56,9 @@ namespace EXBP.Dipren
         /// <param name="job">
         ///   The job to schedule for distributed processing.
         /// </param>
+        /// <param name="settings">
+        ///   The job settings to use.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -63,11 +66,11 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        public async Task ScheduleAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation = default)
+        public async Task ScheduleAsync<TKey, TItem>(Job<TKey, TItem> job, Settings settings, CancellationToken cancellation = default)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
-            Job entry = await this.CreateJobEntryAsync(job, cancellation);
+            Job entry = await this.CreateJobEntryAsync(job, settings, cancellation);
 
             try
             {
@@ -111,6 +114,9 @@ namespace EXBP.Dipren
         /// <param name="job">
         ///   The <see cref="Job{TKey, TItem}"/> object for which to create the entry.
         /// </param>
+        /// <param name="settings">
+        ///   The job settings to use.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -119,10 +125,10 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
-        private async Task<Job> CreateJobEntryAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation)
+        private async Task<Job> CreateJobEntryAsync<TKey, TItem>(Job<TKey, TItem> job, Settings settings, CancellationToken cancellation)
         {
             DateTime timestamp = this.Clock.GetDateTime();
-            Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing);
+            Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing, settings.BatchSize, settings.Timeout, settings.ClockDrift);
 
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, SchedulerResources.EventCreatingJob, cancellation);
 

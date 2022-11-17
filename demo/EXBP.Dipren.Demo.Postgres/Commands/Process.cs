@@ -12,7 +12,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
 {
     internal static class Process
     {
-        internal static async Task<int> HandleAsync(string connectionString, int threads, string name, bool reverse, int batchSize, TimeSpan batchTimeout, TimeSpan clockDrift)
+        internal static async Task<int> HandleAsync(string connectionString, int threads, string name, bool reverse)
         {
             int result = 0;
 
@@ -27,7 +27,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
 
                 for (int i = 0; i < tasks.Length; i++)
                 {
-                    tasks[i] = Task.Run(async () => await Process.RunAsync(connectionString, name, reverse, batchSize, batchTimeout, clockDrift));
+                    tasks[i] = Task.Run(async () => await Process.RunAsync(connectionString, name, reverse));
                 }
 
                 await Task.WhenAll(tasks);
@@ -47,11 +47,10 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
             return result;
         }
 
-        internal static async Task RunAsync(string connectionString, string name, bool reverse, int batchSize, TimeSpan batchTimeout, TimeSpan clockDrift)
+        internal static async Task RunAsync(string connectionString, string name, bool reverse)
         {
             Configuration configuration = new Configuration
             {
-                MaximumClockDrift = clockDrift,
                 PollingInterval = TimeSpan.FromMilliseconds(100)
             };
 
@@ -60,7 +59,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
 
             IDataSource<Guid, Cuboid> source = reverse ? new CuboidDescendingDataSource(connectionString) : new CuboidAscendingDataSource(connectionString);
             CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
-            Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor, batchTimeout, batchSize);
+            Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor);
 
             await engine.RunAsync(job, false);
         }

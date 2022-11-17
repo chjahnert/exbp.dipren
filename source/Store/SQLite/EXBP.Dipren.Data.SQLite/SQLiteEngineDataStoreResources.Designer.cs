@@ -89,6 +89,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;id&quot; VARCHAR(256) NOT NULL,
         ///  &quot;created&quot; DATETIME NOT NULL,
         ///  &quot;updated&quot; DATETIME NOT NULL,
+        ///  &quot;batch_size&quot; INTEGER NOT NULL,
+        ///  &quot;timeout&quot; BIGINT NOT NULL,
+        ///  &quot;clock_drift&quot; BIGINT NOT NULL,
         ///  &quot;started&quot; DATETIME NULL,
         ///  &quot;completed&quot; DATETIME NULL,
         ///  &quot;state&quot; INTEGER NOT NULL,
@@ -101,11 +104,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///CREATE TABLE IF NOT EXISTS &quot;partitions&quot;
         ///(
         ///  &quot;id&quot; CHAR(36) NOT NULL,
-        ///  &quot;job_id&quot; VARCHAR(256) NOT NULL,
-        ///  &quot;created&quot; DATETIME NOT NULL,
-        ///  &quot;updated&quot; DATETIME NOT NULL,
-        ///  &quot;owner&quot; VARCHAR(256) NULL,
-        ///   [rest of string was truncated]&quot;;.
+        ///  &quot;job_id&quot; VARCHAR(256) NOT NULL, [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryCreateSchema {
             get {
@@ -156,6 +155,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;id&quot;,
         ///  &quot;created&quot;,
         ///  &quot;updated&quot;,
+        ///  &quot;batch_size&quot;,
+        ///  &quot;timeout&quot;,
+        ///  &quot;clock_drift&quot;,
         ///  &quot;started&quot;,
         ///  &quot;completed&quot;,
         ///  &quot;state&quot;,
@@ -166,6 +168,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  $id,
         ///  $created,
         ///  $updated,
+        ///  $batch_size,
+        ///  $timeout,
+        ///  $clock_drift,
         ///  $started,
         ///  $completed,
         ///  $state,
@@ -231,6 +236,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;id&quot; AS &quot;id&quot;,
         ///  &quot;created&quot; AS &quot;created&quot;,
         ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;batch_size&quot; AS &quot;batch_size&quot;,
+        ///  &quot;timeout&quot; AS &quot;timeout&quot;,
+        ///  &quot;clock_drift&quot; AS &quot;clock_drift&quot;,
         ///  &quot;started&quot; AS &quot;started&quot;,
         ///  &quot;completed&quot; AS &quot;completed&quot;,
         ///  &quot;state&quot; AS &quot;state&quot;,
@@ -255,6 +263,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;id&quot; AS &quot;id&quot;,
         ///  &quot;created&quot; AS &quot;created&quot;,
         ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;batch_size&quot; AS &quot;batch_size&quot;,
+        ///  &quot;timeout&quot; AS &quot;timeout&quot;,
+        ///  &quot;clock_drift&quot; AS &quot;clock_drift&quot;,
         ///  &quot;started&quot; AS &quot;started&quot;,
         ///  &quot;completed&quot; AS &quot;completed&quot;,
         ///  &quot;state&quot; AS &quot;state&quot;,
@@ -278,6 +289,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;id&quot; AS &quot;id&quot;,
         ///  &quot;created&quot; AS &quot;created&quot;,
         ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;batch_size&quot; AS &quot;batch_size&quot;,
+        ///  &quot;timeout&quot; AS &quot;timeout&quot;,
+        ///  &quot;clock_drift&quot; AS &quot;clock_drift&quot;,
         ///  &quot;started&quot; AS &quot;started&quot;,
         ///  &quot;completed&quot; AS &quot;completed&quot;,
         ///  &quot;state&quot; AS &quot;state&quot;,
@@ -302,6 +316,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;id&quot; AS &quot;id&quot;,
         ///  &quot;created&quot; AS &quot;created&quot;,
         ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;batch_size&quot; AS &quot;batch_size&quot;,
+        ///  &quot;timeout&quot; AS &quot;timeout&quot;,
+        ///  &quot;clock_drift&quot; AS &quot;clock_drift&quot;,
         ///  &quot;started&quot; AS &quot;started&quot;,
         ///  &quot;completed&quot; AS &quot;completed&quot;,
         ///  &quot;state&quot; AS &quot;state&quot;,
@@ -348,6 +365,9 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;id&quot; AS &quot;id&quot;,
         ///  &quot;created&quot; AS &quot;created&quot;,
         ///  &quot;updated&quot; AS &quot;updated&quot;,
+        ///  &quot;batch_size&quot; AS &quot;batch_size&quot;,
+        ///  &quot;timeout&quot; AS &quot;timeout&quot;,
+        ///  &quot;clock_drift&quot; AS &quot;clock_drift&quot;,
         ///  &quot;started&quot; AS &quot;started&quot;,
         ///  &quot;completed&quot; AS &quot;completed&quot;,
         ///  &quot;state&quot; AS &quot;state&quot;,
@@ -368,12 +388,15 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  t1.&quot;id&quot; AS &quot;id&quot;,
         ///  t1.&quot;created&quot; AS &quot;created&quot;,
         ///  t1.&quot;updated&quot; AS &quot;updated&quot;,
+        ///  t1.&quot;batch_size&quot; AS &quot;batch_size&quot;,
+        ///  t1.&quot;timeout&quot; AS &quot;timeout&quot;,
+        ///  t1.&quot;clock_drift&quot; AS &quot;clock_drift&quot;,
         ///  t1.&quot;started&quot; AS &quot;started&quot;,
         ///  t1.&quot;completed&quot; AS &quot;completed&quot;,
         ///  t1.&quot;state&quot; AS &quot;state&quot;,
         ///  t1.&quot;error&quot; AS &quot;error&quot;,
         ///  (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;job_id&quot; = t1.&quot;id&quot;) AND (&quot;is_completed&quot; = 0) AND (&quot;owner&quot; IS NULL) AND (&quot;processed&quot; = 0)) AS &quot;partitons_untouched&quot;,
-        ///  (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE (&quot;job_id&quot; = t1.&quot;id&quot;) AND (&quot;is_completed&quot; = 0) AND ((&quot;owner&quot; IS NOT NULL) OR (&quot;processed&quot; &gt; 0))) AS &quot;part [rest of string was truncated]&quot;;.
+        ///  (SELECT COUNT(1) FROM &quot;partitions&quot; WHERE  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryRetrieveJobStatusReport {
             get {

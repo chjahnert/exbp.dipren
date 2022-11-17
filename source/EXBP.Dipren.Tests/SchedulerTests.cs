@@ -15,6 +15,8 @@ namespace EXBP.Dipren.Tests
     {
         private IEventHandler DefaultEventHandler { get; } = new CompositeEventHandler(DebugEventLogger.Debug);
 
+        private Settings DefaultSettings { get; } = new Settings(66, 1423);
+
 
         [Test]
         public void Ctor_ArgumentStoreIsNull_ThrowsException()
@@ -28,7 +30,7 @@ namespace EXBP.Dipren.Tests
             MemoryEngineDataStore store = new MemoryEngineDataStore();
             Scheduler scheduler = new Scheduler(store);
 
-            Assert.ThrowsAsync<ArgumentNullException>( () => scheduler.ScheduleAsync<int, int>(null));
+            Assert.ThrowsAsync<ArgumentNullException>( () => scheduler.ScheduleAsync<int, int>(null, this.DefaultSettings));
         }
 
         [Test]
@@ -43,9 +45,9 @@ namespace EXBP.Dipren.Tests
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor, timeout, 16);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor);
 
-            await scheduler.ScheduleAsync(job);
+            await scheduler.ScheduleAsync(job, this.DefaultSettings);
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
@@ -84,9 +86,9 @@ namespace EXBP.Dipren.Tests
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor, timeout, 16);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor);
 
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => scheduler.ScheduleAsync(job));
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => scheduler.ScheduleAsync(job, this.DefaultSettings));
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
@@ -114,9 +116,9 @@ namespace EXBP.Dipren.Tests
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor, timeout, 16);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor);
 
-            Assert.ThrowsAsync<KeyNotFoundException>(() => scheduler.ScheduleAsync(job));
+            Assert.ThrowsAsync<KeyNotFoundException>(() => scheduler.ScheduleAsync(job, this.DefaultSettings));
 
             Job sj = store.Jobs.First(j => j.Id == job.Id);
 
