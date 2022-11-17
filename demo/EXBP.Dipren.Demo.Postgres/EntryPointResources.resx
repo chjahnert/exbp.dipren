@@ -150,9 +150,6 @@ For more information visit https://github.com/chjahnert/exbp.dipren/wiki</value>
   <data name="DescriptionOptionDeployDatasetSize" xml:space="preserve">
     <value>The number of rows to generate in the source database.</value>
   </data>
-  <data name="DescriptionOptionProcessClockDrift" xml:space="preserve">
-    <value>The maximum time difference between processing nodes (ms).</value>
-  </data>
   <data name="DescriptionOptionProcessThreads" xml:space="preserve">
     <value>The number of processing threads to start.</value>
   </data>
@@ -164,6 +161,9 @@ For more information visit https://github.com/chjahnert/exbp.dipren/wiki</value>
   </data>
   <data name="DescriptionOptionScheduleBatchTimeout" xml:space="preserve">
     <value>The timeout for processing a single batch (ms).</value>
+  </data>
+  <data name="DescriptionOptionScheduleClockDrift" xml:space="preserve">
+    <value>The maximum time difference between processing nodes (ms).</value>
   </data>
   <data name="MessageIntroduction" xml:space="preserve">
     <value>This is a demo application that demonstrates how to use Dipren.

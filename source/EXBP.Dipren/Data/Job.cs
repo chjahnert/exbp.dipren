@@ -55,6 +55,15 @@ namespace EXBP.Dipren.Data
         public TimeSpan Timeout { get; }
 
         /// <summary>
+        ///   Gets the maximum time divergence between processing nodes.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="TimeSpan"/> value that contains the maximum time divergence between processing nodes. The
+        ///   default value is 2 seconds.
+        /// </value>
+        public TimeSpan ClockDrift { get; }
+
+        /// <summary>
         ///   Gets the date and time the current job was started.
         /// </summary>
         /// <value>
@@ -123,6 +132,9 @@ namespace EXBP.Dipren.Data
         /// <param name="timeout">
         ///   The amount of time after which the processing of a partition is considered unsuccessful or stalled.
         /// </param>
+        /// <param name="clockDrift">
+        ///   The maximum time divergence between processing nodes.
+        /// </param>
         /// <param name="started">
         ///   The date and time the current job was started.
         /// </param>
@@ -132,17 +144,19 @@ namespace EXBP.Dipren.Data
         /// <param name="error">
         ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
         /// </param>
-        public Job(string id, DateTime created, DateTime updated, JobState state, int batchSize, TimeSpan timeout, DateTime? started = null, DateTime? completed = null, string error = null)
+        public Job(string id, DateTime created, DateTime updated, JobState state, int batchSize, TimeSpan timeout, TimeSpan clockDrift, DateTime? started = null, DateTime? completed = null, string error = null)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
             Assert.ArgumentIsGreater(batchSize, 0, nameof(batchSize));
             Assert.ArgumentIsGreater(timeout, TimeSpan.Zero, nameof(timeout));
+            Assert.ArgumentIsGreaterOrEqual(clockDrift, TimeSpan.Zero, nameof(clockDrift));
 
             this.Id = id;
             this.Created = created;
             this.Updated = updated;
             this.BatchSize = batchSize;
             this.Timeout = timeout;
+            this.ClockDrift = clockDrift;
             this.Started = started;
             this.Completed = completed;
             this.State = state;

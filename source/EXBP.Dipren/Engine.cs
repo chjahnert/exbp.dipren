@@ -363,7 +363,7 @@ namespace EXBP.Dipren
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventTryingToAcquirePartition, cancellation);
 
             DateTime now = this.Clock.GetDateTime();
-            DateTime cut = (now - settings.Timeout - this._configuration.MaximumClockDrift);
+            DateTime cut = (now - settings.Timeout - settings.ClockDrift);
 
             Partition acquired = await this.Store.TryAcquirePartitionAsync(job.Id, this.Id, now, cut, cancellation);
 

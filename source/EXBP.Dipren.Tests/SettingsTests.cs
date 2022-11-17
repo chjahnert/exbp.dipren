@@ -42,7 +42,7 @@ namespace EXBP.Dipren.Tests
 
             Assert.That(settings.BatchSize, Is.EqualTo(1));
             Assert.That(settings.Timeout, Is.EqualTo(timeout));
-            Assert.That(settings.MaximumClockDrift, Is.EqualTo(Settings.DefaultMaximumClockDrift));
+            Assert.That(settings.ClockDrift, Is.EqualTo(Settings.DefaultClockDrift));
         }
 
         [Test]
@@ -55,7 +55,7 @@ namespace EXBP.Dipren.Tests
 
             Assert.That(settings.BatchSize, Is.EqualTo(1));
             Assert.That(settings.Timeout, Is.EqualTo(timeout));
-            Assert.That(settings.MaximumClockDrift, Is.EqualTo(maximumClockDrift));
+            Assert.That(settings.ClockDrift, Is.EqualTo(maximumClockDrift));
         }
     }
 }

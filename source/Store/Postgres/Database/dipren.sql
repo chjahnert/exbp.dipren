@@ -16,6 +16,7 @@ CREATE TABLE "dipren"."jobs"
   "updated" TIMESTAMP NOT NULL,
   "batch_size" INTEGER NOT NULL,
   "timeout" BIGINT NOT NULL,
+  "clock_drift" BIGINT NOT NULL,
   "started" TIMESTAMP NULL,
   "completed" TIMESTAMP NULL,
   "state" INTEGER NOT NULL,
@@ -29,6 +30,7 @@ COMMENT ON COLUMN "dipren"."jobs"."created" IS 'A timestamp indicating when the 
 COMMENT ON COLUMN "dipren"."jobs"."updated" IS 'A timestamp indicating when the job was last updated.';
 COMMENT ON COLUMN "dipren"."jobs"."batch_size" IS 'The maximum number of keys to include in a batch.';
 COMMENT ON COLUMN "dipren"."jobs"."timeout" IS 'The amount of time after which a partition is considered stalled.';
+COMMENT ON COLUMN "dipren"."jobs"."clock_drift" IS 'The maximum time divergence between processing nodes.';
 COMMENT ON COLUMN "dipren"."jobs"."started" IS 'A timestamp indicating when the job was started.';
 COMMENT ON COLUMN "dipren"."jobs"."completed" IS 'A timestamp indicating when the job was completed.';
 COMMENT ON COLUMN "dipren"."jobs"."state" IS 'Indicates the state of the job such.';

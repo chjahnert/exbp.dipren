@@ -13,6 +13,7 @@ namespace EXBP.Dipren.Tests.Data
     {
         private readonly int DefaultBachSize = 66;
         private readonly TimeSpan DefaultTimeout = TimeSpan.FromMilliseconds(1277);
+        private readonly TimeSpan DefaultClockDrift = TimeSpan.FromMilliseconds(2465);
 
         protected abstract Task<IEngineDataStore> OnCreateEngineDataStoreAsync();
 
@@ -50,11 +51,11 @@ namespace EXBP.Dipren.Tests.Data
             DateTime started = this.FormatDateTime(new DateTime(2022, 9, 21, 11, 16, 27, DateTimeKind.Utc));
             DateTime completed = this.FormatDateTime(new DateTime(2022, 9, 23, 17, 48, 48, DateTimeKind.Utc));
 
-            Job job1 = new Job("DPJ-0001", created, created, JobState.Initializing, this.DefaultBachSize, this.DefaultTimeout, null, null);
-            Job job2 = new Job("DPJ-0002", created, created, JobState.Ready, this.DefaultBachSize, this.DefaultTimeout, null, null);
-            Job job3 = new Job("DPJ-0003", created, started, JobState.Processing, this.DefaultBachSize, this.DefaultTimeout, started, null);
-            Job job4 = new Job("DPJ-0004", created, completed, JobState.Completed, this.DefaultBachSize, this.DefaultTimeout, started, completed);
-            Job job5 = new Job("DPJ-0005", created, started, JobState.Failed, this.DefaultBachSize, this.DefaultTimeout);
+            Job job1 = new Job("DPJ-0001", created, created, JobState.Initializing, this.DefaultBachSize, this.DefaultTimeout, this.DefaultClockDrift, null, null);
+            Job job2 = new Job("DPJ-0002", created, created, JobState.Ready, this.DefaultBachSize, this.DefaultTimeout, this.DefaultClockDrift, null, null);
+            Job job3 = new Job("DPJ-0003", created, started, JobState.Processing, this.DefaultBachSize, this.DefaultTimeout, this.DefaultClockDrift, started, null);
+            Job job4 = new Job("DPJ-0004", created, completed, JobState.Completed, this.DefaultBachSize, this.DefaultTimeout, this.DefaultClockDrift, started, completed);
+            Job job5 = new Job("DPJ-0005", created, started, JobState.Failed, this.DefaultBachSize, this.DefaultTimeout, this.DefaultClockDrift);
 
             await store.InsertJobAsync(job1, CancellationToken.None);
             await store.InsertJobAsync(job2, CancellationToken.None);
@@ -88,7 +89,7 @@ namespace EXBP.Dipren.Tests.Data
             started = this.FormatDateTime(started);
             completed = this.FormatDateTime(completed);
 
-            Job job = new Job(id, created, updated, state, this.DefaultBachSize, this.DefaultTimeout, started, completed, error);
+            Job job = new Job(id, created, updated, state, this.DefaultBachSize, this.DefaultTimeout, this.DefaultClockDrift, started, completed, error);
 
             await store.InsertJobAsync(job, CancellationToken.None);
 
@@ -119,7 +120,7 @@ namespace EXBP.Dipren.Tests.Data
             const string id = "DPJ-0001";
             DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
 
-            Job first = new Job(id, timestamp, timestamp, JobState.Initializing, this.DefaultBachSize, this.DefaultTimeout);
+            Job first = new Job(id, timestamp, timestamp, JobState.Initializing, this.DefaultBachSize, this.DefaultTimeout, this.DefaultClockDrift);
 
             await store.InsertJobAsync(first, CancellationToken.None);
 
@@ -388,7 +389,7 @@ namespace EXBP.Dipren.Tests.Data
             started = this.FormatDateTime(started);
             completed = this.FormatDateTime(completed);
 
-            Job job = new Job(id, created, updated, state, this.DefaultBachSize, this.DefaultTimeout, started, completed, error);
+            Job job = new Job(id, created, updated, state, this.DefaultBachSize, this.DefaultTimeout, this.DefaultClockDrift, started, completed, error);
 
             await store.InsertJobAsync(job, CancellationToken.None);
 
@@ -1139,7 +1140,7 @@ namespace EXBP.Dipren.Tests.Data
                     break;
             }
 
-            Job result = new Job(id, created, updated, state, this.DefaultBachSize, this.DefaultTimeout, started, completed, error);
+            Job result = new Job(id, created, updated, state, this.DefaultBachSize, this.DefaultTimeout, this.DefaultClockDrift, started, completed, error);
 
             await store.InsertJobAsync(result, cancellation);
 

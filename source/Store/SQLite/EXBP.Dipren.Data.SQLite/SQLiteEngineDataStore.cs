@@ -231,6 +231,7 @@ namespace EXBP.Dipren.Data.SQLite
                 command.Parameters.AddWithValue("$updated", job.Updated);
                 command.Parameters.AddWithValue("$batch_size", job.BatchSize);
                 command.Parameters.AddWithValue("$timeout", job.Timeout.Ticks);
+                command.Parameters.AddWithValue("$clock_drift", job.ClockDrift.Ticks);
                 command.Parameters.AddWithValue("$started", job.Started);
                 command.Parameters.AddWithValue("$completed", job.Completed);
                 command.Parameters.AddWithValue("$state", job.State);
@@ -1259,15 +1260,17 @@ namespace EXBP.Dipren.Data.SQLite
             DateTime created = reader.GetDateTime("created");
             DateTime updated = reader.GetDateTime("updated");
             int batchSize = reader.GetInt32("batch_size");
-            long ticks = reader.GetInt64("timeout");
+            long ticksTimeout = reader.GetInt64("timeout");
+            long ticksClockDrift = reader.GetInt64("clock_drift");
             DateTime? started = reader.GetNullableDateTime("started");
             DateTime? completed = reader.GetNullableDateTime("completed");
             JobState state = (JobState) reader.GetInt32("state");
             string error = reader.GetNullableString("error");
 
-            TimeSpan timeout = TimeSpan.FromTicks(ticks);
+            TimeSpan timeout = TimeSpan.FromTicks(ticksTimeout);
+            TimeSpan clockDrift = TimeSpan.FromTicks(ticksClockDrift);
 
-            Job result = new Job(id, created, updated, state, batchSize, timeout, started, completed, error);
+            Job result = new Job(id, created, updated, state, batchSize, timeout, clockDrift, started, completed, error);
 
             return result;
         }

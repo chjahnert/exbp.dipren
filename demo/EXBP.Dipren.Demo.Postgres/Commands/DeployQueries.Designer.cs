@@ -100,6 +100,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands {
         ///  &quot;updated&quot; TIMESTAMP NOT NULL,
         ///  &quot;batch_size&quot; INTEGER NOT NULL,
         ///  &quot;timeout&quot; BIGINT NOT NULL,
+        ///  &quot;clock_drift&quot; BIGINT NOT NULL,
         ///  &quot;started&quot; TIMESTAMP NULL,
         ///  &quot;completed&quot; TIMESTAMP NULL,
         ///  &quot;state&quot; INTEGER NOT NULL,
@@ -108,7 +109,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands {
         ///  CONSTRAINT &quot;pk_jobs&quot; PRIMARY KEY (&quot;id&quot;)
         ///);
         ///
-        ///COMMENT ON COLUMN &quot;dipren&quot;.&quot;jobs&quot;.&quot;id&quot; IS &apos;The unique [rest of string was truncated]&quot;;.
+        ///COMMENT ON COLUMN &quot; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CreateDiprenDatabaseSchema {
             get {

@@ -92,8 +92,8 @@ namespace EXBP.Dipren.Demo.SQLite
         internal static async Task RunAsync(IEngineDataStore store, Job<int, Measurement> job)
         {
             TimeSpan pollinInterval = TimeSpan.FromMilliseconds(POLLING_INTERVAL);
-            Configuration configuration = new Configuration(TimeSpan.Zero, pollinInterval);
-            Engine engine = new Engine(store, ConsoleEventLogger.Information);
+            Configuration configuration = new Configuration(pollinInterval);
+            Engine engine = new Engine(store, ConsoleEventLogger.Information, configuration);
 
             await engine.RunAsync(job, false);
         }

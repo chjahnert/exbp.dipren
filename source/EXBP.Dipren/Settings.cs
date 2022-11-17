@@ -9,20 +9,20 @@ namespace EXBP.Dipren
     /// <summary>
     ///   Holds the settings for a distributed processing job.
     /// </summary>
-    [DebuggerDisplay("BatchSize = {BatchSize}, Timeout = {Timeout}, MaximumClockDrift = {MaximumClockDrift}")]
+    [DebuggerDisplay("BatchSize = {BatchSize}, Timeout = {Timeout}, ClockDrift = {ClockDrift}")]
     public class Settings
     {
-        private const int DEFAULT_MAXIMUM_CLOCK_DRIFT_MS = 2000;
+        private const int DEFAULT_CLOCK_DRIFT_MS = 2000;
 
 
         /// <summary>
-        ///   Gets the default value for the <see cref="MaximumClockDrift"/> property.
+        ///   Gets the default value for the <see cref="ClockDrift"/> property.
         /// </summary>
         /// <value>
-        ///   A <see cref="TimeSpan"/> value that contains the default value of the <see cref="MaximumClockDrift"/>
+        ///   A <see cref="TimeSpan"/> value that contains the default value of the <see cref="ClockDrift"/>
         ///   property.
         /// </value>
-        internal static TimeSpan DefaultMaximumClockDrift => TimeSpan.FromMilliseconds(DEFAULT_MAXIMUM_CLOCK_DRIFT_MS);
+        internal static TimeSpan DefaultClockDrift => TimeSpan.FromMilliseconds(DEFAULT_CLOCK_DRIFT_MS);
 
 
         /// <summary>
@@ -56,7 +56,6 @@ namespace EXBP.Dipren
         /// </remarks>
         public TimeSpan Timeout { get; }
 
-
         /// <summary>
         ///   Gets the maximum time divergence between processing nodes.
         /// </summary>
@@ -64,7 +63,7 @@ namespace EXBP.Dipren
         ///   A <see cref="TimeSpan"/> value that contains the maximum time divergence between processing nodes. The
         ///   default value is 2 seconds.
         /// </value>
-        public TimeSpan MaximumClockDrift { get; }
+        public TimeSpan ClockDrift { get; }
 
 
         /// <summary>
@@ -76,17 +75,17 @@ namespace EXBP.Dipren
         /// <param name="timeout">
         ///   The amount of time after which the processing of a partition is considered unsuccessful or stalled.
         /// </param>
-        /// <param name="maximumClockDrift">
+        /// <param name="clockDrift">
         ///   The maximum time divergence between processing nodes.
         /// </param>
-        public Settings(int batchSize, TimeSpan timeout, TimeSpan maximumClockDrift)
+        public Settings(int batchSize, TimeSpan timeout, TimeSpan clockDrift)
         {
             Assert.ArgumentIsGreater(batchSize, 0, nameof(batchSize));
             Assert.ArgumentIsGreater(timeout, TimeSpan.Zero, nameof(timeout));
 
             this.BatchSize = batchSize;
             this.Timeout = timeout;
-            this.MaximumClockDrift = (maximumClockDrift >= TimeSpan.Zero) ? maximumClockDrift : (-1 * maximumClockDrift);
+            this.ClockDrift = (clockDrift >= TimeSpan.Zero) ? clockDrift : (-1 * clockDrift);
         }
 
         /// <summary>
@@ -98,7 +97,7 @@ namespace EXBP.Dipren
         /// <param name="timeout">
         ///   The amount of time after which the processing of a partition is considered unsuccessful or stalled.
         /// </param>
-        public Settings(int batchSize, TimeSpan timeout) : this(batchSize, timeout, Settings.DefaultMaximumClockDrift)
+        public Settings(int batchSize, TimeSpan timeout) : this(batchSize, timeout, Settings.DefaultClockDrift)
         {
         }
 
@@ -112,10 +111,10 @@ namespace EXBP.Dipren
         ///   The amount of time, expressed in milliseconds, after which the processing of a partition is considered
         ///   unsuccessful or stalled.
         /// </param>
-        /// <param name="maximumClockDrift">
+        /// <param name="clockDrift">
         ///   The maximum time divergence between processing nodes expressed in milliseconds.
         /// </param>
-        public Settings(int batchSize, int timeout, int maximumClockDrift = DEFAULT_MAXIMUM_CLOCK_DRIFT_MS) : this(batchSize, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(maximumClockDrift))
+        public Settings(int batchSize, int timeout, int clockDrift = DEFAULT_CLOCK_DRIFT_MS) : this(batchSize, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(clockDrift))
         {
         }
     }

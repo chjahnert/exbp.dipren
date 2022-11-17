@@ -146,15 +146,6 @@ namespace EXBP.Dipren.Demo.Postgres {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The maximum time difference between processing nodes (ms)..
-        /// </summary>
-        internal static string DescriptionOptionProcessClockDrift {
-            get {
-                return ResourceManager.GetString("DescriptionOptionProcessClockDrift", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The number of processing threads to start..
         /// </summary>
         internal static string DescriptionOptionProcessThreads {
@@ -187,6 +178,15 @@ namespace EXBP.Dipren.Demo.Postgres {
         internal static string DescriptionOptionScheduleBatchTimeout {
             get {
                 return ResourceManager.GetString("DescriptionOptionScheduleBatchTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The maximum time difference between processing nodes (ms)..
+        /// </summary>
+        internal static string DescriptionOptionScheduleClockDrift {
+            get {
+                return ResourceManager.GetString("DescriptionOptionScheduleClockDrift", resourceCulture);
             }
         }
         
