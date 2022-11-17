@@ -171,62 +171,67 @@ namespace EXBP.Dipren
                     persisted = await this.MarkJobAsStartedAsync(persisted.Id, cancellation);
                 }
 
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobReady, cancellation);
-
-                //
-                // Processing is only started if the scheduled job is in either Ready or Processing state.
-                //
-
-                Settings settings = new Settings(persisted.BatchSize, persisted.Timeout);
-
-                while (persisted?.State == JobState.Processing)
+                if (persisted.State == JobState.Completed || persisted.State == JobState.Failed)
+                {
+                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobCompleted, cancellation);
+                }
+                else
                 {
                     //
-                    // Acquire a partition that is ready to be processed or request an existing partition to be split.
+                    // Processing is only started if the scheduled job is in either Ready or Processing state.
                     //
 
-                    Partition<TKey> partition = await this.TryAcquirePartitionAsync(job, settings, cancellation);
+                    Settings settings = new Settings(persisted.BatchSize, persisted.Timeout);
 
-                    if (partition != null)
+                    while (persisted?.State == JobState.Processing)
                     {
-                        try
-                        {
-                            await this.ProcessPartitionAsync(job, partition, settings, cancellation);
-                        }
-                        catch (LockException)
-                        {
-                            //
-                            // The partition being processed was taken by another processing node.
-                            //
+                        //
+                        // Acquire a partition that is ready to be processed or request an existing partition to be split.
+                        //
 
-                            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventPartitionTaken, cancellation);
-                        }
-                    }
-                    else
-                    {
-                        long incomplete = await this.Store.CountIncompletePartitionsAsync(job.Id, cancellation);
+                        Partition<TKey> partition = await this.TryAcquirePartitionAsync(job, settings, cancellation);
 
-                        if (incomplete == 0L)
+                        if (partition != null)
                         {
-                            persisted = await this.MarkJobAsCompletedAsync(persisted.Id, cancellation);
+                            try
+                            {
+                                await this.ProcessPartitionAsync(job, partition, settings, cancellation);
+                            }
+                            catch (LockException)
+                            {
+                                //
+                                // The partition being processed was taken by another processing node.
+                                //
 
-                            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobCompleted, cancellation);
+                                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventPartitionTaken, cancellation);
+                            }
                         }
                         else
                         {
-                            //
-                            // If a partition could not be acquired, wait the configured amount of time and check if the job
-                            // has not completed, failed, or was deleted in the meanwhile.
-                            //
+                            long incomplete = await this.Store.CountIncompletePartitionsAsync(job.Id, cancellation);
 
-                            await Task.Delay(this._configuration.PollingInterval, cancellation);
-
-                            try
+                            if (incomplete == 0L)
                             {
-                                persisted = await this.Store.RetrieveJobAsync(job.Id, cancellation);
+                                persisted = await this.MarkJobAsCompletedAsync(persisted.Id, cancellation);
+
+                                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobCompleted, cancellation);
                             }
-                            catch (UnknownIdentifierException)
+                            else
                             {
+                                //
+                                // If a partition could not be acquired, wait the configured amount of time and check if the job
+                                // has not completed, failed, or was deleted in the meanwhile.
+                                //
+
+                                await Task.Delay(this._configuration.PollingInterval, cancellation);
+
+                                try
+                                {
+                                    persisted = await this.Store.RetrieveJobAsync(job.Id, cancellation);
+                                }
+                                catch (UnknownIdentifierException)
+                                {
+                                }
                             }
                         }
                     }
@@ -299,23 +304,52 @@ namespace EXBP.Dipren
 
                 stopwatch.Stop();
 
-                long progress = batch.Count();
+                long count = batch.Count();
 
-                string descriptionBatchRetrieved = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchRetrieved, progress, stopwatch.Elapsed.TotalMilliseconds);
+                string descriptionBatchRetrieved = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchRetrieved, count, stopwatch.Elapsed.TotalMilliseconds);
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchRetrieved, cancellation);
 
-                if (progress > 0L)
+                if (count > 0L)
                 {
                     IEnumerable<TItem> items = batch.Select(kvp => kvp.Value);
 
                     stopwatch.Restart();
 
-                    await job.Processor.ProcessAsync(items, cancellation);
+                    bool failed = false;
+
+                    try
+                    {
+                        await job.Processor.ProcessAsync(items, cancellation);
+                    }
+                    catch (Exception ex)
+                    {
+                        string batchDescriptor = null;
+
+                        if (count > 1)
+                        {
+                            string firstInBatch = job.Serializer.Serialize(batch.First().Key);
+                            string lastInBatch = job.Serializer.Serialize(batch.Last().Key);
+
+                            batchDescriptor = string.Format(CultureInfo.InvariantCulture, EngineResources.BatchDescriptior, firstInBatch, lastInBatch);
+                        }
+                        else
+                        {
+                            batchDescriptor = job.Serializer.Serialize(batch.First().Key);
+                        }
+
+                        string descriptionBatchProcessingFailed = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessingFailed, batchDescriptor);
+                        await this.Dispatcher.DispatchEventAsync(EventSeverity.Warning, job.Id, partition.Id, descriptionBatchProcessingFailed, ex, cancellation);
+
+                        failed = true;
+                    }
 
                     stopwatch.Stop();
 
-                    string descriptionBatchProcessed = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessed, progress, stopwatch.Elapsed.TotalMilliseconds);
-                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchProcessed, cancellation);
+                    if (failed == false)
+                    {
+                        string descriptionBatchProcessed = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessed, count, stopwatch.Elapsed.TotalMilliseconds);
+                        await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchProcessed, cancellation);
+                    }
 
                     if (stopwatch.Elapsed >= settings.Timeout)
                     {
@@ -328,11 +362,11 @@ namespace EXBP.Dipren
                     }
                 }
 
-                bool completed = (progress < settings.BatchSize);
-                TKey position = ((progress == 0L) ? partition.Position : batch.Last().Key);
+                bool completed = (count < settings.BatchSize);
+                TKey position = ((count == 0L) ? partition.Position : batch.Last().Key);
                 DateTime timestamp = this.Clock.GetDateTime();
 
-                partition = await this.ReportProgressAsync(job, partition, timestamp, position, progress, completed, cancellation);
+                partition = await this.ReportProgressAsync(job, partition, timestamp, position, count, completed, cancellation);
 
                 if (partition.IsSplitRequested == true)
                 {

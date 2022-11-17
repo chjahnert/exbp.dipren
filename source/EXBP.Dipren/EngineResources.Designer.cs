@@ -61,11 +61,29 @@ namespace EXBP.Dipren {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0}..{1}.
+        /// </summary>
+        internal static string BatchDescriptior {
+            get {
+                return ResourceManager.GetString("BatchDescriptior", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Processed a batch of {0} items. Took {1} ms..
         /// </summary>
         internal static string EventBatchProcessed {
             get {
                 return ResourceManager.GetString("EventBatchProcessed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error occurred during the processing of batch [{0}]..
+        /// </summary>
+        internal static string EventBatchProcessingFailed {
+            get {
+                return ResourceManager.GetString("EventBatchProcessingFailed", resourceCulture);
             }
         }
         
@@ -102,15 +120,6 @@ namespace EXBP.Dipren {
         internal static string EventJobNotScheduled {
             get {
                 return ResourceManager.GetString("EventJobNotScheduled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The job is ready to be processed..
-        /// </summary>
-        internal static string EventJobReady {
-            get {
-                return ResourceManager.GetString("EventJobReady", resourceCulture);
             }
         }
         
