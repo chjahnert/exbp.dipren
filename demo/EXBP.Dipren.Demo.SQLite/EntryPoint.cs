@@ -48,12 +48,15 @@ namespace EXBP.Dipren.Demo.SQLite
 
                 Console.Write("Scheduling the processing job ... ");
 
-                Job<int, Measurement> job = EntryPoint.CreateJob(connectionSource);
+                MeasurementsDataSource source = new MeasurementsDataSource(connectionSource);
+                Job<int, Measurement> job = new Job<int, Measurement>("measurements", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, EntryPoint.Processor);
+                TimeSpan timeout = TimeSpan.FromMilliseconds(BATCH_PROCESSING_TIMEOUT);
+                Settings settings = new Settings(BATCH_SIZE, timeout);
 
                 SQLiteEngineDataStore store = new SQLiteEngineDataStore(ENGINE_CONNECTION_STRING);
                 Scheduler scheduler = new Scheduler(store);
 
-                await scheduler.ScheduleAsync(job);
+                await scheduler.ScheduleAsync(job, settings);
 
                 Console.WriteLine("done.");
 
@@ -84,16 +87,6 @@ namespace EXBP.Dipren.Demo.SQLite
                 Console.WriteLine();
                 Console.WriteLine(ex);
             }
-        }
-
-        internal static Job<int, Measurement> CreateJob(SQLiteConnection connectionSource)
-        {
-            MeasurementsDataSource source = new MeasurementsDataSource(connectionSource);
-            TimeSpan timeout = TimeSpan.FromMilliseconds(BATCH_PROCESSING_TIMEOUT);
-
-            Job<int, Measurement> result = new Job<int, Measurement>("measurements", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, EntryPoint.Processor, timeout, BATCH_SIZE);
-
-            return result;
         }
 
         internal static async Task RunAsync(IEngineDataStore store, Job<int, Measurement> job)

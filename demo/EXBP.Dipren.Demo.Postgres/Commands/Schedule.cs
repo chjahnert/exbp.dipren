@@ -24,9 +24,10 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
                 TimeSpan timeout = TimeSpan.FromSeconds(1);
                 IDataSource<Guid, Cuboid> source = reverse ? new CuboidDescendingDataSource(connectionString) : new CuboidAscendingDataSource(connectionString);
                 CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
-                Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor, timeout, 1);
+                Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor);
+                Settings settings = new Settings(1, timeout);
 
-                await scheduler.ScheduleAsync(job);
+                await scheduler.ScheduleAsync(job, settings);
 
                 Console.WriteLine(RemoveResources.MessageDone);
             }

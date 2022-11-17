@@ -177,19 +177,21 @@ namespace EXBP.Dipren
                 // Processing is only started if the scheduled job is in either Ready or Processing state.
                 //
 
+                Settings settings = new Settings(persisted.BatchSize, persisted.Timeout);
+
                 while (persisted?.State == JobState.Processing)
                 {
                     //
                     // Acquire a partition that is ready to be processed or request an existing partition to be split.
                     //
 
-                    Partition<TKey> partition = await this.TryAcquirePartitionAsync(job, cancellation);
+                    Partition<TKey> partition = await this.TryAcquirePartitionAsync(job, settings, cancellation);
 
                     if (partition != null)
                     {
                         try
                         {
-                            await this.ProcessPartitionAsync(job, partition, cancellation);
+                            await this.ProcessPartitionAsync(job, partition, settings, cancellation);
                         }
                         catch (LockException)
                         {
@@ -253,6 +255,9 @@ namespace EXBP.Dipren
         /// <param name="partition">
         ///   The partition to process.
         /// </param>
+        /// <param name="settings">
+        ///   The job settings to use.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -260,7 +265,7 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        private async Task ProcessPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, CancellationToken cancellation)
+        private async Task ProcessPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, Settings settings, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
             Assert.ArgumentIsNotNull(partition, nameof(partition));
@@ -283,12 +288,12 @@ namespace EXBP.Dipren
                 Range<TKey> range = new Range<TKey>(first, partition.Range.Last, partition.Range.IsInclusive);
                 int skip = ((partition.Processed == 0L) ? 0 : 1);
 
-                string descriptionRequestingNextBatch = string.Format(CultureInfo.InvariantCulture, EngineResources.EventRequestingNextBatch, job.BatchSize, range.First, range.Last, skip);
+                string descriptionRequestingNextBatch = string.Format(CultureInfo.InvariantCulture, EngineResources.EventRequestingNextBatch, settings.BatchSize, range.First, range.Last, skip);
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionRequestingNextBatch, cancellation);
 
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
-                IEnumerable<KeyValuePair<TKey, TItem>> batch = await job.Source.GetNextBatchAsync(range, skip, job.BatchSize, cancellation);
+                IEnumerable<KeyValuePair<TKey, TItem>> batch = await job.Source.GetNextBatchAsync(range, skip, settings.BatchSize, cancellation);
 
                 stopwatch.Stop();
 
@@ -311,7 +316,7 @@ namespace EXBP.Dipren
                     await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchProcessed, cancellation);
                 }
 
-                bool completed = (progress < job.BatchSize);
+                bool completed = (progress < settings.BatchSize);
                 TKey position = ((progress == 0L) ? partition.Position : batch.Last().Key);
                 DateTime timestamp = this.Clock.GetDateTime();
 
@@ -319,7 +324,7 @@ namespace EXBP.Dipren
 
                 if (partition.IsSplitRequested == true)
                 {
-                    partition = await this.SplitPartitionAsync(job, partition, cancellation);
+                    partition = await this.SplitPartitionAsync(job, partition, settings, cancellation);
                 }
             }
 
@@ -338,6 +343,9 @@ namespace EXBP.Dipren
         /// <param name="job">
         ///   The job being processed.
         /// </param>
+        /// <param name="settings">
+        ///   The job settings to use.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -347,14 +355,15 @@ namespace EXBP.Dipren
         ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
         ///   otherwise, <see langword="null"/>.
         /// </returns>
-        private async Task<Partition<TKey>> TryAcquirePartitionAsync<TKey, TItem>(Job<TKey, TItem> job, CancellationToken cancellation)
+        private async Task<Partition<TKey>> TryAcquirePartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Settings settings, CancellationToken cancellation)
         {
             Debug.Assert(job != null);
+            Debug.Assert(settings != null);
 
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventTryingToAcquirePartition, cancellation);
 
             DateTime now = this.Clock.GetDateTime();
-            DateTime cut = (now - job.Timeout - this._configuration.MaximumClockDrift);
+            DateTime cut = (now - settings.Timeout - this._configuration.MaximumClockDrift);
 
             Partition acquired = await this.Store.TryAcquirePartitionAsync(job.Id, this.Id, now, cut, cancellation);
 
@@ -449,6 +458,9 @@ namespace EXBP.Dipren
         /// <param name="partition">
         ///   The partition to split.
         /// </param>
+        /// <param name="settings">
+        ///   The job settings to use.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -457,7 +469,7 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
         ///   operation. The <see cref="Task{TResult}.Result"/> property contains the updated partition.
         /// </returns>
-        private async Task<Partition<TKey>> SplitPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, CancellationToken cancellation)
+        private async Task<Partition<TKey>> SplitPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, Settings settings, CancellationToken cancellation)
         {
             Debug.Assert(partition != null);
 
@@ -475,7 +487,7 @@ namespace EXBP.Dipren
                 Task<long> excludedKeyRangeSize = job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
                 Task<long> updatedKeyRangeSize = job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
 
-                if ((await excludedKeyRangeSize >= job.BatchSize) && (await updatedKeyRangeSize >= job.BatchSize))
+                if ((await excludedKeyRangeSize >= settings.BatchSize) && (await updatedKeyRangeSize >= settings.BatchSize))
                 {
                     DateTime timestamp = this.Clock.GetDateTime();
 

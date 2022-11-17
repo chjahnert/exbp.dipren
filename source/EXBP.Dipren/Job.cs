@@ -24,8 +24,6 @@ namespace EXBP.Dipren
         private readonly IKeyArithmetics<TKey> _arithmetics;
         private readonly IKeySerializer<TKey> _serializer;
         private readonly IBatchProcessor<TItem> _processor;
-        private readonly TimeSpan _timeout;
-        private readonly int _batchSize;
 
 
         /// <summary>
@@ -70,31 +68,6 @@ namespace EXBP.Dipren
         /// </value>
         public IBatchProcessor<TItem> Processor => this._processor;
 
-        /// <summary>
-        ///   Gets the amount of time after which the processing is considered unsuccessful or stalled.
-        /// </summary>
-        /// <value>
-        ///   A <see cref="TimeSpan"/> value that indicates the amount of time after which the processing is considered
-        ///   unsuccessful or stalled.
-        /// </value>
-        /// <remarks>
-        ///   <para>
-        ///     When processing a batch takes longer than the specified timeout value, the operation is not canceled
-        ///     automatically, but if another processing node tries to acquire a partition and a partition was not
-        ///     updated for more than this timeout value, the partition is considered abandoned and might be taken over
-        ///     by the other processing node.
-        ///   </para>
-        /// </remarks>
-        public TimeSpan Timeout => this._timeout;
-
-        /// <summary>
-        ///   Gets the maximum number of entries to include in a batch.
-        /// </summary>
-        /// <value>
-        ///   An <see cref="int"/> value that is the maximum number of entries to include in a batch.
-        /// </value>
-        public int BatchSize => this._batchSize;
-
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="Job{TKey, TValue}"/> class.
@@ -122,23 +95,19 @@ namespace EXBP.Dipren
         /// <param name="batchSize">
         ///   The maximum number of entries to include in a batch.
         /// </param>
-        public Job(string id, IDataSource<TKey, TItem> source, IKeyArithmetics<TKey> arithmetics, IKeySerializer<TKey> serializer, IBatchProcessor<TItem> processor, TimeSpan timeout, int batchSize)
+        public Job(string id, IDataSource<TKey, TItem> source, IKeyArithmetics<TKey> arithmetics, IKeySerializer<TKey> serializer, IBatchProcessor<TItem> processor)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
             Assert.ArgumentIsNotNull(source, nameof(source));
             Assert.ArgumentIsNotNull(arithmetics, nameof(arithmetics));
             Assert.ArgumentIsNotNull(serializer, nameof(serializer));
             Assert.ArgumentIsNotNull(processor, nameof(processor));
-            Assert.ArgumentIsGreater(timeout, TimeSpan.Zero, nameof(timeout));
-            Assert.ArgumentIsGreater(batchSize, 0, nameof(batchSize));
 
             this._id = id;
             this._source = source;
             this._arithmetics = arithmetics;
             this._serializer = serializer;
             this._processor = processor;
-            this._timeout = timeout;
-            this._batchSize = batchSize;
         }
     }
 }
