@@ -12,8 +12,6 @@ namespace EXBP.Dipren.Tests
     public class JobTests
     {
         private readonly string _defaultId = "DPJ-0001";
-        private readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(30.0);
-        private readonly int _defaultBatchSize = 16;
 
 
         [Test]
