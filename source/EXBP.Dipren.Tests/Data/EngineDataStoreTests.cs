@@ -1175,6 +1175,8 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Id, Is.EqualTo(job.Id));
             Assert.That(result.Created, Is.EqualTo(job.Created));
             Assert.That(result.Updated, Is.EqualTo(job.Updated));
+            Assert.That(result.BatchSize, Is.EqualTo(job.BatchSize));
+            Assert.That(result.Timeout, Is.EqualTo(job.Timeout));
             Assert.That(result.Started, Is.EqualTo(job.Started));
             Assert.That(result.Completed, Is.EqualTo(job.Completed));
             Assert.That(result.State, Is.EqualTo(job.State));
@@ -1216,6 +1218,8 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Id, Is.EqualTo(job.Id));
             Assert.That(result.Created, Is.EqualTo(job.Created));
             Assert.That(result.Updated, Is.EqualTo(job.Updated));
+            Assert.That(result.BatchSize, Is.EqualTo(job.BatchSize));
+            Assert.That(result.Timeout, Is.EqualTo(job.Timeout));
             Assert.That(result.Started, Is.EqualTo(job.Started));
             Assert.That(result.Completed, Is.EqualTo(job.Completed));
             Assert.That(result.State, Is.EqualTo(job.State));
@@ -1313,6 +1317,8 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Id, Is.EqualTo(job.Id));
             Assert.That(result.Created, Is.EqualTo(job.Created));
             Assert.That(result.Updated, Is.EqualTo(job.Updated));
+            Assert.That(result.BatchSize, Is.EqualTo(job.BatchSize));
+            Assert.That(result.Timeout, Is.EqualTo(job.Timeout));
             Assert.That(result.Started, Is.EqualTo(job.Started));
             Assert.That(result.Completed, Is.EqualTo(job.Completed));
             Assert.That(result.State, Is.EqualTo(job.State));
@@ -1409,6 +1415,8 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Id, Is.EqualTo(job.Id));
             Assert.That(result.Created, Is.EqualTo(job.Created));
             Assert.That(result.Updated, Is.EqualTo(job.Updated));
+            Assert.That(result.BatchSize, Is.EqualTo(job.BatchSize));
+            Assert.That(result.Timeout, Is.EqualTo(job.Timeout));
             Assert.That(result.Started, Is.EqualTo(job.Started));
             Assert.That(result.Completed, Is.EqualTo(job.Completed));
             Assert.That(result.State, Is.EqualTo(job.State));

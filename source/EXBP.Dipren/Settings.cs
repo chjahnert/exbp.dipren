@@ -13,7 +13,7 @@ namespace EXBP.Dipren
     public class Settings
     {
         /// <summary>
-        ///   Gets the maximum number of keys to include in a batch.
+        ///   Gets the maximum number of items to include in a batch.
         /// </summary>
         /// <value>
         ///   A <see cref="int"/> value that contains the maximum number of items to include in a batch.

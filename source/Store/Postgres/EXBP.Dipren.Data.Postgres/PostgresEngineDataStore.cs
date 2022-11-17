@@ -992,6 +992,8 @@ namespace EXBP.Dipren.Data.Postgres
                         Id = job.Id,
                         Created = job.Created,
                         Updated = job.Updated,
+                        BatchSize = job.BatchSize,
+                        Timeout = job.Timeout,
                         Started = job.Started,
                         Completed = job.Completed,
                         State = job.State,
