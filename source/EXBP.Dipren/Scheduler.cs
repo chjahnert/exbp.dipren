@@ -191,7 +191,12 @@ namespace EXBP.Dipren
             string descriptionRangeSizeEstimated = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeSizeEstimated, remaining, stopwatch.Elapsed.TotalMilliseconds);
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, descriptionRangeSizeEstimated, cancellation);
 
-            if (stopwatch.Elapsed <= settings.Timeout)
+            //
+            // When a split request is honored, the size of two key ranges is estimated. The timeout value should allow
+            // for both range size estimations to complete.
+            //
+
+            if (stopwatch.Elapsed >= (settings.Timeout / 2))
             {
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Warning, job.Id, partitionId, SchedulerResources.EventTimeoutValueTooLow, cancellation);
             }
