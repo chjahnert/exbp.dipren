@@ -133,7 +133,7 @@ namespace EXBP.Dipren {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The specified timeout value might be too low..
+        ///   Looks up a localized string similar to Estimating the size of the key range took longer than the specified timeout. The timeout value specified might be too low..
         /// </summary>
         internal static string EventTimeoutValueTooLow {
             get {

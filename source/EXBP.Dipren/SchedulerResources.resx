@@ -142,6 +142,6 @@
     <value>Retrieving range boundaries.</value>
   </data>
   <data name="EventTimeoutValueTooLow" xml:space="preserve">
-    <value>The specified timeout value might be too low.</value>
+    <value>Estimating the size of the key range took longer than the specified timeout. The timeout value specified might be too low.</value>
   </data>
 </root>
