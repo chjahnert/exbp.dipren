@@ -288,9 +288,12 @@ namespace EXBP.Dipren
             //
 
             long timeoutTooLow = 0L;
+            Stopwatch iteration = Stopwatch.StartNew();
+            MovingAverage throughputs = new MovingAverage(1024);
 
             while (partition.IsCompleted == false)
             {
+
                 TKey first = ((partition.Processed == 0L) ? partition.Range.First : partition.Position);
                 Range<TKey> range = new Range<TKey>(first, partition.Range.Last, partition.Range.IsInclusive);
                 int skip = ((partition.Processed == 0L) ? 0 : 1);
@@ -366,7 +369,16 @@ namespace EXBP.Dipren
                 TKey position = ((count == 0L) ? partition.Position : batch.Last().Key);
                 DateTime timestamp = this.Clock.GetDateTime();
 
-                partition = await this.ReportProgressAsync(job, partition, timestamp, position, count, completed, cancellation);
+                double seconds = iteration.Elapsed.TotalSeconds;
+
+                iteration.Restart();
+
+                if (seconds > 0.0)
+                {
+                    throughputs.Add(count / seconds);
+                }
+
+                partition = await this.ReportProgressAsync(job, partition, timestamp, position, count, completed, throughputs.Average, cancellation);
 
                 if (partition.IsSplitRequested == true)
                 {
@@ -461,6 +473,9 @@ namespace EXBP.Dipren
         /// <param name="completed">
         ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
         /// </param>
+        /// <param name="throughput">
+        ///   The average number of items processed per second.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -472,7 +487,7 @@ namespace EXBP.Dipren
         /// <exception cref="LockException">
         ///   The current processing node no longer holds the lock on the partition.
         /// </exception>
-        private async Task<Partition<TKey>> ReportProgressAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, DateTime timestamp, TKey position, long progress, bool completed, CancellationToken cancellation)
+        private async Task<Partition<TKey>> ReportProgressAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, DateTime timestamp, TKey position, long progress, bool completed, double throughput, CancellationToken cancellation)
         {
             Debug.Assert(job != null);
             Debug.Assert(partition != null);
@@ -485,6 +500,8 @@ namespace EXBP.Dipren
             Partition updated = await this.Store.ReportProgressAsync(partition.Id, this.Id, timestamp, sp, progress, completed, cancellation);
 
             Partition<TKey> result = updated.ToPartition(job.Serializer);
+
+            Debug.WriteLine($"THROUPUT: {throughput}");
 
             return result;
         }
