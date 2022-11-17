@@ -146,24 +146,6 @@ namespace EXBP.Dipren.Demo.Postgres {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The number of items to process per batch..
-        /// </summary>
-        internal static string DescriptionOptionProcessBatchSize {
-            get {
-                return ResourceManager.GetString("DescriptionOptionProcessBatchSize", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The timeout for processing a single batch (ms)..
-        /// </summary>
-        internal static string DescriptionOptionProcessBatchTimeout {
-            get {
-                return ResourceManager.GetString("DescriptionOptionProcessBatchTimeout", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The maximum time difference between processing nodes (ms)..
         /// </summary>
         internal static string DescriptionOptionProcessClockDrift {
@@ -187,6 +169,24 @@ namespace EXBP.Dipren.Demo.Postgres {
         internal static string DescriptionOptionReverse {
             get {
                 return ResourceManager.GetString("DescriptionOptionReverse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of items to process per batch..
+        /// </summary>
+        internal static string DescriptionOptionScheduleBatchSize {
+            get {
+                return ResourceManager.GetString("DescriptionOptionScheduleBatchSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The timeout for processing a single batch (ms)..
+        /// </summary>
+        internal static string DescriptionOptionScheduleBatchTimeout {
+            get {
+                return ResourceManager.GetString("DescriptionOptionScheduleBatchTimeout", resourceCulture);
             }
         }
         
