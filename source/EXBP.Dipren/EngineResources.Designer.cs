@@ -241,6 +241,15 @@ namespace EXBP.Dipren {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Processing the batch took longer than the specified timeout. The timeout value specified might be too low..
+        /// </summary>
+        internal static string EventTimeoutValueTooLow {
+            get {
+                return ResourceManager.GetString("EventTimeoutValueTooLow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Trying to acquire a partition..
         /// </summary>
         internal static string EventTryingToAcquirePartition {

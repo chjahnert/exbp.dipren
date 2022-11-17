@@ -131,5 +131,14 @@ namespace EXBP.Dipren {
                 return ResourceManager.GetString("EventRetrievingRangeBoundaries", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Estimating the size of the key range took longer than the specified timeout. The timeout value specified might be too low..
+        /// </summary>
+        internal static string EventTimeoutValueTooLow {
+            get {
+                return ResourceManager.GetString("EventTimeoutValueTooLow", resourceCulture);
+            }
+        }
     }
 }
