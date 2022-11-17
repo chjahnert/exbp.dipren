@@ -33,5 +33,29 @@ namespace EXBP.Dipren.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new Settings(-1, 250));
         }
+
+        [Test]
+        public void Ctor_ArgumentMaximumClockDriftNotSpecified_PropertiesAreInitializedCorrectly()
+        {
+            TimeSpan timeout = TimeSpan.FromSeconds(3D);
+            Settings settings = new Settings(1, timeout);
+
+            Assert.That(settings.BatchSize, Is.EqualTo(1));
+            Assert.That(settings.Timeout, Is.EqualTo(timeout));
+            Assert.That(settings.MaximumClockDrift, Is.EqualTo(Settings.DefaultMaximumClockDrift));
+        }
+
+        [Test]
+        public void Ctor_ArgumentMaximumClockDriftIsSpecified_PropertiesAreInitializedCorrectly()
+        {
+            TimeSpan timeout = TimeSpan.FromSeconds(3D);
+            TimeSpan maximumClockDrift = TimeSpan.FromSeconds(7D);
+
+            Settings settings = new Settings(1, timeout, maximumClockDrift);
+
+            Assert.That(settings.BatchSize, Is.EqualTo(1));
+            Assert.That(settings.Timeout, Is.EqualTo(timeout));
+            Assert.That(settings.MaximumClockDrift, Is.EqualTo(maximumClockDrift));
+        }
     }
 }
