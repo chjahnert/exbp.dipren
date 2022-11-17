@@ -25,6 +25,7 @@ namespace EXBP.Dipren
         ///   A <see cref="TimeSpan"/> value that contains the maximum time divergence between processing nodes. The
         ///   default value is 2 seconds.
         /// </value>
+        [Obsolete]
         public TimeSpan MaximumClockDrift
         {
             get
