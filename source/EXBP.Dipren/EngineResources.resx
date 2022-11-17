@@ -117,8 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BatchDescriptior" xml:space="preserve">
+    <value>{0}..{1}</value>
+  </data>
   <data name="EventBatchProcessed" xml:space="preserve">
     <value>Processed a batch of {0} items. Took {1} ms.</value>
+  </data>
+  <data name="EventBatchProcessingFailed" xml:space="preserve">
+    <value>An error occurred during the processing of batch [{0}].</value>
   </data>
   <data name="EventBatchRetrieved" xml:space="preserve">
     <value>Retrieved a batch of {0} items. Took {1} ms.</value>
@@ -131,9 +137,6 @@
   </data>
   <data name="EventJobNotScheduled" xml:space="preserve">
     <value>The specified job is not scheduled.</value>
-  </data>
-  <data name="EventJobReady" xml:space="preserve">
-    <value>The job is ready to be processed.</value>
   </data>
   <data name="EventJobStarted" xml:space="preserve">
     <value>Job started.</value>
