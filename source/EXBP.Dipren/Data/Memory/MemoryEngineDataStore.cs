@@ -789,7 +789,7 @@ namespace EXBP.Dipren.Data.Memory
                     LastActivity = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id)).Max(p => p.Updated) : job.Updated,
                     OwnershipChanges = 0L,
                     PendingSplitRequests = (job.State == JobState.Processing) ? this._partitions.Count(p => (p.JobId == job.Id) && (p.IsCompleted == false) && (p.IsSplitRequested == true)) : 0L,
-                    Throughput = (job.State == JobState.Processing) ? this._partitions.Where(p => (p.JobId == job.Id) && (p.IsCompleted == false) && (p.Updated >= (timestamp - job.Timeout - job.ClockDrift))).Sum(p => p.Throughput) : 0.0,
+                    CurrentThroughput = (job.State == JobState.Processing) ? this._partitions.Where(p => (p.JobId == job.Id) && (p.IsCompleted == false) && (p.Updated >= (timestamp - job.Timeout - job.ClockDrift))).Sum(p => p.Throughput) : 0.0,
 
                     Partitions = new StatusReport.PartitionsReport
                     {

@@ -1157,7 +1157,7 @@ namespace EXBP.Dipren.Data.SQLite
                         LastActivity = reader.GetDateTime("last_activity"),
                         OwnershipChanges = reader.GetInt64("ownership_changes"),
                         PendingSplitRequests = reader.GetInt64("split_requests_pending"),
-                        Throughput = reader.GetDouble("throughput"),
+                        CurrentThroughput = reader.GetDouble("current_throughput"),
 
                         Partitions = new StatusReport.PartitionsReport
                         {

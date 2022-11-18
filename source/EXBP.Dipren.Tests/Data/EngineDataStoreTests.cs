@@ -1348,7 +1348,7 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Progress.Total, Is.EqualTo(71L));
             Assert.That(result.Progress.Ratio, Is.EqualTo(0.338).Within(0.001D));
 
-            Assert.That(result.Throughput, Is.EqualTo(13968.3).Within(0.1));
+            Assert.That(result.CurrentThroughput, Is.EqualTo(13968.3).Within(0.1));
             Assert.That(result.PendingSplitRequests, Is.EqualTo(2));
         }
 
@@ -1450,7 +1450,7 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Progress.Total, Is.EqualTo(71L));
             Assert.That(result.Progress.Ratio, Is.EqualTo(1D));
 
-            Assert.That(result.Throughput, Is.EqualTo(0D));
+            Assert.That(result.CurrentThroughput, Is.EqualTo(0D));
             Assert.That(result.PendingSplitRequests, Is.EqualTo(0));
         }
 

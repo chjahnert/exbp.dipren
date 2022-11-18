@@ -33,9 +33,9 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
                     string started = summary.Started?.ToString("yyyy-MM-dd HH:mm:ss") ?? "n/a";
                     string completed = summary.Completed?.ToString("yyyy-MM-dd HH:mm:ss") ?? "n/a";
                     double progress = (summary.Progress.Ratio != null) ? Math.Round(summary.Progress.Ratio.Value * 100, 1) : 0d;
-                    TimeSpan? eta = ((summary.Progress.Remaining != null) && (summary.Throughput > 0.0)) ? TimeSpan.FromSeconds(summary.Progress.Remaining.Value / summary.Throughput) : null;
+                    TimeSpan? eta = ((summary.Progress.Remaining != null) && (summary.CurrentThroughput > 0.0)) ? TimeSpan.FromSeconds(summary.Progress.Remaining.Value / summary.CurrentThroughput) : null;
 
-                    Console.WriteLine($"{timestamp} | {summary.State,-10} | {started,-19} | {completed,-19} | {summary.Partitions.Total,10} | {summary.Partitions.Untouched,9} | {summary.Partitions.InProgress,11} | {summary.Partitions.Completed,9} | {summary.Progress.Completed,14} | {summary.Progress.Remaining,14} | {progress,7:F1}% | {summary.OwnershipChanges,9} | {summary.PendingSplitRequests,14} | {summary.Throughput,10:F1} | {eta,14:hh\\:mm\\:ss\\.ff}");
+                    Console.WriteLine($"{timestamp} | {summary.State,-10} | {started,-19} | {completed,-19} | {summary.Partitions.Total,10} | {summary.Partitions.Untouched,9} | {summary.Partitions.InProgress,11} | {summary.Partitions.Completed,9} | {summary.Progress.Completed,14} | {summary.Progress.Remaining,14} | {progress,7:F1}% | {summary.OwnershipChanges,9} | {summary.PendingSplitRequests,14} | {summary.CurrentThroughput,10:F1} | {eta,14:hh\\:mm\\:ss\\.ff}");
                 }
                 catch (UnknownIdentifierException)
                 {

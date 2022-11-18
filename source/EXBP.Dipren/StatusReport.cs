@@ -146,7 +146,7 @@ namespace EXBP.Dipren
         ///   A <see cref="double"/> value that contains the current throughput of all processing nodes working on this
         ///   job. The throughput is expressed as number of items processed per second.
         /// </value>
-        public double Throughput { get; init; }
+        public double CurrentThroughput { get; init; }
 
         /// <summary>
         ///   Holds the number of partitions grouped by their state.
