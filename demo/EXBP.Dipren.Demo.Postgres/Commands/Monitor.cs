@@ -12,8 +12,8 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
         {
             int result = 0;
 
-            Console.WriteLine("Timestamp           | State      | Started             | Completed           | Partitions | Untouched | In Progress | Completed | Keys Completed | Keys Remaining | Progress | Takeovers | Split Requests");
-            Console.WriteLine("                    |            |                     |                     |            |           |             |           |                |                |          |           |");
+            Console.WriteLine("Timestamp           | State      | Started             | Completed           | Partitions | Untouched | In Progress | Completed | Keys Completed | Keys Remaining | Progress | Takeovers | Split Requests | Throughput");
+            Console.WriteLine("                    |            |                     |                     |            |           |             |           |                |                |          |           |                |");
 
 
             PostgresEngineDataStore store = new PostgresEngineDataStore(connectionString);
@@ -32,7 +32,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
                     string completed = summary.Completed?.ToString("yyyy-MM-dd HH:mm:ss") ?? "n/a";
                     double progress = (summary.Progress.Ratio != null) ? Math.Round(summary.Progress.Ratio.Value * 100, 1) : 0d;
 
-                    Console.WriteLine($"{timestamp} | {summary.State,-10} | {started,-19} | {completed,-19} | {summary.Partitions.Total,10} | {summary.Partitions.Untouched,9} | {summary.Partitions.InProgress,11} | {summary.Partitions.Completed,9} | {summary.Progress.Completed,14} | {summary.Progress.Remaining,14} | {progress,7:F1}% | {summary.OwnershipChanges,9} | {summary.PendingSplitRequests,14}");
+                    Console.WriteLine($"{timestamp} | {summary.State,-10} | {started,-19} | {completed,-19} | {summary.Partitions.Total,10} | {summary.Partitions.Untouched,9} | {summary.Partitions.InProgress,11} | {summary.Partitions.Completed,9} | {summary.Progress.Completed,14} | {summary.Progress.Remaining,14} | {progress,7:F1}% | {summary.OwnershipChanges,9} | {summary.PendingSplitRequests,14} | {summary.Throughput,10:F1}");
                 }
                 catch (UnknownIdentifierException)
                 {
