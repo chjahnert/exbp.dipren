@@ -1144,6 +1144,7 @@ namespace EXBP.Dipren.Data.SQLite
                     result = new StatusReport
                     {
                         Id = job.Id,
+                        Timestamp = timestamp,
                         Created = job.Created,
                         Updated = job.Updated,
                         BatchSize = job.BatchSize,

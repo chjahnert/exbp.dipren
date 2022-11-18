@@ -1003,6 +1003,7 @@ namespace EXBP.Dipren.Data.Postgres
                     result = new StatusReport
                     {
                         Id = job.Id,
+                        Timestamp = uktsTimestamp,
                         Created = job.Created,
                         Updated = job.Updated,
                         BatchSize = job.BatchSize,

@@ -20,6 +20,15 @@ namespace EXBP.Dipren
         public string Id { get; init; }
 
         /// <summary>
+        ///   Gets the date and time the current status report was generated.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="DateTime"/> value containing the date and time the current status report was generated,
+        ///   expressed in UTC.
+        /// </value>
+        public DateTime Timestamp { get; init; }
+
+        /// <summary>
         ///   Gets the date and time when the current job was created.
         /// </summary>
         /// <value>

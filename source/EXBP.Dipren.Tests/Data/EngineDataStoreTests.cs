@@ -1168,14 +1168,17 @@ namespace EXBP.Dipren.Tests.Data
         [Test]
         public async Task RetrieveJobStatusReportAsync_JobIsInitializing_ReturnsCorrectResult()
         {
+            DateTime timestamp = DateTime.UtcNow;
+
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Job job = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
 
-            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, DateTime.UtcNow, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, timestamp, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
+            Assert.That(result.Timestamp, Is.EqualTo(timestamp));
             Assert.That(result.Created, Is.EqualTo(job.Created));
             Assert.That(result.Updated, Is.EqualTo(job.Updated));
             Assert.That(result.BatchSize, Is.EqualTo(job.BatchSize));
@@ -1204,6 +1207,8 @@ namespace EXBP.Dipren.Tests.Data
         [Test]
         public async Task RetrieveJobStatusReportAsync_JobIsReady_ReturnsCorrectResult()
         {
+            DateTime timestamp = DateTime.UtcNow;
+
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Job job = await this.EnsurePersistedJobAsync(store, JobState.Ready);
@@ -1215,10 +1220,11 @@ namespace EXBP.Dipren.Tests.Data
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
-            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, DateTime.UtcNow, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, timestamp, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
+            Assert.That(result.Timestamp, Is.EqualTo(timestamp));
             Assert.That(result.Created, Is.EqualTo(job.Created));
             Assert.That(result.Updated, Is.EqualTo(job.Updated));
             Assert.That(result.BatchSize, Is.EqualTo(job.BatchSize));
@@ -1247,6 +1253,8 @@ namespace EXBP.Dipren.Tests.Data
         [Test]
         public async Task RetrieveJobStatusReportAsync_JobIsProcessing_ReturnsCorrectResult()
         {
+            DateTime timestamp = DateTime.UtcNow;
+
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
@@ -1314,10 +1322,11 @@ namespace EXBP.Dipren.Tests.Data
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
 
-            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, DateTime.UtcNow, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, timestamp, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
+            Assert.That(result.Timestamp, Is.EqualTo(timestamp));
             Assert.That(result.Created, Is.EqualTo(job.Created));
             Assert.That(result.Updated, Is.EqualTo(job.Updated));
             Assert.That(result.BatchSize, Is.EqualTo(job.BatchSize));
@@ -1345,6 +1354,8 @@ namespace EXBP.Dipren.Tests.Data
         [Test]
         public async Task RetrieveJobStatusReportAsync_JobIsCompleted_ReturnsCorrectResult()
         {
+            DateTime timestamp = DateTime.UtcNow;
+
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
             Job job = await this.EnsurePersistedJobAsync(store, JobState.Completed);
@@ -1412,10 +1423,11 @@ namespace EXBP.Dipren.Tests.Data
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
 
-            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, DateTime.UtcNow, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, timestamp, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
+            Assert.That(result.Timestamp, Is.EqualTo(timestamp));
             Assert.That(result.Created, Is.EqualTo(job.Created));
             Assert.That(result.Updated, Is.EqualTo(job.Updated));
             Assert.That(result.BatchSize, Is.EqualTo(job.BatchSize));
