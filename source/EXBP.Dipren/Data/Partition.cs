@@ -141,6 +141,10 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="long"/> value that contains the estimated number of unprocessed items in the current
         ///   partition.
         /// </value>
+        /// <remarks>
+        ///   This value indicates the throughput of the processing node owning the current partition. It maybe the
+        ///   last observed value or the moving average of the last couple of batches.
+        /// </remarks>
         public long Remaining
         {
             get
@@ -162,6 +166,14 @@ namespace EXBP.Dipren.Data
         ///  <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
         /// </value>
         public bool IsCompleted { get; init; }
+
+        /// <summary>
+        ///   Gets the estimated number of items processed per second.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="double"/> value that contains the estimated number of items processed per second.
+        /// </value>
+        public double Throughput { get; init; }
 
         /// <summary>
         ///   Gets a value indicating whether a split was requested.
@@ -212,10 +224,13 @@ namespace EXBP.Dipren.Data
         /// <param name="completed">
         ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
         /// </param>
+        /// <param name="throughput">
+        ///   The number of items processed per second.
+        /// </param>
         /// <param name="split">
         ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
         /// </param>
-        public Partition(Guid id, string jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool completed = false, bool split = false)
+        public Partition(Guid id, string jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool completed = false, double throughput = 0.0, bool split = false)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsNotNull(first, nameof(first));
@@ -232,6 +247,7 @@ namespace EXBP.Dipren.Data
             this.Processed = processed;
             this.Remaining = remaining;
             this.IsCompleted = completed;
+            this.Throughput = throughput;
             this.IsSplitRequested = split;
         }
     }

@@ -36,7 +36,7 @@ namespace EXBP.Dipren
             string last = serializer.Serialize(source.Range.Last);
             string position = serializer.Serialize(source.Position);
 
-            Partition result = new Partition(source.Id, source.JobId, source.Created, source.Updated, first, last, source.Range.IsInclusive, position, source.Processed, source.Remaining, source.Owner, source.IsCompleted, source.IsSplitRequested);
+            Partition result = new Partition(source.Id, source.JobId, source.Created, source.Updated, first, last, source.Range.IsInclusive, position, source.Processed, source.Remaining, source.Owner, source.IsCompleted, source.Throughput, source.IsSplitRequested);
 
             return result;
         }

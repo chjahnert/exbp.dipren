@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Concurrent;
 using System.Data;
 using System.Data.Common;
 using System.Data.SQLite;
@@ -303,6 +304,7 @@ namespace EXBP.Dipren.Data.SQLite
                 command.Parameters.AddWithValue("$position", partition.Position);
                 command.Parameters.AddWithValue("$processed", partition.Processed);
                 command.Parameters.AddWithValue("$remaining", partition.Remaining);
+                command.Parameters.AddWithValue("$throughput", partition.Throughput);
                 command.Parameters.AddWithValue("$is_completed", partition.IsCompleted);
                 command.Parameters.AddWithValue("$is_split_requested", partition.IsSplitRequested);
 
@@ -387,6 +389,7 @@ namespace EXBP.Dipren.Data.SQLite
                     command.Parameters.AddWithValue("$position", partitionToUpdate.Position);
                     command.Parameters.AddWithValue("$processed", partitionToUpdate.Processed);
                     command.Parameters.AddWithValue("$remaining", partitionToUpdate.Remaining);
+                    command.Parameters.AddWithValue("$throughput", partitionToUpdate.Throughput);
                     command.Parameters.AddWithValue("$is_split_requested", partitionToUpdate.IsSplitRequested);
 
                     int affected = await command.ExecuteNonQueryAsync(cancellation);
@@ -427,6 +430,7 @@ namespace EXBP.Dipren.Data.SQLite
                     command.Parameters.AddWithValue("$position", partitionToInsert.Position);
                     command.Parameters.AddWithValue("$processed", partitionToInsert.Processed);
                     command.Parameters.AddWithValue("$remaining", partitionToInsert.Remaining);
+                    command.Parameters.AddWithValue("$throughput", partitionToInsert.Throughput);
                     command.Parameters.AddWithValue("$is_completed", partitionToInsert.IsCompleted);
                     command.Parameters.AddWithValue("$is_split_requested", partitionToInsert.IsSplitRequested);
 
@@ -1001,6 +1005,9 @@ namespace EXBP.Dipren.Data.SQLite
         /// <param name="completed">
         ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
         /// </param>
+        /// <param name="throughput">
+        ///   The number of items processed per second.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -1015,7 +1022,7 @@ namespace EXBP.Dipren.Data.SQLite
         /// <exception cref="UnknownIdentifierException">
         ///   A partition with the specified unique identifier does not exist.
         /// </exception>
-        public async Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, CancellationToken cancellation)
+        public async Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, double throughput, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(position, nameof(position));
@@ -1041,6 +1048,7 @@ namespace EXBP.Dipren.Data.SQLite
                 command.Parameters.AddWithValue("$position", position);
                 command.Parameters.AddWithValue("$progress", progress);
                 command.Parameters.AddWithValue("$completed", completed);
+                command.Parameters.AddWithValue("$throughput", throughput);
                 command.Parameters.AddWithValue("$id", sid);
                 command.Parameters.AddWithValue("$owner", owner);
 
@@ -1300,12 +1308,13 @@ namespace EXBP.Dipren.Data.SQLite
             string position = reader.GetNullableString("position");
             long processed = reader.GetInt64("processed");
             long remaining = reader.GetInt64("remaining");
+            double throughput = reader.GetDouble("throughput");
             bool completed = reader.GetBoolean("is_completed");
             bool split = reader.GetBoolean("is_split_requested");
 
             Guid id = Guid.ParseExact(sid, "d");
 
-            Partition result = new Partition(id, jobId, created, updated, first, last, inclusive, position, processed, remaining, owner, completed, split);
+            Partition result = new Partition(id, jobId, created, updated, first, last, inclusive, position, processed, remaining, owner, completed, throughput, split);
 
             return result;
         }

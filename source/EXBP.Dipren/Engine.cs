@@ -496,12 +496,11 @@ namespace EXBP.Dipren
             Debug.Assert(progress >= 0L);
 
             string sp = job.Serializer.Serialize(position);
+            double tp = (completed == false) ? throughput : 0.0;
 
-            Partition updated = await this.Store.ReportProgressAsync(partition.Id, this.Id, timestamp, sp, progress, completed, cancellation);
+            Partition updated = await this.Store.ReportProgressAsync(partition.Id, this.Id, timestamp, sp, progress, completed, tp, cancellation);
 
             Partition<TKey> result = updated.ToPartition(job.Serializer);
-
-            Debug.WriteLine($"THROUPUT: {throughput}");
 
             return result;
         }
@@ -554,11 +553,11 @@ namespace EXBP.Dipren
                 {
                     DateTime timestamp = this.Clock.GetDateTime();
 
-                    Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updatedKeyRange, partition.Position, partition.Processed, (await updatedKeyRangeSize - 1), false, false);
+                    Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updatedKeyRange, partition.Position, partition.Processed, (await updatedKeyRangeSize - 1), false, 0.0, false);
                     Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
 
                     Guid id = Guid.NewGuid();
-                    Partition<TKey> excludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, await excludedKeyRangeSize, false, false);
+                    Partition<TKey> excludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, await excludedKeyRangeSize, false, 0.0, false);
                     Partition excludedEntry = excludedPartition.ToEntry(job.Serializer);
 
                     await this.Store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);

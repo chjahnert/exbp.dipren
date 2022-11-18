@@ -676,6 +676,9 @@ namespace EXBP.Dipren.Data.Memory
         /// <param name="completed">
         ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
         /// </param>
+        /// <param name="throughput">
+        ///   The number of items processed per second.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -690,7 +693,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A partition with the specified unique identifier does not exist.
         /// </exception>
-        public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, CancellationToken cancellation)
+        public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, double throughput, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(position, nameof(position));
@@ -717,7 +720,8 @@ namespace EXBP.Dipren.Data.Memory
                     Position = position,
                     Processed = (persisted.Processed + progress),
                     Remaining = (persisted.Remaining - progress),
-                    IsCompleted = completed
+                    IsCompleted = completed,
+                    Throughput = throughput
                 };
 
                 this._partitions.Remove(result.Id);

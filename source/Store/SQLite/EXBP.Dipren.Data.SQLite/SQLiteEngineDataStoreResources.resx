@@ -160,6 +160,7 @@ CREATE TABLE IF NOT EXISTS "partitions"
   "position" TEXT NULL,
   "processed" BIGINT NOT NULL,
   "remaining" BIGINT NOT NULL,
+  "throughput" DOUBLE NOT NULL,
   "is_completed" BOOLEAN NOT NULL,
   "is_split_requested" BOOLEAN NOT NULL,
   
@@ -232,6 +233,7 @@ VALUES
   "position",
   "processed",
   "remaining",
+  "throughput",
   "is_completed",
   "is_split_requested"
 )
@@ -248,6 +250,7 @@ VALUES
   $position,
   $processed,
   $remaining,
+  $throughput,
   $is_completed,
   $is_split_requested
 );</value>
@@ -343,6 +346,7 @@ SET
   "position" = $position,
   "processed" = ("processed" + $progress),
   "remaining" = ("remaining" - $progress),
+  "throughput" = $throughput,
   "is_completed" = $completed
 WHERE
   ("id" = $id) AND
@@ -359,6 +363,7 @@ RETURNING
   "position" AS "position",
   "processed" AS "processed",
   "remaining" AS "remaining",
+  "throughput" AS "throughput",
   "is_completed" AS "is_completed",
   "is_split_requested" AS "is_split_requested";</value>
   </data>
@@ -429,6 +434,7 @@ GROUP BY
   "position" AS "position",
   "processed" AS "processed",
   "remaining" AS "remaining",
+  "throughput" AS "throughput",
   "is_completed" AS "is_completed",
   "is_split_requested" AS "is_split_requested"
 FROM
@@ -459,6 +465,7 @@ RETURNING
   "position" AS "position",
   "processed" AS "processed",
   "remaining" AS "remaining",
+  "throughput" AS "throughput",
   "is_completed" AS "is_completed",
   "is_split_requested" AS "is_split_requested"
 ORDER BY
@@ -493,6 +500,7 @@ SET
   "position" = $position,
   "processed" = $processed,
   "remaining" = $remaining,
+  "throughput" = $throughput,
   "is_split_requested" = $is_split_requested
 WHERE
   ("id" = $partition_id) AND

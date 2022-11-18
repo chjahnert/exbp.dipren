@@ -22,6 +22,7 @@ namespace EXBP.Dipren
         private readonly long _processed;
         private readonly long _remaining;
         private readonly bool _completed;
+        private readonly double _throughput;
         private readonly bool _split;
 
 
@@ -116,6 +117,14 @@ namespace EXBP.Dipren
         public bool IsCompleted => this._completed;
 
         /// <summary>
+        ///   Gets the estimated number of items processed per second.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="double"/> value that contains the estimated number of items processed per second.
+        /// </value>
+        public double Throughput => this._throughput;
+
+        /// <summary>
         ///   Gets a value indicating whether a split was requested.
         /// </summary>
         /// <value>
@@ -160,7 +169,7 @@ namespace EXBP.Dipren
         /// <param name="split">
         ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
         /// </param>
-        internal Partition(Guid id, string jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool completed, bool split)
+        internal Partition(Guid id, string jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool completed, double throughput, bool split)
         {
             Debug.Assert(jobId != null);
             Debug.Assert(created.Kind == DateTimeKind.Utc);
@@ -179,6 +188,7 @@ namespace EXBP.Dipren
             this._processed = processed;
             this._remaining = remaining;
             this._completed = completed;
+            this._throughput = throughput;
             this._split = split;
         }
     }
