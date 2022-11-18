@@ -160,6 +160,7 @@ CREATE TABLE IF NOT EXISTS "partitions"
   "position" TEXT NULL,
   "processed" BIGINT NOT NULL,
   "remaining" BIGINT NOT NULL,
+  "throughput" DOUBLE NOT NULL,
   "is_completed" BOOLEAN NOT NULL,
   "is_split_requested" BOOLEAN NOT NULL,
   
@@ -232,6 +233,7 @@ VALUES
   "position",
   "processed",
   "remaining",
+  "throughput",
   "is_completed",
   "is_split_requested"
 )
@@ -248,6 +250,7 @@ VALUES
   $position,
   $processed,
   $remaining,
+  $throughput,
   $is_completed,
   $is_split_requested
 );</value>
@@ -343,6 +346,7 @@ SET
   "position" = $position,
   "processed" = ("processed" + $progress),
   "remaining" = ("remaining" - $progress),
+  "throughput" = $throughput,
   "is_completed" = $completed
 WHERE
   ("id" = $id) AND
@@ -359,6 +363,7 @@ RETURNING
   "position" AS "position",
   "processed" AS "processed",
   "remaining" AS "remaining",
+  "throughput" AS "throughput",
   "is_completed" AS "is_completed",
   "is_split_requested" AS "is_split_requested";</value>
   </data>
@@ -398,7 +403,8 @@ WHERE
   SUM(t2."processed") AS "keys_completed",
   COALESCE(MAX(t2."updated"), t1."updated") AS "last_activity",
   COALESCE((SELECT SUM(t2."acquired") - COUNT(1) FROM "partitions" WHERE ("job_id" = t1."id") AND ("acquired" &gt; 0)), 0) AS "ownership_changes",
-  (SELECT COUNT(1) FROM "partitions" WHERE ("job_id" = t1."id") AND (t1."state" = 2) AND ("is_completed" = 0) AND ("is_split_requested" = 1)) AS "split_requests_pending"
+  (SELECT COUNT(1) FROM "partitions" WHERE ("job_id" = t1."id") AND (t1."state" = 2) AND ("is_completed" = 0) AND ("is_split_requested" = 1)) AS "split_requests_pending",
+  COALESCE((SELECT SUM("throughput") FROM "partitions" WHERE ("job_id" = t1."id") AND (t1."state" = 2) AND ("is_completed" = 0) AND ("updated" >= DATETIME($timestamp, '-' || ((t1."timeout" * 1.0) / 10000000) || ' SECOND'))), 0.0) AS "current_throughput"
 FROM
   "jobs" t1
   LEFT JOIN "partitions" t2 ON (t1."id" = t2."job_id")
@@ -429,6 +435,7 @@ GROUP BY
   "position" AS "position",
   "processed" AS "processed",
   "remaining" AS "remaining",
+  "throughput" AS "throughput",
   "is_completed" AS "is_completed",
   "is_split_requested" AS "is_split_requested"
 FROM
@@ -459,6 +466,7 @@ RETURNING
   "position" AS "position",
   "processed" AS "processed",
   "remaining" AS "remaining",
+  "throughput" AS "throughput",
   "is_completed" AS "is_completed",
   "is_split_requested" AS "is_split_requested"
 ORDER BY
@@ -493,6 +501,7 @@ SET
   "position" = $position,
   "processed" = $processed,
   "remaining" = $remaining,
+  "throughput" = $throughput,
   "is_split_requested" = $is_split_requested
 WHERE
   ("id" = $partition_id) AND

@@ -676,6 +676,9 @@ namespace EXBP.Dipren.Data.Memory
         /// <param name="completed">
         ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
         /// </param>
+        /// <param name="throughput">
+        ///   The number of items processed per second.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -690,7 +693,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A partition with the specified unique identifier does not exist.
         /// </exception>
-        public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, CancellationToken cancellation)
+        public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, double throughput, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(position, nameof(position));
@@ -717,7 +720,8 @@ namespace EXBP.Dipren.Data.Memory
                     Position = position,
                     Processed = (persisted.Processed + progress),
                     Remaining = (persisted.Remaining - progress),
-                    IsCompleted = completed
+                    IsCompleted = completed,
+                    Throughput = throughput
                 };
 
                 this._partitions.Remove(result.Id);
@@ -734,6 +738,9 @@ namespace EXBP.Dipren.Data.Memory
         /// <param name="id">
         ///   The unique identifier of the job.
         /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time, expressed in UTC time.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -748,7 +755,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation)
+        public Task<StatusReport> RetrieveJobStatusReportAsync(string id, DateTime timestamp, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
@@ -769,6 +776,7 @@ namespace EXBP.Dipren.Data.Memory
                 result = new StatusReport
                 {
                     Id = job.Id,
+                    Timestamp = timestamp,
                     Created = job.Created,
                     Updated = job.Updated,
                     BatchSize = job.BatchSize,
@@ -781,6 +789,7 @@ namespace EXBP.Dipren.Data.Memory
                     LastActivity = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id)).Max(p => p.Updated) : job.Updated,
                     OwnershipChanges = 0L,
                     PendingSplitRequests = (job.State == JobState.Processing) ? this._partitions.Count(p => (p.JobId == job.Id) && (p.IsCompleted == false) && (p.IsSplitRequested == true)) : 0L,
+                    CurrentThroughput = (job.State == JobState.Processing) ? this._partitions.Where(p => (p.JobId == job.Id) && (p.IsCompleted == false) && (p.Updated >= (timestamp - job.Timeout - job.ClockDrift))).Sum(p => p.Throughput) : 0.0,
 
                     Partitions = new StatusReport.PartitionsReport
                     {

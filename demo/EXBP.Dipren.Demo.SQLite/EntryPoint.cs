@@ -16,10 +16,10 @@ namespace EXBP.Dipren.Demo.SQLite
         private const string ENGINE_CONNECTION_STRING = "Data Source = dipren.sqlite.db; DateTimeKind = UTC;";
 
         private const int SOURCE_ITEM_COUNT = 70000;
-        private const int BATCH_PROCESSING_TIMEOUT = 1000;
-        private const int PROCESSING_THREADS = 7;
-        private const int POLLING_INTERVAL = 25;
-        private const int BATCH_SIZE = 256;
+        private const int BATCH_PROCESSING_TIMEOUT = 2000;
+        private const int PROCESSING_THREADS = 3;
+        private const int POLLING_INTERVAL = 100;
+        private const int BATCH_SIZE = 512;
 
         private static MeasurementBatchProcessor Processor { get; } = new MeasurementBatchProcessor(TARGET_CONNECTION_STRING, (BATCH_SIZE * PROCESSING_THREADS * 2));
 

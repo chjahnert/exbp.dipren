@@ -20,6 +20,15 @@ namespace EXBP.Dipren
         public string Id { get; init; }
 
         /// <summary>
+        ///   Gets the date and time the current status report was generated.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="DateTime"/> value containing the date and time the current status report was generated,
+        ///   expressed in UTC.
+        /// </value>
+        public DateTime Timestamp { get; init; }
+
+        /// <summary>
         ///   Gets the date and time when the current job was created.
         /// </summary>
         /// <value>
@@ -129,6 +138,15 @@ namespace EXBP.Dipren
         ///   A <see cref="long"/> value containing the number of active split requests.
         /// </value>
         public long? PendingSplitRequests { get; init; }
+
+        /// <summary>
+        ///   Gets the current throughput of all processing nodes working on this job.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="double"/> value that contains the current throughput of all processing nodes working on this
+        ///   job. The throughput is expressed as number of items processed per second.
+        /// </value>
+        public double CurrentThroughput { get; init; }
 
         /// <summary>
         ///   Holds the number of partitions grouped by their state.

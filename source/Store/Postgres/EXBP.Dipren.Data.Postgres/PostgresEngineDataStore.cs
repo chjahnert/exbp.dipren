@@ -268,6 +268,7 @@ namespace EXBP.Dipren.Data.Postgres
             command.Parameters.AddWithValue("@position", NpgsqlDbType.Text, ((object) partition.Position) ?? DBNull.Value);
             command.Parameters.AddWithValue("@processed", NpgsqlDbType.Bigint, partition.Processed);
             command.Parameters.AddWithValue("@remaining", NpgsqlDbType.Bigint, partition.Remaining);
+            command.Parameters.AddWithValue("@throughput", NpgsqlDbType.Double, partition.Throughput);
             command.Parameters.AddWithValue("@is_completed", NpgsqlDbType.Boolean, partition.IsCompleted);
             command.Parameters.AddWithValue("@is_split_requested", NpgsqlDbType.Boolean, partition.IsSplitRequested);
 
@@ -338,6 +339,7 @@ namespace EXBP.Dipren.Data.Postgres
                 command.Parameters.AddWithValue("@is_inclusive", NpgsqlDbType.Boolean, partitionToUpdate.IsInclusive);
                 command.Parameters.AddWithValue("@position", NpgsqlDbType.Text, ((object) partitionToUpdate.Position) ?? DBNull.Value);
                 command.Parameters.AddWithValue("@processed", NpgsqlDbType.Bigint, partitionToUpdate.Processed);
+                command.Parameters.AddWithValue("@throughput", NpgsqlDbType.Double, partitionToUpdate.Throughput);
                 command.Parameters.AddWithValue("@remaining", NpgsqlDbType.Bigint, partitionToUpdate.Remaining);
                 command.Parameters.AddWithValue("@is_split_requested", NpgsqlDbType.Boolean, partitionToUpdate.IsSplitRequested);
 
@@ -384,6 +386,9 @@ namespace EXBP.Dipren.Data.Postgres
         /// <param name="completed">
         ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
         /// </param>
+        /// <param name="throughput">
+        ///   The number of items processed per second.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -398,7 +403,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// <exception cref="UnknownIdentifierException">
         ///   A partition with the specified unique identifier does not exist.
         /// </exception>
-        public async Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, CancellationToken cancellation)
+        public async Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, double throughput, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(position, nameof(position));
@@ -426,6 +431,7 @@ namespace EXBP.Dipren.Data.Postgres
                 command.Parameters.AddWithValue("@completed", NpgsqlDbType.Boolean, completed);
                 command.Parameters.AddWithValue("@id", NpgsqlDbType.Char, COLUMN_PARTITION_ID_LENGTH, sid);
                 command.Parameters.AddWithValue("@owner", NpgsqlDbType.Varchar, COLUMN_PARTITION_OWNER_LENGTH, owner);
+                command.Parameters.AddWithValue("@throughput", NpgsqlDbType.Double, throughput);
 
                 using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
                 {
@@ -946,6 +952,9 @@ namespace EXBP.Dipren.Data.Postgres
         /// <param name="id">
         ///   The unique identifier of the job.
         /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time, expressed in UTC time.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -960,7 +969,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public async Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation)
+        public async Task<StatusReport> RetrieveJobStatusReportAsync(string id, DateTime timestamp, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
@@ -975,7 +984,10 @@ namespace EXBP.Dipren.Data.Postgres
                     Connection = connection
                 };
 
+                DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
+
                 command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
+                command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
 
                 using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
                 {
@@ -991,6 +1003,7 @@ namespace EXBP.Dipren.Data.Postgres
                     result = new StatusReport
                     {
                         Id = job.Id,
+                        Timestamp = uktsTimestamp,
                         Created = job.Created,
                         Updated = job.Updated,
                         BatchSize = job.BatchSize,
@@ -1003,6 +1016,7 @@ namespace EXBP.Dipren.Data.Postgres
                         LastActivity = reader.GetDateTime("last_activity"),
                         OwnershipChanges = reader.GetInt64("ownership_changes"),
                         PendingSplitRequests = reader.GetInt64("split_requests_pending"),
+                        CurrentThroughput = reader.GetDouble("current_throughput"),
 
                         Partitions = new StatusReport.PartitionsReport
                         {
@@ -1178,6 +1192,7 @@ namespace EXBP.Dipren.Data.Postgres
             string position = reader.GetNullableString("position");
             long processed = reader.GetInt64("processed");
             long remaining = reader.GetInt64("remaining");
+            double throughput = reader.GetDouble("throughput");
             bool completed = reader.GetBoolean("is_completed");
             bool split = reader.GetBoolean("is_split_requested");
 
@@ -1186,7 +1201,7 @@ namespace EXBP.Dipren.Data.Postgres
             created = DateTime.SpecifyKind(created, DateTimeKind.Utc);
             updated = DateTime.SpecifyKind(updated, DateTimeKind.Utc);
 
-            Partition result = new Partition(id, jobId, created, updated, first, last, inclusive, position, processed, remaining, owner, completed, split);
+            Partition result = new Partition(id, jobId, created, updated, first, last, inclusive, position, processed, remaining, owner, completed, throughput, split);
 
             return result;
         }

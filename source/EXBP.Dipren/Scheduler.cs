@@ -100,7 +100,13 @@ namespace EXBP.Dipren
         ///   operation.
         /// </returns>
         public async Task<StatusReport> GetStatusReportAsync(string id, CancellationToken cancellation = default)
-            => await this.Store.RetrieveJobStatusReportAsync(id, cancellation);
+        {
+            DateTime timestamp = this.Clock.GetDateTime();
+
+            StatusReport result = await this.Store.RetrieveJobStatusReportAsync(id, timestamp, cancellation);
+
+            return result;
+        }
 
         /// <summary>
         ///   Creates a job entry for the specified job in the engine data store.
@@ -202,7 +208,7 @@ namespace EXBP.Dipren
             }
 
             DateTime timestampPartitionCreated = this.Clock.GetDateTime();
-            Partition<TKey> partition = new Partition<TKey>(partitionId, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false, false);
+            Partition<TKey> partition = new Partition<TKey>(partitionId, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false, 0.0, false);
             Partition result = partition.ToEntry(job.Serializer);
 
             await this.Store.InsertPartitionAsync(result, cancellation);

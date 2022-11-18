@@ -197,6 +197,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;position&quot;,
         ///  &quot;processed&quot;,
         ///  &quot;remaining&quot;,
+        ///  &quot;throughput&quot;,
         ///  &quot;is_completed&quot;,
         ///  &quot;is_split_requested&quot;
         ///)
@@ -213,6 +214,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  $position,
         ///  $processed,
         ///  $remaining,
+        ///  $throughput,
         ///  $is_completed,
         ///  $is_split_requested
         ///);.
@@ -338,6 +340,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;position&quot; = $position,
         ///  &quot;processed&quot; = (&quot;processed&quot; + $progress),
         ///  &quot;remaining&quot; = (&quot;remaining&quot; - $progress),
+        ///  &quot;throughput&quot; = $throughput,
         ///  &quot;is_completed&quot; = $completed
         ///WHERE
         ///  (&quot;id&quot; = $id) AND
@@ -351,8 +354,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;first&quot; AS &quot;first&quot;,
         ///  &quot;last&quot; AS &quot;last&quot;,
         ///  &quot;is_inclusive&quot; AS &quot;is_inclusive&quot;,
-        ///  &quot;position&quot; AS &quot;position&quot;,
-        ///  &quot;processed&quot; AS &quot;proce [rest of string was truncated]&quot;;.
+        ///  &quot;position&quot; AS &quot;posi [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryReportProgress {
             get {
@@ -417,6 +419,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;position&quot; AS &quot;position&quot;,
         ///  &quot;processed&quot; AS &quot;processed&quot;,
         ///  &quot;remaining&quot; AS &quot;remaining&quot;,
+        ///  &quot;throughput&quot; AS &quot;throughput&quot;,
         ///  &quot;is_completed&quot; AS &quot;is_completed&quot;,
         ///  &quot;is_split_requested&quot; AS &quot;is_split_requested&quot;
         ///FROM
@@ -493,6 +496,7 @@ namespace EXBP.Dipren.Data.SQLite {
         ///  &quot;position&quot; = $position,
         ///  &quot;processed&quot; = $processed,
         ///  &quot;remaining&quot; = $remaining,
+        ///  &quot;throughput&quot; = $throughput,
         ///  &quot;is_split_requested&quot; = $is_split_requested
         ///WHERE
         ///  (&quot;id&quot; = $partition_id) AND

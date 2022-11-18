@@ -186,6 +186,7 @@ CREATE TABLE "dipren"."partitions"
   "position" TEXT NULL,
   "processed" BIGINT NOT NULL,
   "remaining" BIGINT NOT NULL,
+  "throughput" DOUBLE PRECISION NOT NULL,
   "is_completed" BOOLEAN NOT NULL,
   "is_split_requested" BOOLEAN NOT NULL,
 
@@ -208,6 +209,7 @@ COMMENT ON COLUMN "dipren"."partitions"."is_inclusive" IS 'Indicates whether the
 COMMENT ON COLUMN "dipren"."partitions"."position" IS 'The last key that was processed.';
 COMMENT ON COLUMN "dipren"."partitions"."processed" IS 'The number of keys processed so far.';
 COMMENT ON COLUMN "dipren"."partitions"."remaining" IS 'The estimated number of keys left to process.';
+COMMENT ON COLUMN "dipren"."partitions"."throughput" IS 'The number of keys processed per second.';
 COMMENT ON COLUMN "dipren"."partitions"."is_completed" IS 'Indicates whether the entire partition has been processed.';
 COMMENT ON COLUMN "dipren"."partitions"."is_split_requested" IS 'Indicates whether a split has been requested.';
 COMMENT ON INDEX "dipren"."ix_partitions_by_state" IS 'Use when an idle processing node tries to acquire a partition.';
