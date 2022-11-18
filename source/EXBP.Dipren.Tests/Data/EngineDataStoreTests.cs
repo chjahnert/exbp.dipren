@@ -12,7 +12,7 @@ namespace EXBP.Dipren.Tests.Data
     public abstract class EngineDataStoreTests
     {
         private readonly int DefaultBachSize = 66;
-        private readonly TimeSpan DefaultTimeout = TimeSpan.FromMilliseconds(1277);
+        private readonly TimeSpan DefaultTimeout = TimeSpan.FromMilliseconds(10200);
         private readonly TimeSpan DefaultClockDrift = TimeSpan.FromMilliseconds(2465);
 
         protected abstract Task<IEngineDataStore> OnCreateEngineDataStoreAsync();
@@ -1168,7 +1168,7 @@ namespace EXBP.Dipren.Tests.Data
         [Test]
         public async Task RetrieveJobStatusReportAsync_JobIsInitializing_ReturnsCorrectResult()
         {
-            DateTime timestamp = DateTime.UtcNow;
+            DateTime timestamp = new DateTime(2022, 11, 17, 16, 21, 21, DateTimeKind.Utc);
 
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1207,7 +1207,7 @@ namespace EXBP.Dipren.Tests.Data
         [Test]
         public async Task RetrieveJobStatusReportAsync_JobIsReady_ReturnsCorrectResult()
         {
-            DateTime timestamp = DateTime.UtcNow;
+            DateTime timestamp = new DateTime(2022, 11, 17, 16, 21, 21, DateTimeKind.Utc);
 
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1253,7 +1253,7 @@ namespace EXBP.Dipren.Tests.Data
         [Test]
         public async Task RetrieveJobStatusReportAsync_JobIsProcessing_ReturnsCorrectResult()
         {
-            DateTime timestamp = DateTime.UtcNow;
+            DateTime timestamp = new DateTime(2022, 9, 12, 17, 48, 41, DateTimeKind.Utc);
 
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1348,13 +1348,14 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Progress.Total, Is.EqualTo(71L));
             Assert.That(result.Progress.Ratio, Is.EqualTo(0.338).Within(0.001D));
 
+            Assert.That(result.Throughput, Is.EqualTo(13968.3).Within(0.1));
             Assert.That(result.PendingSplitRequests, Is.EqualTo(2));
         }
 
         [Test]
         public async Task RetrieveJobStatusReportAsync_JobIsCompleted_ReturnsCorrectResult()
         {
-            DateTime timestamp = DateTime.UtcNow;
+            DateTime timestamp = new DateTime(2022, 9, 12, 17, 48, 35, DateTimeKind.Utc);
 
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1449,6 +1450,7 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(result.Progress.Total, Is.EqualTo(71L));
             Assert.That(result.Progress.Ratio, Is.EqualTo(1D));
 
+            Assert.That(result.Throughput, Is.EqualTo(0D));
             Assert.That(result.PendingSplitRequests, Is.EqualTo(0));
         }
 
