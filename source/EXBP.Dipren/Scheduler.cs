@@ -100,7 +100,13 @@ namespace EXBP.Dipren
         ///   operation.
         /// </returns>
         public async Task<StatusReport> GetStatusReportAsync(string id, CancellationToken cancellation = default)
-            => await this.Store.RetrieveJobStatusReportAsync(id, cancellation);
+        {
+            DateTime timestamp = this.Clock.GetDateTime();
+
+            StatusReport result = await this.Store.RetrieveJobStatusReportAsync(id, timestamp, cancellation);
+
+            return result;
+        }
 
         /// <summary>
         ///   Creates a job entry for the specified job in the engine data store.

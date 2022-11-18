@@ -1154,7 +1154,7 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.RetrieveJobStatusReportAsync(null, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.RetrieveJobStatusReportAsync(null, DateTime.UtcNow, CancellationToken.None));
         }
 
         [Test]
@@ -1162,7 +1162,7 @@ namespace EXBP.Dipren.Tests.Data
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
-            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrieveJobStatusReportAsync("DPJ-0001", CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrieveJobStatusReportAsync("DPJ-0001", DateTime.UtcNow, CancellationToken.None));
         }
 
         [Test]
@@ -1172,7 +1172,7 @@ namespace EXBP.Dipren.Tests.Data
 
             Job job = await this.EnsurePersistedJobAsync(store, JobState.Initializing);
 
-            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, DateTime.UtcNow, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
@@ -1215,7 +1215,7 @@ namespace EXBP.Dipren.Tests.Data
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
-            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, DateTime.UtcNow, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
@@ -1314,7 +1314,7 @@ namespace EXBP.Dipren.Tests.Data
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
 
-            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, DateTime.UtcNow, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
@@ -1412,7 +1412,7 @@ namespace EXBP.Dipren.Tests.Data
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
 
-            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, CancellationToken.None);
+            StatusReport result = await store.RetrieveJobStatusReportAsync(job.Id, DateTime.UtcNow, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
@@ -1502,8 +1502,8 @@ namespace EXBP.Dipren.Tests.Data
             public Task<Job> MarkJobAsFailedAsync(string id, DateTime timestamp, string error, CancellationToken cancellation)
                 => this._store.MarkJobAsFailedAsync(id, timestamp, error, cancellation);
 
-            public Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation)
-                => this._store.RetrieveJobStatusReportAsync(id, cancellation);
+            public Task<StatusReport> RetrieveJobStatusReportAsync(string id, DateTime timestamp, CancellationToken cancellation)
+                => this._store.RetrieveJobStatusReportAsync(id, timestamp, cancellation);
         }
     }
 }

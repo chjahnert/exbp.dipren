@@ -738,6 +738,9 @@ namespace EXBP.Dipren.Data.Memory
         /// <param name="id">
         ///   The unique identifier of the job.
         /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time, expressed in UTC time.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -752,7 +755,7 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation)
+        public Task<StatusReport> RetrieveJobStatusReportAsync(string id, DateTime timestamp, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
@@ -770,8 +773,6 @@ namespace EXBP.Dipren.Data.Memory
                 Job job = this._jobs[id];
                 int partitions = this._partitions.Count(p => (p.JobId == job.Id));
 
-                DateTime active = (DateTime.UtcNow - job.Timeout - job.ClockDrift);
-
                 result = new StatusReport
                 {
                     Id = job.Id,
@@ -787,7 +788,7 @@ namespace EXBP.Dipren.Data.Memory
                     LastActivity = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id)).Max(p => p.Updated) : job.Updated,
                     OwnershipChanges = 0L,
                     PendingSplitRequests = (job.State == JobState.Processing) ? this._partitions.Count(p => (p.JobId == job.Id) && (p.IsCompleted == false) && (p.IsSplitRequested == true)) : 0L,
-                    Throughput = (job.State == JobState.Processing) ? this._partitions.Where(p => (p.JobId == job.Id) && (p.IsCompleted == false) && (p.Updated >= active)).Sum(p => p.Throughput) : 0.0,
+                    Throughput = (job.State == JobState.Processing) ? this._partitions.Where(p => (p.JobId == job.Id) && (p.IsCompleted == false) && (p.Updated >= (timestamp - job.Timeout - job.ClockDrift))).Sum(p => p.Throughput) : 0.0,
 
                     Partitions = new StatusReport.PartitionsReport
                     {

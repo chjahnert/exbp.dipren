@@ -324,6 +324,9 @@ namespace EXBP.Dipren.Data
         /// <param name="id">
         ///   The unique identifier of the job.
         /// </param>
+        /// <param name="timestamp">
+        ///   The current date and time, expressed in UTC time.
+        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
@@ -338,6 +341,6 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<StatusReport> RetrieveJobStatusReportAsync(string id, CancellationToken cancellation);
+        public Task<StatusReport> RetrieveJobStatusReportAsync(string id, DateTime timestamp, CancellationToken cancellation);
     }
 }
