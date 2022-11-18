@@ -140,10 +140,11 @@ namespace EXBP.Dipren
         public long? PendingSplitRequests { get; init; }
 
         /// <summary>
-        ///   Gets the number of items processed per second.
+        ///   Gets the current throughput of all processing nodes working on this job.
         /// </summary>
         /// <value>
-        ///   A <see cref="double"/> value that contains the number of items processed per second.
+        ///   A <see cref="double"/> value that contains the current throughput of all processing nodes working on this
+        ///   job. The throughput is expressed as number of items processed per second.
         /// </value>
         public double Throughput { get; init; }
 
