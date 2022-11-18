@@ -131,6 +131,14 @@ namespace EXBP.Dipren
         public long? PendingSplitRequests { get; init; }
 
         /// <summary>
+        ///   Gets the number of items processed per second.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="double"/> value that contains the number of items processed per second.
+        /// </value>
+        public double Throughput { get; init; }
+
+        /// <summary>
         ///   Holds the number of partitions grouped by their state.
         /// </summary>
         public class PartitionsReport

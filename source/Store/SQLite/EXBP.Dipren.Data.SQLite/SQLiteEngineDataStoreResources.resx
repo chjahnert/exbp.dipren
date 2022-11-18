@@ -403,7 +403,8 @@ WHERE
   SUM(t2."processed") AS "keys_completed",
   COALESCE(MAX(t2."updated"), t1."updated") AS "last_activity",
   COALESCE((SELECT SUM(t2."acquired") - COUNT(1) FROM "partitions" WHERE ("job_id" = t1."id") AND ("acquired" &gt; 0)), 0) AS "ownership_changes",
-  (SELECT COUNT(1) FROM "partitions" WHERE ("job_id" = t1."id") AND (t1."state" = 2) AND ("is_completed" = 0) AND ("is_split_requested" = 1)) AS "split_requests_pending"
+  (SELECT COUNT(1) FROM "partitions" WHERE ("job_id" = t1."id") AND (t1."state" = 2) AND ("is_completed" = 0) AND ("is_split_requested" = 1)) AS "split_requests_pending",
+  COALESCE((SELECT SUM("throughput") FROM "partitions" WHERE ("job_id" = t1."id") AND (t1."state" = 2) AND ("is_completed" = 0) AND (DATETIME("updated", '+' || ((t1."timeout" * 1.0) / 10000000) || ' SECOND') >= DATETIME('NOW'))), 0.0) AS "throughput"
 FROM
   "jobs" t1
   LEFT JOIN "partitions" t2 ON (t1."id" = t2."job_id")

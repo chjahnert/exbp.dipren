@@ -770,6 +770,8 @@ namespace EXBP.Dipren.Data.Memory
                 Job job = this._jobs[id];
                 int partitions = this._partitions.Count(p => (p.JobId == job.Id));
 
+                DateTime active = (DateTime.UtcNow - job.Timeout - job.ClockDrift);
+
                 result = new StatusReport
                 {
                     Id = job.Id,
@@ -785,6 +787,7 @@ namespace EXBP.Dipren.Data.Memory
                     LastActivity = (partitions > 0) ? this._partitions.Where(p => (p.JobId == job.Id)).Max(p => p.Updated) : job.Updated,
                     OwnershipChanges = 0L,
                     PendingSplitRequests = (job.State == JobState.Processing) ? this._partitions.Count(p => (p.JobId == job.Id) && (p.IsCompleted == false) && (p.IsSplitRequested == true)) : 0L,
+                    Throughput = (job.State == JobState.Processing) ? this._partitions.Where(p => (p.JobId == job.Id) && (p.IsCompleted == false) && (p.Updated >= active)).Sum(p => p.Throughput) : 0.0,
 
                     Partitions = new StatusReport.PartitionsReport
                     {
