@@ -1,4 +1,6 @@
 ﻿
+using Npgsql;
+
 namespace EXBP.Dipren.Demo.Postgres.Commands
 {
     internal static class Remove
@@ -7,14 +9,17 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
         {
             int result = 0;
 
+            NpgsqlDataSourceBuilder builder = new NpgsqlDataSourceBuilder(connectionString);
+            NpgsqlDataSource dataSource = builder.Build();
+
             try
             {
                 Console.Write(RemoveResources.MessageRemovingDemoSchema);
-                await Database.ExecuteNonQueryAsync(connectionString, RemoveQueries.DropDemoDatabaseSchema);
+                await Database.ExecuteNonQueryAsync(dataSource, RemoveQueries.DropDemoDatabaseSchema);
                 Console.WriteLine(RemoveResources.MessageDone);
 
                 Console.Write(RemoveResources.MessageRemovingDiprenSchema);
-                await Database.ExecuteNonQueryAsync(connectionString, RemoveQueries.DropDiprenDatabaseSchema);
+                await Database.ExecuteNonQueryAsync(dataSource, RemoveQueries.DropDiprenDatabaseSchema);
                 Console.WriteLine(RemoveResources.MessageDone);
             }
             catch (Exception ex)

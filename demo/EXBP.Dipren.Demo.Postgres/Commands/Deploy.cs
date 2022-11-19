@@ -1,4 +1,6 @@
 ﻿
+using Npgsql;
+
 namespace EXBP.Dipren.Demo.Postgres.Commands
 {
     internal static class Deploy
@@ -7,20 +9,23 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
         {
             int result = 0;
 
+            NpgsqlDataSourceBuilder builder = new NpgsqlDataSourceBuilder(connectionString);
+            NpgsqlDataSource dataSource = builder.Build();
+
             try
             {
                 Console.Write(DeployResources.MessageCreatingDemoSchema);
-                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.DropDemoDatabaseSchema);
-                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.CreateDemoDatabaseSchema);
+                await Database.ExecuteNonQueryAsync(dataSource, DeployQueries.DropDemoDatabaseSchema);
+                await Database.ExecuteNonQueryAsync(dataSource, DeployQueries.CreateDemoDatabaseSchema);
                 Console.WriteLine(DeployResources.MessageDone);
 
                 Console.Write(DeployResources.MessageCreatingDiprenSchema);
-                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.DropDiprenDatabaseSchema);
-                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.CreateDiprenDatabaseSchema);
+                await Database.ExecuteNonQueryAsync(dataSource, DeployQueries.DropDiprenDatabaseSchema);
+                await Database.ExecuteNonQueryAsync(dataSource, DeployQueries.CreateDiprenDatabaseSchema);
                 Console.WriteLine(DeployResources.MessageDone);
 
                 Console.Write(DeployResources.MessageGeneratingDimensions, size);
-                await Database.ExecuteNonQueryAsync(connectionString, DeployQueries.GenerateCuboids, ("@limit", size));
+                await Database.ExecuteNonQueryAsync(dataSource, DeployQueries.GenerateCuboids, ("@limit", size));
                 Console.WriteLine(DeployResources.MessageDone);
             }
             catch (Exception ex)
