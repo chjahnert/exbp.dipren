@@ -9,6 +9,11 @@ CREATE SCHEMA "dipren";
 COMMENT ON SCHEMA "dipren" IS 'Defines the Dipren database objects';
 
 
+CREATE TYPE "dipren"."job_state" AS ENUM ('initializing', 'ready', 'processing', 'completed', 'failed');
+
+COMMENT ON TYPE "dipren"."job_state" IS 'Enumerates job states.';
+
+
 CREATE TABLE "dipren"."jobs"
 (
   "id" VARCHAR(256) NOT NULL,
@@ -19,7 +24,7 @@ CREATE TABLE "dipren"."jobs"
   "clock_drift" BIGINT NOT NULL,
   "started" TIMESTAMP NULL,
   "completed" TIMESTAMP NULL,
-  "state" INTEGER NOT NULL,
+  "state" "dipren"."job_state" NOT NULL,
   "error" TEXT NULL,
   
   CONSTRAINT "pk_jobs" PRIMARY KEY ("id")
