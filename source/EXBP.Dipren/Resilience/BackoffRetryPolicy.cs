@@ -10,8 +10,8 @@ namespace EXBP.Dipren.Resilience
     public class BackoffRetryPolicy
     {
         private readonly int _attempts;
-        private readonly Func<int, Exception, TimeSpan> _getRetryDelay;
-        private readonly Func<int, Exception, bool> _isTransientError;
+        private readonly Func<int, TimeSpan> _getRetryDelay;
+        private readonly Func<Exception, bool> _isTransientError;
 
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace EXBP.Dipren.Resilience
         /// <exception cref="ArgumentException">
         ///   Argument <
         /// </exception>
-        public BackoffRetryPolicy(int retries, Func<int, Exception, TimeSpan> getRetryDelay, Func<int, Exception, bool> isTransientError)
+        public BackoffRetryPolicy(int retries, Func<int, TimeSpan> getRetryDelay, Func<Exception, bool> isTransientError)
         {
             Assert.ArgumentIsGreaterOrEqual(retries, 0, nameof(retries));
             Assert.ArgumentIsNotNull(getRetryDelay, nameof(getRetryDelay));
@@ -41,26 +41,24 @@ namespace EXBP.Dipren.Resilience
             this._isTransientError = isTransientError;
         }
 
+
         /// <summary>
         ///   Executes the specified action.
         /// </summary>
         /// <param name="action">
         ///   The action to be executed.
         /// </param>
-        /// <returns>
-        ///   An <see cref="int"/> value that indicates the total number of attempts performed.
-        /// </returns>
-        public int Execute(Action action)
+        public void Execute(Action action)
         {
             Assert.ArgumentIsNotNull(action, nameof(action));
 
             bool retry = false;
-            int result = 0;
+            int attempt = 0;
 
             do
             {
                 retry = false;
-                result += 1;
+                attempt += 1;
 
                 try
                 {
@@ -68,13 +66,13 @@ namespace EXBP.Dipren.Resilience
                 }
                 catch (Exception exception)
                 {
-                    if (result < this._attempts)
+                    if (attempt < this._attempts)
                     {
-                        retry = this._isTransientError.Invoke(result, exception);
+                        retry = this._isTransientError.Invoke(exception);
 
                         if (retry == true)
                         {
-                            TimeSpan duration = this._getRetryDelay.Invoke(result, exception);
+                            TimeSpan duration = this._getRetryDelay.Invoke(attempt);
 
                             if (duration >= TimeSpan.Zero)
                             {
@@ -93,23 +91,10 @@ namespace EXBP.Dipren.Resilience
                 }
             }
             while (retry == true);
-
-            return result;
         }
 
         /// <summary>
-        ///   Runs the specified action.
-        /// </summary>
-        /// <param name="action">
-        ///   The action to be executed.
-        /// </param>
-        /// <returns>
-        ///   An <see cref="int"/> value that indicates the total number of execution attempts performed.
-        /// </returns>
-        public async Task<int> ExecuteAsync(Action action) => await this.ExecuteAsync(action, CancellationToken.None);
-
-        /// <summary>
-        ///   Runs the specified action.
+        ///   Executes the specified action.
         /// </summary>
         /// <param name="action">
         ///   The action to be executed.
@@ -118,19 +103,19 @@ namespace EXBP.Dipren.Resilience
         ///   A <see cref="CancellationToken"/> value that can be used to cancel the operation.
         /// </param>
         /// <returns>
-        ///   An <see cref="int"/> value that indicates the total number of execution attempts performed.
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        public async Task<int> ExecuteAsync(Action action, CancellationToken cancellation)
+        public async Task ExecuteAsync(Action action, CancellationToken cancellation = default)
         {
             Assert.ArgumentIsNotNull(action, nameof(action));
 
             bool retry = false;
-            int result = 0;
+            int attempt = 0;
 
             do
             {
                 retry = false;
-                result += 1;
+                attempt += 1;
 
                 try
                 {
@@ -138,13 +123,13 @@ namespace EXBP.Dipren.Resilience
                 }
                 catch (Exception exception)
                 {
-                    if (result < this._attempts)
+                    if (attempt < this._attempts)
                     {
-                        retry = this._isTransientError.Invoke(result, exception);
+                        retry = this._isTransientError.Invoke(exception);
 
                         if (retry == true)
                         {
-                            TimeSpan duration = this._getRetryDelay.Invoke(result, exception);
+                            TimeSpan duration = this._getRetryDelay.Invoke(attempt);
 
                             if (duration >= TimeSpan.Zero)
                             {
@@ -163,20 +148,7 @@ namespace EXBP.Dipren.Resilience
                 }
             }
             while (retry == true);
-
-            return result;
         }
-
-        /// <summary>
-        ///   Runs the specified asynchronous method.
-        /// </summary>
-        /// <param name="action">
-        ///   The asynchronous action to be executed.
-        /// </param>
-        /// <returns>
-        ///   An <see cref="int"/> value that indicates the total number of execution attempts performed.
-        /// </returns>
-        public async Task<int> ExecuteAsync(Func<Task> action) => await this.ExecuteAsync(action, CancellationToken.None);
 
         /// <summary>
         ///   Runs the specified asynchronous method.
@@ -190,17 +162,17 @@ namespace EXBP.Dipren.Resilience
         /// <returns>
         ///   An <see cref="int"/> value that indicates the total number of execution attempts performed.
         /// </returns>
-        public async Task<int> ExecuteAsync(Func<Task> action, CancellationToken cancellation)
+        public async Task ExecuteAsync(Func<Task> action, CancellationToken cancellation = default)
         {
             Assert.ArgumentIsNotNull(action, nameof(action));
 
             bool retry = false;
-            int result = 0;
+            int attempt = 0;
 
             do
             {
                 retry = false;
-                result += 1;
+                attempt += 1;
 
                 try
                 {
@@ -208,13 +180,71 @@ namespace EXBP.Dipren.Resilience
                 }
                 catch (Exception exception)
                 {
-                    if (result < this._attempts)
+                    if (attempt < this._attempts)
                     {
-                        retry = this._isTransientError.Invoke(result, exception);
+                        retry = this._isTransientError.Invoke(exception);
 
                         if (retry == true)
                         {
-                            TimeSpan duration = this._getRetryDelay.Invoke(result, exception);
+                            TimeSpan duration = this._getRetryDelay.Invoke(attempt);
+
+                            if (duration >= TimeSpan.Zero)
+                            {
+                                await Task.Delay(duration, cancellation);
+                            }
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+            while (retry == true);
+        }
+
+        /// <summary>
+        ///   Runs the specified asynchronous method.
+        /// </summary>
+        /// <param name="action">
+        ///   The asynchronous action to be executed.
+        /// </param>
+        /// <param name="cancellation">
+        ///   A <see cref="CancellationToken"/> value that can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///   An <see cref="int"/> value that indicates the total number of execution attempts performed.
+        /// </returns>
+        public async Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> action, CancellationToken cancellation = default)
+        {
+            Assert.ArgumentIsNotNull(action, nameof(action));
+
+            bool retry = false;
+            int attempt = 0;
+            TResult result = default;
+
+            do
+            {
+                retry = false;
+                attempt += 1;
+
+                try
+                {
+                    result = await action.Invoke();
+                }
+                catch (Exception exception)
+                {
+                    if (attempt < this._attempts)
+                    {
+                        retry = this._isTransientError.Invoke(exception);
+
+                        if (retry == true)
+                        {
+                            TimeSpan duration = this._getRetryDelay.Invoke(attempt);
 
                             if (duration >= TimeSpan.Zero)
                             {

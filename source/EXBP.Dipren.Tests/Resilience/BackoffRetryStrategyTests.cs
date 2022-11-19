@@ -12,7 +12,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public async Task Execute_PermanentErrorOccurrs_NoRetryIsAttempted()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(1, (attempt, exception) => TimeSpan.Zero, (attempt, exception) => false);
+            BackoffRetryPolicy policy = new BackoffRetryPolicy(1, attempt => TimeSpan.Zero, exception => false);
 
             int attempts = 0;
             int thrown = 0;
@@ -36,7 +36,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public void Execute_TransientErrorOccurrs_RetryIsAttempted()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, (attempt, exception) => TimeSpan.Zero, (attempt, exception) => true);
+            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
 
             int attempts = 0;
 
@@ -53,11 +53,11 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public async Task Execute_TransientErrorOccurrs_StopsAfterSuccessfulAttempts()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, (attempt, exception) => TimeSpan.Zero, (attempt, exception) => true);
+            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
 
             int executions = 0;
 
-            int attempts = await policy.ExecuteAsync(() => {
+            await policy.ExecuteAsync(() => {
 
                executions += 1;
 
@@ -67,7 +67,7 @@ namespace EXBP.Dipren.Tests.Resilience
                }
             });
 
-            Assert.That(attempts, Is.EqualTo(2));
+            Assert.That(executions, Is.EqualTo(2));
         }
     }
 }
