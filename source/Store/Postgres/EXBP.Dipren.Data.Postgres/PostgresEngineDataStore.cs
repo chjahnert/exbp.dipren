@@ -31,7 +31,7 @@ namespace EXBP.Dipren.Data.Postgres
         private const int COLUMN_PARTITION_OWNER_LENGTH = 256;
 
 
-        private readonly string _connectionString;
+        private readonly NpgsqlDataSource _dataSource;
 
 
         /// <summary>
@@ -42,7 +42,9 @@ namespace EXBP.Dipren.Data.Postgres
         /// </param>
         public PostgresEngineDataStore(string connectionString)
         {
-            this._connectionString = connectionString;
+            NpgsqlDataSourceBuilder builder = new NpgsqlDataSourceBuilder(connectionString);
+
+            this._dataSource = builder.Build();
         }
 
 
@@ -59,19 +61,9 @@ namespace EXBP.Dipren.Data.Postgres
         /// </returns>
         public async Task<long> CountJobsAsync(CancellationToken cancellation)
         {
-            long result = 0L;
+            await using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryCountJobs);
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
-            {
-                using NpgsqlCommand command = new NpgsqlCommand
-                {
-                    CommandText = PostgresEngineDataStoreResources.QueryCountJobs,
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
-
-                result = (long) await command.ExecuteScalarAsync(cancellation);
-            }
+            long result = (long) await command.ExecuteScalarAsync(cancellation);
 
             return result;
         }
@@ -96,30 +88,22 @@ namespace EXBP.Dipren.Data.Postgres
 
             long result = 0L;
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            await using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryCountIncompletePartitions);
+
+            command.Parameters.AddWithValue("@job_id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, jobId);
+
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                using NpgsqlCommand command = new NpgsqlCommand
+                await reader.ReadAsync(cancellation);
+
+                long jobCount = reader.GetInt64("job_count");
+
+                if (jobCount == 0L)
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryCountIncompletePartitions,
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
-
-                command.Parameters.AddWithValue("@job_id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, jobId);
-
-                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
-                {
-                    await reader.ReadAsync(cancellation);
-
-                    long jobCount = reader.GetInt64("job_count");
-
-                    if (jobCount == 0L)
-                    {
-                        this.RaiseErrorUnknownJobIdentifier();
-                    }
-
-                    result = reader.GetInt64("partition_count");
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
+
+                result = reader.GetInt64("partition_count");
             }
 
             return result;
@@ -148,40 +132,32 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            await using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryInsertJob);
+
+            DateTime uktsCreated = DateTime.SpecifyKind(job.Created, DateTimeKind.Unspecified);
+            DateTime uktsUpdated = DateTime.SpecifyKind(job.Updated, DateTimeKind.Unspecified);
+            object uktsStarted = ((job.Started != null) ? DateTime.SpecifyKind(job.Started.Value, DateTimeKind.Unspecified) : DBNull.Value);
+            object uktsCompleted = ((job.Completed != null) ? DateTime.SpecifyKind(job.Completed.Value, DateTimeKind.Unspecified) : DBNull.Value);
+            object error = ((job.Error != null) ? job.Error : DBNull.Value);
+
+            command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, job.Id);
+            command.Parameters.AddWithValue("@created", NpgsqlDbType.Timestamp, uktsCreated);
+            command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsUpdated);
+            command.Parameters.AddWithValue("@batch_size", NpgsqlDbType.Integer, job.BatchSize);
+            command.Parameters.AddWithValue("@timeout", NpgsqlDbType.Bigint, job.Timeout.Ticks);
+            command.Parameters.AddWithValue("@clock_drift", NpgsqlDbType.Bigint, job.ClockDrift.Ticks);
+            command.Parameters.AddWithValue("@started", NpgsqlDbType.Timestamp, uktsStarted);
+            command.Parameters.AddWithValue("@completed", NpgsqlDbType.Timestamp, uktsCompleted);
+            command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) job.State);
+            command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, error);
+
+            try
             {
-                using NpgsqlCommand command = new NpgsqlCommand
-                {
-                    CommandText = PostgresEngineDataStoreResources.QueryInsertJob,
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
-
-                DateTime uktsCreated = DateTime.SpecifyKind(job.Created, DateTimeKind.Unspecified);
-                DateTime uktsUpdated = DateTime.SpecifyKind(job.Updated, DateTimeKind.Unspecified);
-                object uktsStarted = ((job.Started != null) ? DateTime.SpecifyKind(job.Started.Value, DateTimeKind.Unspecified) : DBNull.Value);
-                object uktsCompleted = ((job.Completed != null) ? DateTime.SpecifyKind(job.Completed.Value, DateTimeKind.Unspecified) : DBNull.Value);
-                object error = ((job.Error != null) ? job.Error : DBNull.Value);
-
-                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, job.Id);
-                command.Parameters.AddWithValue("@created", NpgsqlDbType.Timestamp, uktsCreated);
-                command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsUpdated);
-                command.Parameters.AddWithValue("@batch_size", NpgsqlDbType.Integer, job.BatchSize);
-                command.Parameters.AddWithValue("@timeout", NpgsqlDbType.Bigint, job.Timeout.Ticks);
-                command.Parameters.AddWithValue("@clock_drift", NpgsqlDbType.Bigint, job.ClockDrift.Ticks);
-                command.Parameters.AddWithValue("@started", NpgsqlDbType.Timestamp, uktsStarted);
-                command.Parameters.AddWithValue("@completed", NpgsqlDbType.Timestamp, uktsCompleted);
-                command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) job.State);
-                command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, error);
-
-                try
-                {
-                    await command.ExecuteNonQueryAsync(cancellation);
-                }
-                catch (PostgresException ex) when ((ex.SqlState == SQL_STATE_PRIMARY_KEY_VIOLATION) && (ex.ConstraintName == CONSTRAINT_PK_JOBS))
-                {
-                    this.RaiseErrorDuplicateJobIdentifier(ex);
-                }
+                await command.ExecuteNonQueryAsync(cancellation);
+            }
+            catch (PostgresException ex) when ((ex.SqlState == SQL_STATE_PRIMARY_KEY_VIOLATION) && (ex.ConstraintName == CONSTRAINT_PK_JOBS))
+            {
+                this.RaiseErrorDuplicateJobIdentifier(ex);
             }
         }
 
@@ -208,7 +184,7 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(partition, nameof(partition));
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
             {
                 await this.InsertPartitionAsync(connection, null, partition, cancellation);
             }
@@ -243,7 +219,6 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Debug.Assert(connection != null);
             Debug.Assert(partition != null);
-
 
             using NpgsqlCommand command = new NpgsqlCommand
             {
@@ -317,7 +292,7 @@ namespace EXBP.Dipren.Data.Postgres
             Assert.ArgumentIsNotNull(partitionToUpdate, nameof(partitionToUpdate));
             Assert.ArgumentIsNotNull(partitionToInsert, nameof(partitionToInsert));
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
             {
                 using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
 
@@ -410,7 +385,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             Partition result = null;
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
             {
                 using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
 
@@ -480,30 +455,22 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
+            await using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryRetrieveJobById);
+
+            command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, 256, id);
+
             Job result = null;
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                using NpgsqlCommand command = new NpgsqlCommand
+                bool exists = await reader.ReadAsync(cancellation);
+
+                if (exists == false)
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryRetrieveJobById,
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
-
-                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, 256, id);
-
-                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
-                {
-                    bool exists = await reader.ReadAsync(cancellation);
-
-                    if (exists == false)
-                    {
-                        this.RaiseErrorUnknownJobIdentifier();
-                    }
-
-                    result = this.ReadJob(reader);
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
+
+                result = this.ReadJob(reader);
             }
 
             return result;
@@ -527,32 +494,24 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
+            using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryRetrievePartitionById);
+
+            string sid = id.ToString("d");
+
+            command.Parameters.AddWithValue("@id", NpgsqlDbType.Char, 36, sid);
+
             Partition result = null;
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                using NpgsqlCommand command = new NpgsqlCommand
+                bool exists = await reader.ReadAsync(cancellation);
+
+                if (exists == false)
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryRetrievePartitionById,
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
-
-                string sid = id.ToString("d");
-
-                command.Parameters.AddWithValue("@id", NpgsqlDbType.Char, 36, sid);
-
-                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
-                {
-                    bool exists = await reader.ReadAsync(cancellation);
-
-                    if (exists == false)
-                    {
-                        this.RaiseErrorUnknownPartitionIdentifier();
-                    }
-
-                    result = this.ReadPartition(reader);
+                    this.RaiseErrorUnknownPartitionIdentifier();
                 }
+
+                result = this.ReadPartition(reader);
             }
 
             return result;
@@ -592,7 +551,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             Partition result = null;
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
             {
                 using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
 
@@ -665,7 +624,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             bool result = false;
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
             {
                 using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
 
@@ -729,34 +688,26 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
+            await using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryMarkJobAsReady);
+
             DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
+
+            command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
+            command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
+            command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Ready);
 
             Job result = null;
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                using NpgsqlCommand command = new NpgsqlCommand
+                bool found = await reader.ReadAsync(cancellation);
+
+                if (found == false)
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobAsReady,
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
-
-                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
-                command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
-                command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Ready);
-
-                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
-                {
-                    bool found = await reader.ReadAsync(cancellation);
-
-                    if (found == false)
-                    {
-                        this.RaiseErrorUnknownJobIdentifier();
-                    }
-
-                    result = this.ReadJob(reader);
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
+
+                result = this.ReadJob(reader);
             }
 
             return result;
@@ -789,34 +740,26 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
+            await using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryMarkJobAsStarted);
+
             DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
+
+            command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
+            command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
+            command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Processing);
 
             Job result = null;
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                using NpgsqlCommand command = new NpgsqlCommand
+                bool found = await reader.ReadAsync(cancellation);
+
+                if (found == false)
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobAsStarted,
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
-
-                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
-                command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
-                command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Processing);
-
-                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
-                {
-                    bool found = await reader.ReadAsync(cancellation);
-
-                    if (found == false)
-                    {
-                        this.RaiseErrorUnknownJobIdentifier();
-                    }
-
-                    result = this.ReadJob(reader);
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
+
+                result = this.ReadJob(reader);
             }
 
             return result;
@@ -849,34 +792,26 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
+            await using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryMarkJobAsCompleted);
+
             DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
+
+            command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
+            command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
+            command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Completed);
 
             Job result = null;
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                using NpgsqlCommand command = new NpgsqlCommand
+                bool found = await reader.ReadAsync(cancellation);
+
+                if (found == false)
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobAsCompleted,
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
-
-                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
-                command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
-                command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Completed);
-
-                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
-                {
-                    bool found = await reader.ReadAsync(cancellation);
-
-                    if (found == false)
-                    {
-                        this.RaiseErrorUnknownJobIdentifier();
-                    }
-
-                    result = this.ReadJob(reader);
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
+
+                result = this.ReadJob(reader);
             }
 
             return result;
@@ -912,35 +847,27 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
+            using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryMarkJobAsFailed);
+
             DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
+
+            command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
+            command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
+            command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Failed);
+            command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, ((object) error) ?? DBNull.Value);
 
             Job result = null;
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                using NpgsqlCommand command = new NpgsqlCommand
+                bool found = await reader.ReadAsync(cancellation);
+
+                if (found == false)
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryMarkJobAsFailed,
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
-
-                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
-                command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
-                command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Failed);
-                command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, ((object) error) ?? DBNull.Value);
-
-                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
-                {
-                    bool found = await reader.ReadAsync(cancellation);
-
-                    if (found == false)
-                    {
-                        this.RaiseErrorUnknownJobIdentifier();
-                    }
-
-                    result = this.ReadJob(reader);
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
+
+                result = this.ReadJob(reader);
             }
 
             return result;
@@ -973,86 +900,58 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
+            await using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryRetrieveJobStatusReport);
+
+            DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
+
+            command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
+            command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
+
             StatusReport result = null;
 
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
+            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
-                using NpgsqlCommand command = new NpgsqlCommand
+                bool found = await reader.ReadAsync(cancellation);
+
+                if (found == false)
                 {
-                    CommandText = PostgresEngineDataStoreResources.QueryRetrieveJobStatusReport,
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
-
-                DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
-
-                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
-                command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
-
-                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
-                {
-                    bool found = await reader.ReadAsync(cancellation);
-
-                    if (found == false)
-                    {
-                        this.RaiseErrorUnknownJobIdentifier();
-                    }
-
-                    Job job = this.ReadJob(reader);
-
-                    result = new StatusReport
-                    {
-                        Id = job.Id,
-                        Timestamp = uktsTimestamp,
-                        Created = job.Created,
-                        Updated = job.Updated,
-                        BatchSize = job.BatchSize,
-                        Timeout = job.Timeout,
-                        Started = job.Started,
-                        Completed = job.Completed,
-                        State = job.State,
-                        Error = job.Error,
-
-                        LastActivity = reader.GetDateTime("last_activity"),
-                        OwnershipChanges = reader.GetInt64("ownership_changes"),
-                        PendingSplitRequests = reader.GetInt64("split_requests_pending"),
-                        CurrentThroughput = reader.GetDouble("current_throughput"),
-
-                        Partitions = new StatusReport.PartitionsReport
-                        {
-                            Untouched = reader.GetInt64("partitons_untouched"),
-                            InProgress = reader.GetInt64("partitons_in_progress"),
-                            Completed = reader.GetInt64("partitions_completed")
-                        },
-
-                        Progress = new StatusReport.ProgressReport
-                        {
-                            Remaining = reader.GetNullableInt64("keys_remaining"),
-                            Completed = reader.GetNullableInt64("keys_completed")
-                        }
-                    };
+                    this.RaiseErrorUnknownJobIdentifier();
                 }
+
+                Job job = this.ReadJob(reader);
+
+                result = new StatusReport
+                {
+                    Id = job.Id,
+                    Timestamp = uktsTimestamp,
+                    Created = job.Created,
+                    Updated = job.Updated,
+                    BatchSize = job.BatchSize,
+                    Timeout = job.Timeout,
+                    Started = job.Started,
+                    Completed = job.Completed,
+                    State = job.State,
+                    Error = job.Error,
+
+                    LastActivity = reader.GetDateTime("last_activity"),
+                    OwnershipChanges = reader.GetInt64("ownership_changes"),
+                    PendingSplitRequests = reader.GetInt64("split_requests_pending"),
+                    CurrentThroughput = reader.GetDouble("current_throughput"),
+
+                    Partitions = new StatusReport.PartitionsReport
+                    {
+                        Untouched = reader.GetInt64("partitons_untouched"),
+                        InProgress = reader.GetInt64("partitons_in_progress"),
+                        Completed = reader.GetInt64("partitions_completed")
+                    },
+
+                    Progress = new StatusReport.ProgressReport
+                    {
+                        Remaining = reader.GetNullableInt64("keys_remaining"),
+                        Completed = reader.GetNullableInt64("keys_completed")
+                    }
+                };
             }
-
-            return result;
-        }
-
-        /// <summary>
-        ///   Creates and opens a database connection.
-        /// </summary>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="NpgsqlConnection"/> object that represents the asynchronous
-        ///   operation.
-        /// </returns>
-        private async Task<NpgsqlConnection> OpenDatabaseConnectionAsync(CancellationToken cancellation)
-        {
-            NpgsqlConnection result = new NpgsqlConnection(this._connectionString);
-
-            await result.OpenAsync(cancellation);
 
             return result;
         }
