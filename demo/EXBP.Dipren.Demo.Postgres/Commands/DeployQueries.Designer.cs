@@ -93,6 +93,11 @@ namespace EXBP.Dipren.Demo.Postgres.Commands {
         ///COMMENT ON SCHEMA &quot;dipren&quot; IS &apos;Defines the Dipren database objects&apos;;
         ///
         ///
+        ///CREATE TYPE &quot;dipren&quot;.&quot;job_state&quot; AS ENUM (&apos;initializing&apos;, &apos;ready&apos;, &apos;processing&apos;, &apos;completed&apos;, &apos;failed&apos;);
+        ///
+        ///COMMENT ON TYPE &quot;dipren&quot;.&quot;job_state&quot; IS &apos;Enumerates job states.&apos;;
+        ///
+        ///
         ///CREATE TABLE &quot;dipren&quot;.&quot;jobs&quot;
         ///(
         ///  &quot;id&quot; VARCHAR(256) NOT NULL,
@@ -101,15 +106,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands {
         ///  &quot;batch_size&quot; INTEGER NOT NULL,
         ///  &quot;timeout&quot; BIGINT NOT NULL,
         ///  &quot;clock_drift&quot; BIGINT NOT NULL,
-        ///  &quot;started&quot; TIMESTAMP NULL,
-        ///  &quot;completed&quot; TIMESTAMP NULL,
-        ///  &quot;state&quot; INTEGER NOT NULL,
-        ///  &quot;error&quot; TEXT NULL,
-        ///  
-        ///  CONSTRAINT &quot;pk_jobs&quot; PRIMARY KEY (&quot;id&quot;)
-        ///);
-        ///
-        ///COMMENT ON COLUMN &quot; [rest of string was truncated]&quot;;.
+        ///  &quot;s [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CreateDiprenDatabaseSchema {
             get {

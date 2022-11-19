@@ -44,6 +44,8 @@ namespace EXBP.Dipren.Data.Postgres
         {
             NpgsqlDataSourceBuilder builder = new NpgsqlDataSourceBuilder(connectionString);
 
+            builder.MapEnum<JobState>();
+
             this._dataSource = builder.Build();
         }
 
@@ -140,16 +142,16 @@ namespace EXBP.Dipren.Data.Postgres
             object uktsCompleted = ((job.Completed != null) ? DateTime.SpecifyKind(job.Completed.Value, DateTimeKind.Unspecified) : DBNull.Value);
             object error = ((job.Error != null) ? job.Error : DBNull.Value);
 
-            command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, job.Id);
-            command.Parameters.AddWithValue("@created", NpgsqlDbType.Timestamp, uktsCreated);
-            command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsUpdated);
-            command.Parameters.AddWithValue("@batch_size", NpgsqlDbType.Integer, job.BatchSize);
-            command.Parameters.AddWithValue("@timeout", NpgsqlDbType.Bigint, job.Timeout.Ticks);
-            command.Parameters.AddWithValue("@clock_drift", NpgsqlDbType.Bigint, job.ClockDrift.Ticks);
-            command.Parameters.AddWithValue("@started", NpgsqlDbType.Timestamp, uktsStarted);
-            command.Parameters.AddWithValue("@completed", NpgsqlDbType.Timestamp, uktsCompleted);
-            command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) job.State);
-            command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, error);
+                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, job.Id);
+                command.Parameters.AddWithValue("@created", NpgsqlDbType.Timestamp, uktsCreated);
+                command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsUpdated);
+                command.Parameters.AddWithValue("@batch_size", NpgsqlDbType.Integer, job.BatchSize);
+                command.Parameters.AddWithValue("@timeout", NpgsqlDbType.Bigint, job.Timeout.Ticks);
+                command.Parameters.AddWithValue("@clock_drift", NpgsqlDbType.Bigint, job.ClockDrift.Ticks);
+                command.Parameters.AddWithValue("@started", NpgsqlDbType.Timestamp, uktsStarted);
+                command.Parameters.AddWithValue("@completed", NpgsqlDbType.Timestamp, uktsCompleted);
+                command.Parameters.AddWithValue("@state", job.State);
+                command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, error);
 
             try
             {
@@ -694,7 +696,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
             command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
-            command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Ready);
+            command.Parameters.AddWithValue("@state", JobState.Ready);
 
             Job result = null;
 
@@ -746,7 +748,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
             command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
-            command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Processing);
+            command.Parameters.AddWithValue("@state", JobState.Processing);
 
             Job result = null;
 
@@ -798,7 +800,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
             command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
-            command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Completed);
+            command.Parameters.AddWithValue("@state", JobState.Completed);
 
             Job result = null;
 
@@ -853,7 +855,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, id);
             command.Parameters.AddWithValue("@timestamp", NpgsqlDbType.Timestamp, uktsTimestamp);
-            command.Parameters.AddWithValue("@state", NpgsqlDbType.Integer, (int) JobState.Failed);
+            command.Parameters.AddWithValue("@state", JobState.Failed);
             command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, ((object) error) ?? DBNull.Value);
 
             Job result = null;
@@ -1047,7 +1049,7 @@ namespace EXBP.Dipren.Data.Postgres
             DateTime updated = reader.GetDateTime("updated");
             DateTime? started = reader.GetNullableDateTime("started");
             DateTime? completed = reader.GetNullableDateTime("completed");
-            JobState state = (JobState) reader.GetInt32("state");
+            JobState state = (JobState) reader.GetValue("state");
             int batchSize = reader.GetInt32("batch_size");
             long ticksTimeout = reader.GetInt64("timeout");
             long ticksClockDrift = reader.GetInt64("clock_drift");
