@@ -120,7 +120,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             command.Parameters.AddWithValue("@job_id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, jobId);
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            await using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
                 await reader.ReadAsync(cancellation);
 
@@ -168,16 +168,16 @@ namespace EXBP.Dipren.Data.Postgres
             object uktsCompleted = ((job.Completed != null) ? DateTime.SpecifyKind(job.Completed.Value, DateTimeKind.Unspecified) : DBNull.Value);
             object error = ((job.Error != null) ? job.Error : DBNull.Value);
 
-                command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, job.Id);
-                command.Parameters.AddWithValue("@created", NpgsqlDbType.Timestamp, uktsCreated);
-                command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsUpdated);
-                command.Parameters.AddWithValue("@batch_size", NpgsqlDbType.Integer, job.BatchSize);
-                command.Parameters.AddWithValue("@timeout", NpgsqlDbType.Bigint, job.Timeout.Ticks);
-                command.Parameters.AddWithValue("@clock_drift", NpgsqlDbType.Bigint, job.ClockDrift.Ticks);
-                command.Parameters.AddWithValue("@started", NpgsqlDbType.Timestamp, uktsStarted);
-                command.Parameters.AddWithValue("@completed", NpgsqlDbType.Timestamp, uktsCompleted);
-                command.Parameters.AddWithValue("@state", job.State);
-                command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, error);
+            command.Parameters.AddWithValue("@id", NpgsqlDbType.Varchar, COLUMN_JOB_NAME_LENGTH, job.Id);
+            command.Parameters.AddWithValue("@created", NpgsqlDbType.Timestamp, uktsCreated);
+            command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsUpdated);
+            command.Parameters.AddWithValue("@batch_size", NpgsqlDbType.Integer, job.BatchSize);
+            command.Parameters.AddWithValue("@timeout", NpgsqlDbType.Bigint, job.Timeout.Ticks);
+            command.Parameters.AddWithValue("@clock_drift", NpgsqlDbType.Bigint, job.ClockDrift.Ticks);
+            command.Parameters.AddWithValue("@started", NpgsqlDbType.Timestamp, uktsStarted);
+            command.Parameters.AddWithValue("@completed", NpgsqlDbType.Timestamp, uktsCompleted);
+            command.Parameters.AddWithValue("@state", job.State);
+            command.Parameters.AddWithValue("@error", NpgsqlDbType.Text, error);
 
             try
             {
@@ -212,10 +212,9 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(partition, nameof(partition));
 
-            using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
-            {
-                await this.InsertPartitionAsync(connection, null, partition, cancellation);
-            }
+            await using NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation);
+
+            await this.InsertPartitionAsync(connection, null, partition, cancellation);
         }
 
         /// <summary>
@@ -248,7 +247,7 @@ namespace EXBP.Dipren.Data.Postgres
             Debug.Assert(connection != null);
             Debug.Assert(partition != null);
 
-            using NpgsqlCommand command = new NpgsqlCommand
+            await using NpgsqlCommand command = new NpgsqlCommand
             {
                 CommandText = PostgresEngineDataStoreResources.QueryInsertPartition,
                 CommandType = CommandType.Text,
@@ -320,11 +319,11 @@ namespace EXBP.Dipren.Data.Postgres
             Assert.ArgumentIsNotNull(partitionToUpdate, nameof(partitionToUpdate));
             Assert.ArgumentIsNotNull(partitionToInsert, nameof(partitionToInsert));
 
-            using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
+            await using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
             {
-                using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
+                await using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
 
-                using NpgsqlCommand command = new NpgsqlCommand
+                await using NpgsqlCommand command = new NpgsqlCommand
                 {
                     CommandText = PostgresEngineDataStoreResources.QueryUpdateSplitPartition,
                     CommandType = CommandType.Text,
@@ -413,11 +412,11 @@ namespace EXBP.Dipren.Data.Postgres
 
             Partition result = null;
 
-            using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
+            await using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
             {
-                using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
+                await using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
 
-                using NpgsqlCommand command = new NpgsqlCommand
+                await using NpgsqlCommand command = new NpgsqlCommand
                 {
                     CommandText = PostgresEngineDataStoreResources.QueryReportProgress,
                     CommandType = CommandType.Text,
@@ -436,7 +435,7 @@ namespace EXBP.Dipren.Data.Postgres
                 command.Parameters.AddWithValue("@owner", NpgsqlDbType.Varchar, COLUMN_PARTITION_OWNER_LENGTH, owner);
                 command.Parameters.AddWithValue("@throughput", NpgsqlDbType.Double, throughput);
 
-                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                await using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
                 {
                     bool found = await reader.ReadAsync(cancellation);
 
@@ -489,7 +488,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             Job result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            await using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
                 bool exists = await reader.ReadAsync(cancellation);
 
@@ -522,7 +521,7 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
-            using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryRetrievePartitionById);
+            await using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryRetrievePartitionById);
 
             string sid = id.ToString("d");
 
@@ -530,7 +529,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             Partition result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            await using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
                 bool exists = await reader.ReadAsync(cancellation);
 
@@ -579,11 +578,11 @@ namespace EXBP.Dipren.Data.Postgres
 
             Partition result = null;
 
-            using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
+            await using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
             {
-                using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
+                await using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
 
-                using NpgsqlCommand command = new NpgsqlCommand
+                await using NpgsqlCommand command = new NpgsqlCommand
                 {
                     CommandText = PostgresEngineDataStoreResources.QueryTryAcquirePartition,
                     CommandType = CommandType.Text,
@@ -599,7 +598,7 @@ namespace EXBP.Dipren.Data.Postgres
                 command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsTimestamp);
                 command.Parameters.AddWithValue("@active", NpgsqlDbType.Timestamp, uktsActive);
 
-                using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+                await using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
                 {
                     bool found = await reader.ReadAsync(cancellation);
 
@@ -652,11 +651,11 @@ namespace EXBP.Dipren.Data.Postgres
 
             bool result = false;
 
-            using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
+            await using (NpgsqlConnection connection = await this._dataSource.OpenConnectionAsync(cancellation))
             {
-                using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
+                await using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellation);
 
-                using NpgsqlCommand command = new NpgsqlCommand
+                await using NpgsqlCommand command = new NpgsqlCommand
                 {
                     CommandText = PostgresEngineDataStoreResources.QueryTryRequestSplit,
                     CommandType = CommandType.Text,
@@ -726,7 +725,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             Job result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            await using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
                 bool found = await reader.ReadAsync(cancellation);
 
@@ -778,7 +777,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             Job result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            await using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
                 bool found = await reader.ReadAsync(cancellation);
 
@@ -830,7 +829,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             Job result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            await using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
                 bool found = await reader.ReadAsync(cancellation);
 
@@ -875,7 +874,7 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
 
-            using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryMarkJobAsFailed);
+            await using NpgsqlCommand command = this._dataSource.CreateCommand(PostgresEngineDataStoreResources.QueryMarkJobAsFailed);
 
             DateTime uktsTimestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Unspecified);
 
@@ -886,7 +885,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             Job result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            await using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
                 bool found = await reader.ReadAsync(cancellation);
 
@@ -937,7 +936,7 @@ namespace EXBP.Dipren.Data.Postgres
 
             StatusReport result = null;
 
-            using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
+            await using (DbDataReader reader = await command.ExecuteReaderAsync(cancellation))
             {
                 bool found = await reader.ReadAsync(cancellation);
 
@@ -1005,7 +1004,7 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Debug.Assert(id != null);
 
-            using NpgsqlCommand command = new NpgsqlCommand
+            await using NpgsqlCommand command = new NpgsqlCommand
             {
                 CommandText = PostgresEngineDataStoreResources.QueryDoesJobExist,
                 CommandType = CommandType.Text,
@@ -1039,7 +1038,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// </returns>
         private async Task<bool> DoesPartitionExistAsync(NpgsqlTransaction transaction, Guid id, CancellationToken cancellation)
         {
-            using NpgsqlCommand command = new NpgsqlCommand
+            await using NpgsqlCommand command = new NpgsqlCommand
             {
                 CommandText = PostgresEngineDataStoreResources.QueryDoesPartitionExist,
                 CommandType = CommandType.Text,
