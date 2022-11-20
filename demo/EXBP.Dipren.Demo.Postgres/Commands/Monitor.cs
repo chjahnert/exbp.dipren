@@ -15,7 +15,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
             Console.WriteLine("Timestamp           | State      | Started             | Completed           | Partitions | Untouched | In Progress | Completed | Keys Completed | Keys Remaining | Progress | Takeovers | Split Requests | Throughput | Remaining Time");
             Console.WriteLine("                    |            |                     |                     |            |           |             |           |                |                |          |           |                |            |");
 
-            await using (PostgresEngineDataStore store = new PostgresEngineDataStore(connectionString))
+            await using (PostgresResilientEngineDataStore store = new PostgresResilientEngineDataStore(connectionString))
             {
                 Scheduler scheduler = new Scheduler(store, DebugEventLogger.Debug);
 

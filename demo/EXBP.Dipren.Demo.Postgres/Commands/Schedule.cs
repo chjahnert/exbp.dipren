@@ -18,7 +18,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
             {
                 Console.Write(ScheduleResources.MessageSchedulingJob, name);
 
-                await using (PostgresEngineDataStore store = new PostgresEngineDataStore(connectionString))
+                await using (PostgresResilientEngineDataStore store = new PostgresResilientEngineDataStore(connectionString))
                 {
                     Scheduler scheduler = new Scheduler(store, DebugEventLogger.Debug);
 
