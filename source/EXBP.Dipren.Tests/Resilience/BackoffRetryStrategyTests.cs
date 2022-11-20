@@ -10,7 +10,37 @@ namespace EXBP.Dipren.Tests.Resilience
     public class BackoffRetryStrategyTests
     {
         [Test]
-        public async Task Execute_PermanentErrorOccurrs_NoRetryIsAttempted()
+        public void Execute_ArgumentActionIsNull_ThrowsException()
+        {
+            BackoffRetryPolicy policy = new BackoffRetryPolicy(1, attempt => TimeSpan.Zero, exception => false);
+
+            Action action = null;
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => policy.ExecuteAsync(action));
+        }
+
+        [Test]
+        public void ExecuteAsync_ArgumentActionIsNull_ThrowsException()
+        {
+            BackoffRetryPolicy policy = new BackoffRetryPolicy(1, attempt => TimeSpan.Zero, exception => false);
+
+            Func<Task> action = null;
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => policy.ExecuteAsync(action));
+        }
+
+        [Test]
+        public void ExecuteAsync_ArgumentFunctionIsNull_ThrowsException()
+        {
+            BackoffRetryPolicy policy = new BackoffRetryPolicy(1, attempt => TimeSpan.Zero, exception => false);
+
+            Func<Task<int>> function = null;
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => policy.ExecuteAsync<int>(function));
+        }
+
+        [Test]
+        public async Task ExecuteAsync_PermanentErrorOccurrs_NoRetryIsAttempted()
         {
             BackoffRetryPolicy policy = new BackoffRetryPolicy(1, attempt => TimeSpan.Zero, exception => false);
 
@@ -34,7 +64,7 @@ namespace EXBP.Dipren.Tests.Resilience
         }
 
         [Test]
-        public void Execute_TransientErrorOccurrs_RetryIsAttempted()
+        public void ExecuteAsync_TransientErrorOccurrsDuringAction_RetryIsAttempted()
         {
             BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
 
@@ -51,7 +81,46 @@ namespace EXBP.Dipren.Tests.Resilience
         }
 
         [Test]
-        public async Task Execute_TransientErrorOccurrs_StopsAfterSuccessfulAttempts()
+        public void ExecuteAsync_TransientErrorOccurrsDuringFunction_RetryIsAttempted()
+        {
+            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
+
+            int attempts = 0;
+
+            Func<Task<int>> function = () => {
+                attempts += 1;
+                throw new Exception("Transient error condition.");
+            };
+
+            Assert.ThrowsAsync<Exception>(async () => {
+                await policy.ExecuteAsync(function);
+            });
+
+            Assert.That(attempts, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void Execute_TransientErrorOccurrsDuringAction_StopsAfterSuccessfulAttempts()
+        {
+            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
+
+            int executions = 0;
+
+            policy.Execute(() => {
+
+               executions += 1;
+
+               if (executions < 2)
+               {
+                   throw new Exception("Transient error condition.");
+               }
+            });
+
+            Assert.That(executions, Is.EqualTo(2));
+        }
+
+        [Test]
+        public async Task ExecuteAsync_TransientErrorOccurrsDuringAction_StopsAfterSuccessfulAttempts()
         {
             BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
 
@@ -65,6 +134,28 @@ namespace EXBP.Dipren.Tests.Resilience
                {
                    throw new Exception("Transient error condition.");
                }
+            });
+
+            Assert.That(executions, Is.EqualTo(2));
+        }
+
+        [Test]
+        public async Task ExecuteAsync_TransientErrorOccurrsDuringFunction_StopsAfterSuccessfulAttempts()
+        {
+            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
+
+            int executions = 0;
+
+            await policy.ExecuteAsync(() => {
+
+               executions += 1;
+
+               if (executions < 2)
+               {
+                   throw new Exception("Transient error condition.");
+               }
+
+                return Task.FromResult(1);
             });
 
             Assert.That(executions, Is.EqualTo(2));
