@@ -2,7 +2,6 @@
 using Npgsql;
 
 using EXBP.Dipren.Tests.Data;
-using System.Data;
 
 using NUnit.Framework;
 
@@ -10,13 +9,27 @@ using NUnit.Framework;
 namespace EXBP.Dipren.Data.Postgres.Tests
 {
     [TestFixture]
-    public class PostgresEngineDataStoreTests : EngineDataStoreTests
+    public class PostgresEngineDataStoreTests : EngineDataStoreTests, IDisposable
     {
-        private const string CONNECTION_STRING = "Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development";
+        protected const string CONNECTION_STRING = "Host = localhost; Port = 5432; Database = postgres; User ID = postgres; Password = development";
         private const string PATH_SCHEMA_SCRIPT = @"../../../../Database/dipren.sql";
 
 
-        private string ConnectionString { get; } = CONNECTION_STRING;
+        protected NpgsqlDataSource DataSource { get; }
+
+
+        public PostgresEngineDataStoreTests()
+        {
+            NpgsqlDataSourceBuilder builder = new NpgsqlDataSourceBuilder(CONNECTION_STRING);
+
+            this.DataSource = builder.Build();
+        }
+
+
+        public void Dispose()
+        {
+            this.DataSource.Dispose();
+        }
 
 
         protected override Task<IEngineDataStore> OnCreateEngineDataStoreAsync()
@@ -39,43 +52,20 @@ namespace EXBP.Dipren.Data.Postgres.Tests
             await this.DropDatabaseSchemaAsync(CancellationToken.None);
         }
 
-        private async Task<NpgsqlConnection> OpenDatabaseConnectionAsync(CancellationToken cancellation)
-        {
-            NpgsqlConnection result = new NpgsqlConnection(this.ConnectionString);
-
-            await result.OpenAsync(cancellation);
-
-            return result;
-        }
-
         private async Task DropDatabaseSchemaAsync(CancellationToken cancellation)
         {
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
-            {
-                using NpgsqlCommand command = new NpgsqlCommand
-                {
-                    CommandText = PostgresEngineDataStoreTestsResources.QueryDropSchema,
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
+            await using NpgsqlCommand command = this.DataSource.CreateCommand(PostgresEngineDataStoreTestsResources.QueryDropSchema);
 
-                await command.ExecuteNonQueryAsync(cancellation);
-            }
+            await command.ExecuteNonQueryAsync(cancellation);
         }
 
         private async Task CreateDatabaseSchemaAsync(CancellationToken cancellation)
         {
-            using (NpgsqlConnection connection = await this.OpenDatabaseConnectionAsync(cancellation))
-            {
-                using NpgsqlCommand command = new NpgsqlCommand
-                {
-                    CommandText = await File.ReadAllTextAsync(PATH_SCHEMA_SCRIPT, cancellation),
-                    CommandType = CommandType.Text,
-                    Connection = connection
-                };
+            string script = await File.ReadAllTextAsync(PATH_SCHEMA_SCRIPT, cancellation);
 
-                await command.ExecuteNonQueryAsync(cancellation);
-            }
+            await using NpgsqlCommand command = this.DataSource.CreateCommand(script);
+
+            await command.ExecuteNonQueryAsync(cancellation);
         }
     }
 }
