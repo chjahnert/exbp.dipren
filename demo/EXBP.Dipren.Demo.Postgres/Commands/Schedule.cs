@@ -18,15 +18,17 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
             {
                 Console.Write(ScheduleResources.MessageSchedulingJob, name);
 
-                PostgresEngineDataStore store = new PostgresEngineDataStore(connectionString);
-                Scheduler scheduler = new Scheduler(store, DebugEventLogger.Debug);
+                await using (PostgresEngineDataStore store = new PostgresEngineDataStore(connectionString))
+                {
+                    Scheduler scheduler = new Scheduler(store, DebugEventLogger.Debug);
 
-                IDataSource<Guid, Cuboid> source = reverse ? new CuboidDescendingDataSource(connectionString) : new CuboidAscendingDataSource(connectionString);
-                CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
-                Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor);
-                Settings settings = new Settings(batchSize, batchTimeout, clockDrift);
+                    IDataSource<Guid, Cuboid> source = reverse ? new CuboidDescendingDataSource(connectionString) : new CuboidAscendingDataSource(connectionString);
+                    CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
+                    Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor);
+                    Settings settings = new Settings(batchSize, batchTimeout, clockDrift);
 
-                await scheduler.ScheduleAsync(job, settings);
+                    await scheduler.ScheduleAsync(job, settings);
+                }
 
                 Console.WriteLine(RemoveResources.MessageDone);
             }
