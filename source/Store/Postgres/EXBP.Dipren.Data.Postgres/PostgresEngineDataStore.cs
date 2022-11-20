@@ -17,7 +17,7 @@ namespace EXBP.Dipren.Data.Postgres
     /// <remarks>
     ///   The implementation assumes that the required schema and table structure is already deployed.
     /// </remarks>
-    public class PostgresEngineDataStore : EngineDataStore, IEngineDataStore
+    public class PostgresEngineDataStore : EngineDataStore, IEngineDataStore, IDisposable, IAsyncDisposable
     {
         private const string SQL_STATE_FOREIGN_KEY_VIOLATION = "23503";
         private const string SQL_STATE_PRIMARY_KEY_VIOLATION = "23505";
@@ -47,6 +47,32 @@ namespace EXBP.Dipren.Data.Postgres
             builder.MapEnum<JobState>();
 
             this._dataSource = builder.Build();
+        }
+
+
+        /// <summary>
+        ///   Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            this._dataSource.Dispose();
+
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        ///   Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources asynchronously.
+        /// </summary>
+        /// <returns>
+        ///   A <see cref="ValueTask"/> value that represents the asynchronous dispose operation.
+        /// </returns>
+        public ValueTask DisposeAsync()
+        {
+            ValueTask result = this._dataSource.DisposeAsync();
+
+            GC.SuppressFinalize(this);
+
+            return result;
         }
 
 

@@ -1456,7 +1456,7 @@ namespace EXBP.Dipren.Tests.Data
 
 
         [DebuggerStepThrough]
-        private class EngineDataStoreWrapper : IEngineDataStore, IDisposable
+        private class EngineDataStoreWrapper : IEngineDataStore, IDisposable, IAsyncDisposable
         {
             private readonly IEngineDataStore _store;
 
@@ -1469,9 +1469,26 @@ namespace EXBP.Dipren.Tests.Data
 
             public void Dispose()
             {
-                (this._store as IDisposable)?.Dispose();
+                IDisposable disposable = (this._store as IDisposable);
 
-                GC.SuppressFinalize(this);
+                if (disposable != null)
+                {
+                    disposable.Dispose();
+
+                    GC.SuppressFinalize(this);
+                }
+            }
+
+            public async ValueTask DisposeAsync()
+            {
+                IAsyncDisposable disposable = (this._store as IAsyncDisposable);
+
+                if (disposable != null)
+                {
+                    await disposable.DisposeAsync();
+
+                    GC.SuppressFinalize(this);
+                }
             }
 
             public Task<long> CountIncompletePartitionsAsync(string id, CancellationToken cancellation)

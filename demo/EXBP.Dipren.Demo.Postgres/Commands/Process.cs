@@ -54,14 +54,16 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
                 PollingInterval = TimeSpan.FromMilliseconds(100)
             };
 
-            PostgresEngineDataStore store = new PostgresEngineDataStore(connectionString);
-            Engine engine = new Engine(store, ConsoleEventLogger.Information, configuration: configuration);
-
             IDataSource<Guid, Cuboid> source = reverse ? new CuboidDescendingDataSource(connectionString) : new CuboidAscendingDataSource(connectionString);
             CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
             Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor);
 
-            await engine.RunAsync(job, false);
+            await using (PostgresEngineDataStore store = new PostgresEngineDataStore(connectionString))
+            {
+                Engine engine = new Engine(store, ConsoleEventLogger.Information, configuration: configuration);
+
+                await engine.RunAsync(job, false);
+            }
         }
     }
 }
