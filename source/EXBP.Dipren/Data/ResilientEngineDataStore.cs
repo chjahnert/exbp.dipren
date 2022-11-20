@@ -14,7 +14,8 @@ namespace EXBP.Dipren.Data.Postgres
 
 
         /// <summary>
-        ///   Gets the <see cref="IEngineDataStore"/> object to wrap.
+        ///   When implemented in a derived class, this property gets the <see cref="IEngineDataStore"/> object being
+        ///   wrapped by the current <see cref="ResilientEngineDataStore"/> instance.
         /// </summary>
         /// <value>
         ///   The <see cref="IEngineDataStore"/> object being wrapped.
