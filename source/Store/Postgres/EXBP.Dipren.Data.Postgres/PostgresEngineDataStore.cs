@@ -68,9 +68,11 @@ namespace EXBP.Dipren.Data.Postgres
         /// </returns>
         public ValueTask DisposeAsync()
         {
-            return this._dataSource.DisposeAsync();
+            ValueTask result = this._dataSource.DisposeAsync();
 
             GC.SuppressFinalize(this);
+
+            return result;
         }
 
 
