@@ -58,7 +58,7 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
             CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
             Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor);
 
-            await using (PostgresResilientEngineDataStore store = new PostgresResilientEngineDataStore(connectionString))
+            await using (ResilientPostgresEngineDataStore store = new ResilientPostgresEngineDataStore(connectionString))
             {
                 Engine engine = new Engine(store, ConsoleEventLogger.Information, configuration: configuration);
 

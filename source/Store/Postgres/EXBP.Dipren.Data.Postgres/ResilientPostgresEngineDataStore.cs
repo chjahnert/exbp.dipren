@@ -11,7 +11,7 @@ namespace EXBP.Dipren.Data.Postgres
     /// <remarks>
     ///   The implementation assumes that the required schema and table structure is already deployed.
     /// </remarks>
-    public class PostgresResilientEngineDataStore : ResilientEngineDataStore, IDisposable, IAsyncDisposable
+    public class ResilientPostgresEngineDataStore : ResilientEngineDataStore, IDisposable, IAsyncDisposable
     {
         private const int DEFAULT_RETRY_LIMIT = 16;
         private const int DEFAULT_RETRY_DELAY = 20;
@@ -41,7 +41,7 @@ namespace EXBP.Dipren.Data.Postgres
         ///   The number of retry attempts to perform in case a transient error occurs. By default, operations are
         ///   retried up to 16 times.
         /// </param>
-        public PostgresResilientEngineDataStore(string connectionString, int retryLimit = DEFAULT_RETRY_LIMIT) : this(connectionString, retryLimit, DefaultRetryDelay)
+        public ResilientPostgresEngineDataStore(string connectionString, int retryLimit = DEFAULT_RETRY_LIMIT) : this(connectionString, retryLimit, DefaultRetryDelay)
         {
         }
 
@@ -54,7 +54,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// <param name="retryLimit">
         ///   The number of retry attempts to perform in case a transient error occurs.
         /// </param>
-        public PostgresResilientEngineDataStore(string connectionString, int retryLimit, TimeSpan retryDelay) : base(retryLimit, retryDelay)
+        public ResilientPostgresEngineDataStore(string connectionString, int retryLimit, TimeSpan retryDelay) : base(retryLimit, retryDelay)
         {
             this._dataStore = new PostgresEngineDataStore(connectionString);
         }
