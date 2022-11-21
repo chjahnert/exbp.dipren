@@ -4,7 +4,7 @@ using System.Data.Common;
 using EXBP.Dipren.Resilience;
 
 
-namespace EXBP.Dipren.Data.Postgres
+namespace EXBP.Dipren.Data
 {
     /// <summary>
     ///   Implements an <see cref="IEngineDataStore"/> that uses a backoff retry policy for resilience.
