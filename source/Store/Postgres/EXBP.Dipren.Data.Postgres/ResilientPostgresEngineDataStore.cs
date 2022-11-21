@@ -17,10 +17,10 @@ namespace EXBP.Dipren.Data.Postgres
 
 
         /// <summary>
-        ///   Gets the <see cref="IEngineDataStore"/> object to wrap.
+        ///   Gets the <see cref="PostgresEngineDataStore"/> object being wrapped.
         /// </summary>
         /// <value>
-        ///   The <see cref="IEngineDataStore"/> object being wrapped.
+        ///   The <see cref="PostgresEngineDataStore"/> object being wrapped.
         /// </value>
         protected override PostgresEngineDataStore Store { get; }
 
@@ -47,6 +47,10 @@ namespace EXBP.Dipren.Data.Postgres
         /// </param>
         /// <param name="retryLimit">
         ///   The number of retry attempts to perform in case a transient error occurs.
+        /// </param>
+        /// <param name="retryDelay">
+        ///   The duration to wait before the first retry attempt. The value is doubled for each subsequent retry
+        ///   attempt.
         /// </param>
         public ResilientPostgresEngineDataStore(string connectionString, int retryLimit, TimeSpan retryDelay) : base(retryLimit, retryDelay)
         {
