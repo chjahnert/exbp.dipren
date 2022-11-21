@@ -1,25 +1,19 @@
 ﻿
-using Npgsql;
-
-
 namespace EXBP.Dipren.Data.Postgres
 {
     /// <summary>
-    ///   Implements an <see cref="IEngineDataStore"/> that uses Postgres SQL as its storage engine and employs a
-    ///   backoff retry policy for resilience.
+    ///   Implements an <see cref="IEngineDataStore"/> that uses Postgres SQL as its storage engine and uses a backoff
+    ///   retry policy for resilience.
     /// </summary>
     /// <remarks>
     ///   The implementation assumes that the required schema and table structure is already deployed.
     /// </remarks>
-    public class ResilientPostgresEngineDataStore : ResilientEngineDataStore, IDisposable, IAsyncDisposable
+    public class ResilientPostgresEngineDataStore : ResilientEngineDataStore<PostgresEngineDataStore>, IDisposable, IAsyncDisposable
     {
         private const int DEFAULT_RETRY_LIMIT = 16;
         private const int DEFAULT_RETRY_DELAY = 20;
 
         private static readonly TimeSpan DefaultRetryDelay = TimeSpan.FromMilliseconds(DEFAULT_RETRY_DELAY);
-
-
-        private readonly PostgresEngineDataStore _dataStore;
 
 
         /// <summary>
@@ -28,7 +22,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// <value>
         ///   The <see cref="IEngineDataStore"/> object being wrapped.
         /// </value>
-        protected override IEngineDataStore Store => this._dataStore;
+        protected override PostgresEngineDataStore Store { get; }
 
 
         /// <summary>
@@ -56,7 +50,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// </param>
         public ResilientPostgresEngineDataStore(string connectionString, int retryLimit, TimeSpan retryDelay) : base(retryLimit, retryDelay)
         {
-            this._dataStore = new PostgresEngineDataStore(connectionString);
+            this.Store = new PostgresEngineDataStore(connectionString);
         }
 
 
@@ -65,7 +59,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// </summary>
         public void Dispose()
         {
-            this._dataStore.Dispose();
+            this.Store.Dispose();
 
             GC.SuppressFinalize(this);
         }
@@ -78,7 +72,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// </returns>
         public ValueTask DisposeAsync()
         {
-            ValueTask result = this._dataStore.DisposeAsync();
+            ValueTask result = this.Store.DisposeAsync();
 
             GC.SuppressFinalize(this);
 

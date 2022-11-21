@@ -9,7 +9,10 @@ namespace EXBP.Dipren.Data.Postgres
     /// <summary>
     ///   Implements an <see cref="IEngineDataStore"/> that uses a backoff retry policy for resilience.
     /// </summary>
-    public abstract class ResilientEngineDataStore : IEngineDataStore
+    /// <typeparam name="TEngineDataStore">
+    ///   The actual implementation type of the engine data store.
+    /// </typeparam>
+    public abstract class ResilientEngineDataStore<TEngineDataStore> : IEngineDataStore where TEngineDataStore : IEngineDataStore
     {
         private readonly BackoffRetryPolicy _retryPolicy;
         private readonly TimeSpan _retryDelay;
@@ -20,9 +23,9 @@ namespace EXBP.Dipren.Data.Postgres
         ///   wrapped by the current <see cref="ResilientEngineDataStore"/> instance.
         /// </summary>
         /// <value>
-        ///   The <see cref="IEngineDataStore"/> object being wrapped.
+        ///   The <typeparamref name="TEngineDataStore"/> object being wrapped.
         /// </value>
-        protected abstract IEngineDataStore Store { get; }
+        protected abstract TEngineDataStore Store { get; }
 
 
         /// <summary>
