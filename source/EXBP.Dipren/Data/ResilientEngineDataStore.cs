@@ -20,7 +20,7 @@ namespace EXBP.Dipren.Data
 
         /// <summary>
         ///   When implemented in a derived class, this property gets the <see cref="IEngineDataStore"/> object being
-        ///   wrapped by the current <see cref="ResilientEngineDataStore"/> instance.
+        ///   wrapped by the current <see cref="ResilientEngineDataStore{TEngineDataStore}"/> instance.
         /// </summary>
         /// <value>
         ///   The <typeparamref name="TEngineDataStore"/> object being wrapped.
