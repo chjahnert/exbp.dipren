@@ -1,4 +1,6 @@
 ﻿
+using System.Data.Common;
+
 using EXBP.Dipren.Resilience;
 
 
@@ -430,7 +432,12 @@ namespace EXBP.Dipren.Data.Postgres
         ///   <see langword="true"/> if <paramref name="exception"/> is caused by a transient error condition;
         ///   otherwise <see langword="false"/>.
         /// </returns>
+        /// <remarks>
+        ///   The default implementation returns <see langword="false"/> unless the exception is of type
+        ///   <see cref="DbException"/> and the <see cref="DbException.IsTransient"/> property is
+        ///   <see langword="true"/>.
+        /// </remarks>
         protected virtual bool IsTransientError(Exception exception)
-            => true;
+            => (exception as DbException)?.IsTransient ?? false;
     }
 }

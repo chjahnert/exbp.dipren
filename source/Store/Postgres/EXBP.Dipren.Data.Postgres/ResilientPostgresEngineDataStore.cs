@@ -84,18 +84,5 @@ namespace EXBP.Dipren.Data.Postgres
 
             return result;
         }
-
-        /// <summary>
-        ///   Determines whether the specified exception is a transient error.
-        /// </summary>
-        /// <param name="exception">
-        ///   A <see cref="Exception"/> object providing details about the error condition.
-        /// </param>
-        /// <returns>
-        ///   <see langword="true"/> if <paramref name="exception"/> is caused by a transient error condition;
-        ///   otherwise <see langword="false"/>.
-        /// </returns>
-        protected override bool IsTransientError(Exception exception)
-            => (exception as PostgresException)?.IsTransient ?? false;
     }
 }
