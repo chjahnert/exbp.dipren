@@ -1,4 +1,10 @@
 ﻿
+using System.Data.Common;
+
+using EXBP.Dipren.Diagnostics;
+using EXBP.Dipren.Resilience;
+
+
 namespace EXBP.Dipren.Data.Postgres
 {
     /// <summary>
@@ -13,16 +19,27 @@ namespace EXBP.Dipren.Data.Postgres
         private const int DEFAULT_RETRY_LIMIT = 16;
         private const int DEFAULT_RETRY_DELAY = 20;
 
-        private static readonly TimeSpan DefaultRetryDelay = TimeSpan.FromMilliseconds(DEFAULT_RETRY_DELAY);
+
+        private readonly PostgresEngineDataStoreImplementation _store;
+        private readonly IAsyncRetryStrategy _strategy;
+        private readonly TimeSpan _delay;
 
 
         /// <summary>
-        ///   Gets the <see cref="IEngineDataStore"/> object being wrapped.
+        ///   Gets the engine data store instance being wrapped.
         /// </summary>
         /// <value>
-        ///   The <see cref="IEngineDataStore"/> object being wrapped.
+        ///   The <see cref="IEngineDataStore"/> instance being wrapped.
         /// </value>
-        protected override IEngineDataStore Store { get; }
+        protected override IEngineDataStore Store => this._store;
+
+        /// <summary>
+        ///   Gets the <see cref="IAsyncRetryStrategy"/> object that implements the retry strategy to use.
+        /// </summary>
+        /// <value>
+        ///   The <see cref="IAsyncRetryStrategy"/> instance that implements the retry strategy to use.
+        /// </value>
+        protected override IAsyncRetryStrategy Strategy => this._strategy;
 
 
         /// <summary>
@@ -32,15 +49,17 @@ namespace EXBP.Dipren.Data.Postgres
         ///   The connection string to use when connecting to the database.
         /// </param>
         /// <param name="retryLimit">
-        ///   The number of retry attempts to perform in case a transient error occurs. By default, operations are
-        ///   retried up to 16 times.
+        ///   The number of retry attempts to perform in case a transient error occurs.
         /// </param>
-        public PostgresEngineDataStore(string connectionString, int retryLimit = DEFAULT_RETRY_LIMIT) : this(connectionString, retryLimit, DefaultRetryDelay)
+        public PostgresEngineDataStore(string connectionString, int retryLimit = DEFAULT_RETRY_LIMIT)
         {
+            this._delay = TimeSpan.FromMilliseconds(DEFAULT_RETRY_DELAY);
+            this._store = new PostgresEngineDataStoreImplementation(connectionString);
+            this._strategy = new BackoffRetryStrategy(retryLimit, this.GetRetryWaitDuration, this.IsTransientError);
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="PostgresEngineDataStoreImplementation"/> class.
+        ///   Initializes a new instance of the <see cref="PostgresEngineDataStore"/> class.
         /// </summary>
         /// <param name="connectionString">
         ///   The connection string to use when connecting to the database.
@@ -52,9 +71,32 @@ namespace EXBP.Dipren.Data.Postgres
         ///   The duration to wait before the first retry attempt. The value is doubled for each subsequent retry
         ///   attempt.
         /// </param>
-        public PostgresEngineDataStore(string connectionString, int retryLimit, TimeSpan retryDelay) : base(retryLimit, retryDelay)
+        public PostgresEngineDataStore(string connectionString, int retryLimit, TimeSpan retryDelay) : this(connectionString, retryLimit)
         {
-            this.Store = new PostgresEngineDataStoreImplementation(connectionString);
+            Assert.ArgumentIsGreater(retryDelay, TimeSpan.Zero, nameof(retryDelay));
+
+            this._delay = retryDelay;
+        }
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="PostgresEngineDataStore"/> class.
+        /// </summary>
+        /// <param name="connectionString">
+        ///   The connection string to use when connecting to the database.
+        /// </param>
+        /// <param name="retryStrategy">
+        ///   The <see cref="IAsyncRetryStrategy"/> instance that implements the retry strategy to use.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="retryStrategy"/> is a <see langword="null"/> reference.
+        /// </exception>
+        public PostgresEngineDataStore(string connectionString, IAsyncRetryStrategy retryStrategy)
+        {
+            Assert.ArgumentIsNotNull(retryStrategy, nameof(retryStrategy));
+
+            this._delay = TimeSpan.Zero;
+            this._store = new PostgresEngineDataStoreImplementation(connectionString);
+            this._strategy = retryStrategy;
         }
 
 
@@ -63,14 +105,9 @@ namespace EXBP.Dipren.Data.Postgres
         /// </summary>
         public void Dispose()
         {
-            IDisposable disposable = (this.Store as IDisposable);
+            this._store.Dispose();
 
-            if (disposable != null)
-            {
-                disposable.Dispose();
-
-                GC.SuppressFinalize(this);
-            }
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -79,19 +116,42 @@ namespace EXBP.Dipren.Data.Postgres
         /// <returns>
         ///   A <see cref="ValueTask"/> value that represents the asynchronous dispose operation.
         /// </returns>
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            IAsyncDisposable disposable = (this.Store as IAsyncDisposable);
-            ValueTask result = ValueTask.CompletedTask;
+            await this._store.DisposeAsync();
 
-            if (disposable != null)
-            {
-                result = disposable.DisposeAsync();
-
-                GC.SuppressFinalize(this);
-            }
-
-            return result;
+            GC.SuppressFinalize(this);
         }
+
+
+        /// <summary>
+        ///   Returns the duration to wait before the next retry attempt.
+        /// </summary>
+        /// <param name="attempt">
+        ///   The number of the next attempt.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="TimeSpan"/> value containing the duration to wait before the next retry attempt.
+        /// </returns>
+        private TimeSpan GetRetryWaitDuration(int attempt)
+            => (this._delay * Math.Pow(2, attempt));
+
+        /// <summary>
+        ///   Determines whether the specified exception is a transient error.
+        /// </summary>
+        /// <param name="exception">
+        ///   A <see cref="Exception"/> object providing details about the error condition.
+        /// </param>
+        /// <returns>
+        ///   <see langword="true"/> if <paramref name="exception"/> is caused by a transient error condition;
+        ///   otherwise <see langword="false"/>.
+        /// </returns>
+        /// <remarks>
+        ///   The default implementation returns <see langword="false"/> unless the exception is of type
+        ///   <see cref="DbException"/> and the <see cref="DbException.IsTransient"/> property is
+        ///   <see langword="true"/>.
+        /// </remarks>
+        private bool IsTransientError(Exception exception)
+            => (exception as DbException)?.IsTransient ?? false;
     }
 }
