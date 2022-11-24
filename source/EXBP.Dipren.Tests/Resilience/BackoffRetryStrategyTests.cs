@@ -10,16 +10,6 @@ namespace EXBP.Dipren.Tests.Resilience
     public class BackoffRetryStrategyTests
     {
         [Test]
-        public void Execute_ArgumentActionIsNull_ThrowsException()
-        {
-            BackoffRetryStrategy policy = new BackoffRetryStrategy(1, attempt => TimeSpan.Zero, exception => false);
-
-            Action action = null;
-
-            Assert.ThrowsAsync<ArgumentNullException>(() => policy.ExecuteAsync(action));
-        }
-
-        [Test]
         public void ExecuteAsync_ArgumentActionIsNull_ThrowsException()
         {
             BackoffRetryStrategy policy = new BackoffRetryStrategy(1, attempt => TimeSpan.Zero, exception => false);
@@ -100,26 +90,6 @@ namespace EXBP.Dipren.Tests.Resilience
         }
 
         [Test]
-        public void Execute_TransientErrorOccurrsDuringAction_StopsAfterSuccessfulAttempts()
-        {
-            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, attempt => TimeSpan.Zero, exception => true);
-
-            int executions = 0;
-
-            policy.Execute(() => {
-
-               executions += 1;
-
-               if (executions < 2)
-               {
-                   throw new Exception("Transient error condition.");
-               }
-            });
-
-            Assert.That(executions, Is.EqualTo(2));
-        }
-
-        [Test]
         public async Task ExecuteAsync_TransientErrorOccurrsDuringAction_StopsAfterSuccessfulAttempts()
         {
             BackoffRetryStrategy policy = new BackoffRetryStrategy(3, attempt => TimeSpan.Zero, exception => true);
@@ -134,6 +104,8 @@ namespace EXBP.Dipren.Tests.Resilience
                {
                    throw new Exception("Transient error condition.");
                }
+
+                return Task.CompletedTask;
             });
 
             Assert.That(executions, Is.EqualTo(2));
