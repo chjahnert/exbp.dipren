@@ -14,8 +14,8 @@ namespace EXBP.Dipren.Data.Postgres
     /// </remarks>
     public class PostgresEngineDataStore : ResilientEngineDataStore, IDisposable, IAsyncDisposable
     {
-        private const int DEFAULT_RETRY_LIMIT = 16;
-        private const int DEFAULT_RETRY_DELAY = 20;
+        private const int DEFAULT_RETRY_LIMIT = 12;
+        private const int DEFAULT_RETRY_DELAY = 5;
 
 
         private static ITransientErrorDetector DefaultTransientErrorDetector = new DbTransientErrorDetector(false);
@@ -50,6 +50,10 @@ namespace EXBP.Dipren.Data.Postgres
         /// <param name="retryLimit">
         ///   The number of retry attempts to perform in case a transient error occurs.
         /// </param>
+        /// <remarks>
+        ///   If the <paramref name="retryLimit"/> is not specified, the operations failing due to transient errors are
+        ///   retried up to 12 times, for about 20 seconds.
+        /// </remarks>
         public PostgresEngineDataStore(string connectionString, int retryLimit = DEFAULT_RETRY_LIMIT) : this(connectionString, retryLimit, TimeSpan.FromMilliseconds(DEFAULT_RETRY_DELAY))
         {
             TimeSpan retryDelay = TimeSpan.FromMilliseconds(DEFAULT_RETRY_DELAY);
