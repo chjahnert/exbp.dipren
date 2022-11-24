@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace EXBP.Dipren.Tests.Resilience
 {
     [TestFixture]
-    public class ExponentialBackoffDelyaProviderTests
+    public class ExponentialBackoffDelayProviderTests
     {
         [TestCase(1, 1, 1)]
         [TestCase(1, 2, 2)]
