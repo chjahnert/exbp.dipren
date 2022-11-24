@@ -22,7 +22,6 @@ namespace EXBP.Dipren.Data.Postgres
 
         private readonly PostgresEngineDataStoreImplementation _store;
         private readonly IAsyncRetryStrategy _strategy;
-        private readonly TimeSpan _delay;
 
 
         /// <summary>
@@ -51,11 +50,13 @@ namespace EXBP.Dipren.Data.Postgres
         /// <param name="retryLimit">
         ///   The number of retry attempts to perform in case a transient error occurs.
         /// </param>
-        public PostgresEngineDataStore(string connectionString, int retryLimit = DEFAULT_RETRY_LIMIT)
+        public PostgresEngineDataStore(string connectionString, int retryLimit = DEFAULT_RETRY_LIMIT) : this(connectionString, retryLimit, TimeSpan.FromMilliseconds(DEFAULT_RETRY_DELAY))
         {
-            this._delay = TimeSpan.FromMilliseconds(DEFAULT_RETRY_DELAY);
+            TimeSpan retryDelay = TimeSpan.FromMilliseconds(DEFAULT_RETRY_DELAY);
+            IBackoffDelayProvider backoffDelayProvider = new ConstantBackoffDelayProvider(retryDelay);
+
             this._store = new PostgresEngineDataStoreImplementation(connectionString);
-            this._strategy = new BackoffRetryStrategy(retryLimit, this.GetRetryWaitDuration, this.IsTransientError);
+            this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, this.IsTransientError);
         }
 
         /// <summary>
@@ -71,11 +72,12 @@ namespace EXBP.Dipren.Data.Postgres
         ///   The duration to wait before the first retry attempt. The value is doubled for each subsequent retry
         ///   attempt.
         /// </param>
-        public PostgresEngineDataStore(string connectionString, int retryLimit, TimeSpan retryDelay) : this(connectionString, retryLimit)
+        public PostgresEngineDataStore(string connectionString, int retryLimit, TimeSpan retryDelay)
         {
-            Assert.ArgumentIsGreater(retryDelay, TimeSpan.Zero, nameof(retryDelay));
+            IBackoffDelayProvider backoffDelayProvider = new ConstantBackoffDelayProvider(retryDelay);
 
-            this._delay = retryDelay;
+            this._store = new PostgresEngineDataStoreImplementation(connectionString);
+            this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, this.IsTransientError);
         }
 
         /// <summary>
@@ -94,7 +96,6 @@ namespace EXBP.Dipren.Data.Postgres
         {
             Assert.ArgumentIsNotNull(retryStrategy, nameof(retryStrategy));
 
-            this._delay = TimeSpan.Zero;
             this._store = new PostgresEngineDataStoreImplementation(connectionString);
             this._strategy = retryStrategy;
         }
@@ -122,19 +123,6 @@ namespace EXBP.Dipren.Data.Postgres
 
             GC.SuppressFinalize(this);
         }
-
-
-        /// <summary>
-        ///   Returns the duration to wait before the next retry attempt.
-        /// </summary>
-        /// <param name="attempt">
-        ///   The number of the next attempt.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="TimeSpan"/> value containing the duration to wait before the next retry attempt.
-        /// </returns>
-        private TimeSpan GetRetryWaitDuration(int attempt)
-            => (this._delay * Math.Pow(2, attempt));
 
         /// <summary>
         ///   Determines whether the specified exception is a transient error.

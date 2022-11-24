@@ -10,7 +10,7 @@ namespace EXBP.Dipren.Resilience
     public class BackoffRetryStrategy : IAsyncRetryStrategy
     {
         private readonly int _attempts;
-        private readonly Func<int, TimeSpan> _getRetryDelayFunction;
+        private readonly IBackoffDelayProvider _delayProvider;
         private readonly Func<Exception, bool> _isTransientErrorFunction;
 
 
@@ -21,8 +21,8 @@ namespace EXBP.Dipren.Resilience
         ///   The number of retry attempts to make in case the initial attempt fails due to a transient error
         ///   condition.
         /// </param>
-        /// <param name="getRetryDelay">
-        ///   A function that returns the time to wait before each retry attempt.
+        /// <param name="delayProvider">
+        ///   An <see cref="IBackoffDelayProvider"/> object that returns the time to wait before each retry attempt.
         /// </param>
         /// <param name="isTransientError">
         ///   A function that determines whether an exception represents a transient error condition.
@@ -31,17 +31,17 @@ namespace EXBP.Dipren.Resilience
         ///   Argument <paramref name="retryAttempts"/> is less than zero.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="getRetryDelay"/> or <paramref name="isTransientError"/> is a
+        ///   Argument <paramref name="delayProvider"/> or <paramref name="isTransientError"/> is a
         ///   <see langword="null"/> reference.
         /// </exception>
-        public BackoffRetryStrategy(int retryAttempts, Func<int, TimeSpan> getRetryDelay, Func<Exception, bool> isTransientError)
+        public BackoffRetryStrategy(int retryAttempts, IBackoffDelayProvider delayProvider, Func<Exception, bool> isTransientError)
         {
             Assert.ArgumentIsGreaterOrEqual(retryAttempts, 0, nameof(retryAttempts));
-            Assert.ArgumentIsNotNull(getRetryDelay, nameof(getRetryDelay));
+            Assert.ArgumentIsNotNull(delayProvider, nameof(delayProvider));
             Assert.ArgumentIsNotNull(isTransientError, nameof(isTransientError));
 
             this._attempts = (1 + retryAttempts);
-            this._getRetryDelayFunction = getRetryDelay;
+            this._delayProvider = delayProvider;
             this._isTransientErrorFunction = isTransientError;
         }
 
@@ -122,7 +122,7 @@ namespace EXBP.Dipren.Resilience
 
                         if (retry == true)
                         {
-                            TimeSpan duration = this._getRetryDelayFunction.Invoke(attempt);
+                            TimeSpan duration = this._delayProvider.GetDelay(attempt);
 
                             if (duration >= TimeSpan.Zero)
                             {
