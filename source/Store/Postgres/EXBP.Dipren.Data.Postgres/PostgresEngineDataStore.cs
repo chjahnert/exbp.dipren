@@ -1,6 +1,4 @@
 ﻿
-using System.Data.Common;
-
 using EXBP.Dipren.Diagnostics;
 using EXBP.Dipren.Resilience;
 
@@ -19,6 +17,8 @@ namespace EXBP.Dipren.Data.Postgres
         private const int DEFAULT_RETRY_LIMIT = 16;
         private const int DEFAULT_RETRY_DELAY = 20;
 
+
+        private static IErrorConditionClassifier DefaultErrorClassifier = new DbErrorConditionClassifier(false);
 
         private readonly PostgresEngineDataStoreImplementation _store;
         private readonly IAsyncRetryStrategy _strategy;
@@ -56,7 +56,7 @@ namespace EXBP.Dipren.Data.Postgres
             IBackoffDelayProvider backoffDelayProvider = new ConstantBackoffDelayProvider(retryDelay);
 
             this._store = new PostgresEngineDataStoreImplementation(connectionString);
-            this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, this.IsTransientError);
+            this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, DefaultErrorClassifier);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace EXBP.Dipren.Data.Postgres
             IBackoffDelayProvider backoffDelayProvider = new ConstantBackoffDelayProvider(retryDelay);
 
             this._store = new PostgresEngineDataStoreImplementation(connectionString);
-            this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, this.IsTransientError);
+            this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, DefaultErrorClassifier);
         }
 
         /// <summary>
@@ -123,23 +123,5 @@ namespace EXBP.Dipren.Data.Postgres
 
             GC.SuppressFinalize(this);
         }
-
-        /// <summary>
-        ///   Determines whether the specified exception is a transient error.
-        /// </summary>
-        /// <param name="exception">
-        ///   A <see cref="Exception"/> object providing details about the error condition.
-        /// </param>
-        /// <returns>
-        ///   <see langword="true"/> if <paramref name="exception"/> is caused by a transient error condition;
-        ///   otherwise <see langword="false"/>.
-        /// </returns>
-        /// <remarks>
-        ///   The default implementation returns <see langword="false"/> unless the exception is of type
-        ///   <see cref="DbException"/> and the <see cref="DbException.IsTransient"/> property is
-        ///   <see langword="true"/>.
-        /// </remarks>
-        private bool IsTransientError(Exception exception)
-            => (exception as DbException)?.IsTransient ?? false;
     }
 }

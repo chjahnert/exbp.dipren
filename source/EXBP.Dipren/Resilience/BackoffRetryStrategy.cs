@@ -11,7 +11,7 @@ namespace EXBP.Dipren.Resilience
     {
         private readonly int _attempts;
         private readonly IBackoffDelayProvider _delayProvider;
-        private readonly Func<Exception, bool> _isTransientErrorFunction;
+        private readonly IErrorConditionClassifier _errorClassifier;
 
 
         /// <summary>
@@ -24,25 +24,25 @@ namespace EXBP.Dipren.Resilience
         /// <param name="delayProvider">
         ///   An <see cref="IBackoffDelayProvider"/> object that returns the time to wait before each retry attempt.
         /// </param>
-        /// <param name="isTransientError">
+        /// <param name="errorClassifier">
         ///   A function that determines whether an exception represents a transient error condition.
         /// </param>
         /// <exception cref="ArgumentException">
         ///   Argument <paramref name="retryAttempts"/> is less than zero.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="delayProvider"/> or <paramref name="isTransientError"/> is a
+        ///   Argument <paramref name="delayProvider"/> or <paramref name="errorClassifier"/> is a
         ///   <see langword="null"/> reference.
         /// </exception>
-        public BackoffRetryStrategy(int retryAttempts, IBackoffDelayProvider delayProvider, Func<Exception, bool> isTransientError)
+        public BackoffRetryStrategy(int retryAttempts, IBackoffDelayProvider delayProvider, IErrorConditionClassifier errorClassifier)
         {
             Assert.ArgumentIsGreaterOrEqual(retryAttempts, 0, nameof(retryAttempts));
             Assert.ArgumentIsNotNull(delayProvider, nameof(delayProvider));
-            Assert.ArgumentIsNotNull(isTransientError, nameof(isTransientError));
+            Assert.ArgumentIsNotNull(errorClassifier, nameof(errorClassifier));
 
             this._attempts = (1 + retryAttempts);
             this._delayProvider = delayProvider;
-            this._isTransientErrorFunction = isTransientError;
+            this._errorClassifier = errorClassifier;
         }
 
 
@@ -118,7 +118,7 @@ namespace EXBP.Dipren.Resilience
                 {
                     if (attempt < this._attempts)
                     {
-                        retry = this._isTransientErrorFunction.Invoke(exception);
+                        retry = this._errorClassifier.IsTransientError(exception);
 
                         if (retry == true)
                         {
