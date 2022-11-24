@@ -1,4 +1,6 @@
 ﻿
+using EXBP.Dipren.Diagnostics;
+
 namespace EXBP.Dipren.Resilience
 {
     /// <summary>
@@ -19,8 +21,15 @@ namespace EXBP.Dipren.Resilience
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="action"/> is a <see langword="null"/> reference.
+        /// </exception>
         async Task ExecuteAsync(Func<Task> action, CancellationToken cancellation = default)
-            => await this.ExecuteAsync(async () => { await action(); return Empty.Value; }, cancellation);
+        {
+            Assert.ArgumentIsNotNull(action, nameof(action));
+
+            await this.ExecuteAsync(async () => { await action(); return Empty.Value; }, cancellation);
+        }
 
         /// <summary>
         ///   Executes the specified action with the current retry strategy.
