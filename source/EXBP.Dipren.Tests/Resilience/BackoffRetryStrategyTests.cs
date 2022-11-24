@@ -9,15 +9,13 @@ namespace EXBP.Dipren.Tests.Resilience
     [TestFixture]
     public class BackoffRetryStrategyTests
     {
-        private IBackoffDelayProvider DefaultDelayProvider { get; } = new ConstantBackoffDelayProvider(TimeSpan.Zero);
-
-        private ITransientErrorDetector DefaultTransientErrorDetector { get; } = ConstantTransientErrorDetector.AlwaysTransient;
+        private IBackoffDelayProvider DefaultDelayProvider { get; } = new PresetBackoffDelayProvider(TimeSpan.Zero);
 
 
         [Test]
         public void ExecuteAsync_ArgumentActionIsNull_ThrowsException()
         {
-            BackoffRetryStrategy policy = new BackoffRetryStrategy(1, this.DefaultDelayProvider, this.DefaultTransientErrorDetector);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(1, this.DefaultDelayProvider, ConstantTransientErrorDetector.AlwaysTransient);
 
             Func<Task> action = null;
 
@@ -27,7 +25,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public void ExecuteAsync_ArgumentFunctionIsNull_ThrowsException()
         {
-            BackoffRetryStrategy policy = new BackoffRetryStrategy(1, this.DefaultDelayProvider, this.DefaultTransientErrorDetector);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(1, this.DefaultDelayProvider, ConstantTransientErrorDetector.AlwaysTransient);
 
             Func<Task<int>> function = null;
 
@@ -37,7 +35,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public async Task ExecuteAsync_PermanentErrorOccurrs_NoRetryIsAttempted()
         {
-            BackoffRetryStrategy policy = new BackoffRetryStrategy(1, this.DefaultDelayProvider, this.DefaultTransientErrorDetector);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(1, this.DefaultDelayProvider, ConstantTransientErrorDetector.NeverTransient);
 
             int attempts = 0;
             int thrown = 0;
@@ -62,7 +60,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public void ExecuteAsync_TransientErrorOccurrsDuringAction_RetryIsAttempted()
         {
-            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, this.DefaultDelayProvider, this.DefaultTransientErrorDetector);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, this.DefaultDelayProvider, ConstantTransientErrorDetector.AlwaysTransient);
 
             int attempts = 0;
 
@@ -81,7 +79,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public void ExecuteAsync_TransientErrorOccurrsDuringFunction_RetryIsAttempted()
         {
-            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, this.DefaultDelayProvider, this.DefaultTransientErrorDetector);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, this.DefaultDelayProvider, ConstantTransientErrorDetector.AlwaysTransient);
 
             int attempts = 0;
 
@@ -102,7 +100,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public async Task ExecuteAsync_TransientErrorOccurrsDuringAction_StopsAfterSuccessfulAttempts()
         {
-            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, this.DefaultDelayProvider, this.DefaultTransientErrorDetector);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, this.DefaultDelayProvider, ConstantTransientErrorDetector.AlwaysTransient);
 
             int executions = 0;
 
@@ -125,7 +123,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public async Task ExecuteAsync_TransientErrorOccurrsDuringFunction_StopsAfterSuccessfulAttempts()
         {
-            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, this.DefaultDelayProvider, this.DefaultTransientErrorDetector);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, this.DefaultDelayProvider, ConstantTransientErrorDetector.AlwaysTransient);
 
             int executions = 0;
 
