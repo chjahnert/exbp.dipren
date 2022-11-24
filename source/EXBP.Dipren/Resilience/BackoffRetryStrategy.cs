@@ -7,7 +7,7 @@ namespace EXBP.Dipren.Resilience
     /// <summary>
     ///   Implements a retry policy that waits some time before retry attempts.
     /// </summary>
-    internal class BackoffRetryPolicy
+    internal class BackoffRetryStrategy : IAsyncRetryStrategy
     {
         private readonly int _attempts;
         private readonly Func<int, TimeSpan> _getRetryDelayFunction;
@@ -15,7 +15,7 @@ namespace EXBP.Dipren.Resilience
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="BackoffRetryPolicy"/> class.
+        ///   Initializes a new instance of the <see cref="BackoffRetryStrategy"/> class.
         /// </summary>
         /// <param name="retryAttempts">
         ///   The total number of retry attempts to make.
@@ -33,7 +33,7 @@ namespace EXBP.Dipren.Resilience
         ///   Argument <paramref name="getRetryDelay"/> or <paramref name="isTransientError"/> is a
         ///   <see langword="null"/> reference.
         /// </exception>
-        public BackoffRetryPolicy(int retryAttempts, Func<int, TimeSpan> getRetryDelay, Func<Exception, bool> isTransientError)
+        public BackoffRetryStrategy(int retryAttempts, Func<int, TimeSpan> getRetryDelay, Func<Exception, bool> isTransientError)
         {
             Assert.ArgumentIsGreaterOrEqual(retryAttempts, 0, nameof(retryAttempts));
             Assert.ArgumentIsNotNull(getRetryDelay, nameof(getRetryDelay));

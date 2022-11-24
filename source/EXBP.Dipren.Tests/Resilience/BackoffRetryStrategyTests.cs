@@ -12,7 +12,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public void Execute_ArgumentActionIsNull_ThrowsException()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(1, attempt => TimeSpan.Zero, exception => false);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(1, attempt => TimeSpan.Zero, exception => false);
 
             Action action = null;
 
@@ -22,7 +22,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public void ExecuteAsync_ArgumentActionIsNull_ThrowsException()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(1, attempt => TimeSpan.Zero, exception => false);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(1, attempt => TimeSpan.Zero, exception => false);
 
             Func<Task> action = null;
 
@@ -32,7 +32,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public void ExecuteAsync_ArgumentFunctionIsNull_ThrowsException()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(1, attempt => TimeSpan.Zero, exception => false);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(1, attempt => TimeSpan.Zero, exception => false);
 
             Func<Task<int>> function = null;
 
@@ -42,7 +42,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public async Task ExecuteAsync_PermanentErrorOccurrs_NoRetryIsAttempted()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(1, attempt => TimeSpan.Zero, exception => false);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(1, attempt => TimeSpan.Zero, exception => false);
 
             int attempts = 0;
             int thrown = 0;
@@ -66,7 +66,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public void ExecuteAsync_TransientErrorOccurrsDuringAction_RetryIsAttempted()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, attempt => TimeSpan.Zero, exception => true);
 
             int attempts = 0;
 
@@ -83,7 +83,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public void ExecuteAsync_TransientErrorOccurrsDuringFunction_RetryIsAttempted()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, attempt => TimeSpan.Zero, exception => true);
 
             int attempts = 0;
 
@@ -102,7 +102,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public void Execute_TransientErrorOccurrsDuringAction_StopsAfterSuccessfulAttempts()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, attempt => TimeSpan.Zero, exception => true);
 
             int executions = 0;
 
@@ -122,7 +122,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public async Task ExecuteAsync_TransientErrorOccurrsDuringAction_StopsAfterSuccessfulAttempts()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, attempt => TimeSpan.Zero, exception => true);
 
             int executions = 0;
 
@@ -142,7 +142,7 @@ namespace EXBP.Dipren.Tests.Resilience
         [Test]
         public async Task ExecuteAsync_TransientErrorOccurrsDuringFunction_StopsAfterSuccessfulAttempts()
         {
-            BackoffRetryPolicy policy = new BackoffRetryPolicy(3, attempt => TimeSpan.Zero, exception => true);
+            BackoffRetryStrategy policy = new BackoffRetryStrategy(3, attempt => TimeSpan.Zero, exception => true);
 
             int executions = 0;
 

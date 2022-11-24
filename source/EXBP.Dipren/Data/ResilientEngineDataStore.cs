@@ -11,7 +11,7 @@ namespace EXBP.Dipren.Data
     /// </summary>
     public abstract class ResilientEngineDataStore : IEngineDataStore
     {
-        private readonly BackoffRetryPolicy _retryPolicy;
+        private readonly BackoffRetryStrategy _retryPolicy;
         private readonly TimeSpan _retryDelay;
 
 
@@ -37,7 +37,7 @@ namespace EXBP.Dipren.Data
         /// </param>
         protected ResilientEngineDataStore(int retryLimit, TimeSpan retryDelay)
         {
-            this._retryPolicy = new BackoffRetryPolicy(retryLimit, this.GetRetryWaitDuration, this.IsTransientError);
+            this._retryPolicy = new BackoffRetryStrategy(retryLimit, this.GetRetryWaitDuration, this.IsTransientError);
             this._retryDelay = retryDelay;
         }
 
