@@ -9,10 +9,7 @@ namespace EXBP.Dipren.Data
     /// <summary>
     ///   Implements an <see cref="IEngineDataStore"/> that uses a backoff retry policy for resilience.
     /// </summary>
-    /// <typeparam name="TEngineDataStore">
-    ///   The actual implementation type of the engine data store.
-    /// </typeparam>
-    public abstract class ResilientEngineDataStore<TEngineDataStore> : IEngineDataStore where TEngineDataStore : IEngineDataStore
+    public abstract class ResilientEngineDataStore : IEngineDataStore
     {
         private readonly BackoffRetryPolicy _retryPolicy;
         private readonly TimeSpan _retryDelay;
@@ -20,12 +17,9 @@ namespace EXBP.Dipren.Data
 
         /// <summary>
         ///   When implemented in a derived class, this property gets the <see cref="IEngineDataStore"/> object being
-        ///   wrapped by the current <see cref="ResilientEngineDataStore{TEngineDataStore}"/> instance.
+        ///   wrapped by the current <see cref="ResilientEngineDataStore"/> instance.
         /// </summary>
-        /// <value>
-        ///   The <typeparamref name="TEngineDataStore"/> object being wrapped.
-        /// </value>
-        protected abstract TEngineDataStore Store { get; }
+        protected abstract IEngineDataStore Store { get; }
 
 
         /// <summary>
