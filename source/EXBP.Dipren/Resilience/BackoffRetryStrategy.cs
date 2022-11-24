@@ -5,7 +5,7 @@ using EXBP.Dipren.Diagnostics;
 namespace EXBP.Dipren.Resilience
 {
     /// <summary>
-    ///   Implements a retry policy that waits some time before retry attempts.
+    ///   Implements a retry strategy that waits some time before each retry attempt.
     /// </summary>
     public class BackoffRetryStrategy : IAsyncRetryStrategy
     {
@@ -18,10 +18,11 @@ namespace EXBP.Dipren.Resilience
         ///   Initializes a new instance of the <see cref="BackoffRetryStrategy"/> class.
         /// </summary>
         /// <param name="retryAttempts">
-        ///   The total number of retry attempts to make.
+        ///   The number of retry attempts to make in case the initial attempt fails due to a transient error
+        ///   condition.
         /// </param>
         /// <param name="getRetryDelay">
-        ///   A function that returns the time to wait before retry attempts.
+        ///   A function that returns the time to wait before each retry attempt.
         /// </param>
         /// <param name="isTransientError">
         ///   A function that determines whether an exception represents a transient error condition.
@@ -46,69 +47,14 @@ namespace EXBP.Dipren.Resilience
 
 
         /// <summary>
-        ///   Executes the specified action. If the action fails with a transient error, it is retried up to the
-        ///   number of times at construction time.
+        ///   Executes the specified action with the current retry strategy.
         /// </summary>
         /// <param name="action">
-        ///   The action to be executed.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="action"/> is a <see langword="null"/> reference.
-        /// </exception>
-        public void Execute(Action action)
-        {
-            Assert.ArgumentIsNotNull(action, nameof(action));
-
-            bool retry = false;
-            int attempt = 0;
-
-            do
-            {
-                retry = false;
-                attempt += 1;
-
-                try
-                {
-                    action.Invoke();
-                }
-                catch (Exception exception)
-                {
-                    if (attempt < this._attempts)
-                    {
-                        retry = this._isTransientErrorFunction.Invoke(exception);
-
-                        if (retry == true)
-                        {
-                            TimeSpan duration = this._getRetryDelayFunction.Invoke(attempt);
-
-                            if (duration >= TimeSpan.Zero)
-                            {
-                                Thread.Sleep(duration);
-                            }
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
-            while (retry == true);
-        }
-
-        /// <summary>
-        ///   Executes the specified action. If the action fails with a transient error, it is retried up to the
-        ///   number of times at construction time.
-        /// </summary>
-        /// <param name="action">
-        ///   The action to be executed.
+        ///   The action to execute.
         /// </param>
         /// <param name="cancellation">
-        ///   A <see cref="CancellationToken"/> value that can be used to cancel the operation.
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
         /// </param>
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
@@ -116,144 +62,42 @@ namespace EXBP.Dipren.Resilience
         /// <exception cref="ArgumentNullException">
         ///   Argument <paramref name="action"/> is a <see langword="null"/> reference.
         /// </exception>
-        /// <remarks>
-        ///   The specified action is executed in a synchronous fashion, but the waiting between retry attempt is
-        ///   asynchronous.
-        /// </remarks>
-        public async Task ExecuteAsync(Action action, CancellationToken cancellation = default)
-        {
-            Assert.ArgumentIsNotNull(action, nameof(action));
-
-            bool retry = false;
-            int attempt = 0;
-
-            do
-            {
-                retry = false;
-                attempt += 1;
-
-                try
-                {
-                    action.Invoke();
-                }
-                catch (Exception exception)
-                {
-                    if (attempt < this._attempts)
-                    {
-                        retry = this._isTransientErrorFunction.Invoke(exception);
-
-                        if (retry == true)
-                        {
-                            TimeSpan duration = this._getRetryDelayFunction.Invoke(attempt);
-
-                            if (duration >= TimeSpan.Zero)
-                            {
-                                await Task.Delay(duration, cancellation);
-                            }
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
-            while (retry == true);
-        }
-
-        /// <summary>
-        ///   Executes the specified asynchronous action. If the action fails with a transient error, it is retried up
-        ///   to the number of times at construction time.
-        /// </summary>
-        /// <param name="action">
-        ///   The asynchronous action to execute.
-        /// </param>
-        /// <param name="cancellation">
-        ///   A <see cref="CancellationToken"/> value that can be used to cancel the operation.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task"/> object that represents the asynchronous operation.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="action"/> is a <see langword="null"/> reference.
-        /// </exception>
-        /// <remarks>
-        ///   Both the specified action and the waiting between retry attempt is run in an asynchronous fashion.
-        /// </remarks>
         public async Task ExecuteAsync(Func<Task> action, CancellationToken cancellation = default)
         {
             Assert.ArgumentIsNotNull(action, nameof(action));
 
-            bool retry = false;
-            int attempt = 0;
-
-            do
+            Func<Task<Empty>> function = async () =>
             {
-                retry = false;
-                attempt += 1;
+                await action();
+                return Empty.Value;
+            };
 
-                try
-                {
-                    await action.Invoke();
-                }
-                catch (Exception exception)
-                {
-                    if (attempt < this._attempts)
-                    {
-                        retry = this._isTransientErrorFunction.Invoke(exception);
-
-                        if (retry == true)
-                        {
-                            TimeSpan duration = this._getRetryDelayFunction.Invoke(attempt);
-
-                            if (duration >= TimeSpan.Zero)
-                            {
-                                await Task.Delay(duration, cancellation);
-                            }
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
-            while (retry == true);
+            await this.ExecuteAsync(function, cancellation);
         }
 
+
         /// <summary>
-        ///   Executes the specified asynchronous function. If the function fails with a transient error, it is retried
-        ///   up to the number of times at construction time.
+        ///   Executes the specified action with the current retry strategy.
         /// </summary>
         /// <typeparam name="TResult">
-        ///   The type the asynchronous function returns.
+        ///   The type of the result returned by the asynchronous operation.
         /// </typeparam>
-        /// <param name="function">
-        ///   The asynchronous function to execute.
+        /// <param name="action">
+        ///   The action to execute.
         /// </param>
         /// <param name="cancellation">
-        ///   A <see cref="CancellationToken"/> value that can be used to cancel the operation.
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
         /// </param>
         /// <returns>
         ///   A <see cref="Task{TResult}"/> object that represents the asynchronous operation.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="function"/> is a <see langword="null"/> reference.
+        ///   Argument <paramref name="action"/> is a <see langword="null"/> reference.
         /// </exception>
-        /// <remarks>
-        ///   Both the specified action and the waiting between retry attempt is run in an asynchronous fashion.
-        /// </remarks>
-        public async Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> function, CancellationToken cancellation = default)
+        public async Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> action, CancellationToken cancellation = default)
         {
-            Assert.ArgumentIsNotNull(function, nameof(function));
+            Assert.ArgumentIsNotNull(action, nameof(action));
 
             bool retry = false;
             int attempt = 0;
@@ -261,12 +105,14 @@ namespace EXBP.Dipren.Resilience
 
             do
             {
+                cancellation.ThrowIfCancellationRequested();
+
                 retry = false;
                 attempt += 1;
 
                 try
                 {
-                    result = await function.Invoke();
+                    result = await action.Invoke();
                 }
                 catch (Exception exception)
                 {
@@ -298,5 +144,21 @@ namespace EXBP.Dipren.Resilience
 
             return result;
         }
+
+
+        /// <summary>
+        ///   An empty structure used as a return value when wrapping asynchronous operations into asynchronous
+        ///   function calls.
+        /// </summary>
+        private struct Empty
+        {
+            /// <summary>
+            ///   Gets an instance of the <see cref="Empty"/> type.
+            /// </summary>
+            /// <value>
+            ///   An instance of the <see cref="Empty"/> type.
+            /// </value>
+            public static Empty Value { get; } = new Empty();
+        };
     }
 }

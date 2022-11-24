@@ -1,6 +1,4 @@
 ﻿
-using EXBP.Dipren.Diagnostics;
-
 namespace EXBP.Dipren.Resilience
 {
     /// <summary>
@@ -24,12 +22,7 @@ namespace EXBP.Dipren.Resilience
         /// <exception cref="ArgumentNullException">
         ///   Argument <paramref name="action"/> is a <see langword="null"/> reference.
         /// </exception>
-        async Task ExecuteAsync(Func<Task> action, CancellationToken cancellation = default)
-        {
-            Assert.ArgumentIsNotNull(action, nameof(action));
-
-            await this.ExecuteAsync(async () => { await action(); return Empty.Value; }, cancellation);
-        }
+        Task ExecuteAsync(Func<Task> action, CancellationToken cancellation = default);
 
         /// <summary>
         ///   Executes the specified action with the current retry strategy.
@@ -48,20 +41,5 @@ namespace EXBP.Dipren.Resilience
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
         Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> action, CancellationToken cancellation = default);
-
-        /// <summary>
-        ///   An empty structure used as a return value when wrapping asynchronous operations into asynchronous
-        ///   function calls.
-        /// </summary>
-        private struct Empty
-        {
-            /// <summary>
-            ///   Gets an instance of the <see cref="Empty"/> type.
-            /// </summary>
-            /// <value>
-            ///   An instance of the <see cref="Empty"/> type.
-            /// </value>
-            public static Empty Value { get; } = new Empty();
-        };
     }
 }
