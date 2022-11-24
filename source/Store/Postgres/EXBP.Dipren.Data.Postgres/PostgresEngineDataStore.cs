@@ -57,7 +57,7 @@ namespace EXBP.Dipren.Data.Postgres
         public PostgresEngineDataStore(string connectionString, int retryLimit = DEFAULT_RETRY_LIMIT) : this(connectionString, retryLimit, TimeSpan.FromMilliseconds(DEFAULT_RETRY_DELAY))
         {
             TimeSpan retryDelay = TimeSpan.FromMilliseconds(DEFAULT_RETRY_DELAY);
-            IBackoffDelayProvider backoffDelayProvider = new ConstantBackoffDelayProvider(retryDelay);
+            IBackoffDelayProvider backoffDelayProvider = new ExponentialBackoffDelayProvider(retryDelay);
 
             this._store = new PostgresEngineDataStoreImplementation(connectionString);
             this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, DefaultTransientErrorDetector);
@@ -78,7 +78,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// </param>
         public PostgresEngineDataStore(string connectionString, int retryLimit, TimeSpan retryDelay)
         {
-            IBackoffDelayProvider backoffDelayProvider = new ConstantBackoffDelayProvider(retryDelay);
+            IBackoffDelayProvider backoffDelayProvider = new ExponentialBackoffDelayProvider(retryDelay);
 
             this._store = new PostgresEngineDataStoreImplementation(connectionString);
             this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, DefaultTransientErrorDetector);
