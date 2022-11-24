@@ -4,7 +4,7 @@ namespace EXBP.Dipren.Resilience
     /// <summary>
     ///   Implements a <see cref="ITransientErrorDetector"/> that always returns a predefined value.
     /// </summary>
-    internal sealed class ConstantTransientErrorDetector : ITransientErrorDetector
+    public sealed class ConstantTransientErrorDetector : ITransientErrorDetector
     {
         private readonly bool _value;
 
