@@ -7,7 +7,7 @@ namespace EXBP.Dipren.Resilience
     /// <summary>
     ///   Implements a retry policy that waits some time before retry attempts.
     /// </summary>
-    internal class BackoffRetryStrategy : IAsyncRetryStrategy
+    public class BackoffRetryStrategy : IAsyncRetryStrategy
     {
         private readonly int _attempts;
         private readonly Func<int, TimeSpan> _getRetryDelayFunction;
