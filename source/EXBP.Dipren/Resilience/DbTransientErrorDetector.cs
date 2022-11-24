@@ -5,20 +5,22 @@ using System.Data.Common;
 namespace EXBP.Dipren.Resilience
 {
     /// <summary>
-    ///   Implements a <see cref="IErrorConditionClassifier"/> to be used with ADO.NET.
+    ///   Implements an <see cref="ITransientErrorDetector"/> that uses the <see cref="DbException.IsTransient"/>
+    ///   property to detect transient error conditions.
     /// </summary>
-    public class DbErrorConditionClassifier : IErrorConditionClassifier
+    public class DbTransientErrorDetector : ITransientErrorDetector
     {
         private readonly bool _default;
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="DbErrorConditionClassifier"/> class.
+        ///   Initializes a new instance of the <see cref="DbTransientErrorDetector"/> class.
         /// </summary>
         /// <param name="default">
-        ///   The value to return if the exception specified is not a <see cref="DbException"/> instance.
+        ///   <see langword="true"/> to threat all exceptions that are not derived from <see cref="DbException"/> as
+        ///   transient errors; otherwise <see langword="false"/>. The default value is <see langword="false"/>.
         /// </param>
-        public DbErrorConditionClassifier(bool @default = false)
+        public DbTransientErrorDetector(bool @default = false)
         {
             this._default = @default;
         }

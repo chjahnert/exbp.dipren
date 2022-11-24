@@ -2,10 +2,10 @@
 namespace EXBP.Dipren.Resilience
 {
     /// <summary>
-    ///   Allows a type to implement an error condition classifier that determines whether an error condition is
-    ///   transient or permanent.
+    ///   Allows a type to implement a method for determining whether an error condition is a transient error and maybe
+    ///   retried without modifications.
     /// </summary>
-    public interface IErrorConditionClassifier
+    public interface ITransientErrorDetector
     {
         /// <summary>
         ///   Determines whether the specified exception represents a transient error condition.

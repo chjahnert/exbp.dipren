@@ -18,7 +18,7 @@ namespace EXBP.Dipren.Data.Postgres
         private const int DEFAULT_RETRY_DELAY = 20;
 
 
-        private static IErrorConditionClassifier DefaultErrorClassifier = new DbErrorConditionClassifier(false);
+        private static ITransientErrorDetector DefaultTransientErrorDetector = new DbTransientErrorDetector(false);
 
         private readonly PostgresEngineDataStoreImplementation _store;
         private readonly IAsyncRetryStrategy _strategy;
@@ -56,7 +56,7 @@ namespace EXBP.Dipren.Data.Postgres
             IBackoffDelayProvider backoffDelayProvider = new ConstantBackoffDelayProvider(retryDelay);
 
             this._store = new PostgresEngineDataStoreImplementation(connectionString);
-            this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, DefaultErrorClassifier);
+            this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, DefaultTransientErrorDetector);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace EXBP.Dipren.Data.Postgres
             IBackoffDelayProvider backoffDelayProvider = new ConstantBackoffDelayProvider(retryDelay);
 
             this._store = new PostgresEngineDataStoreImplementation(connectionString);
-            this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, DefaultErrorClassifier);
+            this._strategy = new BackoffRetryStrategy(retryLimit, backoffDelayProvider, DefaultTransientErrorDetector);
         }
 
         /// <summary>

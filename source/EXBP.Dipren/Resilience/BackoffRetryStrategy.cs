@@ -10,8 +10,8 @@ namespace EXBP.Dipren.Resilience
     public class BackoffRetryStrategy : IAsyncRetryStrategy
     {
         private readonly int _attempts;
-        private readonly IBackoffDelayProvider _delayProvider;
-        private readonly IErrorConditionClassifier _errorClassifier;
+        private readonly IBackoffDelayProvider _backoffDelayProvider;
+        private readonly ITransientErrorDetector _transientErrorDetector;
 
 
         /// <summary>
@@ -21,28 +21,29 @@ namespace EXBP.Dipren.Resilience
         ///   The number of retry attempts to make in case the initial attempt fails due to a transient error
         ///   condition.
         /// </param>
-        /// <param name="delayProvider">
+        /// <param name="backoffDelayProvider">
         ///   An <see cref="IBackoffDelayProvider"/> object that returns the time to wait before each retry attempt.
         /// </param>
-        /// <param name="errorClassifier">
-        ///   A function that determines whether an exception represents a transient error condition.
+        /// <param name="transientErrorDetector">
+        ///   A <see cref="ITransientErrorDetector"/> object that implements a method for detecting transient errors
+        ///   that maybe retried without modifications.
         /// </param>
         /// <exception cref="ArgumentException">
         ///   Argument <paramref name="retryAttempts"/> is less than zero.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="delayProvider"/> or <paramref name="errorClassifier"/> is a
+        ///   Argument <paramref name="backoffDelayProvider"/> or <paramref name="transientErrorDetector"/> is a
         ///   <see langword="null"/> reference.
         /// </exception>
-        public BackoffRetryStrategy(int retryAttempts, IBackoffDelayProvider delayProvider, IErrorConditionClassifier errorClassifier)
+        public BackoffRetryStrategy(int retryAttempts, IBackoffDelayProvider backoffDelayProvider, ITransientErrorDetector transientErrorDetector)
         {
             Assert.ArgumentIsGreaterOrEqual(retryAttempts, 0, nameof(retryAttempts));
-            Assert.ArgumentIsNotNull(delayProvider, nameof(delayProvider));
-            Assert.ArgumentIsNotNull(errorClassifier, nameof(errorClassifier));
+            Assert.ArgumentIsNotNull(backoffDelayProvider, nameof(backoffDelayProvider));
+            Assert.ArgumentIsNotNull(transientErrorDetector, nameof(transientErrorDetector));
 
             this._attempts = (1 + retryAttempts);
-            this._delayProvider = delayProvider;
-            this._errorClassifier = errorClassifier;
+            this._backoffDelayProvider = backoffDelayProvider;
+            this._transientErrorDetector = transientErrorDetector;
         }
 
 
@@ -118,11 +119,11 @@ namespace EXBP.Dipren.Resilience
                 {
                     if (attempt < this._attempts)
                     {
-                        retry = this._errorClassifier.IsTransientError(exception);
+                        retry = this._transientErrorDetector.IsTransientError(exception);
 
                         if (retry == true)
                         {
-                            TimeSpan duration = this._delayProvider.GetDelay(attempt);
+                            TimeSpan duration = this._backoffDelayProvider.GetDelay(attempt);
 
                             if (duration >= TimeSpan.Zero)
                             {

@@ -2,38 +2,38 @@
 namespace EXBP.Dipren.Resilience
 {
     /// <summary>
-    ///   Implements a <see cref="IErrorConditionClassifier"/> that always returns a predefined value.
+    ///   Implements a <see cref="ITransientErrorDetector"/> that always returns a predefined value.
     /// </summary>
-    internal sealed class ConstantErrorConditionClassifier : IErrorConditionClassifier
+    internal sealed class ConstantTransientErrorDetector : ITransientErrorDetector
     {
-        /// <summary>
-        ///   Gets a <see cref="IErrorConditionClassifier"/> instance that treats all exceptions as transient errors.
-        /// </summary>
-        /// <value>
-        ///   A <see cref="IErrorConditionClassifier"/> instance that treats all exceptions as transient errors.
-        /// </value>
-        public static IErrorConditionClassifier AlwaysTransient { get; } = new ConstantErrorConditionClassifier(true);
-
-        /// <summary>
-        ///   Gets a <see cref="IErrorConditionClassifier"/> instance that treats all exceptions as permanent errors.
-        /// </summary>
-        /// <value>
-        ///   A <see cref="IErrorConditionClassifier"/> instance that treats all exceptions as permanent errors.
-        /// </value>
-        public static IErrorConditionClassifier NeverTransient  { get; } = new ConstantErrorConditionClassifier(false);
-
-
         private readonly bool _value;
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="ConstantErrorConditionClassifier"/> type.
+        ///   Gets a <see cref="ITransientErrorDetector"/> instance that treats all exceptions as transient errors.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="ITransientErrorDetector"/> instance that treats all exceptions as transient errors.
+        /// </value>
+        public static ITransientErrorDetector AlwaysTransient { get; } = new ConstantTransientErrorDetector(true);
+
+        /// <summary>
+        ///   Gets a <see cref="ITransientErrorDetector"/> instance that treats all exceptions as permanent errors.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="ITransientErrorDetector"/> instance that treats all exceptions as permanent errors.
+        /// </value>
+        public static ITransientErrorDetector NeverTransient  { get; } = new ConstantTransientErrorDetector(false);
+
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="ConstantTransientErrorDetector"/> type.
         /// </summary>
         /// <param name="value">
         ///   <see langword="true"/> to treat all exceptions as transient errors; or <see langword="false"/> to treat
         ///   all exceptions as permanent errors.
         /// </param>
-        private ConstantErrorConditionClassifier(bool value)
+        private ConstantTransientErrorDetector(bool value)
         {
             this._value = value;
         }
