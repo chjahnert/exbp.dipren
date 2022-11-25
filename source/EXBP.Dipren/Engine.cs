@@ -30,8 +30,8 @@ namespace EXBP.Dipren
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
         /// <param name="clock">
-        ///   A <see cref="IDateTimeProvider"/> that can be used to generate timestamp values; or
-        ///   <see langword="null"/> to use a <see cref="UtcDateTimeProvider"/> instance.
+        ///   A <see cref="ITimestampProvider"/> that can be used to generate timestamp values; or
+        ///   <see langword="null"/> to use a <see cref="UtcTimestampProvider"/> instance.
         /// </param>
         /// <param name="handler">
         ///   The <see cref="IEventHandler"/> object to use to emit event notifications; or <see langword="null"/> to
@@ -40,7 +40,7 @@ namespace EXBP.Dipren
         /// <param name="configuration">
         ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
         /// </param>
-        internal Engine(IEngineDataStore store, IDateTimeProvider clock, IEventHandler handler = null, Configuration configuration = null) : base(NodeType.Engine, store, clock, handler)
+        internal Engine(IEngineDataStore store, ITimestampProvider clock, IEventHandler handler = null, Configuration configuration = null) : base(NodeType.Engine, store, clock, handler)
         {
             this._configuration = (configuration ?? new Configuration());
         }
@@ -367,7 +367,7 @@ namespace EXBP.Dipren
 
                 bool completed = (count < settings.BatchSize);
                 TKey position = ((count == 0L) ? partition.Position : batch.Last().Key);
-                DateTime timestamp = this.Clock.GetDateTime();
+                DateTime timestamp = this.Clock.GetCurrentTimestamp();
 
                 double seconds = iteration.Elapsed.TotalSeconds;
 
@@ -420,7 +420,7 @@ namespace EXBP.Dipren
 
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventTryingToAcquirePartition, cancellation);
 
-            DateTime now = this.Clock.GetDateTime();
+            DateTime now = this.Clock.GetCurrentTimestamp();
             DateTime cut = (now - settings.Timeout - settings.ClockDrift);
 
             Partition acquired = await this.Store.TryAcquirePartitionAsync(job.Id, this.Id, now, cut, cancellation);
@@ -551,7 +551,7 @@ namespace EXBP.Dipren
 
                 if ((await excludedKeyRangeSize >= settings.BatchSize) && (await updatedKeyRangeSize >= settings.BatchSize))
                 {
-                    DateTime timestamp = this.Clock.GetDateTime();
+                    DateTime timestamp = this.Clock.GetCurrentTimestamp();
 
                     Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updatedKeyRange, partition.Position, partition.Processed, (await updatedKeyRangeSize - 1), false, 0.0, false);
                     Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
@@ -596,7 +596,7 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Job> MarkJobAsStartedAsync(string id, CancellationToken cancellation)
         {
-            DateTime timestamp = this.Clock.GetDateTime();
+            DateTime timestamp = this.Clock.GetCurrentTimestamp();
             Job result = await this.Store.MarkJobAsStartedAsync(id, timestamp, cancellation);
 
             return result;
@@ -618,7 +618,7 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Job> MarkJobAsCompletedAsync(string id, CancellationToken cancellation)
         {
-            DateTime timestamp = this.Clock.GetDateTime();
+            DateTime timestamp = this.Clock.GetCurrentTimestamp();
             Job result = await this.Store.MarkJobAsCompletedAsync(id, timestamp, cancellation);
 
             return result;
