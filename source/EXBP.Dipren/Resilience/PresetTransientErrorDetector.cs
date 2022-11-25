@@ -4,7 +4,7 @@ namespace EXBP.Dipren.Resilience
     /// <summary>
     ///   Implements a <see cref="ITransientErrorDetector"/> that always returns a predefined value.
     /// </summary>
-    public sealed class ConstantTransientErrorDetector : ITransientErrorDetector
+    public sealed class PresetTransientErrorDetector : ITransientErrorDetector
     {
         private readonly bool _value;
 
@@ -15,7 +15,7 @@ namespace EXBP.Dipren.Resilience
         /// <value>
         ///   A <see cref="ITransientErrorDetector"/> instance that treats all exceptions as transient errors.
         /// </value>
-        public static ITransientErrorDetector AlwaysTransient { get; } = new ConstantTransientErrorDetector(true);
+        public static ITransientErrorDetector AlwaysTransient { get; } = new PresetTransientErrorDetector(true);
 
         /// <summary>
         ///   Gets a <see cref="ITransientErrorDetector"/> instance that treats all exceptions as permanent errors.
@@ -23,17 +23,17 @@ namespace EXBP.Dipren.Resilience
         /// <value>
         ///   A <see cref="ITransientErrorDetector"/> instance that treats all exceptions as permanent errors.
         /// </value>
-        public static ITransientErrorDetector NeverTransient  { get; } = new ConstantTransientErrorDetector(false);
+        public static ITransientErrorDetector NeverTransient  { get; } = new PresetTransientErrorDetector(false);
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="ConstantTransientErrorDetector"/> type.
+        ///   Initializes a new instance of the <see cref="PresetTransientErrorDetector"/> type.
         /// </summary>
         /// <param name="value">
         ///   <see langword="true"/> to treat all exceptions as transient errors; or <see langword="false"/> to treat
         ///   all exceptions as permanent errors.
         /// </param>
-        private ConstantTransientErrorDetector(bool value)
+        private PresetTransientErrorDetector(bool value)
         {
             this._value = value;
         }
