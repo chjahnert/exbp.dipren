@@ -7,22 +7,35 @@ using Npgsql;
 using NpgsqlTypes;
 
 using EXBP.Dipren.Demo.Postgres.Processing.Models;
+using EXBP.Dipren.Resilience;
 
 
 namespace EXBP.Dipren.Demo.Postgres.Processing
 {
     internal class CuboidAscendingDataSource : IDataSource<Guid, Cuboid>
     {
+        private const int RETRY_LIMIT = 8;
+        private const int RETRY_BACKOFF_DELAY_MS = 25;
+
         private readonly string _connectionString;
+        private readonly IAsyncRetryStrategy _retrier;
+
 
         internal CuboidAscendingDataSource(string connectionString)
         {
             Debug.Assert(connectionString != null);
 
+            TimeSpan backoffDelay = TimeSpan.FromMilliseconds(RETRY_BACKOFF_DELAY_MS);
+            IBackoffDelayProvider delayProvider = new PresetBackoffDelayProvider(backoffDelay);
+
             this._connectionString = connectionString;
+            this._retrier = new BackoffRetryStrategy(RETRY_LIMIT, delayProvider, DbTransientErrorDetector.Default);
         }
 
         public async Task<long> EstimateRangeSizeAsync(Range<Guid> range, CancellationToken cancellation)
+            => await this._retrier.ExecuteAsync(async () => await this.OnEstimateRangeSizeAsync(range, cancellation), cancellation);
+
+        private async Task<long> OnEstimateRangeSizeAsync(Range<Guid> range, CancellationToken cancellation)
         {
             Debug.Assert(range != null);
 
@@ -50,6 +63,9 @@ namespace EXBP.Dipren.Demo.Postgres.Processing
         }
 
         public async Task<Range<Guid>> GetEntireRangeAsync(CancellationToken cancellation)
+            => await this._retrier.ExecuteAsync(async () => await this.OnGetEntireRangeAsync(cancellation), cancellation);
+
+        private async Task<Range<Guid>> OnGetEntireRangeAsync(CancellationToken cancellation)
         {
             Range<Guid> result = null;
 
@@ -79,6 +95,9 @@ namespace EXBP.Dipren.Demo.Postgres.Processing
         }
 
         public async Task<IEnumerable<KeyValuePair<Guid, Cuboid>>> GetNextBatchAsync(Range<Guid> range, int skip, int take, CancellationToken cancellation)
+            => await this._retrier.ExecuteAsync(async () => await this.OnGetNextBatchAsync(range, skip, take, cancellation), cancellation);
+
+        private async Task<IEnumerable<KeyValuePair<Guid, Cuboid>>> OnGetNextBatchAsync(Range<Guid> range, int skip, int take, CancellationToken cancellation)
         {
             List<KeyValuePair<Guid, Cuboid>> result = null;
 

@@ -14,6 +14,15 @@ namespace EXBP.Dipren.Resilience
 
 
         /// <summary>
+        ///   Gets the default instance of the <see cref="DbTransientErrorDetector"/> class.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="DbTransientErrorDetector"/> instance that is ready to be used.
+        /// </value>
+        public static DbTransientErrorDetector Default { get; } = new DbTransientErrorDetector(false);
+
+
+        /// <summary>
         ///   Initializes a new instance of the <see cref="DbTransientErrorDetector"/> class.
         /// </summary>
         /// <param name="default">
