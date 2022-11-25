@@ -5,39 +5,27 @@ using Npgsql;
 using NpgsqlTypes;
 
 using EXBP.Dipren.Demo.Postgres.Processing.Models;
-using EXBP.Dipren.Resilience;
 
 
 namespace EXBP.Dipren.Demo.Postgres.Processing
 {
     internal class CubiodBatchProcessor : IBatchProcessor<Cuboid>
     {
-        private const int RETRY_LIMIT = 8;
-        private const int RETRY_BACKOFF_DELAY_MS = 25;
-
         private const string SQL_STATE_PRIMARY_KEY_VIOLATION = "23505";
 
 
         private readonly string _connectionString;
-        private readonly IAsyncRetryStrategy _retrier;
 
 
         internal CubiodBatchProcessor(string connectionString)
         {
             Debug.Assert(connectionString != null);
 
-            TimeSpan backoffDelay = TimeSpan.FromMilliseconds(RETRY_BACKOFF_DELAY_MS);
-            IBackoffDelayProvider delayProvider = new PresetBackoffDelayProvider(backoffDelay);
-
             this._connectionString = connectionString;
-            this._retrier = new BackoffRetryStrategy(RETRY_LIMIT, delayProvider, DbTransientErrorDetector.Default);
         }
 
 
         public async Task ProcessAsync(IEnumerable<Cuboid> cuboids, CancellationToken cancellation)
-            => await this._retrier.ExecuteAsync(async () => await this.OnProcessAsync(cuboids, cancellation));
-
-        private async Task OnProcessAsync(IEnumerable<Cuboid> cuboids, CancellationToken cancellation)
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(this._connectionString))
             {
