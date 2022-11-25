@@ -146,8 +146,11 @@ namespace EXBP.Dipren.Data
         /// <param name="position">
         ///   The key of the last item processed in the key range of the partition.
         /// </param>
-        /// <param name="progress">
-        ///   The number of items processed since the last progress update.
+        /// <param name="processed">
+        ///   The total number of items processed in this partition.
+        /// </param>
+        /// <param name="remaining">
+        ///   The total number of items remaining in this partition.
         /// </param>
         /// <param name="completed">
         ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
@@ -169,8 +172,8 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A partition with the specified unique identifier does not exist.
         /// </exception>
-        public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, double throughput, CancellationToken cancellation)
-            => this.Strategy.ExecuteAsync(async () => await this.Store.ReportProgressAsync(id, owner, timestamp, position, progress, completed, throughput, cancellation), cancellation);
+        public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long processed, long remaining, bool completed, double throughput, CancellationToken cancellation)
+            => this.Strategy.ExecuteAsync(async () => await this.Store.ReportProgressAsync(id, owner, timestamp, position, processed, remaining, completed, throughput, cancellation), cancellation);
 
         /// <summary>
         ///   Retrieves the job with the specified identifier from the data store.

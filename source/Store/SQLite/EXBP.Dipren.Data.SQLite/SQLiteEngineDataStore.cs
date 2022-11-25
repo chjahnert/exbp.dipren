@@ -1004,8 +1004,11 @@ namespace EXBP.Dipren.Data.SQLite
         /// <param name="position">
         ///   The key of the last item processed in the key range of the partition.
         /// </param>
-        /// <param name="progress">
-        ///   The number of items processed since the last progress update.
+        /// <param name="processed">
+        ///   The total number of items processed in this partition.
+        /// </param>
+        /// <param name="remaining">
+        ///   The total number of items remaining in this partition.
         /// </param>
         /// <param name="completed">
         ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
@@ -1027,7 +1030,7 @@ namespace EXBP.Dipren.Data.SQLite
         /// <exception cref="UnknownIdentifierException">
         ///   A partition with the specified unique identifier does not exist.
         /// </exception>
-        public async Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, double throughput, CancellationToken cancellation)
+        public async Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long processed, long remaining, bool completed, double throughput, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(position, nameof(position));
@@ -1051,7 +1054,8 @@ namespace EXBP.Dipren.Data.SQLite
 
                 command.Parameters.AddWithValue("$updated", timestamp);
                 command.Parameters.AddWithValue("$position", position);
-                command.Parameters.AddWithValue("$progress", progress);
+                command.Parameters.AddWithValue("$processed", processed);
+                command.Parameters.AddWithValue("$remaining", remaining);
                 command.Parameters.AddWithValue("$completed", completed);
                 command.Parameters.AddWithValue("$throughput", throughput);
                 command.Parameters.AddWithValue("$id", sid);

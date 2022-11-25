@@ -835,7 +835,7 @@ namespace EXBP.Dipren.Tests.Data
             Guid id = Guid.NewGuid();
             DateTime timestamp = DateTime.UtcNow;
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.ReportProgressAsync(id, null, timestamp, "d", 4, false, 4231.1, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.ReportProgressAsync(id, null, timestamp, "d", 4, 2, false, 4231.1, CancellationToken.None));
         }
 
         [Test]
@@ -846,7 +846,7 @@ namespace EXBP.Dipren.Tests.Data
             Guid id = Guid.NewGuid();
             DateTime timestamp = DateTime.UtcNow;
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.ReportProgressAsync(id, "owner", timestamp, null, 4, false, 4231.1, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.ReportProgressAsync(id, "owner", timestamp, null, 4, 2, false, 4231.1, CancellationToken.None));
         }
 
         [Test]
@@ -857,7 +857,7 @@ namespace EXBP.Dipren.Tests.Data
             Guid id = Guid.NewGuid();
             DateTime timestamp = DateTime.UtcNow;
 
-            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.ReportProgressAsync(id, "owner", timestamp, "d", 4, false, 4231.1, CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.ReportProgressAsync(id, "owner", timestamp, "d", 4, 2, false, 4231.1, CancellationToken.None));
         }
 
         [Test]
@@ -877,7 +877,7 @@ namespace EXBP.Dipren.Tests.Data
 
             DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
 
-            Assert.ThrowsAsync<LockException>(() => store.ReportProgressAsync(id, "owner", progressUpdated, "g", 3, false, 4231.1, CancellationToken.None));
+            Assert.ThrowsAsync<LockException>(() => store.ReportProgressAsync(id, "owner", progressUpdated, "g", 3, 1, false, 4231.1, CancellationToken.None));
         }
 
         [Test]
@@ -897,7 +897,7 @@ namespace EXBP.Dipren.Tests.Data
 
             DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
 
-            await store.ReportProgressAsync(id, "owner", progressUpdated, "g", 3L, true, 4231.1, CancellationToken.None);
+            await store.ReportProgressAsync(id, "owner", progressUpdated, "g", 5L, 19L, true, 4231.1, CancellationToken.None);
 
             Partition persisted = await store.RetrievePartitionAsync(id, CancellationToken.None);
 
@@ -909,8 +909,8 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(persisted.Last, Is.EqualTo(partition.Last));
             Assert.That(persisted.IsInclusive, Is.EqualTo(partition.IsInclusive));
             Assert.That(persisted.Position, Is.EqualTo("g"));
-            Assert.That(persisted.Processed, Is.EqualTo(partition.Processed + 3L));
-            Assert.That(persisted.Remaining, Is.EqualTo(partition.Remaining - 3L));
+            Assert.That(persisted.Processed, Is.EqualTo(5L));
+            Assert.That(persisted.Remaining, Is.EqualTo(19L));
             Assert.That(persisted.IsCompleted, Is.True);
             Assert.That(persisted.Throughput, Is.EqualTo(4231.1));
             Assert.That(persisted.IsSplitRequested, Is.EqualTo(partition.IsSplitRequested));
@@ -933,7 +933,7 @@ namespace EXBP.Dipren.Tests.Data
 
             DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
 
-            Partition returned = await store.ReportProgressAsync(id, "owner", progressUpdated, "g", 3L, true, 4231.1, CancellationToken.None);
+            Partition returned = await store.ReportProgressAsync(id, "owner", progressUpdated, "g", 5L, 19L, true, 4231.1, CancellationToken.None);
 
             Assert.That(returned.JobId, Is.EqualTo(partition.JobId));
             Assert.That(returned.Created, Is.EqualTo(partition.Created));
@@ -943,8 +943,8 @@ namespace EXBP.Dipren.Tests.Data
             Assert.That(returned.Last, Is.EqualTo(partition.Last));
             Assert.That(returned.IsInclusive, Is.EqualTo(partition.IsInclusive));
             Assert.That(returned.Position, Is.EqualTo("g"));
-            Assert.That(returned.Processed, Is.EqualTo(partition.Processed + 3L));
-            Assert.That(returned.Remaining, Is.EqualTo(partition.Remaining - 3L));
+            Assert.That(returned.Processed, Is.EqualTo(5L));
+            Assert.That(returned.Remaining, Is.EqualTo(19L));
             Assert.That(returned.IsCompleted, Is.True);
             Assert.That(returned.Throughput, Is.EqualTo(4231.1));
             Assert.That(returned.IsSplitRequested, Is.EqualTo(partition.IsSplitRequested));
@@ -1506,8 +1506,8 @@ namespace EXBP.Dipren.Tests.Data
             public Task InsertSplitPartitionAsync(Partition partitionToUpdate, Partition partitionToInsert, CancellationToken cancellation)
                 => this._store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, cancellation);
 
-            public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, double throughput, CancellationToken cancellation)
-                => this._store.ReportProgressAsync(id, owner, timestamp, position, progress, completed, throughput, cancellation);
+            public Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long processed, long remaining, bool completed, double throughput, CancellationToken cancellation)
+                => this._store.ReportProgressAsync(id, owner, timestamp, position, processed, remaining, completed, throughput, cancellation);
 
             public Task<Job> RetrieveJobAsync(string id, CancellationToken cancellation)
                 => this._store.RetrieveJobAsync(id, cancellation);
