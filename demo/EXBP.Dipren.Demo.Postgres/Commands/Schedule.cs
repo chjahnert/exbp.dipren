@@ -3,6 +3,7 @@ using EXBP.Dipren.Data;
 using EXBP.Dipren.Data.Postgres;
 using EXBP.Dipren.Demo.Postgres.Processing;
 using EXBP.Dipren.Demo.Postgres.Processing.Models;
+using EXBP.Dipren.Demo.Postgres.Processing.Resilience;
 using EXBP.Dipren.Telemetry;
 
 
@@ -22,8 +23,8 @@ namespace EXBP.Dipren.Demo.Postgres.Commands
                 {
                     Scheduler scheduler = new Scheduler(store, DebugEventLogger.Debug);
 
-                    IDataSource<Guid, Cuboid> source = reverse ? new CuboidDescendingDataSource(connectionString) : new CuboidAscendingDataSource(connectionString);
-                    CubiodBatchProcessor processor = new CubiodBatchProcessor(connectionString);
+                    IDataSource<Guid, Cuboid> source = new ResilientDataSource<Guid, Cuboid>(reverse ? new CuboidDescendingDataSource(connectionString) : new CuboidAscendingDataSource(connectionString));
+                    IBatchProcessor<Cuboid> processor = new ResilientBatchProcessor<Cuboid>(new CubiodBatchProcessor(connectionString));
                     Job<Guid, Cuboid> job = new Job<Guid, Cuboid>(name, source, GuidKeyArithmetics.LexicographicalMemberwise, GuidKeySerializer.Default, processor);
                     Settings settings = new Settings(batchSize, batchTimeout, clockDrift);
 
