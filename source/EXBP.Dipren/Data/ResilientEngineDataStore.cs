@@ -78,9 +78,6 @@ namespace EXBP.Dipren.Data
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
-        /// </exception>
         /// <exception cref="DuplicateIdentifierException">
         ///   A job with the specified unique identifier already exists in the data store.
         /// </exception>
@@ -125,10 +122,6 @@ namespace EXBP.Dipren.Data
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="partitionToUpdate"/> or argument <paramref name="partitionToInsert"/> is a
-        ///   <see langword="null"/> reference.
-        /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   The partition to update does not exist in the data store.
         /// </exception>
@@ -192,6 +185,9 @@ namespace EXBP.Dipren.Data
         /// <returns>
         ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist.
+        /// </exception>
         public Task<Job> RetrieveJobAsync(string id, CancellationToken cancellation)
             => this.Strategy.ExecuteAsync(async () => await this.Store.RetrieveJobAsync(id, cancellation), cancellation);
 
@@ -209,6 +205,9 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A partition with the specified unique identifier does not exist.
+        /// </exception>
         public Task<Partition> RetrievePartitionAsync(Guid id, CancellationToken cancellation)
             => this.Strategy.ExecuteAsync(async () => await this.Store.RetrievePartitionAsync(id, cancellation), cancellation);
 
@@ -390,9 +389,6 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
         ///   provides access to the result of the operation.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
-        /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>

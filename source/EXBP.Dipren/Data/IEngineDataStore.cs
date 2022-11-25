@@ -169,6 +169,9 @@ namespace EXBP.Dipren.Data
         /// <returns>
         ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist.
+        /// </exception>
         Task<Job> RetrieveJobAsync(string id, CancellationToken cancellation);
 
         /// <summary>
@@ -224,6 +227,9 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A partition with the specified unique identifier does not exist.
+        /// </exception>
         Task<Partition> RetrievePartitionAsync(Guid id, CancellationToken cancellation);
 
         /// <summary>
@@ -335,9 +341,6 @@ namespace EXBP.Dipren.Data
         ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
         ///   provides access to the result of the operation.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
-        /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>

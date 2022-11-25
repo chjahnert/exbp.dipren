@@ -740,6 +740,9 @@ namespace EXBP.Dipren.Data.SQLite
         /// <returns>
         ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist.
+        /// </exception>
         public async Task<Job> RetrieveJobAsync(string id, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
@@ -793,6 +796,9 @@ namespace EXBP.Dipren.Data.SQLite
         ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
         ///   operation.
         /// </returns>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A partition with the specified unique identifier does not exist.
+        /// </exception>
         public async Task<Partition> RetrievePartitionAsync(Guid id, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
