@@ -382,8 +382,11 @@ namespace EXBP.Dipren.Data.Postgres
         /// <param name="position">
         ///   The key of the last item processed in the key range of the partition.
         /// </param>
-        /// <param name="progress">
-        ///   The number of items processed since the last progress update.
+        /// <param name="processed">
+        ///   The total number of items processed in this partition.
+        /// </param>
+        /// <param name="remaining">
+        ///   The total number of items remaining in this partition.
         /// </param>
         /// <param name="completed">
         ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
@@ -405,7 +408,7 @@ namespace EXBP.Dipren.Data.Postgres
         /// <exception cref="UnknownIdentifierException">
         ///   A partition with the specified unique identifier does not exist.
         /// </exception>
-        public async Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long progress, bool completed, double throughput, CancellationToken cancellation)
+        public async Task<Partition> ReportProgressAsync(Guid id, string owner, DateTime timestamp, string position, long processed, long remaining, bool completed, double throughput, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(owner, nameof(owner));
             Assert.ArgumentIsNotNull(position, nameof(position));
@@ -429,7 +432,8 @@ namespace EXBP.Dipren.Data.Postgres
 
                 command.Parameters.AddWithValue("@updated", NpgsqlDbType.Timestamp, uktsTimestamp);
                 command.Parameters.AddWithValue("@position", NpgsqlDbType.Text, ((object) position) ?? DBNull.Value);
-                command.Parameters.AddWithValue("@progress", NpgsqlDbType.Bigint, progress);
+                command.Parameters.AddWithValue("@processed", NpgsqlDbType.Bigint, processed);
+                command.Parameters.AddWithValue("@remaining", NpgsqlDbType.Bigint, remaining);
                 command.Parameters.AddWithValue("@completed", NpgsqlDbType.Boolean, completed);
                 command.Parameters.AddWithValue("@id", NpgsqlDbType.Char, COLUMN_PARTITION_ID_LENGTH, sid);
                 command.Parameters.AddWithValue("@owner", NpgsqlDbType.Varchar, COLUMN_PARTITION_OWNER_LENGTH, owner);

@@ -300,8 +300,8 @@ namespace EXBP.Dipren.Data.Postgres {
         ///SET
         ///  &quot;updated&quot; = @updated,
         ///  &quot;position&quot; = @position,
-        ///  &quot;processed&quot; = (&quot;processed&quot; + @progress),
-        ///  &quot;remaining&quot; = (&quot;remaining&quot; - @progress),
+        ///  &quot;processed&quot; = @processed,
+        ///  &quot;remaining&quot; = @remaining,
         ///  &quot;throughput&quot; = @throughput,
         ///  &quot;is_completed&quot; = @completed
         ///WHERE
@@ -316,7 +316,8 @@ namespace EXBP.Dipren.Data.Postgres {
         ///  &quot;first&quot; AS &quot;first&quot;,
         ///  &quot;last&quot; AS &quot;last&quot;,
         ///  &quot;is_inclusive&quot; AS &quot;is_inclusive&quot;,
-        ///  &quot;position&quot; [rest of string was truncated]&quot;;.
+        ///  &quot;position&quot; AS &quot;position&quot;,
+        ///  &quot;processed&quot; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string QueryReportProgress {
             get {

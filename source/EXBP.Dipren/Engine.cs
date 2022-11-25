@@ -368,6 +368,8 @@ namespace EXBP.Dipren
                 bool completed = (count < settings.BatchSize);
                 TKey position = ((count == 0L) ? partition.Position : batch.Last().Key);
                 DateTime timestamp = this.Clock.GetCurrentTimestamp();
+                long processed = (partition.Processed + count);
+                long remaining = ((partition.Remaining >= count) ? (partition.Remaining - count) : 0L);
 
                 double seconds = iteration.Elapsed.TotalSeconds;
 
@@ -378,7 +380,7 @@ namespace EXBP.Dipren
                     throughputs.Add(count / seconds);
                 }
 
-                partition = await this.ReportProgressAsync(job, partition, timestamp, position, count, completed, throughputs.Average, cancellation);
+                partition = await this.ReportProgressAsync(job, partition, timestamp, position, processed, remaining, completed, throughputs.Average, cancellation);
 
                 if (partition.IsSplitRequested == true)
                 {
@@ -467,8 +469,11 @@ namespace EXBP.Dipren
         /// <param name="position">
         ///   The key of the last item processed in the key range of the partition.
         /// </param>
-        /// <param name="progress">
-        ///   The number of items processed since the last progress update.
+        /// <param name="processed">
+        ///   The total number of items processed in this partition.
+        /// </param>
+        /// <param name="remaining">
+        ///   The total number of items remaining in this partition.
         /// </param>
         /// <param name="completed">
         ///   <see langword="true"/> if the partition is completed; otherwise, <see langword="false"/>.
@@ -487,18 +492,19 @@ namespace EXBP.Dipren
         /// <exception cref="LockException">
         ///   The current processing node no longer holds the lock on the partition.
         /// </exception>
-        private async Task<Partition<TKey>> ReportProgressAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, DateTime timestamp, TKey position, long progress, bool completed, double throughput, CancellationToken cancellation)
+        private async Task<Partition<TKey>> ReportProgressAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, DateTime timestamp, TKey position, long processed, long remaining, bool completed, double throughput, CancellationToken cancellation)
         {
             Debug.Assert(job != null);
             Debug.Assert(partition != null);
             Debug.Assert(partition.Owner == this.Id);
             Debug.Assert(position != null);
-            Debug.Assert(progress >= 0L);
+            Debug.Assert(processed >= 0L);
+            Debug.Assert(remaining >= 0L);
 
             string sp = job.Serializer.Serialize(position);
             double tp = (completed == false) ? throughput : 0.0;
 
-            Partition updated = await this.Store.ReportProgressAsync(partition.Id, this.Id, timestamp, sp, progress, completed, tp, cancellation);
+            Partition updated = await this.Store.ReportProgressAsync(partition.Id, this.Id, timestamp, sp, processed, remaining, completed, tp, cancellation);
 
             Partition<TKey> result = updated.ToPartition(job.Serializer);
 
