@@ -15,17 +15,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="PostgresEngineDataStoreResources.Designer.cs">
+    <Compile Update="PostgresEngineDataStoreImplementationResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>PostgresEngineDataStoreResources.resx</DependentUpon>
+      <DependentUpon>PostgresEngineDataStoreImplementationResources.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="PostgresEngineDataStoreResources.resx">
+    <EmbeddedResource Update="PostgresEngineDataStoreImplementationResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>PostgresEngineDataStoreResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>PostgresEngineDataStoreImplementationResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 
