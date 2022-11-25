@@ -15,7 +15,7 @@ namespace EXBP.Dipren
     {
         private readonly string _id;
         private readonly IEngineDataStore _store;
-        private readonly IDateTimeProvider _clock;
+        private readonly ITimestampProvider _clock;
         private readonly EventDispatcher _dispatcher;
 
 
@@ -39,9 +39,9 @@ namespace EXBP.Dipren
         ///   Gets the date and time provider that can be use to generate timestamp values.
         /// </summary>
         /// <value>
-        ///   A <see cref="IDateTimeProvider"/> object that can be used to generate timestamp values.
+        ///   A <see cref="ITimestampProvider"/> object that can be used to generate timestamp values.
         /// </value>
-        protected IDateTimeProvider Clock => this._clock;
+        protected ITimestampProvider Clock => this._clock;
 
         /// <summary>
         ///   Gets the event dispatcher that is used to emit event notifications.
@@ -62,18 +62,18 @@ namespace EXBP.Dipren
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
         /// <param name="clock">
-        ///   The <see cref="IDateTimeProvider"/> to use to generate timestamps.
+        ///   The <see cref="ITimestampProvider"/> to use to generate timestamps.
         /// </param>
         /// <param name="handler">
         ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
         /// </param>
-        protected Node(NodeType type, IEngineDataStore store, IDateTimeProvider clock, IEventHandler handler)
+        protected Node(NodeType type, IEngineDataStore store, ITimestampProvider clock, IEventHandler handler)
         {
             Assert.ArgumentIsDefined(type, nameof(type));
             Assert.ArgumentIsNotNull(store, nameof(store));
 
             this._id = NodeIdentifier.Generate(type);
-            this._clock = (clock ?? UtcDateTimeProvider.Default);
+            this._clock = (clock ?? UtcTimestampProvider.Default);
             this._dispatcher = new EventDispatcher(type, this._id, this._clock, handler);
             this._store = store;
         }
@@ -86,7 +86,7 @@ namespace EXBP.Dipren
         {
             private readonly NodeType _type;
             private readonly string _id;
-            private readonly IDateTimeProvider _clock;
+            private readonly ITimestampProvider _clock;
             private readonly IEventHandler _handler;
 
 
@@ -100,13 +100,13 @@ namespace EXBP.Dipren
             ///   The unique identifier of the node generating the events.
             /// </param>
             /// <param name="clock">
-            ///   The <see cref="IDateTimeProvider"/> object to use to generate timestamp values.
+            ///   The <see cref="ITimestampProvider"/> object to use to generate timestamp values.
             /// </param>
             /// <param name="handler">
             ///   The <see cref="IEventHandler"/> object to dispatch the events to; or <see langword="null"/> to
             ///   discard the events.
             /// </param>
-            public EventDispatcher(NodeType type, string nodeId, IDateTimeProvider clock, IEventHandler handler)
+            public EventDispatcher(NodeType type, string nodeId, ITimestampProvider clock, IEventHandler handler)
             {
                 Debug.Assert(nodeId != null);
                 Debug.Assert(clock != null);
@@ -145,7 +145,7 @@ namespace EXBP.Dipren
                 {
                     EventDescriptor descriptor = new EventDescriptor
                     {
-                        Timestamp = this._clock.GetDateTime(),
+                        Timestamp = this._clock.GetCurrentTimestamp(),
                         Source = this._type,
                         Severity = severity,
                         EngineId = this._id,
@@ -192,7 +192,7 @@ namespace EXBP.Dipren
                 {
                     EventDescriptor descriptor = new EventDescriptor
                     {
-                        Timestamp = this._clock.GetDateTime(),
+                        Timestamp = this._clock.GetCurrentTimestamp(),
                         Source = this._type,
                         Severity = severity,
                         EngineId = this._id,
@@ -236,7 +236,7 @@ namespace EXBP.Dipren
                 {
                     EventDescriptor descriptor = new EventDescriptor
                     {
-                        Timestamp = this._clock.GetDateTime(),
+                        Timestamp = this._clock.GetCurrentTimestamp(),
                         Source = this._type,
                         Severity = severity,
                         EngineId = this._id,
@@ -284,7 +284,7 @@ namespace EXBP.Dipren
                 {
                     EventDescriptor descriptor = new EventDescriptor
                     {
-                        Timestamp = this._clock.GetDateTime(),
+                        Timestamp = this._clock.GetCurrentTimestamp(),
                         Source = this._type,
                         Severity = severity,
                         EngineId = this._id,

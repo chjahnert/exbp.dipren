@@ -21,12 +21,12 @@ namespace EXBP.Dipren
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
         /// <param name="clock">
-        ///   The <see cref="IDateTimeProvider"/> to use to generate timestamps.
+        ///   The <see cref="ITimestampProvider"/> to use to generate timestamps.
         /// </param>
         /// <param name="handler">
         ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
         /// </param>
-        internal Scheduler(IEngineDataStore store, IDateTimeProvider clock, IEventHandler handler) : base(NodeType.Scheduler, store, clock, handler)
+        internal Scheduler(IEngineDataStore store, ITimestampProvider clock, IEventHandler handler) : base(NodeType.Scheduler, store, clock, handler)
         {
         }
 
@@ -39,7 +39,7 @@ namespace EXBP.Dipren
         /// <param name="handler">
         ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
         /// </param>
-        public Scheduler(IEngineDataStore store, IEventHandler handler = null) : this(store, UtcDateTimeProvider.Default, handler)
+        public Scheduler(IEngineDataStore store, IEventHandler handler = null) : this(store, UtcTimestampProvider.Default, handler)
         {
         }
 
@@ -101,7 +101,7 @@ namespace EXBP.Dipren
         /// </returns>
         public async Task<StatusReport> GetStatusReportAsync(string id, CancellationToken cancellation = default)
         {
-            DateTime timestamp = this.Clock.GetDateTime();
+            DateTime timestamp = this.Clock.GetCurrentTimestamp();
 
             StatusReport result = await this.Store.RetrieveJobStatusReportAsync(id, timestamp, cancellation);
 
@@ -133,7 +133,7 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Job> CreateJobEntryAsync<TKey, TItem>(Job<TKey, TItem> job, Settings settings, CancellationToken cancellation)
         {
-            DateTime timestamp = this.Clock.GetDateTime();
+            DateTime timestamp = this.Clock.GetCurrentTimestamp();
             Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing, settings.BatchSize, settings.Timeout, settings.ClockDrift);
 
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, SchedulerResources.EventCreatingJob, cancellation);
@@ -207,7 +207,7 @@ namespace EXBP.Dipren
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Warning, job.Id, partitionId, SchedulerResources.EventTimeoutValueTooLow, cancellation);
             }
 
-            DateTime timestampPartitionCreated = this.Clock.GetDateTime();
+            DateTime timestampPartitionCreated = this.Clock.GetCurrentTimestamp();
             Partition<TKey> partition = new Partition<TKey>(partitionId, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false, 0.0, false);
             Partition result = partition.ToEntry(job.Serializer);
 
@@ -234,7 +234,7 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Job> MarkJobAsReadyAsync(string jobId, CancellationToken cancellation)
         {
-            DateTime timestamp = this.Clock.GetDateTime();
+            DateTime timestamp = this.Clock.GetCurrentTimestamp();
             Job result = await this.Store.MarkJobAsReadyAsync(jobId, timestamp, cancellation);
 
             return result;
@@ -259,7 +259,7 @@ namespace EXBP.Dipren
         /// </returns>
         private async Task<Job> MarkJobAsFailedAsync(string jobId, Exception exception, CancellationToken cancellation)
         {
-            DateTime timestamp = this.Clock.GetDateTime();
+            DateTime timestamp = this.Clock.GetCurrentTimestamp();
             Job result = await this.Store.MarkJobAsFailedAsync(jobId, timestamp, exception?.Message, cancellation);
 
             return result;
