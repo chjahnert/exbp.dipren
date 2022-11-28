@@ -50,7 +50,7 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(characterset, nameof(characterset));
             Assert.ArgumentIsNotEmpty(characterset, nameof(characterset));
-            Assert.ArgumentIsValid(characterset.Length == characterset.Distinct().Count(), nameof(characterset), "Each characters in the specified set has to be unique.");
+            Assert.ArgumentIsValid(characterset.Length == characterset.Distinct().Count(), nameof(characterset), StringKeyArithmeticsResources.MessageCharactersHaveToBeUnique);
             Assert.ArgumentIsGreater(length, 0, nameof(length));
 
             BigInteger combinations = 0;
@@ -82,11 +82,10 @@ namespace EXBP.Dipren
         public Range<string> Split(Range<string> range, out Range<string> created)
         {
             Assert.ArgumentIsNotNull(range, nameof(range));
-
-            //
-            // TODO: Validate that both keys in the specified range contain only characters that are included in the
-            //       current character set.
-            //
+            Assert.ArgumentIsValid(range.First.Length <= this._length, nameof(range), StringKeyArithmeticsResources.MessageFirstKeyInRangeTooLong);
+            Assert.ArgumentIsValid(range.First.All(c => this._characterset.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageFirstKeyInRangeContainsInvalidCharacters);
+            Assert.ArgumentIsValid(range.Last.Length <= this._length, nameof(range), StringKeyArithmeticsResources.MessageLastKeyInRangeTooLong);
+            Assert.ArgumentIsValid(range.Last.All(c => this._characterset.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageLastKeyInRangeContainsInvalidCharacters);
 
             Range<string> result = range;
             created = null;

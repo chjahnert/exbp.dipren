@@ -40,6 +40,46 @@ namespace EXBP.Dipren.Tests
             Assert.Throws<ArgumentNullException>(() => arithmetics.Split(null, out _));
         }
 
+        [Test]
+        public void Split_FirstKeyInRangeIsTooLong_ThrowsException()
+        {
+            Range<string> range = new Range<string>("aba", "bb", false);
+
+            StringKeyArithmetics arithmetics = new StringKeyArithmetics("abc", 2);
+
+            Assert.Throws<ArgumentException>(() => arithmetics.Split(range, out _), StringKeyArithmeticsResources.MessageFirstKeyInRangeTooLong);
+        }
+
+        [Test]
+        public void Split_FirstKeyInRangeContainsInvalidCharacters_ThrowsException()
+        {
+            Range<string> range = new Range<string>("az", "bb", false);
+
+            StringKeyArithmetics arithmetics = new StringKeyArithmetics("abc", 2);
+
+            Assert.Throws<ArgumentException>(() => arithmetics.Split(range, out _), StringKeyArithmeticsResources.MessageFirstKeyInRangeContainsInvalidCharacters);
+        }
+
+        [Test]
+        public void Split_LastKeyInRangeIsTooLong_ThrowsException()
+        {
+            Range<string> range = new Range<string>("ab", "bba", false);
+
+            StringKeyArithmetics arithmetics = new StringKeyArithmetics("abc", 2);
+
+            Assert.Throws<ArgumentException>(() => arithmetics.Split(range, out _), StringKeyArithmeticsResources.MessageLastKeyInRangeTooLong);
+        }
+
+        [Test]
+        public void Split_LasstKeyInRangeContainsInvalidCharacters_ThrowsException()
+        {
+            Range<string> range = new Range<string>("aa", "bz", false);
+
+            StringKeyArithmetics arithmetics = new StringKeyArithmetics("abc", 2);
+
+            Assert.Throws<ArgumentException>(() => arithmetics.Split(range, out _), StringKeyArithmeticsResources.MessageLastKeyInRangeContainsInvalidCharacters);
+        }
+
         [TestCase("0123456789", 3, "333", "335", false)]
         [TestCase("1ab", 3, "1a", "1a1", true)]
         public void Split_RangeIsTooSmall_DoesNotSplitsRange(string characterset, int length, string first, string last, bool inclusive)
