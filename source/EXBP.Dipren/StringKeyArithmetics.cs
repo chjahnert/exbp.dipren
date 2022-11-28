@@ -28,6 +28,15 @@ namespace EXBP.Dipren
         /// <param name="length">
         ///   The maximum length of the key.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="characterset"/> is a <see langword="null"/> reference.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   Argument <paramref name="characterset"/> contains duplicate characters.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   Argument <paramref name="length"/> is less than one.
+        /// </exception>
         /// <remarks>
         ///   <para>
         ///     When specifying the <paramref name="characterset"/>, the order in which the characters appear is
@@ -41,11 +50,8 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(characterset, nameof(characterset));
             Assert.ArgumentIsNotEmpty(characterset, nameof(characterset));
+            Assert.ArgumentIsValid(characterset.Length == characterset.Distinct().Count(), nameof(characterset), "Each characters in the specified set has to be unique.");
             Assert.ArgumentIsGreater(length, 0, nameof(length));
-
-            //
-            // Compute the number of possible keys.
-            //
 
             BigInteger combinations = 0;
 
