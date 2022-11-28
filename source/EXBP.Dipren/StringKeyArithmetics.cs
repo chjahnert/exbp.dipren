@@ -22,9 +22,21 @@ namespace EXBP.Dipren
         ///   Initializes a new instance of the <see cref="StringKeyArithmetics"/> class.
         /// </summary>
         /// <param name="characterset">
+        ///   A <see cref="string"/> containing all possible characters allowed in the key sorted according to the
+        ///   sorting rules used by the underlaying database.
         /// </param>
         /// <param name="length">
+        ///   The maximum length of the key.
         /// </param>
+        /// <remarks>
+        ///   <para>
+        ///     When specifying the <paramref name="characterset"/>, the order in which the characters appear is
+        ///     important. They should be ordered the same way as the underlaying database would sort them. If the
+        ///     character set contained 'a' and 'b', the possible key combinations in ascending order would be:
+        ///     '', 'a', 'aa', 'ab', 'b', 'ba', and 'bb'. In contrast, if character set contained 'b' and 'a' instead,
+        ///     the possible key combinations in ascending order would be: '', 'b', 'bb', 'ba', 'a', 'ab', and 'aa'.
+        ///   </para>
+        /// </remarks>
         public StringKeyArithmetics(string characterset, int length)
         {
             Assert.ArgumentIsNotNull(characterset, nameof(characterset));
@@ -45,7 +57,6 @@ namespace EXBP.Dipren
             this._characterset = characterset;
             this._combinations = combinations;
             this._length = length;
-            this._combinations = combinations;
         }
 
 
