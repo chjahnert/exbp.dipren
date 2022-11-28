@@ -37,12 +37,13 @@ namespace EXBP.Dipren
 
             BigInteger combinations = 0;
 
-            for (int i = 0; i <= this._length; i++)
+            for (int i = 0; i <= length; i++)
             {
-                combinations += BigInteger.Pow(this._characterset.Length, i);
+                combinations += BigInteger.Pow(characterset.Length, i);
             }
 
             this._characterset = characterset;
+            this._combinations = combinations;
             this._length = length;
             this._combinations = combinations;
         }
