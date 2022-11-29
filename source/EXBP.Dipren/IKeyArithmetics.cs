@@ -19,7 +19,7 @@ namespace EXBP.Dipren
         ///   A variable that receives the new <paramref name="range"/> object created.
         /// </param>
         /// <returns>
-        ///   A <see cref="Range{TKey}"/> objects that is the updated value of <paramref name="range"/>.
+        ///   A <see cref="Range{TKey}"/> object that is the updated value of <paramref name="range"/>.
         /// </returns>
         Range<TKey> Split(Range<TKey> range, out Range<TKey> created);
     }
