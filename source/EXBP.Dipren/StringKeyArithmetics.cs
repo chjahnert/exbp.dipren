@@ -13,54 +13,73 @@ namespace EXBP.Dipren
     /// </summary>
     public class StringKeyArithmetics : IKeyArithmetics<string>
     {
-        private readonly string _characterset;
+        private readonly string _characters;
         private readonly int _length;
         private readonly BigInteger _combinations;
 
 
         /// <summary>
+        ///   Gets a <see cref="string"/> containing all possible characters allowed in the key, ordered according to
+        ///   the sorting rules used by the underlaying database.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="string"/> value containing all possible characters allowed in the key, ordered according to
+        ///   the sorting rules used by the underlaying database.
+        /// </value>
+        protected string Characters => this._characters;
+
+        /// <summary>
+        ///   Gets the maximum length of a key, expressed in number of characters.
+        /// </summary>
+        /// <value>
+        ///   An <see cref="int"/> value that contains the maximum number of characters a key may contain.
+        /// </value>
+        protected int Length => this._length;
+
+
+        /// <summary>
         ///   Initializes a new instance of the <see cref="StringKeyArithmetics"/> class.
         /// </summary>
-        /// <param name="characterset">
+        /// <param name="characters">
         ///   A <see cref="string"/> containing all possible characters allowed in the key sorted according to the
-        ///   sorting rules used by the underlaying database.
+        ///   sorting rules used by the underlaying data source.
         /// </param>
         /// <param name="length">
         ///   The maximum length of the key.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="characterset"/> is a <see langword="null"/> reference.
+        ///   Argument <paramref name="characters"/> is a <see langword="null"/> reference.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///   Argument <paramref name="characterset"/> contains duplicate characters.
+        ///   Argument <paramref name="characters"/> contains duplicate characters.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///   Argument <paramref name="length"/> is less than one.
         /// </exception>
         /// <remarks>
         ///   <para>
-        ///     When specifying the <paramref name="characterset"/>, the order in which the characters appear is
+        ///     When specifying the <paramref name="characters"/>, the order in which the characters appear is
         ///     important. They should be ordered the same way as the underlaying database would sort them. If the
         ///     character set contained 'a' and 'b', the possible key combinations in ascending order would be:
         ///     '', 'a', 'aa', 'ab', 'b', 'ba', and 'bb'. In contrast, if character set contained 'b' and 'a' instead,
         ///     the possible key combinations in ascending order would be: '', 'b', 'bb', 'ba', 'a', 'ab', and 'aa'.
         ///   </para>
         /// </remarks>
-        public StringKeyArithmetics(string characterset, int length)
+        public StringKeyArithmetics(string characters, int length)
         {
-            Assert.ArgumentIsNotNull(characterset, nameof(characterset));
-            Assert.ArgumentIsNotEmpty(characterset, nameof(characterset));
-            Assert.ArgumentIsValid(characterset.Length == characterset.Distinct().Count(), nameof(characterset), StringKeyArithmeticsResources.MessageCharactersHaveToBeUnique);
+            Assert.ArgumentIsNotNull(characters, nameof(characters));
+            Assert.ArgumentIsNotEmpty(characters, nameof(characters));
+            Assert.ArgumentIsValid(characters.Length == characters.Distinct().Count(), nameof(characters), StringKeyArithmeticsResources.MessageCharactersHaveToBeUnique);
             Assert.ArgumentIsGreater(length, 0, nameof(length));
 
             BigInteger combinations = 0;
 
             for (int i = 0; i <= length; i++)
             {
-                combinations += BigInteger.Pow(characterset.Length, i);
+                combinations += BigInteger.Pow(characters.Length, i);
             }
 
-            this._characterset = characterset;
+            this._characters = characters;
             this._combinations = combinations;
             this._length = length;
         }
@@ -79,13 +98,13 @@ namespace EXBP.Dipren
         ///   A <see cref="Range{TKey}"/> of <see cref="string"/> object that is the updated value of
         ///   <paramref name="range"/>.
         /// </returns>
-        public Range<string> Split(Range<string> range, out Range<string> created)
+        public virtual Range<string> Split(Range<string> range, out Range<string> created)
         {
             Assert.ArgumentIsNotNull(range, nameof(range));
             Assert.ArgumentIsValid(range.First.Length <= this._length, nameof(range), StringKeyArithmeticsResources.MessageFirstKeyInRangeTooLong);
-            Assert.ArgumentIsValid(range.First.All(c => this._characterset.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageFirstKeyInRangeContainsInvalidCharacters);
+            Assert.ArgumentIsValid(range.First.All(c => this._characters.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageFirstKeyInRangeContainsInvalidCharacters);
             Assert.ArgumentIsValid(range.Last.Length <= this._length, nameof(range), StringKeyArithmeticsResources.MessageLastKeyInRangeTooLong);
-            Assert.ArgumentIsValid(range.Last.All(c => this._characterset.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageLastKeyInRangeContainsInvalidCharacters);
+            Assert.ArgumentIsValid(range.Last.All(c => this._characters.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageLastKeyInRangeContainsInvalidCharacters);
 
             Range<string> result = range;
             created = null;
@@ -136,8 +155,8 @@ namespace EXBP.Dipren
 
             for (int i = 0; i < value.Length; i++)
             {
-                int index = this._characterset.IndexOf(value[i]);
-                combinations /= this._characterset.Length;
+                int index = this._characters.IndexOf(value[i]);
+                combinations /= this._characters.Length;
                 result += ((index * combinations) + 1);
             }
 
@@ -165,9 +184,9 @@ namespace EXBP.Dipren
 
                 while (current != index)
                 {
-                    BigInteger size = (remaining / this._characterset.Length);
+                    BigInteger size = (remaining / this._characters.Length);
                     int i = (int) ((index - current - 1) / size);
-                    char character = this._characterset[i];
+                    char character = this._characters[i];
 
                     builder.Append(character);
 
