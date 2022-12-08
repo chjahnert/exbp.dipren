@@ -28,14 +28,18 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+
     - name: Setup .NET 6.0
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+
     - name: Restore dependencies
       run: dotnet restore ./source
+
     - name: Build solution
       run: dotnet build --configuration Debug --no-restore ./source
+
     - name: Verify solution
       run: dotnet test --no-restore --verbosity normal --logger trx --results-directory ./output/results ./source
