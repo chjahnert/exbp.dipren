@@ -7,6 +7,7 @@ on:
 
 env:
   SOURCE_DIRECTORY: './source/EXBP.Dipren'
+  RESULT_DIRECTORY: './output/result'
   PACKAGE_DIRECTORY: ${{github.workspace}}/output
   PACKAGE_GALLERY: 'https://api.nuget.org/v3/index.json'
 
@@ -33,8 +34,11 @@ jobs:
     - name: 'Build solution'
       run: dotnet build --configuration Release /p:Version=${VERSION} -p:ContinuousIntegrationBuild=true --no-restore ${{env.SOURCE_DIRECTORY}}
 
+    - name: Verify solution
+      run: dotnet test --no-restore --verbosity normal --logger trx --results-directory ${{env.RESULT_DIRECTORY}} ${{env.SOURCE_DIRECTORY}}
+
     - name: 'Create Package'
-      run: dotnet pack ${{env.SOURCE_DIRECTORY}} --configuration Release --no-restore --no-build -p:PackageVersion=${VERSION} -p:ContinuousIntegrationBuild=true --output ${{env.PACKAGE_DIRECTORY}}
+      run: dotnet pack ${{env.SOURCE_DIRECTORY}} --configuration Release --no-restore --no-build -p:PackageVersion=${VERSION} -p:ContinuousIntegrationBuild=true -p:EmbedUntrackedSources=true --output ${{env.PACKAGE_DIRECTORY}}
 
     - name: 'Publish Package'
       run: dotnet nuget push ${{env.PACKAGE_DIRECTORY}}/*.nupkg --source ${{env.PACKAGE_GALLERY}} --api-key ${{secrets.NUGET_DIPREN_TOKEN}}
