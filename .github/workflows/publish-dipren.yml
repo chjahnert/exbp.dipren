@@ -4,7 +4,7 @@ on:
   [push]
 
 env:
-  SOURCE_DIRECTORY: ./source
+  SOURCE_DIRECTORY: ./source/EXBP.Dipren
   PACKAGE_DIRECTORY: ${{github.workspace}}/output
 
 jobs:
