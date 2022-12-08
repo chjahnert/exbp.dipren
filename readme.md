@@ -15,12 +15,3 @@ Each item in the data set has to have a unique key. The following key types are 
 *	String
 
 However, you can add support for your own unique key type with minimal effort by implementing an interface with a single method. By doing so, any data type can be supported including compound keys.
-
-### Examples
-Todo
-
-* Database migration
-* Image Conversion
-
-### Getting started
-Todo
