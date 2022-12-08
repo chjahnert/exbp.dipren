@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+env:
+  SOURCE_DIRECTORY: './source'
+  RESULT_DIRECTORY: './output/result'
+
 jobs:
   Build:
 
@@ -36,10 +40,10 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Restore dependencies
-      run: dotnet restore ./source
+      run: dotnet restore ${{SOURCE_DIRECTORY}}
 
     - name: Build solution
-      run: dotnet build --configuration Debug --no-restore ./source
+      run: dotnet build --configuration Debug --no-restore ${{SOURCE_DIRECTORY}}
 
     - name: Verify solution
-      run: dotnet test --no-restore --verbosity normal --logger trx --results-directory ./output/results ./source
+      run: dotnet test --no-restore --verbosity normal --logger trx --results-directory ${{RESULT_DIRECTORY}} ${{SOURCE_DIRECTORY}}
