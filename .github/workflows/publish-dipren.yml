@@ -1,0 +1,31 @@
+name: Publish Dipren
+
+on:
+  [push]
+
+env:
+  SOURCE_DIRECTORY: ./source
+  PACKAGE_DIRECTORY: ${{github.workspace}}/output
+
+jobs:
+  Publish:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Check-out'
+      uses: actions/checkout@v2
+
+    - name: 'Setup .NET 6.0'
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+
+    - name: 'Restore dependencies'
+      run: dotnet restore ${{SOURCE_DIRECTORY}}
+
+    - name: 'Build solution'
+      run: dotnet build --configuration Release --no-restore ${{SOURCE_DIRECTORY}}
+
+    - name: 'Create Package'
+      run: dotnet pack ${{SOURCE_DIRECTORY}} --configuration Release --no-restore --no-build --output ${{PACKAGE_DIRECTORY}}
