@@ -1,11 +1,14 @@
 name: Publish Dipren
 
 on:
-  [push]
+  push:
+    tags:
+      - 'v*'
 
 env:
-  SOURCE_DIRECTORY: ./source/EXBP.Dipren
+  SOURCE_DIRECTORY: './source/EXBP.Dipren'
   PACKAGE_DIRECTORY: ${{github.workspace}}/output
+  PACKAGE_GALLERY: 'https://api.nuget.org/v3/index.json'
 
 jobs:
   Publish:
@@ -27,5 +30,12 @@ jobs:
     - name: 'Build solution'
       run: dotnet build --configuration Release --no-restore ${{env.SOURCE_DIRECTORY}}
 
+    - name: 'Set version'
+      id: verion
+      uses: battila7/get-version-action@v2
+
     - name: 'Create Package'
-      run: dotnet pack ${{env.SOURCE_DIRECTORY}} --configuration Release --no-restore --no-build --output ${{env.PACKAGE_DIRECTORY}}
+      run: dotnet pack ${{env.SOURCE_DIRECTORY}} --configuration Release --no-restore --no-build -p:PackageVersion=${{steps.version.outputs.version-without-v}} --output ${{env.PACKAGE_DIRECTORY}}
+
+    - name: 'Publish Package'
+      run: dotnet nuget push ${{env.PACKAGE_DIRECTORY}}/*.nupkg ${{env.PACKAGE_DIRECTORY}}/*.snupkg --source ${{PACKAGE_GALLERY}} --api-key ${{secrets.NUGET_DIPREN_TOKEN}}
