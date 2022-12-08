@@ -37,4 +37,4 @@ jobs:
       run: dotnet pack ${{env.SOURCE_DIRECTORY}} --configuration Release --no-restore --no-build -p:PackageVersion=${VERSION} --output ${{env.PACKAGE_DIRECTORY}}
 
     - name: 'Publish Package'
-      run: dotnet nuget push ${{env.PACKAGE_DIRECTORY}}/*.nupkg ${{env.PACKAGE_DIRECTORY}}/*.snupkg --source ${{env.PACKAGE_GALLERY}} --api-key ${{secrets.NUGET_DIPREN_TOKEN}}
+      run: dotnet nuget push ${{env.PACKAGE_DIRECTORY}}/*.nupkg --source ${{env.PACKAGE_GALLERY}} --api-key ${{secrets.NUGET_DIPREN_TOKEN}}
