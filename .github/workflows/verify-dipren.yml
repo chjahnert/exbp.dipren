@@ -40,10 +40,10 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Restore dependencies
-      run: dotnet restore ${{SOURCE_DIRECTORY}}
+      run: dotnet restore ${{env.SOURCE_DIRECTORY}}
 
     - name: Build solution
-      run: dotnet build --configuration Debug --no-restore ${{SOURCE_DIRECTORY}}
+      run: dotnet build --configuration Debug --no-restore ${{env.SOURCE_DIRECTORY}}
 
     - name: Verify solution
-      run: dotnet test --no-restore --verbosity normal --logger trx --results-directory ${{RESULT_DIRECTORY}} ${{SOURCE_DIRECTORY}}
+      run: dotnet test --no-restore --verbosity normal --logger trx --results-directory ${{env.RESULT_DIRECTORY}} ${{env.SOURCE_DIRECTORY}}
