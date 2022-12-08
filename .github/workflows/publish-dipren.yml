@@ -22,10 +22,10 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: 'Restore dependencies'
-      run: dotnet restore ${{SOURCE_DIRECTORY}}
+      run: dotnet restore ${{env.SOURCE_DIRECTORY}}
 
     - name: 'Build solution'
-      run: dotnet build --configuration Release --no-restore ${{SOURCE_DIRECTORY}}
+      run: dotnet build --configuration Release --no-restore ${{env.SOURCE_DIRECTORY}}
 
     - name: 'Create Package'
-      run: dotnet pack ${{SOURCE_DIRECTORY}} --configuration Release --no-restore --no-build --output ${{PACKAGE_DIRECTORY}}
+      run: dotnet pack ${{env.SOURCE_DIRECTORY}} --configuration Release --no-restore --no-build --output ${{env.PACKAGE_DIRECTORY}}
