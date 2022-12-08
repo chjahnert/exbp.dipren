@@ -3,7 +3,7 @@ name: Publish Dipren
 on:
   push:
     tags:
-      - 'v*'
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 env:
   SOURCE_DIRECTORY: './source/EXBP.Dipren'
@@ -24,18 +24,17 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
+    - name: 'Set version'
+      run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+
     - name: 'Restore dependencies'
       run: dotnet restore ${{env.SOURCE_DIRECTORY}}
 
     - name: 'Build solution'
-      run: dotnet build --configuration Release --no-restore ${{env.SOURCE_DIRECTORY}}
-
-    - name: 'Set version'
-      id: verion
-      uses: battila7/get-version-action@v2
+      run: dotnet build --configuration Release /p:Version=${VERSION} --no-restore ${{env.SOURCE_DIRECTORY}}
 
     - name: 'Create Package'
-      run: dotnet pack ${{env.SOURCE_DIRECTORY}} --configuration Release --no-restore --no-build -p:PackageVersion=${{steps.version.outputs.version-without-v}} --output ${{env.PACKAGE_DIRECTORY}}
+      run: dotnet pack ${{env.SOURCE_DIRECTORY}} --configuration Release --no-restore --no-build -p:PackageVersion=${VERSION} --output ${{env.PACKAGE_DIRECTORY}}
 
     - name: 'Publish Package'
       run: dotnet nuget push ${{env.PACKAGE_DIRECTORY}}/*.nupkg ${{env.PACKAGE_DIRECTORY}}/*.snupkg --source ${{env.PACKAGE_GALLERY}} --api-key ${{secrets.NUGET_DIPREN_TOKEN}}
