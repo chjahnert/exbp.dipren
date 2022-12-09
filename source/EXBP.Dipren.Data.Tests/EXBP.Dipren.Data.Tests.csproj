@@ -11,6 +11,7 @@
     <PackageProjectUrl>https://github.com/chjahnert/exbp.dipren/wiki</PackageProjectUrl>
     <RepositoryUrl>https://github.com/chjahnert/exbp.dipren</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageLicenseFile>license</PackageLicenseFile>
     <Version>$(VersionPrefix)</Version>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
