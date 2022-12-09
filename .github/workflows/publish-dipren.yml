@@ -6,9 +6,9 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 env:
-  SOURCE_DIRECTORY: './source/EXBP.Dipren'
+  SOURCE_DIRECTORY: './source'
   RESULT_DIRECTORY: './output/result'
-  PACKAGE_DIRECTORY: ${{github.workspace}}/output
+  PACKAGE_DIRECTORY: ${{github.workspace}}/output/packages
   PACKAGE_GALLERY: 'https://api.nuget.org/v3/index.json'
 
 jobs:
