@@ -2,12 +2,10 @@
 using System.Collections;
 using System.Diagnostics;
 
-using EXBP.Dipren.Data;
-
 using NUnit.Framework;
 
 
-namespace EXBP.Dipren.Tests.Data
+namespace EXBP.Dipren.Data.Tests
 {
     public abstract class EngineDataStoreTests
     {

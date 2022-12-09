@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <IsPublishable>False</IsPublishable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\EXBP.Dipren.Tests\EXBP.Dipren.Tests.csproj" />
+    <ProjectReference Include="..\..\..\EXBP.Dipren.Data.Tests\EXBP.Dipren.Data.Tests.csproj" />
     <ProjectReference Include="..\EXBP.Dipren.Data.SQLite\EXBP.Dipren.Data.SQLite.csproj" />
   </ItemGroup>
 

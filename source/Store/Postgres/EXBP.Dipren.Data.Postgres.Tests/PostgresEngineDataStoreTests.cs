@@ -1,7 +1,7 @@
 ﻿
-using Npgsql;
+using EXBP.Dipren.Data.Tests;
 
-using EXBP.Dipren.Tests.Data;
+using Npgsql;
 
 using NUnit.Framework;
 

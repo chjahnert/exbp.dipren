@@ -1,5 +1,5 @@
 ﻿
-using EXBP.Dipren.Tests.Data;
+using EXBP.Dipren.Data.Tests;
 
 using NUnit.Framework;
 

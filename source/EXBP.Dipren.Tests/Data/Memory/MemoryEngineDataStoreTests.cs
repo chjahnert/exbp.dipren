@@ -1,6 +1,7 @@
 ﻿
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Data.Memory;
+using EXBP.Dipren.Data.Tests;
 
 using NUnit.Framework;
 
