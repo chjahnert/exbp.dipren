@@ -1,4 +1,4 @@
-name: Build Dipren
+name: Build
 
 on:
   push:

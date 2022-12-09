@@ -1,4 +1,4 @@
-name: Publish Dipren
+name: Publish
 
 on:
   push:
