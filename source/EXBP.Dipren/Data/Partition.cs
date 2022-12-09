@@ -63,7 +63,7 @@ namespace EXBP.Dipren.Data
         ///   Gets the first key of the current range.
         /// </summary>
         /// <value>
-        ///   A <see cref="TKey"/> value that is the first key in the range.
+        ///   A <see cref="string"/> value that contains the first key in the range.
         /// </value>
         /// <remarks>
         ///   The key does not have to actually exist.
@@ -71,10 +71,10 @@ namespace EXBP.Dipren.Data
         public string First { get; }
 
         /// <summary>
-        ///   Gets the key at which to start processing.
+        ///   Gets the last key of the current range.
         /// </summary>
         /// <value>
-        ///   A <see cref="TKey"/> value that is the key at which to start processing.
+        ///   A <see cref="string"/> value that contains the last key in the range.
         /// </value>
         /// <remarks>
         ///   The key does not have to actually exist.
@@ -106,7 +106,7 @@ namespace EXBP.Dipren.Data
         ///   Gets the key of the last item that was processed.
         /// </summary>
         /// <value>
-        ///   A <typeparamref name="TKey"/> value that contains the  key last of the last item that was processed.
+        ///   A <see cref="string"/> value that contains the key of the last item that was processed.
         /// </value>
         /// <remarks>
         ///   This value is only set after at least one item was processed. Check <see cref="Processed"/> to determine

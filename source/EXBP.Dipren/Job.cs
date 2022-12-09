@@ -89,12 +89,6 @@ namespace EXBP.Dipren
         /// <param name="processor">
         ///   The <see cref="IBatchProcessor{TEntry}"/> object to use to process the entries.
         /// </param>
-        /// <param name="timeout">
-        ///   The time after which a partition is considered stalled or abandoned.
-        /// </param>
-        /// <param name="batchSize">
-        ///   The maximum number of entries to include in a batch.
-        /// </param>
         public Job(string id, IDataSource<TKey, TItem> source, IKeyArithmetics<TKey> arithmetics, IKeySerializer<TKey> serializer, IBatchProcessor<TItem> processor)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));

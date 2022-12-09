@@ -50,7 +50,7 @@ namespace EXBP.Dipren
         ///   An array of 16 <see cref="byte"/> values between 0 and 15.
         /// </param>
         /// <returns>
-        ///   <see langword="true"/> if <see cref="layout"/> is valid; otherwise, <see langword="false"/>.
+        ///   <see langword="true"/> if <paramref name="layout"/> is valid; otherwise, <see langword="false"/>.
         /// </returns>
         internal static bool IsValid(byte[] layout)
         {

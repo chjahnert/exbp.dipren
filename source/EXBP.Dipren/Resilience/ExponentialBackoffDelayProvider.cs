@@ -10,7 +10,7 @@ namespace EXBP.Dipren.Resilience
     /// </summary>
     /// <remarks>
     ///   <para>
-    ///     See <see href="https://en.wikipedia.org/wiki/Exponential_backoff"/>Exponential Backoff</see> for details.
+    ///     See <see href="https://en.wikipedia.org/wiki/Exponential_backoff">Exponential Backoff</see> for details.
     ///   </para>
     /// </remarks>
     public class ExponentialBackoffDelayProvider : IBackoffDelayProvider
