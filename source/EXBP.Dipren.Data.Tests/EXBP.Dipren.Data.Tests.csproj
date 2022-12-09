@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <Title>DIPREN Data Store Tests</Title>
+    <Authors>ch.jahnert</Authors>
+    <Description>NUnit test set for verifying DIPREN Data Store implementations</Description>
+    <Copyright>Copyright (c) 2022 Christian Jähnert</Copyright>
+    <PackageProjectUrl>https://github.com/chjahnert/exbp.dipren/wiki</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/chjahnert/exbp.dipren</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageLicenseFile>license</PackageLicenseFile>
+    <Version>$(VersionPrefix)</Version>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\license">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit.Analyzers" Version="3.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EXBP.Dipren\EXBP.Dipren.csproj" />
+  </ItemGroup>
+
+</Project>

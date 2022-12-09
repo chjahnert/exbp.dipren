@@ -6,6 +6,8 @@
     <Nullable>disable</Nullable>
 
     <IsPackable>false</IsPackable>
+
+    <IsPublishable>False</IsPublishable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EXBP.Dipren.Data.Tests\EXBP.Dipren.Data.Tests.csproj" />
     <ProjectReference Include="..\EXBP.Dipren\EXBP.Dipren.csproj" />
   </ItemGroup>
 

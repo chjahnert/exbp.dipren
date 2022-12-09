@@ -4,7 +4,37 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <Title>DIPREN - Distributed Processing Engine</Title>
+    <Authors>ch.jahnert</Authors>
+    <Description>DIPREN stands for Distributed Processing Engine and is a framework that supports iterating through very large data sets in a distributed fashion and perform operations on each data item.</Description>
+    <Copyright>Copyright (c) 2022 Christian Jähnert</Copyright>
+    <PackageProjectUrl>https://github.com/chjahnert/exbp.dipren/wiki</PackageProjectUrl>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/chjahnert/exbp.dipren</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseFile>license</PackageLicenseFile>
+    <Version>$(VersionPrefix)</Version>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\license">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="AssertResources.Designer.cs">
