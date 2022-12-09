@@ -6,7 +6,7 @@
     <Nullable>disable</Nullable>
     <Title>DIPREN - Distributed Processing Engine</Title>
     <Authors>ch.jahnert</Authors>
-    <Description>DIPREN stands for Distributed Processing Engine and is a framework that allows you to iterate through very large data sets in a distributed fashion and perform operations on each data item.</Description>
+    <Description>DIPREN stands for Distributed Processing Engine and is a framework that supports iterating through very large data sets in a distributed fashion and perform operations on each data item.</Description>
     <Copyright>Copyright (c) 2022 Christian Jähnert</Copyright>
     <PackageProjectUrl>https://github.com/chjahnert/exbp.dipren/wiki</PackageProjectUrl>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
