@@ -24,7 +24,7 @@ namespace EXBP.Dipren
         ///   Gets the first key of the current range.
         /// </summary>
         /// <value>
-        ///   A <see cref="TKey"/> value that is the first key in the range.
+        ///   A <typeparamref name="TKey"/> value that is the first key in the range.
         /// </value>
         /// <remarks>
         ///   The key does not have to actually exist.
@@ -35,7 +35,7 @@ namespace EXBP.Dipren
         ///   Gets the key at which to start processing.
         /// </summary>
         /// <value>
-        ///   A <see cref="TKey"/> value that is the key at which to start processing.
+        ///   A <typeparamref name="TKey"/> value that is the key at which to start processing.
         /// </value>
         /// <remarks>
         ///   The key does not have to actually exist.
@@ -60,6 +60,10 @@ namespace EXBP.Dipren
         /// </param>
         /// <param name="last">
         ///   The last value of the range.
+        /// </param>
+        /// <param name="inclusive">
+        ///   <see langword="true"/> if <paramref name="last"/> is included in the range; otherwise,
+        ///   <see langword="false"/>.
         /// </param>
         public Range(TKey first, TKey last, bool inclusive = true)
         {

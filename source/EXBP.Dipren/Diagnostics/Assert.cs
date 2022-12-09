@@ -11,7 +11,7 @@ namespace EXBP.Dipren.Diagnostics
     public static class Assert
     {
         /// <summary>
-        ///   Throws an <see cref="ArgumentNullException"/> if the specified value is <c>null</c>.
+        ///   Throws an <see cref="ArgumentNullException"/> if the specified value is <see langword="null"/>.
         /// </summary>
         /// <param name="value">
         ///   The parameter value to verify.
@@ -26,7 +26,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   The argument <paramref name="value"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///   The specified <paramref name="value"/> is <c>null</c>.
+        ///   The specified <paramref name="value"/> is <see langword="null"/>.
         /// </exception>
         [return: NotNullIfNotNull("value")]
         public static TValue ArgumentIsNotNull<TValue>(TValue value, string name, string message = null)
@@ -51,7 +51,7 @@ namespace EXBP.Dipren.Diagnostics
         }
 
         /// <summary>
-        ///   Throws an <see cref="ArgumentException"/> if the specified condition is <b>false</b>.
+        ///   Throws an <see cref="ArgumentException"/> if the specified condition is <see langword="false"/>.
         /// </summary>
         /// <param name="condition">
         ///   The condition to evaluate.
@@ -63,7 +63,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   The description of the error.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///   The specified <paramref name="condition"/> is <b>false</b>.
+        ///   The specified <paramref name="condition"/> is <see langword="false"/>.
         /// </exception>
         public static void ArgumentIsValid(bool condition, string name, string message = null)
         {
@@ -94,7 +94,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   The name of the parameter.
         /// </param>
         /// <param name="whitespace">
-        ///   <b>true</b> to treat strings with whitespace characters only as valid; otherwise, <b>false</b>.
+        ///   <see langword="true"/> to treat strings with whitespace characters only as valid; otherwise, <see langword="false"/>.
         /// </param>
         /// <param name="message">
         ///   The description of the error.
@@ -107,7 +107,7 @@ namespace EXBP.Dipren.Diagnostics
         /// </exception>
         /// <remarks>
         ///   This method does not throw an <see cref="ArgumentNullException"/> if <paramref name="value"/> is
-        ///   <c>null</c>.
+        ///   <see langword="null"/>.
         /// </remarks>
         public static string ArgumentIsNotEmpty(string value, bool whitespace, string name, string message = null)
         {
@@ -123,7 +123,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   Throws an <see cref="ArgumentException"/> if the specified collection has no elements.
         /// </summary>
         /// <param name="value">
-        ///   The <see cref="IEnumerable{T}"/> of <typeparamref name="T"/> values to verify.
+        ///   The <see cref="IEnumerable{T}"/> value to verify.
         /// </param>
         /// <param name="name">
         ///   The name of the parameter.
@@ -139,7 +139,7 @@ namespace EXBP.Dipren.Diagnostics
         /// </exception>
         /// <remarks>
         ///   This method does not throw an <see cref="ArgumentNullException"/> if <paramref name="value"/> is
-        ///   <c>null</c>.
+        ///   <see langword="null"/>.
         /// </remarks>
         public static TValue ArgumentIsNotEmpty<TValue>(TValue value, string name, string message = null) where TValue : IEnumerable
         {
@@ -505,7 +505,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   The description of the error.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="comparand"/> is <c>null</c>.
+        ///   Argument <paramref name="comparand"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///   Argument <paramref name="value"/> is less than or equal to <paramref name="comparand"/>.
@@ -543,7 +543,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   The description of the error.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="comparand"/> is <c>null</c>.
+        ///   Argument <paramref name="comparand"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///   Argument <paramref name="value"/> is less than <paramref name="comparand"/>.
@@ -582,7 +582,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   The description of the error.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="comparand"/> is <c>null</c>.
+        ///   Argument <paramref name="comparand"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///   Argument <paramref name="value"/> is greater than or equal to <paramref name="comparand"/>.
@@ -620,7 +620,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   The description of the error.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="comparand"/> is <c>null</c>.
+        ///   Argument <paramref name="comparand"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///   Argument <paramref name="value"/> is less than <paramref name="comparand"/>.
@@ -641,7 +641,7 @@ namespace EXBP.Dipren.Diagnostics
 
         /// <summary>
         ///   Throws an <see cref="ObjectDisposedException"/> if the specified value indicating the disposed state of
-        ///   an object is <c>true</c>.
+        ///   an object is <see langword="true"/>.
         /// </summary>
         /// <param name="disposed">
         ///   A <see cref="bool"/> value indicating whether the object in question is disposed.
@@ -653,7 +653,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   The description of the error.
         /// </param>
         /// <exception cref="ObjectDisposedException">
-        ///   Argument <paramref name="valid"/> is <c>true</c>.
+        ///   Argument <paramref name="disposed"/> is <see langword="true"/>.
         /// </exception>
         public static void IsNotDisposed(bool disposed, string name, string message = null)
         {
@@ -685,7 +685,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   The description of the error.
         /// </param>
         /// <exception cref="InvalidOperationException">
-        ///   Argument <paramref name="valid"/> is <c>false</c>.
+        ///   Argument <paramref name="valid"/> is <see langword="false"/>.
         /// </exception>
         public static void IsValidOperation(bool valid, string message = null)
         {

@@ -166,9 +166,6 @@ namespace EXBP.Dipren
             /// <param name="jobId">
             ///   The unique identifier of the distributed processing job the event is related to.
             /// </param>
-            /// <param name="parititonId">
-            ///   The unique identifier of the partition the event is related to.
-            /// </param>
             /// <param name="description">
             ///   A description of the event.
             /// </param>

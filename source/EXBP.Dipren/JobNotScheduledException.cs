@@ -35,6 +35,9 @@ namespace EXBP.Dipren
         /// <param name="message">
         ///   A <see cref="string"/> that describes the error.
         /// </param>
+        /// <param name="id">
+        ///   The unique identifier of the distributed processing job.
+        /// </param>
         public JobNotScheduledException(string message, string id) : this(message, id, null)
         {
         }
@@ -44,6 +47,9 @@ namespace EXBP.Dipren
         /// </summary>
         /// <param name="message">
         ///   A <see cref="string"/> that describes the error.
+        /// </param>
+        /// <param name="id">
+        ///   The unique identifier of the distributed processing job.
         /// </param>
         /// <param name="innerException">
         ///   The exception that is the cause of the current exception.
@@ -63,7 +69,6 @@ namespace EXBP.Dipren
         /// <param name="context">
         ///   The source and destination for the file.
         /// </param>
-        /// <remarks>
         protected JobNotScheduledException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             this._id = info.GetString(nameof(JobNotScheduledException) + "." + nameof(this._id));

@@ -322,7 +322,7 @@ namespace EXBP.Dipren.Data.Memory
         ///   provides access to the result of the operation.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="job"/> is a <see langword="null"/> reference.
+        ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
         /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.

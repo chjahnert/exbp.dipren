@@ -50,7 +50,6 @@ namespace EXBP.Dipren.Data
         /// <param name="context">
         ///   The source and destination for the file.
         /// </param>
-        /// <remarks>
         protected DuplicateIdentifierException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
