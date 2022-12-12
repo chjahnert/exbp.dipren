@@ -89,6 +89,12 @@ namespace EXBP.Dipren
         ///   Argument <paramref name="value"/> or argument <paramref name="culture"/> is a <see langword="null"/>
         ///   reference.
         /// </exception>
+        /// <remarks>
+        ///   Note that database collations do not map to <see cref="CultureInfo"/> objects. You can only get the same
+        ///   sorting behavior for small, well defined character sets. See the
+        ///   <see href="https://github.com/chjahnert/exbp.dipren/wiki/String-Keys">documentation</see> for a better
+        ///   method to define the character set to use with the <see cref="StringKeyArithmetics"/> type.
+        /// </remarks>
         public static string Sort(string value, CultureInfo culture, CompareOptions options = CompareOptions.None)
         {
             Assert.ArgumentIsNotNull(value, nameof(value));
