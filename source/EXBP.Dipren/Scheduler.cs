@@ -10,7 +10,7 @@ using EXBP.Dipren.Telemetry;
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Implements methods to schedule, cancel, and monitor distributed processing jobs.
+    ///   Implements methods to schedule and monitor distributed processing jobs.
     /// </summary>
     public class Scheduler : Node
     {
@@ -264,5 +264,97 @@ namespace EXBP.Dipren
 
             return result;
         }
+    }
+
+
+    /// <summary>
+    ///   Implements methods to schedule and monitor distributed processing jobs.
+    /// </summary>
+    /// <typeparam name="TKey">
+    ///   The type of the item key.
+    /// </typeparam>
+    /// <typeparam name="TItem">
+    ///   The type of items to process.
+    /// </typeparam>
+    public class Scheduler<TKey, TItem>
+    {
+        private readonly Scheduler _scheduler;
+
+
+        /// <summary>
+        ///   Gets the unique identifier of the current node.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="string"/> value that contains the unique identifier of the current node.
+        /// </value>
+        public string Id => this._scheduler.Id;
+
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="Scheduler"/> class.
+        /// </summary>
+        /// <param name="store">
+        ///   The <see cref="IEngineDataStore"/> to use.
+        /// </param>
+        /// <param name="clock">
+        ///   The <see cref="ITimestampProvider"/> to use to generate timestamps.
+        /// </param>
+        /// <param name="handler">
+        ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
+        /// </param>
+        internal Scheduler(IEngineDataStore store, ITimestampProvider clock, IEventHandler handler)
+        {
+            this._scheduler = new Scheduler(store, clock, handler);
+        }
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="Scheduler"/> class.
+        /// </summary>
+        /// <param name="store">
+        ///   The <see cref="IEngineDataStore"/> to use.
+        /// </param>
+        /// <param name="handler">
+        ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
+        /// </param>
+        public Scheduler(IEngineDataStore store, IEventHandler handler = null)
+        {
+            this._scheduler = new Scheduler(store, handler);
+        }
+
+        /// <summary>
+        ///   Schedules a distributed processing job.
+        /// </summary>
+        /// <param name="job">
+        ///   The job to schedule for distributed processing.
+        /// </param>
+        /// <param name="settings">
+        ///   The job settings to use.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
+        public Task ScheduleAsync(Job<TKey, TItem> job, Settings settings, CancellationToken cancellation = default)
+            => this._scheduler.ScheduleAsync(job, settings, cancellation);
+
+        /// <summary>
+        ///   Gets a status report of the job with the specified unique identifier.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="StatusReport"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        public Task<StatusReport> GetStatusReportAsync(string id, CancellationToken cancellation = default)
+            => this._scheduler.GetStatusReportAsync(id, cancellation);
     }
 }
