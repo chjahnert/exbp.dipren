@@ -20,6 +20,10 @@ namespace EXBP.Dipren
         /// <summary>
         ///   Gets the configuration settings for the current distributed processing engine instance.
         /// </summary>
+        /// <value>
+        ///   A <see cref="EXBP.Dipren.Configuration"/> object that holding configuration settings for the current
+        ///   engine instance.
+        /// </value>
         public Configuration Configuration => this._configuration;
 
 
@@ -657,6 +661,10 @@ namespace EXBP.Dipren
         /// <summary>
         ///   Gets the configuration settings for the current distributed processing engine instance.
         /// </summary>
+        /// <value>
+        ///   A <see cref="EXBP.Dipren.Configuration"/> object that holding configuration settings for the current
+        ///   engine instance.
+        /// </value>
         public Configuration Configuration => this._engine.Configuration;
 
 
