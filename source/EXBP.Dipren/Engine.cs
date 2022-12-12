@@ -630,4 +630,103 @@ namespace EXBP.Dipren
             return result;
         }
     }
+
+
+    /// <summary>
+    ///   Implements a processing engine that can iterate over a large set of ordered items in a distributed fashion.
+    /// </summary>
+    /// <typeparam name="TKey">
+    ///   The type of the item key.
+    /// </typeparam>
+    /// <typeparam name="TItem">
+    ///   The type of items to process.
+    /// </typeparam>
+    public class Engine<TKey, TItem>
+    {
+        private readonly Engine _engine;
+
+
+        /// <summary>
+        ///   Gets the unique identifier of the current node.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="string"/> value that contains the unique identifier of the current node.
+        /// </value>
+        public string Id => this._engine.Id;
+
+        /// <summary>
+        ///   Gets the configuration settings for the current distributed processing engine instance.
+        /// </summary>
+        public Configuration Configuration => this._engine.Configuration;
+
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="Engine"/> class.
+        /// </summary>
+        /// <param name="store">
+        ///   The <see cref="IEngineDataStore"/> to use.
+        /// </param>
+        /// <param name="clock">
+        ///   A <see cref="ITimestampProvider"/> that can be used to generate timestamp values; or
+        ///   <see langword="null"/> to use a <see cref="UtcTimestampProvider"/> instance.
+        /// </param>
+        /// <param name="handler">
+        ///   The <see cref="IEventHandler"/> object to use to emit event notifications; or <see langword="null"/> to
+        ///   discard event notifications.
+        /// </param>
+        /// <param name="configuration">
+        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
+        /// </param>
+        internal Engine(IEngineDataStore store, ITimestampProvider clock, IEventHandler handler = null, Configuration configuration = null)
+        {
+            this._engine = new Engine(store, clock, handler, configuration);
+        }
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="Engine"/> class.
+        /// </summary>
+        /// <param name="store">
+        ///   The <see cref="IEngineDataStore"/> to use.
+        /// </param>
+        /// <param name="handler">
+        ///   The <see cref="IEventHandler"/> object to use to emit event notifications; or <see langword="null"/> to
+        ///   discard event notifications.
+        /// </param>
+        /// <param name="configuration">
+        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
+        /// </param>
+        public Engine(IEngineDataStore store, IEventHandler handler = null, Configuration configuration = null)
+        {
+            this._engine = new Engine(store, handler, configuration);
+        }
+
+        /// <summary>
+        ///   Executes a distributed processing job.
+        /// </summary>
+        /// <param name="job">
+        ///   The job to start.
+        /// </param>
+        /// <param name="wait">
+        ///   <see langword="true"/> to wait for the job to be ready; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> that represents the asynchronous operation and can be used to access the result.
+        /// </returns>
+        /// <exception cref="JobNotScheduledException">
+        ///   Argument <paramref name="wait"/> is <see langword="false"/> and the job has not yet been scheduled for
+        ///   processing.
+        /// </exception>
+        /// <remarks>
+        ///   <para>
+        ///     If <paramref name="wait"/> is <see langword="true"/> and the job is not yet scheduled, the method will
+        ///     wait for the job to be scheduled.
+        ///   </para>
+        /// </remarks>
+        public Task RunAsync(Job<TKey, TItem> job, bool wait, CancellationToken cancellation = default)
+        => this._engine.RunAsync(job, wait, cancellation);
+    }
 }
