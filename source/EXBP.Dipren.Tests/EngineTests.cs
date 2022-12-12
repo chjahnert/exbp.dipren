@@ -42,11 +42,11 @@ namespace EXBP.Dipren.Tests
             Settings settings = new Settings(4, timeout);
 
             MemoryEngineDataStore store = new MemoryEngineDataStore();
-            Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
+            Scheduler<int, string> scheduler = new Scheduler<int, string>(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, settings);
 
-            Engine engine = new Engine(store, this.DefaultEventHandler);
+            Engine<int, string> engine = new Engine<int, string>(store, this.DefaultEventHandler);
 
             await engine.RunAsync(job, false);
 
@@ -67,11 +67,11 @@ namespace EXBP.Dipren.Tests
             Settings settings = new Settings(4, timeout);
 
             MemoryEngineDataStore store = new MemoryEngineDataStore();
-            Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
+            Scheduler<int, string> scheduler = new Scheduler<int, string>(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, settings);
 
-            Engine engine = new Engine(store, this.DefaultEventHandler);
+            Engine<int, string> engine = new Engine<int, string>(store, this.DefaultEventHandler);
 
             await engine.RunAsync(job, false);
 
@@ -90,11 +90,11 @@ namespace EXBP.Dipren.Tests
             Settings settings = new Settings(4, timeout);
 
             MemoryEngineDataStore store = new MemoryEngineDataStore();
-            Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
+            Scheduler<int, string> scheduler = new Scheduler<int, string>(store, this.DefaultEventHandler);
 
             await scheduler.ScheduleAsync(job, settings);
 
-            Engine engine = new Engine(store, this.DefaultEventHandler);
+            Engine<int, string> engine = new Engine<int, string>(store, this.DefaultEventHandler);
 
             await engine.RunAsync(job, false);
 
