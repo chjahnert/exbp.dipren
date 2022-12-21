@@ -136,6 +136,89 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
+        ///   Splits the specified <see cref="string"/> key range into two ranges.
+        /// </summary>
+        /// <param name="range">
+        ///   The <see cref="Range{TKey}"/> of <see cref="string"/> to split.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> object that represents the asynchronous operation.
+        /// </returns>
+        public virtual async Task<RangePartitioningResult<string>> SplitAsync(Range<string> range, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(range, nameof(range));
+            Assert.ArgumentIsValid(range.First.Length <= this._length, nameof(range), StringKeyArithmeticsResources.MessageFirstKeyInRangeTooLong);
+            Assert.ArgumentIsValid(range.First.All(c => this._characters.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageFirstKeyInRangeContainsInvalidCharacters);
+            Assert.ArgumentIsValid(range.Last.Length <= this._length, nameof(range), StringKeyArithmeticsResources.MessageLastKeyInRangeTooLong);
+            Assert.ArgumentIsValid(range.Last.All(c => this._characters.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageLastKeyInRangeContainsInvalidCharacters);
+
+            Range<BigInteger> rangeBi = this.ToBigIntegerRange(range);
+            RangePartitioningResult<BigInteger> resultBi = await BigIntegerKeyArithmetics.Default.SplitAsync(rangeBi, cancellation);
+
+            RangePartitioningResult<string> result;
+
+            if (resultBi?.Success == true)
+            {
+                Range<string> updated = this.ToStringRange(resultBi.Updated);
+                IEnumerable<Range<string>> created = resultBi.Created.Select(r => this.ToStringRange(r));
+
+                result = new RangePartitioningResult<string>(updated, created);
+            }
+            else
+            {
+                result = new RangePartitioningResult<string>(range, new Range<string>[0]);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Converts the specified <see cref="string"/> key range to a <see cref="BigInteger"/> key range.
+        /// </summary>
+        /// <param name="range">
+        ///   The <see cref="Range{TKey}"/> of <see cref="string"/> object to convert.
+        /// </param>
+        /// <returns>
+        ///   The <see cref="Range{TKey}"/> of <see cref="BigInteger"/> that is the result of the conversion.
+        /// </returns>
+        private Range<BigInteger> ToBigIntegerRange(Range<string> range)
+        {
+            Debug.Assert(range != null);
+
+            BigInteger first = this.ToIndex(range.First);
+            BigInteger last = this.ToIndex(range.Last);
+
+            Range<BigInteger> result = new Range<BigInteger>(first, last, range.IsInclusive);
+
+            return result;
+        }
+
+        /// <summary>
+        ///   Converts the specified <see cref="BigInteger"/> key range to a <see cref="string"/> key range.
+        /// </summary>
+        /// <param name="range">
+        ///   The <see cref="Range{TKey}"/> of <see cref="BigInteger"/> object to convert.
+        /// </param>
+        /// <returns>
+        ///   The <see cref="Range{TKey}"/> of <see cref="string"/> that is the result of the conversion.
+        /// </returns>
+        private Range<string> ToStringRange(Range<BigInteger> range)
+        {
+            Debug.Assert(range != null);
+
+            string first = this.ToKey(range.First);
+            string last = this.ToKey(range.Last);
+
+            Range<string> result = new Range<string>(first, last, range.IsInclusive);
+
+            return result;
+        }
+
+        /// <summary>
         ///   Computes the zero-based index of the specified value in the sorted list of all possible combinations
         ///   of the current character set.
         /// </summary>
