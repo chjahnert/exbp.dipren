@@ -41,22 +41,22 @@ namespace EXBP.Dipren
         ///   Splits the specified range into two ranges.
         /// </summary>
         /// <param name="range">
-        ///   The <see cref="Range{TKey}"/> of <see cref="BigInteger"/> values to split.
+        ///   The <see cref="Range{TKey}"/> of <see cref="BigInteger"/> to split.
         /// </param>
-        /// <param name="created">
-        ///   A variable that receives the new <see cref="Range{TKey}"/> of <see cref="BigInteger"/> object.
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Range{TKey}"/> of <see cref="BigInteger"/> object that is the updated
-        ///   <paramref name="range"/>.
+        ///   A <see cref="Task{TResult}"/> object that represents the asynchronous operation.
         /// </returns>
-        public Range<BigInteger> Split(Range<BigInteger> range, out Range<BigInteger> created)
+        public Task<RangePartitioningResult<BigInteger>> SplitAsync(Range<BigInteger> range, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(range, nameof(range));
 
-            BigInteger distance = BigInteger.Abs(range.Last - range.First);
+            RangePartitioningResult<BigInteger> result;
 
-            Range<BigInteger> result = range;
+            BigInteger distance = BigInteger.Abs(range.Last - range.First);
 
             if (((range.IsInclusive == true) && (distance >= 2)) || ((range.IsInclusive == false) && (distance >= 3)))
             {
@@ -69,15 +69,17 @@ namespace EXBP.Dipren
                     half *= -1;
                 }
 
-                result = new Range<BigInteger>(range.First, (range.First + half), false);
-                created = new Range<BigInteger>((range.First + half), range.Last, range.IsInclusive);
+                Range<BigInteger> updated = new Range<BigInteger>(range.First, (range.First + half), false);
+                Range<BigInteger> created = new Range<BigInteger>((range.First + half), range.Last, range.IsInclusive);
+
+                result = new RangePartitioningResult<BigInteger>(updated, new Range<BigInteger>[] { created });
             }
             else
             {
-                created = null;
+                result = new RangePartitioningResult<BigInteger>(range, new Range<BigInteger>[0]);
             }
 
-            return result;
+            return Task.FromResult(result);
         }
     }
 }

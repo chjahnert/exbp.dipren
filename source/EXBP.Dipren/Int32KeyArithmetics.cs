@@ -39,21 +39,20 @@ namespace EXBP.Dipren
         ///   Splits the specified range into two ranges.
         /// </summary>
         /// <param name="range">
-        ///   The <see cref="Range{TKey}"/> of <see cref="int"/> values to split.
+        ///   The <see cref="Range{TKey}"/> of <see cref="int"/> to split.
         /// </param>
-        /// <param name="created">
-        ///   A variable that receives the new <see cref="Range{TKey}"/> of <see cref="int"/> object created.
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Range{TKey}"/> of <see cref="int"/> object that is the updated value of
-        ///   <paramref name="range"/>.
+        ///   A <see cref="Task{TResult}"/> object that represents the asynchronous operation.
         /// </returns>
-        public Range<int> Split(Range<int> range, out Range<int> created)
+        public Task<RangePartitioningResult<int>> SplitAsync(Range<int> range, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(range, nameof(range));
 
-            Range<int> result = range;
-            created = null;
+            RangePartitioningResult<int> result;
 
             double distance = Math.Abs(((double) range.Last) - ((double) range.First));
 
@@ -68,11 +67,17 @@ namespace EXBP.Dipren
                     half *= -1;
                 }
 
-                result = new Range<int>(range.First, range.First + half, false);
-                created = new Range<int>(range.First + half, range.Last, range.IsInclusive);
+                Range<int> updated = new Range<int>(range.First, range.First + half, false);
+                Range<int> created = new Range<int>(range.First + half, range.Last, range.IsInclusive);
+
+                result = new RangePartitioningResult<int>(updated, new Range<int>[] { created });
+            }
+            else
+            {
+                result = new RangePartitioningResult<int>(range, new Range<int>[0]);
             }
 
-            return result;
+            return Task.FromResult(result);
         }
     }
 }

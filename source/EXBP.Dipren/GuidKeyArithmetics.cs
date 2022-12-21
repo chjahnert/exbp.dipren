@@ -65,28 +65,34 @@ namespace EXBP.Dipren
         ///   Splits the specified range into two ranges.
         /// </summary>
         /// <param name="range">
-        ///   The <see cref="Range{TKey}"/> of <see cref="Guid"/> values to split.
+        ///   The <see cref="Range{TKey}"/> of <see cref="Guid"/> to split.
         /// </param>
-        /// <param name="created">
-        ///   A variable that receives the new <see cref="Range{TKey}"/> of <see cref="Guid"/> object.
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Range{TKey}"/> of <see cref="Guid"/> object that is the updated <paramref name="range"/>.
+        ///   A <see cref="Task{TResult}"/> object that represents the asynchronous operation.
         /// </returns>
-        public Range<Guid> Split(Range<Guid> range, out Range<Guid> created)
+        public async Task<RangePartitioningResult<Guid>> SplitAsync(Range<Guid> range, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(range, nameof(range));
 
-            created = null;
-
             Range<BigInteger> rangeBi = this.ToBigIntegerRange(range);
-            Range<BigInteger> resultBi = BigIntegerKeyArithmetics.Default.Split(rangeBi, out Range<BigInteger> createdBi);
+            RangePartitioningResult<BigInteger> resultBi = await BigIntegerKeyArithmetics.Default.SplitAsync(rangeBi, cancellation);
 
-            Range<Guid> result = this.ToGuidRange(resultBi);
+            RangePartitioningResult<Guid> result;
 
-            if (createdBi != null)
+            if (resultBi?.Success == true)
             {
-                created = this.ToGuidRange(createdBi);
+                Range<Guid> updated = this.ToGuidRange(resultBi.Updated);
+                IEnumerable<Range<Guid>> created = resultBi.Created.Select(r => this.ToGuidRange(r));
+
+                result = new RangePartitioningResult<Guid>(updated, created);
+            }
+            else
+            {
+                result = new RangePartitioningResult<Guid>(range, new Range<Guid>[0]);
             }
 
             return result;

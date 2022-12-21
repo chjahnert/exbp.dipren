@@ -15,12 +15,13 @@ namespace EXBP.Dipren
         /// <param name="range">
         ///   The <see cref="Range{TKey}"/> to split.
         /// </param>
-        /// <param name="created">
-        ///   A variable that receives the new <paramref name="range"/> object created.
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Range{TKey}"/> object that is the updated value of <paramref name="range"/>.
+        ///   A <see cref="RangePartitioningResult{TKey}"/> object that holds the results of the operation.
         /// </returns>
-        Range<TKey> Split(Range<TKey> range, out Range<TKey> created);
+        Task<RangePartitioningResult<TKey>> SplitAsync(Range<TKey> range, CancellationToken cancellation);
     }
 }

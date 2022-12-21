@@ -8,9 +8,9 @@ namespace EXBP.Dipren.Tests
     internal class Int32KeyArithmeticsTests
     {
         [Test]
-        public void Split_ArgumentRangeIsNull_ThrowsException()
+        public void SplitAsync_ArgumentRangeIsNull_ThrowsException()
         {
-            Assert.Throws<ArgumentNullException>(() => Int32KeyArithmetics.Default.Split(null, out Range<int> _));
+            Assert.ThrowsAsync<ArgumentNullException>(() => Int32KeyArithmetics.Default.SplitAsync(null, CancellationToken.None));
         }
 
         [TestCase(1, 8, true, 1, 5, 5, 8)]
@@ -25,15 +25,22 @@ namespace EXBP.Dipren.Tests
         [TestCase(int.MaxValue, int.MinValue, false, int.MaxValue, -1, -1, int.MinValue)]
         [TestCase(int.MinValue, int.MaxValue, true, int.MinValue, 0, 0, int.MaxValue)]
         [TestCase(int.MaxValue, int.MinValue, true, int.MaxValue, -1, -1, int.MinValue)]
-        public void Split_ArgumentRangeIsSplittable_SplitsRangeCorrectly(int inputFirst, int inputLast, bool inputInclusive, int returnedFirst, int returnedLast, int createdFirst, int createdLast)
+        public async Task SplitAsync_ArgumentRangeIsSplittable_SplitsRangeCorrectly(int inputFirst, int inputLast, bool inputInclusive, int returnedFirst, int returnedLast, int createdFirst, int createdLast)
         {
             Range<int> input = new Range<int>(inputFirst, inputLast, inputInclusive);
 
-            Range<int> returned = Int32KeyArithmetics.Default.Split(input, out Range<int> created);
+            RangePartitioningResult<int> result = await Int32KeyArithmetics.Default.SplitAsync(input, CancellationToken.None);
 
-            Assert.That(returned.First, Is.EqualTo(returnedFirst));
-            Assert.That(returned.Last, Is.EqualTo(returnedLast));
-            Assert.That(returned.IsInclusive, Is.False);
+            Assert.That(result, Is.Not.Null);
+
+            Assert.That(result.Updated.First, Is.EqualTo(returnedFirst));
+            Assert.That(result.Updated.Last, Is.EqualTo(returnedLast));
+            Assert.That(result.Updated.IsInclusive, Is.False);
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Created.Count, Is.EqualTo(1));
+
+            Range<int> created = result.Created.First();
 
             Assert.That(created.First, Is.EqualTo(createdFirst));
             Assert.That(created.Last, Is.EqualTo(createdLast));
@@ -43,17 +50,20 @@ namespace EXBP.Dipren.Tests
         [TestCase(1, 1, true)]
         [TestCase(1, 2, true)]
         [TestCase(1, 3, false)]
-        public void Split_ArgumentRangeIsNotSplittable_ReturnUnchangedRange(int inputFirst, int inputLast, bool inputInclusive)
+        public async Task SplitAsync_ArgumentRangeIsNotSplittable_ReturnUnchangedRange(int inputFirst, int inputLast, bool inputInclusive)
         {
             Range<int> input = new Range<int>(inputFirst, inputLast, inputInclusive);
 
-            Range<int> returned = Int32KeyArithmetics.Default.Split(input, out Range<int> created);
+            RangePartitioningResult<int> result = await Int32KeyArithmetics.Default.SplitAsync(input, CancellationToken.None);
 
-            Assert.That(returned.First, Is.EqualTo(input.First));
-            Assert.That(returned.Last, Is.EqualTo(input.Last));
-            Assert.That(returned.IsInclusive, Is.EqualTo(input.IsInclusive));
+            Assert.That(result, Is.Not.Null);
 
-            Assert.That(created, Is.Null);
+            Assert.That(result.Updated.First, Is.EqualTo(input.First));
+            Assert.That(result.Updated.Last, Is.EqualTo(input.Last));
+            Assert.That(result.Updated.IsInclusive, Is.EqualTo(input.IsInclusive));
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Created, Is.Empty);
         }
     }
 }
