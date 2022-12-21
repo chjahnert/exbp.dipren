@@ -544,26 +544,34 @@ namespace EXBP.Dipren
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventSplitRequested, cancellation);
 
             Range<TKey> remainingKeyRange = partition.GetRemainingKeyRange();
-            Range<TKey> updatedKeyRange = job.Arithmetics.Split(remainingKeyRange, out Range<TKey> excludedKeyRange);
+            RangePartitioningResult<TKey> ranges = await job.Arithmetics.SplitAsync(remainingKeyRange, cancellation);
 
             Partition<TKey> result = partition;
 
-            if (excludedKeyRange != null)
+            if (ranges?.Success == true)
             {
+                if (ranges.Created.Count > 1)
+                {
+                    throw new NotSupportedException(EngineResources.RangeSplitIntoTooManyRanges);
+                }
+
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
-                Task<long> excludedKeyRangeSize = job.Source.EstimateRangeSizeAsync(excludedKeyRange, cancellation);
-                Task<long> updatedKeyRangeSize = job.Source.EstimateRangeSizeAsync(updatedKeyRange, cancellation);
+                Range<TKey> updated = ranges.Updated;
+                Range<TKey> created = ranges.Created.First();
 
-                if ((await excludedKeyRangeSize >= settings.BatchSize) && (await updatedKeyRangeSize >= settings.BatchSize))
+                Task<long> createdKeyRangeSize = job.Source.EstimateRangeSizeAsync(created, cancellation);
+                Task<long> updatedKeyRangeSize = job.Source.EstimateRangeSizeAsync(updated, cancellation);
+
+                if ((await createdKeyRangeSize >= settings.BatchSize) && (await updatedKeyRangeSize >= settings.BatchSize))
                 {
                     DateTime timestamp = this.Clock.GetCurrentTimestamp();
 
-                    Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updatedKeyRange, partition.Position, partition.Processed, (await updatedKeyRangeSize - 1), false, 0.0, false);
+                    Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updated, partition.Position, partition.Processed, (await updatedKeyRangeSize - 1), false, 0.0, false);
                     Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
 
                     Guid id = Guid.NewGuid();
-                    Partition<TKey> excludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, excludedKeyRange, default, 0L, await excludedKeyRangeSize, false, 0.0, false);
+                    Partition<TKey> excludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, created, default, 0L, await createdKeyRangeSize, false, 0.0, false);
                     Partition excludedEntry = excludedPartition.ToEntry(job.Serializer);
 
                     await this.Store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);

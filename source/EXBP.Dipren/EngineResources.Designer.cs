@@ -284,5 +284,14 @@ namespace EXBP.Dipren {
                 return ResourceManager.GetString("NoJobScheduledWithSpecifiedIdentifier", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The key arithmetics implementation returned too many key ranges..
+        /// </summary>
+        internal static string RangeSplitIntoTooManyRanges {
+            get {
+                return ResourceManager.GetString("RangeSplitIntoTooManyRanges", resourceCulture);
+            }
+        }
     }
 }
