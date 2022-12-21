@@ -74,5 +74,50 @@ namespace EXBP.Dipren
 
             return result;
         }
+
+        /// <summary>
+        ///   Splits the specified range into two ranges.
+        /// </summary>
+        /// <param name="range">
+        ///   The <see cref="Range{TKey}"/> to split.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="RangePartitioningResult{TKey}"/> object that holds the results of the operation.
+        /// </returns>
+        public Task<RangePartitioningResult<int>> SplitAsync(Range<int> range, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(range, nameof(range));
+
+            RangePartitioningResult<int> result;
+
+            double distance = Math.Abs(((double) range.Last) - ((double) range.First));
+
+            if (((range.IsInclusive == true) && (distance >= 2)) || ((range.IsInclusive == false) && (distance >= 3)))
+            {
+                int half = (int) Math.Round(distance / 2);
+
+                bool ascending = range.IsAscending(this._comparer);
+
+                if (ascending == false)
+                {
+                    half *= -1;
+                }
+
+                Range<int> updated = new Range<int>(range.First, range.First + half, false);
+                Range<int> created = new Range<int>(range.First + half, range.Last, range.IsInclusive);
+
+                result = new RangePartitioningResult<int>(updated, new Range<int>[] { created });
+            }
+            else
+            {
+                result = new RangePartitioningResult<int>(range, new Range<int>[0]);
+            }
+
+            return Task.FromResult(result);
+        }
     }
 }
