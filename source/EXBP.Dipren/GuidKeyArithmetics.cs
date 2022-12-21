@@ -93,6 +93,43 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
+        ///   Splits the specified <see cref="Guid"/> key range into two ranges.
+        /// </summary>
+        /// <param name="range">
+        ///   The <see cref="Range{TKey}"/> of <see cref="Guid"/> to split.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> object that represents the asynchronous operation.
+        /// </returns>
+        public async Task<RangePartitioningResult<Guid>> SplitAsync(Range<Guid> range, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(range, nameof(range));
+
+            Range<BigInteger> rangeBi = this.ToBigIntegerRange(range);
+            RangePartitioningResult<BigInteger> resultBi = await BigIntegerKeyArithmetics.Default.SplitAsync(rangeBi, cancellation);
+
+            RangePartitioningResult<Guid> result;
+
+            if (resultBi?.Success == true)
+            {
+                Range<Guid> updated = this.ToGuidRange(resultBi.Updated);
+                IEnumerable<Range<Guid>> created = resultBi.Created.Select(r => this.ToGuidRange(r));
+
+                result = new RangePartitioningResult<Guid>(updated, created);
+            }
+            else
+            {
+                result = new RangePartitioningResult<Guid>(range, new Range<Guid>[0]);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         ///   Converts the specified <see cref="Range{TKey}"/> of <see cref="Guid"/> object to a
         ///   <see cref="Range{TKey}"/> of <see cref="BigInteger"/> object.
         /// </summary>
