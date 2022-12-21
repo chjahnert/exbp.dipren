@@ -65,37 +65,6 @@ namespace EXBP.Dipren
         ///   Splits the specified range into two ranges.
         /// </summary>
         /// <param name="range">
-        ///   The <see cref="Range{TKey}"/> of <see cref="Guid"/> values to split.
-        /// </param>
-        /// <param name="created">
-        ///   A variable that receives the new <see cref="Range{TKey}"/> of <see cref="Guid"/> object.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Range{TKey}"/> of <see cref="Guid"/> object that is the updated <paramref name="range"/>.
-        /// </returns>
-        public Range<Guid> Split(Range<Guid> range, out Range<Guid> created)
-        {
-            Assert.ArgumentIsNotNull(range, nameof(range));
-
-            created = null;
-
-            Range<BigInteger> rangeBi = this.ToBigIntegerRange(range);
-            Range<BigInteger> resultBi = BigIntegerKeyArithmetics.Default.Split(rangeBi, out Range<BigInteger> createdBi);
-
-            Range<Guid> result = this.ToGuidRange(resultBi);
-
-            if (createdBi != null)
-            {
-                created = this.ToGuidRange(createdBi);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        ///   Splits the specified range into two ranges.
-        /// </summary>
-        /// <param name="range">
         ///   The <see cref="Range{TKey}"/> of <see cref="Guid"/> to split.
         /// </param>
         /// <param name="cancellation">

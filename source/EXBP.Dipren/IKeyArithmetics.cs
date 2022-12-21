@@ -15,20 +15,6 @@ namespace EXBP.Dipren
         /// <param name="range">
         ///   The <see cref="Range{TKey}"/> to split.
         /// </param>
-        /// <param name="created">
-        ///   A variable that receives the new <paramref name="range"/> object created.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Range{TKey}"/> object that is the updated value of <paramref name="range"/>.
-        /// </returns>
-        Range<TKey> Split(Range<TKey> range, out Range<TKey> created);
-
-        /// <summary>
-        ///   Splits the specified range into two ranges.
-        /// </summary>
-        /// <param name="range">
-        ///   The <see cref="Range{TKey}"/> to split.
-        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.

@@ -23,42 +23,6 @@ namespace EXBP.Dipren.Tests
             Assert.Throws<ArgumentException>(() => new GuidKeyArithmetics(layout));
         }
 
-        [TestCaseSource(nameof(SplitAsync_ArgumentRangeIsSplittable_ParameterSource))]
-        public void Split_ArgumentRangeIsSplittable_SplitsRangeCorrectly(byte[] layout, Guid first, Guid last, bool inclusive, Guid mid)
-        {
-            Range<Guid> range = new Range<Guid>(first, last, inclusive);
-
-            GuidKeyArithmetics arithemtics = new GuidKeyArithmetics(layout);
-
-            Range<Guid> updated = arithemtics.Split(range, out Range<Guid> created);
-
-            Assert.That(updated, Is.Not.Null);
-            Assert.That(updated.First, Is.EqualTo(first));
-            Assert.That(updated.Last, Is.EqualTo(mid));
-            Assert.That(updated.IsInclusive, Is.False);
-
-            Assert.That(created, Is.Not.Null);
-            Assert.That(created.First, Is.EqualTo(mid));
-            Assert.That(created.Last, Is.EqualTo(last));
-            Assert.That(created.IsInclusive, Is.EqualTo(inclusive));
-        }
-
-        [TestCaseSource(nameof(SplitAsync_ArgumentRangeIsNotSplittable_ParameterSource))]
-        public void Split_ArgumentRangeIsNotSplittable_ReturnUnchangedRange(byte[] layout, Guid first, Guid last, bool inclusive)
-        {
-            Range<Guid> input = new Range<Guid>(first, last, inclusive);
-
-            GuidKeyArithmetics arithemtics = new GuidKeyArithmetics(layout);
-
-            Range<Guid> returned = arithemtics.Split(input, out Range<Guid> created);
-
-            Assert.That(returned.First, Is.EqualTo(input.First));
-            Assert.That(returned.Last, Is.EqualTo(input.Last));
-            Assert.That(returned.IsInclusive, Is.EqualTo(input.IsInclusive));
-
-            Assert.That(created, Is.Null);
-        }
-
         [Test]
         public void SplitAsync_ArgumentRangeIsNull_ThrowsException()
         {

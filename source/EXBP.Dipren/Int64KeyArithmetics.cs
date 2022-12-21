@@ -39,46 +39,6 @@ namespace EXBP.Dipren
         ///   Splits the specified range into two ranges.
         /// </summary>
         /// <param name="range">
-        ///   The <see cref="Range{TKey}"/> of <see cref="long"/> values to split.
-        /// </param>
-        /// <param name="created">
-        ///   A variable that receives the new <see cref="Range{TKey}"/> of <see cref="long"/> object created.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Range{TKey}"/> of <see cref="long"/> object that is the updated value of
-        ///   <paramref name="range"/>.
-        /// </returns>
-        public Range<long> Split(Range<long> range, out Range<long> created)
-        {
-            Assert.ArgumentIsNotNull(range, nameof(range));
-
-            Range<long> result = range;
-            created = null;
-
-            double distance = Math.Abs(((double) range.Last) - ((double) range.First));
-
-            if (((range.IsInclusive == true) && (distance >= 2)) || ((range.IsInclusive == false) && (distance >= 3)))
-            {
-                long half = (long) Math.Round(distance / 2);
-
-                bool ascending = range.IsAscending(this._comparer);
-
-                if (ascending == false)
-                {
-                    half *= -1;
-                }
-
-                result = new Range<long>(range.First, range.First + half, false);
-                created = new Range<long>(range.First + half, range.Last, range.IsInclusive);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        ///   Splits the specified range into two ranges.
-        /// </summary>
-        /// <param name="range">
         ///   The <see cref="Range{TKey}"/> of <see cref="long"/> to split.
         /// </param>
         /// <param name="cancellation">

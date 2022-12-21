@@ -91,56 +91,6 @@ namespace EXBP.Dipren
         /// <param name="range">
         ///   The <see cref="Range{TKey}"/> of <see cref="string"/> to split.
         /// </param>
-        /// <param name="created">
-        ///   A variable that receives the new <paramref name="range"/> object created.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Range{TKey}"/> of <see cref="string"/> object that is the updated value of
-        ///   <paramref name="range"/>.
-        /// </returns>
-        public virtual Range<string> Split(Range<string> range, out Range<string> created)
-        {
-            Assert.ArgumentIsNotNull(range, nameof(range));
-            Assert.ArgumentIsValid(range.First.Length <= this._length, nameof(range), StringKeyArithmeticsResources.MessageFirstKeyInRangeTooLong);
-            Assert.ArgumentIsValid(range.First.All(c => this._characters.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageFirstKeyInRangeContainsInvalidCharacters);
-            Assert.ArgumentIsValid(range.Last.Length <= this._length, nameof(range), StringKeyArithmeticsResources.MessageLastKeyInRangeTooLong);
-            Assert.ArgumentIsValid(range.Last.All(c => this._characters.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageLastKeyInRangeContainsInvalidCharacters);
-
-            Range<string> result = range;
-            created = null;
-
-            BigInteger indexFirst = this.ToIndex(range.First);
-            BigInteger indexLast = this.ToIndex(range.Last);
-
-            BigInteger distance = BigInteger.Abs(indexLast - indexFirst);
-
-            if (((range.IsInclusive == true) && (distance >= 2)) || ((range.IsInclusive == false) && (distance >= 3)))
-            {
-                BigInteger half = (distance / 2);
-
-                bool ascending = (indexFirst < indexLast);
-
-                if (ascending == false)
-                {
-                    half *= -1;
-                }
-
-                BigInteger indexMiddle = (indexFirst + half);
-                string middle = this.ToKey(indexMiddle);
-
-                result = new Range<string>(range.First, middle, false);
-                created = new Range<string>(middle, range.Last, range.IsInclusive);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        ///   Splits the specified range into two ranges.
-        /// </summary>
-        /// <param name="range">
-        ///   The <see cref="Range{TKey}"/> of <see cref="string"/> to split.
-        /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
