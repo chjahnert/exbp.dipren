@@ -79,5 +79,50 @@ namespace EXBP.Dipren
 
             return result;
         }
+
+        /// <summary>
+        ///   Splits the specified big integer key range into two ranges.
+        /// </summary>
+        /// <param name="range">
+        ///   The <see cref="Range{TKey}"/> of <see cref="BigInteger"/> to split.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> object that represents the asynchronous operation.
+        /// </returns>
+        public Task<RangePartitioningResult<BigInteger>> SplitAsync(Range<BigInteger> range, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(range, nameof(range));
+
+            RangePartitioningResult<BigInteger> result;
+
+            BigInteger distance = BigInteger.Abs(range.Last - range.First);
+
+            if (((range.IsInclusive == true) && (distance >= 2)) || ((range.IsInclusive == false) && (distance >= 3)))
+            {
+                BigInteger half = (distance / 2);
+
+                bool ascending = range.IsAscending(this._comparer);
+
+                if (ascending == false)
+                {
+                    half *= -1;
+                }
+
+                Range<BigInteger> updated = new Range<BigInteger>(range.First, (range.First + half), false);
+                Range<BigInteger> created = new Range<BigInteger>((range.First + half), range.Last, range.IsInclusive);
+
+                result = new RangePartitioningResult<BigInteger>(updated, new Range<BigInteger>[] { created });
+            }
+            else
+            {
+                result = new RangePartitioningResult<BigInteger>(range, new Range<BigInteger>[0]);
+            }
+
+            return Task.FromResult(result);
+        }
     }
 }
