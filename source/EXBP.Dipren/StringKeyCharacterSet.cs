@@ -7,11 +7,11 @@ using EXBP.Dipren.Diagnostics;
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Defines some common character sets for the <see cref="StringKeyArithmetics"/> type.
+    ///   Defines some common character sets for the <see cref="StringKeyRangePartitioner"/> type.
     /// </summary>
     /// <remarks>
     ///   See the <see href="https://github.com/chjahnert/exbp.dipren/wiki/String-Keys">documentation</see> for a
-    ///   better method to define the character set to use with the <see cref="StringKeyArithmetics"/> type.
+    ///   better method to define the character set to use with the <see cref="StringKeyRangePartitioner"/> type.
     /// </remarks>
     public static class StringKeyCharacterSet
     {
@@ -93,7 +93,7 @@ namespace EXBP.Dipren
         ///   Note that database collations do not map to <see cref="CultureInfo"/> objects. You can only get the same
         ///   sorting behavior for small, well defined character sets. See the
         ///   <see href="https://github.com/chjahnert/exbp.dipren/wiki/String-Keys">documentation</see> for a better
-        ///   method to define the character set to use with the <see cref="StringKeyArithmetics"/> type.
+        ///   method to define the character set to use with the <see cref="StringKeyRangePartitioner"/> type.
         /// </remarks>
         public static string Sort(string value, CultureInfo culture, CompareOptions options = CompareOptions.None)
         {

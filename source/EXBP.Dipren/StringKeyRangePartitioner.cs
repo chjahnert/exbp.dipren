@@ -9,9 +9,9 @@ using EXBP.Dipren.Diagnostics;
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Implements key arithmetics for the <see cref="string"/> type.
+    ///   Implements a partitioner for string key ranges that computes the range boundaries.
     /// </summary>
-    public class StringKeyArithmetics : IKeyArithmetics<string>
+    public class StringKeyRangePartitioner : IRangePartitioner<string>
     {
         private readonly string _characters;
         private readonly int _length;
@@ -38,7 +38,7 @@ namespace EXBP.Dipren
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="StringKeyArithmetics"/> class.
+        ///   Initializes a new instance of the <see cref="StringKeyRangePartitioner"/> class.
         /// </summary>
         /// <param name="characters">
         ///   A <see cref="string"/> containing all possible characters allowed in the key sorted according to the
@@ -65,11 +65,11 @@ namespace EXBP.Dipren
         ///     the possible key combinations in ascending order would be: '', 'b', 'bb', 'ba', 'a', 'ab', and 'aa'.
         ///   </para>
         /// </remarks>
-        public StringKeyArithmetics(string characters, int length)
+        public StringKeyRangePartitioner(string characters, int length)
         {
             Assert.ArgumentIsNotNull(characters, nameof(characters));
             Assert.ArgumentIsNotEmpty(characters, nameof(characters));
-            Assert.ArgumentIsValid(characters.Length == characters.Distinct().Count(), nameof(characters), StringKeyArithmeticsResources.MessageCharactersHaveToBeUnique);
+            Assert.ArgumentIsValid(characters.Length == characters.Distinct().Count(), nameof(characters), StringKeyRangePartitionerResources.MessageCharactersHaveToBeUnique);
             Assert.ArgumentIsGreater(length, 0, nameof(length));
 
             BigInteger combinations = 0;
@@ -101,13 +101,13 @@ namespace EXBP.Dipren
         public virtual async Task<RangePartitioningResult<string>> SplitAsync(Range<string> range, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(range, nameof(range));
-            Assert.ArgumentIsValid(range.First.Length <= this._length, nameof(range), StringKeyArithmeticsResources.MessageFirstKeyInRangeTooLong);
-            Assert.ArgumentIsValid(range.First.All(c => this._characters.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageFirstKeyInRangeContainsInvalidCharacters);
-            Assert.ArgumentIsValid(range.Last.Length <= this._length, nameof(range), StringKeyArithmeticsResources.MessageLastKeyInRangeTooLong);
-            Assert.ArgumentIsValid(range.Last.All(c => this._characters.Contains(c)), nameof(range), StringKeyArithmeticsResources.MessageLastKeyInRangeContainsInvalidCharacters);
+            Assert.ArgumentIsValid(range.First.Length <= this._length, nameof(range), StringKeyRangePartitionerResources.MessageFirstKeyInRangeTooLong);
+            Assert.ArgumentIsValid(range.First.All(c => this._characters.Contains(c)), nameof(range), StringKeyRangePartitionerResources.MessageFirstKeyInRangeContainsInvalidCharacters);
+            Assert.ArgumentIsValid(range.Last.Length <= this._length, nameof(range), StringKeyRangePartitionerResources.MessageLastKeyInRangeTooLong);
+            Assert.ArgumentIsValid(range.Last.All(c => this._characters.Contains(c)), nameof(range), StringKeyRangePartitionerResources.MessageLastKeyInRangeContainsInvalidCharacters);
 
             Range<BigInteger> rangeBi = this.ToBigIntegerRange(range);
-            RangePartitioningResult<BigInteger> resultBi = await BigIntegerKeyArithmetics.Default.SplitAsync(rangeBi, cancellation);
+            RangePartitioningResult<BigInteger> resultBi = await BigIntegerKeyRangePartitioner.Default.SplitAsync(rangeBi, cancellation);
 
             RangePartitioningResult<string> result;
 

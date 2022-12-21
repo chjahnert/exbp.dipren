@@ -2,12 +2,12 @@
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Implements operations for manipulating key ranges.
+    ///   Allows a class to implement a key range partitioner.
     /// </summary>
     /// <typeparam name="TKey">
     ///   The type of keys.
     /// </typeparam>
-    public interface IKeyArithmetics<TKey>
+    public interface IRangePartitioner<TKey>
     {
         /// <summary>
         ///   Splits the specified range into two ranges.

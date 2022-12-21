@@ -5,31 +5,31 @@ using EXBP.Dipren.Diagnostics;
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Implements key arithmetics for the <see cref="long"/> type.
+    ///   Implements a partitioner for 64 bit signed integer key ranges that computes the range boundaries.
     /// </summary>
-    public class Int64KeyArithmetics : IKeyArithmetics<long>
+    public class Int64KeyRangePartitioner : IRangePartitioner<long>
     {
         private readonly IComparer<long> _comparer;
 
 
         /// <summary>
-        ///   Gets the default instance of the <see cref="Int64KeyArithmetics"/> class.
+        ///   Gets the default instance of the <see cref="Int64KeyRangePartitioner"/> class.
         /// </summary>
         /// <value>
-        ///   An <see cref="Int32KeyArithmetics"/> object that uses the default comparer for the <see cref="long"/>
+        ///   An <see cref="Int32KeyRangePartitioner"/> object that uses the default comparer for the <see cref="long"/>
         ///   type.
         /// </value>
-        public static Int64KeyArithmetics Default { get; } = new Int64KeyArithmetics(Comparer<long>.Default);
+        public static Int64KeyRangePartitioner Default { get; } = new Int64KeyRangePartitioner(Comparer<long>.Default);
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Int64KeyArithmetics"/> class.
+        ///   Initializes a new instance of the <see cref="Int64KeyRangePartitioner"/> class.
         /// </summary>
         /// <param name="comparer">
         ///   The <see cref="IComparable{T}"/> of <see cref="long"/> object to use to compare key values; or
         ///   <see langword="null"/> to use the default comparer.
         /// </param>
-        public Int64KeyArithmetics(IComparer<long> comparer = null)
+        public Int64KeyRangePartitioner(IComparer<long> comparer = null)
         {
             this._comparer = (comparer ?? Comparer<long>.Default);
         }

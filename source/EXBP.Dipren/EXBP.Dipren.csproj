@@ -55,20 +55,20 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AssertResources.resx</DependentUpon>
     </Compile>
-    <Compile Update="GuidKeyArithmeticsResources.Designer.cs">
+    <Compile Update="GuidKeyRangePartitionerResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>GuidKeyArithmeticsResources.resx</DependentUpon>
+      <DependentUpon>GuidKeyRangePartitionerResources.resx</DependentUpon>
     </Compile>
     <Compile Update="SchedulerResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>SchedulerResources.resx</DependentUpon>
     </Compile>
-    <Compile Update="StringKeyArithmeticsResources.Designer.cs">
+    <Compile Update="StringKeyRangePartitionerResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>StringKeyArithmeticsResources.resx</DependentUpon>
+      <DependentUpon>StringKeyRangePartitionerResources.resx</DependentUpon>
     </Compile>
     <Compile Update="Telemetry\TextEventLoggerResources.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -95,17 +95,17 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AssertResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="GuidKeyArithmeticsResources.resx">
+    <EmbeddedResource Update="GuidKeyRangePartitionerResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>GuidKeyArithmeticsResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>GuidKeyRangePartitionerResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="SchedulerResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>SchedulerResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="StringKeyArithmeticsResources.resx">
+    <EmbeddedResource Update="StringKeyRangePartitionerResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>StringKeyArithmeticsResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>StringKeyRangePartitionerResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Telemetry\TextEventLoggerResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

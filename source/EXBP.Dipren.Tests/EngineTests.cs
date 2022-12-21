@@ -36,7 +36,7 @@ namespace EXBP.Dipren.Tests
 
             Int32SequenceDataSource source = new Int32SequenceDataSource(1, 8);
             CollectingBatchProcessor processor = new CollectingBatchProcessor();
-            Job<int, string> job = new Job<int, string>(jobId, source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor);
+            Job<int, string> job = new Job<int, string>(jobId, source, Int32KeyRangePartitioner.Default, Int32KeySerializer.Default, processor);
 
             TimeSpan timeout = TimeSpan.FromSeconds(2);
             Settings settings = new Settings(4, timeout);
@@ -61,7 +61,7 @@ namespace EXBP.Dipren.Tests
         {
             Int32SequenceDataSource source = new Int32SequenceDataSource(1, 128);
             CollectingBatchProcessor processor = new CollectingBatchProcessor();
-            Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor);
+            Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyRangePartitioner.Default, Int32KeySerializer.Default, processor);
 
             TimeSpan timeout = TimeSpan.FromSeconds(2);
             Settings settings = new Settings(4, timeout);
@@ -84,7 +84,7 @@ namespace EXBP.Dipren.Tests
         {
             Int32SequenceDataSource source = new Int32SequenceDataSource(128, 1);
             CollectingBatchProcessor processor = new CollectingBatchProcessor();
-            Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyArithmetics.Default, Int32KeySerializer.Default, processor);
+            Job<int, string> job = new Job<int, string>("DPJ-001", source, Int32KeyRangePartitioner.Default, Int32KeySerializer.Default, processor);
 
             TimeSpan timeout = TimeSpan.FromSeconds(2);
             Settings settings = new Settings(4, timeout);

@@ -18,25 +18,25 @@ namespace EXBP.Dipren.Tests
         public void Ctor_ArgumentIdIsNull_ThrowsExcption()
         {
             IDataSource<int, string> source = Substitute.For<IDataSource<int, string>>();
-            IKeyArithmetics<int> arithmetics = Substitute.For<IKeyArithmetics<int>>();
+            IRangePartitioner<int> partitioner = Substitute.For<IRangePartitioner<int>>();
             IKeySerializer<int> serializer = Substitute.For<IKeySerializer<int>>();
             IBatchProcessor<string> processor = Substitute.For<IBatchProcessor<string>>();
 
-            Assert.Throws<ArgumentNullException>(() => new Job<int, string>(null, source, arithmetics, serializer, processor));
+            Assert.Throws<ArgumentNullException>(() => new Job<int, string>(null, source, partitioner, serializer, processor));
         }
 
         [Test]
         public void Ctor_ArgumentSourceIsNull_ThrowsExcption()
         {
-            IKeyArithmetics<int> arithmetics = Substitute.For<IKeyArithmetics<int>>();
+            IRangePartitioner<int> partitioner = Substitute.For<IRangePartitioner<int>>();
             IKeySerializer<int> serializer = Substitute.For<IKeySerializer<int>>();
             IBatchProcessor<string> processor = Substitute.For<IBatchProcessor<string>>();
 
-            Assert.Throws<ArgumentNullException>(() => new Job<int, string>(this._defaultId, null, arithmetics, serializer, processor));
+            Assert.Throws<ArgumentNullException>(() => new Job<int, string>(this._defaultId, null, partitioner, serializer, processor));
         }
 
         [Test]
-        public void Ctor_ArgumentArithmeticsIsNull_ThrowsExcption()
+        public void Ctor_ArgumentPartitionerIsNull_ThrowsExcption()
         {
             IDataSource<int, string> source = Substitute.For<IDataSource<int, string>>();
             IKeySerializer<int> serializer = Substitute.For<IKeySerializer<int>>();
@@ -49,20 +49,20 @@ namespace EXBP.Dipren.Tests
         public void Ctor_ArgumentSerializerIsNull_ThrowsExcption()
         {
             IDataSource<int, string> source = Substitute.For<IDataSource<int, string>>();
-            IKeyArithmetics<int> arithmetics = Substitute.For<IKeyArithmetics<int>>();
+            IRangePartitioner<int> partitioner = Substitute.For<IRangePartitioner<int>>();
             IBatchProcessor<string> processor = Substitute.For<IBatchProcessor<string>>();
 
-            Assert.Throws<ArgumentNullException>(() => new Job<int, string>(this._defaultId, source, arithmetics, null, processor));
+            Assert.Throws<ArgumentNullException>(() => new Job<int, string>(this._defaultId, source, partitioner, null, processor));
         }
 
         [Test]
         public void Ctor_ArgumentProcessorIsNull_ThrowsExcption()
         {
             IDataSource<int, string> source = Substitute.For<IDataSource<int, string>>();
-            IKeyArithmetics<int> arithmetics = Substitute.For<IKeyArithmetics<int>>();
+            IRangePartitioner<int> partitioner = Substitute.For<IRangePartitioner<int>>();
             IKeySerializer<int> serializer = Substitute.For<IKeySerializer<int>>();
 
-            Assert.Throws<ArgumentNullException>(() => new Job<int, string>(this._defaultId, source, arithmetics, serializer, null));
+            Assert.Throws<ArgumentNullException>(() => new Job<int, string>(this._defaultId, source, partitioner, serializer, null));
         }
     }
 }

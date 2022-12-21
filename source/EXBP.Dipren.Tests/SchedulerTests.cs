@@ -40,12 +40,12 @@ namespace EXBP.Dipren.Tests
             Scheduler scheduler = new Scheduler(store, this.DefaultEventHandler);
 
             DummyDataSource source = new DummyDataSource(1, 1024);
-            IKeyArithmetics<int> arithmetics = Substitute.For<IKeyArithmetics<int>>();
+            IRangePartitioner<int> partitioner = Substitute.For<IRangePartitioner<int>>();
             Int32KeySerializer serializer = new Int32KeySerializer();
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", source, partitioner, serializer, processor);
 
             await scheduler.ScheduleAsync(job, this.DefaultSettings);
 
@@ -81,12 +81,12 @@ namespace EXBP.Dipren.Tests
                 .When(x => x.EstimateRangeSizeAsync(Arg.Any<Range<int>>(), Arg.Any<CancellationToken>()))
                 .Do(x => Task.FromResult(1000L));
 
-            IKeyArithmetics<int> arithmetics = Substitute.For<IKeyArithmetics<int>>();
+            IRangePartitioner<int> partitioner = Substitute.For<IRangePartitioner<int>>();
             Int32KeySerializer serializer = new Int32KeySerializer();
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", source, partitioner, serializer, processor);
 
             Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => scheduler.ScheduleAsync(job, this.DefaultSettings));
 
@@ -111,12 +111,12 @@ namespace EXBP.Dipren.Tests
                 .When(x => x.EstimateRangeSizeAsync(Arg.Any<Range<int>>(), Arg.Any<CancellationToken>()))
                 .Do(x => { throw new KeyNotFoundException(); });
 
-            IKeyArithmetics<int> arithmetics = Substitute.For<IKeyArithmetics<int>>();
+            IRangePartitioner<int> partitioner = Substitute.For<IRangePartitioner<int>>();
             Int32KeySerializer serializer = new Int32KeySerializer();
             IBatchProcessor<int> processor = Substitute.For<IBatchProcessor<int>>();
             TimeSpan timeout = TimeSpan.FromMinutes(3);
 
-            Job<int, int> job = new Job<int, int>("DPJ-0001", source, arithmetics, serializer, processor);
+            Job<int, int> job = new Job<int, int>("DPJ-0001", source, partitioner, serializer, processor);
 
             Assert.ThrowsAsync<KeyNotFoundException>(() => scheduler.ScheduleAsync(job, this.DefaultSettings));
 
