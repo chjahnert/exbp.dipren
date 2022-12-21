@@ -76,17 +76,17 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
-        ///   Splits the specified range into two ranges.
+        ///   Splits the specified integer key range into two ranges.
         /// </summary>
         /// <param name="range">
-        ///   The <see cref="Range{TKey}"/> to split.
+        ///   The <see cref="Range{TKey}"/> of <see cref="int"/> to split.
         /// </param>
         /// <param name="cancellation">
         ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="RangePartitioningResult{TKey}"/> object that holds the results of the operation.
+        ///   A <see cref="Task{TResult}"/> object that represents the asynchronous operation.
         /// </returns>
         public Task<RangePartitioningResult<int>> SplitAsync(Range<int> range, CancellationToken cancellation)
         {
