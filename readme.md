@@ -3,15 +3,15 @@
 **DIPREN** is implemented in a headless fashion which means that there is no central component responsible for orchestrating the work. Processing nodes communicate with each other through a database.
 
 Among others, the following features are supported:
-*	Scheduling and processing a distributed processing job
-*	Monitoring the status of a distributed processing job
-*	Dynamically increasing and shrinking the processing cluster
+* Scheduling and processing a distributed processing job
+* Monitoring the status of a distributed processing job
+* Dynamically increasing and shrinking the processing cluster
 
 Each item in the data set has to have a unique key. The following key types are supported out-of-the-box:
-*	UUID / GUID
-*	32 bit signed integer
-*	64 bit signed integer
-*	Arbitrarily large signed integer
-*	String
+* UUID / GUID
+* 32 bit signed integer
+* 64 bit signed integer
+* Arbitrarily large signed integer
+* String
 
 However, you can add support for your own unique key type with minimal effort by implementing an interface with a single method. By doing so, any data type can be supported including compound keys.
