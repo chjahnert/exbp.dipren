@@ -56,25 +56,6 @@ namespace EXBP.Dipren.Tests
             Assert.That(created, Is.Null);
         }
 
-        [TestCase(1, 1, true)]
-        [TestCase(1, 2, true)]
-        [TestCase(1, 3, false)]
-        public async Task SplitAsync_ArgumentRangeIsNotSplittable_ReturnUnchangedRange(int inputFirst, int inputLast, bool inputInclusive)
-        {
-            Range<int> input = new Range<int>(inputFirst, inputLast, inputInclusive);
-
-            RangePartitioningResult<int> result = await Int32KeyArithmetics.Default.SplitAsync(input, CancellationToken.None);
-
-            Assert.That(result, Is.Not.Null);
-
-            Assert.That(result.Updated.First, Is.EqualTo(input.First));
-            Assert.That(result.Updated.Last, Is.EqualTo(input.Last));
-            Assert.That(result.Updated.IsInclusive, Is.EqualTo(input.IsInclusive));
-
-            Assert.That(result.Success, Is.False);
-            Assert.That(result.Created, Is.Empty);
-        }
-
         [Test]
         public void SplitAsync_ArgumentRangeIsNull_ThrowsException()
         {
@@ -113,6 +94,25 @@ namespace EXBP.Dipren.Tests
             Assert.That(created.First, Is.EqualTo(createdFirst));
             Assert.That(created.Last, Is.EqualTo(createdLast));
             Assert.That(created.IsInclusive, Is.EqualTo(inputInclusive));
+        }
+
+        [TestCase(1, 1, true)]
+        [TestCase(1, 2, true)]
+        [TestCase(1, 3, false)]
+        public async Task SplitAsync_ArgumentRangeIsNotSplittable_ReturnUnchangedRange(int inputFirst, int inputLast, bool inputInclusive)
+        {
+            Range<int> input = new Range<int>(inputFirst, inputLast, inputInclusive);
+
+            RangePartitioningResult<int> result = await Int32KeyArithmetics.Default.SplitAsync(input, CancellationToken.None);
+
+            Assert.That(result, Is.Not.Null);
+
+            Assert.That(result.Updated.First, Is.EqualTo(input.First));
+            Assert.That(result.Updated.Last, Is.EqualTo(input.Last));
+            Assert.That(result.Updated.IsInclusive, Is.EqualTo(input.IsInclusive));
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Created, Is.Empty);
         }
     }
 }
