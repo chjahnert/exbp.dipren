@@ -136,7 +136,7 @@ namespace EXBP.Dipren
         }
 
         /// <summary>
-        ///   Splits the specified <see cref="string"/> key range into two ranges.
+        ///   Splits the specified range into two ranges.
         /// </summary>
         /// <param name="range">
         ///   The <see cref="Range{TKey}"/> of <see cref="string"/> to split.
