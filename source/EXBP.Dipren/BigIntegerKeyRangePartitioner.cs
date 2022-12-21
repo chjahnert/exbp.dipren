@@ -7,31 +7,31 @@ using EXBP.Dipren.Diagnostics;
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Implements key arithmetics for the <see cref="BigInteger"/> type.
+    ///   Implements a partitioner for arbitrary large signed integer key ranges that computes the range boundaries.
     /// </summary>
-    public class BigIntegerKeyArithmetics : IKeyArithmetics<BigInteger>
+    public class BigIntegerKeyRangePartitioner : IRangePartitioner<BigInteger>
     {
         private IComparer<BigInteger> _comparer;
 
 
         /// <summary>
-        ///   Gets the default instance of the <see cref="BigIntegerKeyArithmetics"/> class.
+        ///   Gets the default instance of the <see cref="BigIntegerKeyRangePartitioner"/> class.
         /// </summary>
         /// <value>
-        ///   An <see cref="BigIntegerKeyArithmetics"/> object that is the default instance for the
+        ///   An <see cref="BigIntegerKeyRangePartitioner"/> object that is the default instance for the
         ///   <see cref="BigInteger"/> type.
         /// </value>
-        public static BigIntegerKeyArithmetics Default { get; } = new BigIntegerKeyArithmetics(Comparer<BigInteger>.Default);
+        public static BigIntegerKeyRangePartitioner Default { get; } = new BigIntegerKeyRangePartitioner(Comparer<BigInteger>.Default);
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="BigIntegerKeyArithmetics"/> class.
+        ///   Initializes a new instance of the <see cref="BigIntegerKeyRangePartitioner"/> class.
         /// </summary>
         /// <param name="comparer">
         ///   The <see cref="IComparable{T}"/> of <see cref="int"/> object to use to compare key values; or
         ///   <see langword="null"/> to use the default comparer.
         /// </param>
-        public BigIntegerKeyArithmetics(IComparer<BigInteger> comparer = null)
+        public BigIntegerKeyRangePartitioner(IComparer<BigInteger> comparer = null)
         {
             this._comparer = (comparer ?? Comparer<BigInteger>.Default);
         }

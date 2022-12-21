@@ -7,12 +7,12 @@ using NUnit.Framework;
 namespace EXBP.Dipren.Tests
 {
     [TestFixture]
-    public class GuidKeyArithmeticsTests
+    public class GuidKeyRangePartitionerTests
     {
         [Test]
         public void Ctor_ArgumentLayoutIsNull_ThrowsException()
         {
-            Assert.Throws<ArgumentNullException>(() => new GuidKeyArithmetics(null));
+            Assert.Throws<ArgumentNullException>(() => new GuidKeyRangePartitioner(null));
         }
 
         [TestCase(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 })]
@@ -20,13 +20,13 @@ namespace EXBP.Dipren.Tests
         [TestCase(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 33 })]
         public void Ctor_ArgumentLayoutIsNotValid_ThrowsException(byte[] layout)
         {
-            Assert.Throws<ArgumentException>(() => new GuidKeyArithmetics(layout));
+            Assert.Throws<ArgumentException>(() => new GuidKeyRangePartitioner(layout));
         }
 
         [Test]
         public void SplitAsync_ArgumentRangeIsNull_ThrowsException()
         {
-            GuidKeyArithmetics instance = new GuidKeyArithmetics(GuidLayout.MicrosoftSqlServer);
+            GuidKeyRangePartitioner instance = new GuidKeyRangePartitioner(GuidLayout.MicrosoftSqlServer);
 
             Assert.ThrowsAsync<ArgumentNullException>(() => instance.SplitAsync(null, CancellationToken.None));
         }
@@ -36,9 +36,9 @@ namespace EXBP.Dipren.Tests
         {
             Range<Guid> input = new Range<Guid>(first, last, inclusive);
 
-            GuidKeyArithmetics arithemtics = new GuidKeyArithmetics(layout);
+            GuidKeyRangePartitioner partitioner = new GuidKeyRangePartitioner(layout);
 
-            RangePartitioningResult<Guid> result = await arithemtics.SplitAsync(input, CancellationToken.None);
+            RangePartitioningResult<Guid> result = await partitioner.SplitAsync(input, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
 
@@ -62,9 +62,9 @@ namespace EXBP.Dipren.Tests
         {
             Range<Guid> input = new Range<Guid>(first, last, inclusive);
 
-            GuidKeyArithmetics arithemtics = new GuidKeyArithmetics(layout);
+            GuidKeyRangePartitioner partitioner = new GuidKeyRangePartitioner(layout);
 
-            RangePartitioningResult<Guid> result = await arithemtics.SplitAsync(input, CancellationToken.None);
+            RangePartitioningResult<Guid> result = await partitioner.SplitAsync(input, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
 

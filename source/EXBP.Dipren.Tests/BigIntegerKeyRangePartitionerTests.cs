@@ -8,12 +8,12 @@ using NUnit.Framework;
 namespace EXBP.Dipren.Tests
 {
     [TestFixture]
-    public class BigIntegerKeyArithmeticsTests
+    public class BigIntegerKeyRangePartitionerTests
     {
         [Test]
         public void SplitAsync_ArgumentRangeIsNull_ThrowsException()
         {
-            Assert.ThrowsAsync<ArgumentNullException>(() => BigIntegerKeyArithmetics.Default.SplitAsync(null, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => BigIntegerKeyRangePartitioner.Default.SplitAsync(null, CancellationToken.None));
         }
 
         [TestCaseSource(nameof(SplitAsync_ArgumentRangeIsSplittable_ParameterSource))]
@@ -21,7 +21,7 @@ namespace EXBP.Dipren.Tests
         {
             Range<BigInteger> input = new Range<BigInteger>(inputFirst, inputLast, inputInclusive);
 
-            var result = await BigIntegerKeyArithmetics.Default.SplitAsync(input, CancellationToken.None);
+            var result = await BigIntegerKeyRangePartitioner.Default.SplitAsync(input, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
 
@@ -44,7 +44,7 @@ namespace EXBP.Dipren.Tests
         {
             Range<BigInteger> input = new Range<BigInteger>(inputFirst, inputLast, inputInclusive);
 
-            RangePartitioningResult<BigInteger> result = await BigIntegerKeyArithmetics.Default.SplitAsync(input, CancellationToken.None);
+            RangePartitioningResult<BigInteger> result = await BigIntegerKeyRangePartitioner.Default.SplitAsync(input, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
 

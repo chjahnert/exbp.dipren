@@ -211,7 +211,7 @@ namespace EXBP.Dipren
             /// <param name="jobId">
             ///   The unique identifier of the distributed processing job the event is related to.
             /// </param>
-            /// <param name="parititonId">
+            /// <param name="partitonId">
             ///   The unique identifier of the partition the event is related to.
             /// </param>
             /// <param name="description">
@@ -224,7 +224,7 @@ namespace EXBP.Dipren
             /// <returns>
             ///   A <see cref="Task"/> object that represents the asynchronous operation.
             /// </returns>
-            public async Task DispatchEventAsync(EventSeverity severity, string jobId, Guid parititonId, string description, CancellationToken cancellation)
+            public async Task DispatchEventAsync(EventSeverity severity, string jobId, Guid partitonId, string description, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(description != null);
@@ -238,7 +238,7 @@ namespace EXBP.Dipren
                         Severity = severity,
                         EngineId = this._id,
                         JobId = jobId,
-                        PartitionId = parititonId,
+                        PartitionId = partitonId,
                         Description = description
                     };
 
@@ -255,7 +255,7 @@ namespace EXBP.Dipren
             /// <param name="jobId">
             ///   The unique identifier of the distributed processing job the event is related to.
             /// </param>
-            /// <param name="parititonId">
+            /// <param name="partitonId">
             ///   The unique identifier of the partition the event is related to.
             /// </param>
             /// <param name="description">
@@ -272,7 +272,7 @@ namespace EXBP.Dipren
             /// <returns>
             ///   A <see cref="Task"/> object that represents the asynchronous operation.
             /// </returns>
-            internal async Task DispatchEventAsync(EventSeverity severity, string jobId, Guid parititonId, string description, Exception exception, CancellationToken cancellation)
+            internal async Task DispatchEventAsync(EventSeverity severity, string jobId, Guid partitonId, string description, Exception exception, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(description != null);
@@ -286,7 +286,7 @@ namespace EXBP.Dipren
                         Severity = severity,
                         EngineId = this._id,
                         JobId = jobId,
-                        PartitionId = parititonId,
+                        PartitionId = partitonId,
                         Description = description,
                         Exception = exception
                     };

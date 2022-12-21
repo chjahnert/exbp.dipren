@@ -22,14 +22,14 @@ namespace EXBP.Dipren {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class GuidKeyArithmeticsResources {
+    internal class StringKeyRangePartitionerResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal GuidKeyArithmeticsResources() {
+        internal StringKeyRangePartitionerResources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace EXBP.Dipren {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EXBP.Dipren.GuidKeyArithmeticsResources", typeof(GuidKeyArithmeticsResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EXBP.Dipren.StringKeyRangePartitionerResources", typeof(StringKeyRangePartitionerResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,11 +61,47 @@ namespace EXBP.Dipren {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The specified  GUID/UUID layout is not valid. The layout must contain exactly 16 unqiue byte values between 0 and 15..
+        ///   Looks up a localized string similar to Each character in the specified set has to be unique..
         /// </summary>
-        internal static string MessageInvalidGuidLayout {
+        internal static string MessageCharactersHaveToBeUnique {
             get {
-                return ResourceManager.GetString("MessageInvalidGuidLayout", resourceCulture);
+                return ResourceManager.GetString("MessageCharactersHaveToBeUnique", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The first key in the specified range contains one or more characters that are not included in the character set..
+        /// </summary>
+        internal static string MessageFirstKeyInRangeContainsInvalidCharacters {
+            get {
+                return ResourceManager.GetString("MessageFirstKeyInRangeContainsInvalidCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The first key in the specified range is too long..
+        /// </summary>
+        internal static string MessageFirstKeyInRangeTooLong {
+            get {
+                return ResourceManager.GetString("MessageFirstKeyInRangeTooLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The last key in the specified range contains one or more characters that are not included in the character set..
+        /// </summary>
+        internal static string MessageLastKeyInRangeContainsInvalidCharacters {
+            get {
+                return ResourceManager.GetString("MessageLastKeyInRangeContainsInvalidCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The last key in the specified range is too long..
+        /// </summary>
+        internal static string MessageLastKeyInRangeTooLong {
+            get {
+                return ResourceManager.GetString("MessageLastKeyInRangeTooLong", resourceCulture);
             }
         }
     }

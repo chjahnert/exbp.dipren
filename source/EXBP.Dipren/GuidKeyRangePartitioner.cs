@@ -8,9 +8,9 @@ using EXBP.Dipren.Diagnostics;
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Implements key arithmetics for the <see cref="Guid"/> type.
+    ///   Implements a partitioner for GUID / UUID key ranges that computes the range boundaries.
     /// </summary>
-    public class GuidKeyArithmetics : IKeyArithmetics<Guid>
+    public class GuidKeyRangePartitioner : IRangePartitioner<Guid>
     {
         private const int GUID_LENGTH = 16;
 
@@ -18,44 +18,44 @@ namespace EXBP.Dipren
 
 
         /// <summary>
-        ///   Gets a <see cref="GuidKeyArithmetics"/> object that uses the GUID layout used by Microsoft SQL Server.
+        ///   Gets a <see cref="GuidKeyRangePartitioner"/> object that uses the GUID layout used by Microsoft SQL Server.
         /// </summary>
         /// <value>
-        ///   A <see cref="GuidKeyArithmetics"/> object that uses the GUID layout used by Microsoft SQL Server.
+        ///   A <see cref="GuidKeyRangePartitioner"/> object that uses the GUID layout used by Microsoft SQL Server.
         /// </value>
-        public static GuidKeyArithmetics MicrosoftSqlServer { get; } = new GuidKeyArithmetics(GuidLayout.MicrosoftSqlServer);
+        public static GuidKeyRangePartitioner MicrosoftSqlServer { get; } = new GuidKeyRangePartitioner(GuidLayout.MicrosoftSqlServer);
 
         /// <summary>
-        ///   Gets a <see cref="GuidKeyArithmetics"/> object that uses a bytewise lexicographical GUID layout.
+        ///   Gets a <see cref="GuidKeyRangePartitioner"/> object that uses a bytewise lexicographical GUID layout.
         /// </summary>
         /// <value>
-        ///   A <see cref="GuidKeyArithmetics"/> object that uses a bytewise lexicographical GUID layout.
+        ///   A <see cref="GuidKeyRangePartitioner"/> object that uses a bytewise lexicographical GUID layout.
         /// </value>
-        public static GuidKeyArithmetics LexicographicalBytewise { get; } = new GuidKeyArithmetics(GuidLayout.LexicographicalBytewise);
+        public static GuidKeyRangePartitioner LexicographicalBytewise { get; } = new GuidKeyRangePartitioner(GuidLayout.LexicographicalBytewise);
 
         /// <summary>
-        ///   Gets a <see cref="GuidKeyArithmetics"/> object that uses a memberwise lexicographical GUID layout.
+        ///   Gets a <see cref="GuidKeyRangePartitioner"/> object that uses a memberwise lexicographical GUID layout.
         /// </summary>
         /// <value>
-        ///   A <see cref="GuidKeyArithmetics"/> object that uses a memberwise lexicographical GUID layout.
+        ///   A <see cref="GuidKeyRangePartitioner"/> object that uses a memberwise lexicographical GUID layout.
         /// </value>
-        public static GuidKeyArithmetics LexicographicalMemberwise { get; } = new GuidKeyArithmetics(GuidLayout.LexicographicalMemberwise);
+        public static GuidKeyRangePartitioner LexicographicalMemberwise { get; } = new GuidKeyRangePartitioner(GuidLayout.LexicographicalMemberwise);
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="GuidKeyArithmetics"/> class.
+        ///   Initializes a new instance of the <see cref="GuidKeyRangePartitioner"/> class.
         /// </summary>
         /// <param name="layout">
         ///   An array of 16 <see cref="byte"/> values between 0 and 15 indicating the layout of UUID values in little
         ///   endian order.
         /// </param>
-        public GuidKeyArithmetics(byte[] layout)
+        public GuidKeyRangePartitioner(byte[] layout)
         {
             Assert.ArgumentIsNotNull(layout, nameof(layout));
 
             bool valid = GuidLayout.IsValid(layout);
 
-            Assert.ArgumentIsValid(valid, nameof(layout), GuidKeyArithmeticsResources.MessageInvalidGuidLayout);
+            Assert.ArgumentIsValid(valid, nameof(layout), GuidKeyRangePartitionerResources.MessageInvalidGuidLayout);
 
             this._layout = layout;
         }
@@ -79,7 +79,7 @@ namespace EXBP.Dipren
             Assert.ArgumentIsNotNull(range, nameof(range));
 
             Range<BigInteger> rangeBi = this.ToBigIntegerRange(range);
-            RangePartitioningResult<BigInteger> resultBi = await BigIntegerKeyArithmetics.Default.SplitAsync(rangeBi, cancellation);
+            RangePartitioningResult<BigInteger> resultBi = await BigIntegerKeyRangePartitioner.Default.SplitAsync(rangeBi, cancellation);
 
             RangePartitioningResult<Guid> result;
 

@@ -193,6 +193,6 @@
     <value>A distributed processing job with the specified identifier is not scheduled.</value>
   </data>
   <data name="RangeSplitIntoTooManyRanges" xml:space="preserve">
-    <value>The key arithmetics implementation returned too many key ranges.</value>
+    <value>The range partitioner returned too many key ranges.</value>
   </data>
 </root>

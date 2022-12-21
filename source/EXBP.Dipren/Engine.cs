@@ -544,7 +544,7 @@ namespace EXBP.Dipren
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventSplitRequested, cancellation);
 
             Range<TKey> remainingKeyRange = partition.GetRemainingKeyRange();
-            RangePartitioningResult<TKey> ranges = await job.Arithmetics.SplitAsync(remainingKeyRange, cancellation);
+            RangePartitioningResult<TKey> ranges = await job.Partitioner.SplitAsync(remainingKeyRange, cancellation);
 
             Partition<TKey> result = partition;
 

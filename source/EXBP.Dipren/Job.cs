@@ -21,7 +21,7 @@ namespace EXBP.Dipren
     {
         private readonly string _id;
         private readonly IDataSource<TKey, TItem> _source;
-        private readonly IKeyArithmetics<TKey> _arithmetics;
+        private readonly IRangePartitioner<TKey> _partitioner;
         private readonly IKeySerializer<TKey> _serializer;
         private readonly IBatchProcessor<TItem> _processor;
 
@@ -44,18 +44,18 @@ namespace EXBP.Dipren
         public IDataSource<TKey, TItem> Source => this._source;
 
         /// <summary>
-        ///   Gets the key arithmetics provider to use to manipulate key ranges.
+        ///   Gets the key range partitioner used to split key ranges.
         /// </summary>
         /// <value>
-        ///   An <see cref="IKeyArithmetics{TKey}"/> object that is used to manipulate key ranges.
+        ///   An <see cref="IRangePartitioner{TKey}"/> object that is used to split key ranges.
         /// </value>
-        public IKeyArithmetics<TKey> Arithmetics => this._arithmetics;
+        public IRangePartitioner<TKey> Partitioner => this._partitioner;
 
         /// <summary>
         ///   Gets the serializer to use to convert keys to their string representation and back.
         /// </summary>
         /// <value>
-        ///   A <see cref="IKeyArithmetics{TKey}"/> object that can convert between keys and their string
+        ///   A <see cref="IRangePartitioner{TKey}"/> object that can convert between keys and their string
         ///   representations.
         /// </value>
         public IKeySerializer<TKey> Serializer => this._serializer;
@@ -79,27 +79,27 @@ namespace EXBP.Dipren
         /// <param name="source">
         ///   The <see cref="IDataSource{TKey, TValue}"/> object to use to access the entries to be processed.
         /// </param>
-        /// <param name="arithmetics">
-        ///   The <see cref="IKeyArithmetics{TKey}"/> object to use to manipulate key ranges.
+        /// <param name="partitioner">
+        ///   The <see cref="IRangePartitioner{TKey}"/> object to use to manipulate key ranges.
         /// </param>
         /// <param name="serializer">
-        ///   The <see cref="IKeyArithmetics{TKey}"/> object to use to convert between key values and their string
+        ///   The <see cref="IRangePartitioner{TKey}"/> object to use to convert between key values and their string
         ///   representation.
         /// </param>
         /// <param name="processor">
         ///   The <see cref="IBatchProcessor{TEntry}"/> object to use to process the entries.
         /// </param>
-        public Job(string id, IDataSource<TKey, TItem> source, IKeyArithmetics<TKey> arithmetics, IKeySerializer<TKey> serializer, IBatchProcessor<TItem> processor)
+        public Job(string id, IDataSource<TKey, TItem> source, IRangePartitioner<TKey> partitioner, IKeySerializer<TKey> serializer, IBatchProcessor<TItem> processor)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));
             Assert.ArgumentIsNotNull(source, nameof(source));
-            Assert.ArgumentIsNotNull(arithmetics, nameof(arithmetics));
+            Assert.ArgumentIsNotNull(partitioner, nameof(partitioner));
             Assert.ArgumentIsNotNull(serializer, nameof(serializer));
             Assert.ArgumentIsNotNull(processor, nameof(processor));
 
             this._id = id;
             this._source = source;
-            this._arithmetics = arithmetics;
+            this._partitioner = partitioner;
             this._serializer = serializer;
             this._processor = processor;
         }

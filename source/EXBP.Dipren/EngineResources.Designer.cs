@@ -286,7 +286,7 @@ namespace EXBP.Dipren {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The key arithmetics implementation returned too many key ranges..
+        ///   Looks up a localized string similar to The range partitioner returned too many key ranges..
         /// </summary>
         internal static string RangeSplitIntoTooManyRanges {
             get {

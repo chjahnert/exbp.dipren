@@ -5,39 +5,39 @@ using NUnit.Framework;
 namespace EXBP.Dipren.Tests
 {
     [TestFixture]
-    public class StringKeyArithmeticsTests
+    public class StringKeyRangePartitionerTests
     {
         [Test]
         public void Ctor_ArgumentCharactersetIsNull_ThrowsException()
         {
-            Assert.Throws<ArgumentNullException>(() => new StringKeyArithmetics(null, 3));
+            Assert.Throws<ArgumentNullException>(() => new StringKeyRangePartitioner(null, 3));
         }
 
         [Test]
         public void Ctor_ArgumentCharactersetIsEmpty_ThrowsException()
         {
-            Assert.Throws<ArgumentException>(() => new StringKeyArithmetics(String.Empty, 3));
+            Assert.Throws<ArgumentException>(() => new StringKeyRangePartitioner(String.Empty, 3));
         }
 
         [Test]
         public void Ctor_ArgumentCharactersetContainsDuplicates_ThrowsException()
         {
-            Assert.Throws<ArgumentException>(() => new StringKeyArithmetics("butter", 3));
+            Assert.Throws<ArgumentException>(() => new StringKeyRangePartitioner("butter", 3));
         }
 
         [TestCase(-1)]
         [TestCase(0)]
         public void Ctor_ArgumentLengthIsLessThanOne_ThrowsException(int length)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new StringKeyArithmetics("abc", length));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new StringKeyRangePartitioner("abc", length));
         }
 
         [Test]
         public void SplitAsync_ArgumentRangeIsNull_ThrowsException()
         {
-            StringKeyArithmetics arithmetics = new StringKeyArithmetics("abc", 1);
+            StringKeyRangePartitioner partitioner = new StringKeyRangePartitioner("abc", 1);
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => arithmetics.SplitAsync(null, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => partitioner.SplitAsync(null, CancellationToken.None));
         }
 
         [Test]
@@ -45,9 +45,9 @@ namespace EXBP.Dipren.Tests
         {
             Range<string> range = new Range<string>("aba", "bb", false);
 
-            StringKeyArithmetics arithmetics = new StringKeyArithmetics("abc", 2);
+            StringKeyRangePartitioner partitioner = new StringKeyRangePartitioner("abc", 2);
 
-            Assert.ThrowsAsync<ArgumentException>(() => arithmetics.SplitAsync(range, CancellationToken.None), StringKeyArithmeticsResources.MessageFirstKeyInRangeTooLong);
+            Assert.ThrowsAsync<ArgumentException>(() => partitioner.SplitAsync(range, CancellationToken.None), StringKeyRangePartitionerResources.MessageFirstKeyInRangeTooLong);
         }
 
         [Test]
@@ -55,9 +55,9 @@ namespace EXBP.Dipren.Tests
         {
             Range<string> range = new Range<string>("az", "bb", false);
 
-            StringKeyArithmetics arithmetics = new StringKeyArithmetics("abc", 2);
+            StringKeyRangePartitioner partitioner = new StringKeyRangePartitioner("abc", 2);
 
-            Assert.ThrowsAsync<ArgumentException>(() => arithmetics.SplitAsync(range, CancellationToken.None), StringKeyArithmeticsResources.MessageFirstKeyInRangeContainsInvalidCharacters);
+            Assert.ThrowsAsync<ArgumentException>(() => partitioner.SplitAsync(range, CancellationToken.None), StringKeyRangePartitionerResources.MessageFirstKeyInRangeContainsInvalidCharacters);
         }
 
         [Test]
@@ -65,9 +65,9 @@ namespace EXBP.Dipren.Tests
         {
             Range<string> range = new Range<string>("ab", "bba", false);
 
-            StringKeyArithmetics arithmetics = new StringKeyArithmetics("abc", 2);
+            StringKeyRangePartitioner partitioner = new StringKeyRangePartitioner("abc", 2);
 
-            Assert.ThrowsAsync<ArgumentException>(() => arithmetics.SplitAsync(range, CancellationToken.None), StringKeyArithmeticsResources.MessageLastKeyInRangeTooLong);
+            Assert.ThrowsAsync<ArgumentException>(() => partitioner.SplitAsync(range, CancellationToken.None), StringKeyRangePartitionerResources.MessageLastKeyInRangeTooLong);
         }
 
         [Test]
@@ -75,9 +75,9 @@ namespace EXBP.Dipren.Tests
         {
             Range<string> range = new Range<string>("aa", "bz", false);
 
-            StringKeyArithmetics arithmetics = new StringKeyArithmetics("abc", 2);
+            StringKeyRangePartitioner partitioner = new StringKeyRangePartitioner("abc", 2);
 
-            Assert.ThrowsAsync<ArgumentException>(() => arithmetics.SplitAsync(range, CancellationToken.None), StringKeyArithmeticsResources.MessageLastKeyInRangeContainsInvalidCharacters);
+            Assert.ThrowsAsync<ArgumentException>(() => partitioner.SplitAsync(range, CancellationToken.None), StringKeyRangePartitionerResources.MessageLastKeyInRangeContainsInvalidCharacters);
         }
 
         [TestCase("0123456789", 3, "333", "335", false)]
@@ -86,9 +86,9 @@ namespace EXBP.Dipren.Tests
         {
             Range<string> whole = new Range<string>(first, last, inclusive);
 
-            StringKeyArithmetics arithmetics = new StringKeyArithmetics(characterset, length);
+            StringKeyRangePartitioner partitioner = new StringKeyRangePartitioner(characterset, length);
 
-            RangePartitioningResult<string> result = await arithmetics.SplitAsync(whole, CancellationToken.None);
+            RangePartitioningResult<string> result = await partitioner.SplitAsync(whole, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
 
@@ -107,9 +107,9 @@ namespace EXBP.Dipren.Tests
         {
             Range<string> whole = new Range<string>(first, last, inclusive);
 
-            StringKeyArithmetics arithmetics = new StringKeyArithmetics(characterset, length);
+            StringKeyRangePartitioner partitioner = new StringKeyRangePartitioner(characterset, length);
 
-            RangePartitioningResult<string> result = await arithmetics.SplitAsync(whole, CancellationToken.None);
+            RangePartitioningResult<string> result = await partitioner.SplitAsync(whole, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
 

@@ -5,12 +5,12 @@ using NUnit.Framework;
 namespace EXBP.Dipren.Tests
 {
     [TestFixture]
-    public class Int64KeyArithmeticsTests
+    public class Int64KeyRangePartitionerTests
     {
         [Test]
         public void SplitAsync_ArgumentRangeIsNull_ThrowsException()
         {
-            Assert.Throws<ArgumentNullException>(() => Int64KeyArithmetics.Default.SplitAsync(null, CancellationToken.None));
+            Assert.Throws<ArgumentNullException>(() => Int64KeyRangePartitioner.Default.SplitAsync(null, CancellationToken.None));
         }
 
         [TestCase(1, 8, true, 1, 5, 5, 8)]
@@ -29,7 +29,7 @@ namespace EXBP.Dipren.Tests
         {
             Range<long> input = new Range<long>(inputFirst, inputLast, inputInclusive);
 
-            RangePartitioningResult<long> result = await Int64KeyArithmetics.Default.SplitAsync(input, CancellationToken.None);
+            RangePartitioningResult<long> result = await Int64KeyRangePartitioner.Default.SplitAsync(input, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
 
@@ -54,7 +54,7 @@ namespace EXBP.Dipren.Tests
         {
             Range<long> input = new Range<long>(inputFirst, inputLast, inputInclusive);
 
-            RangePartitioningResult<long> result = await Int64KeyArithmetics.Default.SplitAsync(input, CancellationToken.None);
+            RangePartitioningResult<long> result = await Int64KeyRangePartitioner.Default.SplitAsync(input, CancellationToken.None);
 
             Assert.That(result, Is.Not.Null);
 
