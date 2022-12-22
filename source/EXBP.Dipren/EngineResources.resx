@@ -171,6 +171,9 @@
   <data name="EventRequestingSplit" xml:space="preserve">
     <value>Requesting a partition to be split.</value>
   </data>
+  <data name="EventSplitAlreadyRequested" xml:space="preserve">
+    <value>A split has already been requested.</value>
+  </data>
   <data name="EventSplitRequested" xml:space="preserve">
     <value>Partition split requested.</value>
   </data>

@@ -223,6 +223,15 @@ namespace EXBP.Dipren {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A split has already been requested..
+        /// </summary>
+        internal static string EventSplitAlreadyRequested {
+            get {
+                return ResourceManager.GetString("EventSplitAlreadyRequested", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Partition split requested..
         /// </summary>
         internal static string EventSplitRequested {

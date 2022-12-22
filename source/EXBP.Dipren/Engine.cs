@@ -438,11 +438,21 @@ namespace EXBP.Dipren
             else
             {
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventPartitionNotAcquired, cancellation);
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventRequestingSplit, cancellation);
 
-                bool succeeded = await this.Store.TryRequestSplitAsync(job.Id, this.Id, cut, cancellation);
+                bool pending = await this.Store.IsSplitRequestPendingAsync(job.Id, this.Id, cancellation);
 
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, (succeeded ? EngineResources.EventSplitRequestSucceeded : EngineResources.EventSplitRequestFailed), cancellation);
+                if (pending == false)
+                {
+                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventRequestingSplit, cancellation);
+
+                    bool succeeded = await this.Store.TryRequestSplitAsync(job.Id, this.Id, cut, cancellation);
+
+                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, (succeeded ? EngineResources.EventSplitRequestSucceeded : EngineResources.EventSplitRequestFailed), cancellation);
+                }
+                else
+                {
+                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, EngineResources.EventSplitAlreadyRequested, cancellation);
+                }
             }
 
             return result;
