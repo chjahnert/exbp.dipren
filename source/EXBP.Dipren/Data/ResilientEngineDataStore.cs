@@ -271,6 +271,28 @@ namespace EXBP.Dipren.Data
         public Task<bool> TryRequestSplitAsync(string jobId, string requester, DateTime active, CancellationToken cancellation)
             => this.Strategy.ExecuteAsync(async () => await this.Store.TryRequestSplitAsync(jobId, requester, active, cancellation), cancellation);
 
+
+        /// <summary>
+        ///   Determines whether a split request for the specified requester is still pending.
+        /// </summary>
+        /// <param name="jobId">
+        ///   The unique identifier of the distributed processing job.
+        /// </param>
+        /// <param name="requester">
+        ///   The unique identifier of the processing node that requested a split.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="bool"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains a value indicating whether a split
+        ///   request is pending.
+        /// </returns>
+        public Task<bool> IsSplitRequestPendingAsync(string jobId, string requester, CancellationToken cancellation)
+            => this.Strategy.ExecuteAsync(async () => await this.Store.IsSplitRequestPendingAsync(jobId, requester, cancellation), cancellation);
+
         /// <summary>
         ///   Marks a job as ready.
         /// </summary>

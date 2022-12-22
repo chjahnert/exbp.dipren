@@ -1,6 +1,5 @@
 ﻿
 using System.Collections.ObjectModel;
-using System.Reflection.PortableExecutable;
 
 using EXBP.Dipren.Diagnostics;
 
@@ -660,6 +659,46 @@ namespace EXBP.Dipren.Data.Memory
 
                     result = true;
                 }
+            }
+
+            return Task.FromResult(result);
+        }
+
+        /// <summary>
+        ///   Determines whether a split request for the specified requester is still pending.
+        /// </summary>
+        /// <param name="jobId">
+        ///   The unique identifier of the distributed processing job.
+        /// </param>
+        /// <param name="requester">
+        ///   The unique identifier of the processing node that requested a split.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="bool"/> object that represents the asynchronous
+        ///   operation. The <see cref="Task{TResult}.Result"/> property contains a value indicating whether a split
+        ///   request is pending.
+        /// </returns>
+        public Task<bool> IsSplitRequestPendingAsync(string jobId, string requester, CancellationToken cancellation)
+        {
+            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+            Assert.ArgumentIsNotNull(requester, nameof(requester));
+
+            bool result = false;
+
+            lock (this._syncRoot)
+            {
+                bool exists = this._jobs.Contains(jobId);
+
+                if (exists == false)
+                {
+                    this.RaiseErrorUnknownJobIdentifier();
+                }
+
+                result = this._partitions.Any(p => p.SplitRequester == requester);
             }
 
             return Task.FromResult(result);

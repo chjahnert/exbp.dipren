@@ -837,6 +837,70 @@ namespace EXBP.Dipren.Data.Tests
         }
 
         [Test]
+        public async Task IsSplitRequestPendingAsync_ArgumentJobIdIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.IsSplitRequestPendingAsync(null, "node-1", CancellationToken.None));
+        }
+
+        [Test]
+        public async Task IsSplitRequestPendingAsync_ArgumentRequesterIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.IsSplitRequestPendingAsync("DJP-001", null, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task IsSplitRequestPendingAsync_JobDoesNotExist_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.IsSplitRequestPendingAsync("DJP-001", "node-1", CancellationToken.None));
+        }
+
+        [Test]
+        public async Task IsSplitRequestPendingAsync_SplitRequestIsPending_ReturnsTrue()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
+
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "other", false, 72.4, "node-1");
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            bool result = await store.IsSplitRequestPendingAsync(job.Id, "node-1", CancellationToken.None);
+
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public async Task IsSplitRequestPendingAsync_NoSplitRequested_ReturnsFalse()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
+
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "other", false, 72.4, "node-2");
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            bool result = await store.IsSplitRequestPendingAsync(job.Id, "node-1", CancellationToken.None);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
         public async Task ReportProgressAsync_ArgumentOwnerIsNull_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
@@ -962,7 +1026,7 @@ namespace EXBP.Dipren.Data.Tests
         }
 
         [Test]
-        public async Task InsertSplitPartition_ArgumentPartitionToUpdateIsNull_ThrowsException()
+        public async Task InsertSplitPartitionAsync_ArgumentPartitionToUpdateIsNull_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -978,7 +1042,7 @@ namespace EXBP.Dipren.Data.Tests
         }
 
         [Test]
-        public async Task InsertSplitPartition_ArgumentPartitionToInsertIsNull_ThrowsException()
+        public async Task InsertSplitPartitionAsync_ArgumentPartitionToInsertIsNull_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -996,7 +1060,7 @@ namespace EXBP.Dipren.Data.Tests
         }
 
         [Test]
-        public async Task InsertSplitPartition_PartitionToUpdateDoesNotExist_ThrowsException()
+        public async Task InsertSplitPartitionAsync_PartitionToUpdateDoesNotExist_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1018,7 +1082,7 @@ namespace EXBP.Dipren.Data.Tests
         }
 
         [Test]
-        public async Task InsertSplitPartition_PartitionToInsertAlreadyExists_ThrowsException()
+        public async Task InsertSplitPartitionAsync_PartitionToInsertAlreadyExists_ThrowsException()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1044,7 +1108,7 @@ namespace EXBP.Dipren.Data.Tests
         }
 
         [Test]
-        public async Task InsertSplitPartition_ArgumensAreValid_UpdatesExistingAndInsertsNewPartition()
+        public async Task InsertSplitPartitionAsync_ArgumensAreValid_UpdatesExistingAndInsertsNewPartition()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -1531,6 +1595,9 @@ namespace EXBP.Dipren.Data.Tests
 
             public Task<bool> TryRequestSplitAsync(string jobId, string requester, DateTime active, CancellationToken cancellation)
                 => this._store.TryRequestSplitAsync(jobId, requester, active, cancellation);
+
+            public Task<bool> IsSplitRequestPendingAsync(string jobId, string requester, CancellationToken cancellation)
+                => this._store.IsSplitRequestPendingAsync(jobId, requester, cancellation);
 
             public Task<Job> MarkJobAsReadyAsync(string id, DateTime timestamp, CancellationToken cancellation)
                 => this._store.MarkJobAsReadyAsync(id, timestamp, cancellation);
