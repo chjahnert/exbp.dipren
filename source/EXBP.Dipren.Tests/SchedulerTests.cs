@@ -63,6 +63,7 @@ namespace EXBP.Dipren.Tests
             Assert.That(sp.Processed, Is.EqualTo(0L));
             Assert.That(sp.Remaining, Is.EqualTo(1024L));
             Assert.That(sp.IsSplitRequested, Is.False);
+            Assert.That(sp.SplitRequester, Is.Null);
         }
 
         [Test]

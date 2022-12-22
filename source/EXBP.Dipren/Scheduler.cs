@@ -208,7 +208,7 @@ namespace EXBP.Dipren
             }
 
             DateTime timestampPartitionCreated = this.Clock.GetCurrentTimestamp();
-            Partition<TKey> partition = new Partition<TKey>(partitionId, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false, 0.0, false);
+            Partition<TKey> partition = new Partition<TKey>(partitionId, job.Id, null, timestampPartitionCreated, timestampPartitionCreated, range, default, 0L, remaining, false, 0.0, null);
             Partition result = partition.ToEntry(job.Serializer);
 
             await this.Store.InsertPartitionAsync(result, cancellation);

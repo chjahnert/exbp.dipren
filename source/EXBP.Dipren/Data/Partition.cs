@@ -181,7 +181,16 @@ namespace EXBP.Dipren.Data
         /// <value>
         ///   <see langword="true"/> if a split was requested; otherwise, <see langword="false"/>.
         /// </value>
-        public bool IsSplitRequested { get; init; }
+        public bool IsSplitRequested => (this.SplitRequester != null);
+
+        /// <summary>
+        ///   Gets the unique identifier of the processing node that requested the current partition to be split.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="string"/> value containing the unique identifier of the processing node that requested the
+        ///   current partition to be split.
+        /// </value>
+        public string SplitRequester { get; init; }
 
 
         /// <summary>
@@ -227,10 +236,11 @@ namespace EXBP.Dipren.Data
         /// <param name="throughput">
         ///   The number of items processed per second.
         /// </param>
-        /// <param name="split">
-        ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
+        /// <param name="requester">
+        ///   The unique identifier of the processing node that requested the partition to be split; or
+        ///   <see langword="null"/> a split is not requested.
         /// </param>
-        public Partition(Guid id, string jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool completed = false, double throughput = 0.0, bool split = false)
+        public Partition(Guid id, string jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool completed = false, double throughput = 0.0, string requester = null)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsNotNull(first, nameof(first));
@@ -248,7 +258,7 @@ namespace EXBP.Dipren.Data
             this.Remaining = remaining;
             this.IsCompleted = completed;
             this.Throughput = throughput;
-            this.IsSplitRequested = split;
+            this.SplitRequester = requester;
         }
     }
 }

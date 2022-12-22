@@ -23,7 +23,7 @@ namespace EXBP.Dipren
         private readonly long _remaining;
         private readonly bool _completed;
         private readonly double _throughput;
-        private readonly bool _split;
+        private readonly string _requester;
 
 
         /// <summary>
@@ -130,7 +130,16 @@ namespace EXBP.Dipren
         /// <value>
         ///   <see langword="true"/> if a split was requested; otherwise, <see langword="false"/>.
         /// </value>
-        public bool IsSplitRequested => this._split;
+        public bool IsSplitRequested => (this.SplitRequester != null);
+
+        /// <summary>
+        ///   Gets the unique identifier of the processing node that requested the current partition to be split.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="string"/> value containing the unique identifier of the processing node that requested the
+        ///   current partition to be split.
+        /// </value>
+        public string SplitRequester => this._requester;
 
 
         /// <summary>
@@ -169,10 +178,11 @@ namespace EXBP.Dipren
         /// <param name="throughput">
         ///   The last measured throughput of the processing node owning the partition.
         /// </param>
-        /// <param name="split">
-        ///   <see langword="true"/> if a split is requested; otherwise, <see langword="false"/>.
+        /// <param name="requester">
+        ///   The unique identifier of the processing node that requested the partition to be split; or
+        ///   <see langword="null"/> a split is not requested.
         /// </param>
-        internal Partition(Guid id, string jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool completed, double throughput, bool split)
+        internal Partition(Guid id, string jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool completed, double throughput, string requester)
         {
             Debug.Assert(jobId != null);
             Debug.Assert(created.Kind == DateTimeKind.Utc);
@@ -192,7 +202,7 @@ namespace EXBP.Dipren
             this._remaining = remaining;
             this._completed = completed;
             this._throughput = throughput;
-            this._split = split;
+            this._requester = requester;
         }
     }
 }

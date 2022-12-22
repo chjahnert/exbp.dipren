@@ -250,6 +250,9 @@ namespace EXBP.Dipren.Data
         /// <param name="jobId">
         ///   The unique identifier of the distributed processing job.
         /// </param>
+        /// <param name="requester">
+        ///   The unique identifier of the processing node trying to request a split.
+        /// </param>
         /// <param name="active">
         ///   A <see cref="DateTime"/> value that is used to determine whether a partition is being processed.
         /// </param>
@@ -265,8 +268,8 @@ namespace EXBP.Dipren.Data
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<bool> TryRequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation)
-            => this.Strategy.ExecuteAsync(async () => await this.Store.TryRequestSplitAsync(jobId, active, cancellation), cancellation);
+        public Task<bool> TryRequestSplitAsync(string jobId, string requester, DateTime active, CancellationToken cancellation)
+            => this.Strategy.ExecuteAsync(async () => await this.Store.TryRequestSplitAsync(jobId, requester, active, cancellation), cancellation);
 
         /// <summary>
         ///   Marks a job as ready.

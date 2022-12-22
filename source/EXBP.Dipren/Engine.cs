@@ -440,7 +440,7 @@ namespace EXBP.Dipren
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventPartitionNotAcquired, cancellation);
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventRequestingSplit, cancellation);
 
-                bool succeeded = await this.Store.TryRequestSplitAsync(job.Id, cut, cancellation);
+                bool succeeded = await this.Store.TryRequestSplitAsync(job.Id, this.Id, cut, cancellation);
 
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, (succeeded ? EngineResources.EventSplitRequestSucceeded : EngineResources.EventSplitRequestFailed), cancellation);
             }
@@ -567,11 +567,11 @@ namespace EXBP.Dipren
                 {
                     DateTime timestamp = this.Clock.GetCurrentTimestamp();
 
-                    Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updated, partition.Position, partition.Processed, (await updatedKeyRangeSize - 1), false, 0.0, false);
+                    Partition<TKey> updatedPartition = new Partition<TKey>(partition.Id, partition.JobId, partition.Owner, partition.Created, timestamp, updated, partition.Position, partition.Processed, (await updatedKeyRangeSize - 1), false, 0.0, null);
                     Partition updatedEntry = updatedPartition.ToEntry(job.Serializer);
 
                     Guid id = Guid.NewGuid();
-                    Partition<TKey> excludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, created, default, 0L, await createdKeyRangeSize, false, 0.0, false);
+                    Partition<TKey> excludedPartition = new Partition<TKey>(id, partition.JobId, null, timestamp, timestamp, created, default, 0L, await createdKeyRangeSize, false, 0.0, null);
                     Partition excludedEntry = excludedPartition.ToEntry(job.Serializer);
 
                     await this.Store.InsertSplitPartitionAsync(updatedEntry, excludedEntry, cancellation);

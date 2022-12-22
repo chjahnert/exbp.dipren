@@ -241,7 +241,7 @@ namespace EXBP.Dipren.Data.Memory
                     Position = partitionToUpdate.Position,
                     Processed = partitionToUpdate.Processed,
                     Remaining = partitionToUpdate.Remaining,
-                    IsSplitRequested = partitionToUpdate.IsSplitRequested
+                    SplitRequester = partitionToUpdate.SplitRequester
                 };
 
                 this._partitions.Remove(partitionToUpdate.Id);
@@ -592,7 +592,7 @@ namespace EXBP.Dipren.Data.Memory
                     {
                         Owner = requester,
                         Updated = timestamp,
-                        IsSplitRequested = false
+                        SplitRequester = null
                     };
 
                     this._partitions.Remove(current.Id);
@@ -609,6 +609,9 @@ namespace EXBP.Dipren.Data.Memory
         /// <param name="jobId">
         ///   The unique identifier of the distributed processing job.
         /// </param>
+        /// <param name="requester">
+        ///   The unique identifier of the processing node trying to request a split.
+        /// </param>
         /// <param name="active">
         ///   A <see cref="DateTime"/> value that is used to determine whether a partition is being processed.
         /// </param>
@@ -624,9 +627,10 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
-        public Task<bool> TryRequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation)
+        public Task<bool> TryRequestSplitAsync(string jobId, string requester, DateTime active, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+            Assert.ArgumentIsNotNull(requester, nameof(requester));
 
             bool result = false;
 
@@ -648,7 +652,7 @@ namespace EXBP.Dipren.Data.Memory
                 {
                     Partition updated = candidate with
                     {
-                        IsSplitRequested = true
+                        SplitRequester = requester
                     };
 
                     this._partitions.Remove(updated.Id);

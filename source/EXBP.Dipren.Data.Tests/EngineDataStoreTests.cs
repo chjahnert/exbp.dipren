@@ -581,7 +581,7 @@ namespace EXBP.Dipren.Data.Tests
             DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "z", 24L, 0L, null, true, 4231.1, false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "z", 24L, 0L, null, true, 4231.1, null);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
@@ -682,7 +682,17 @@ namespace EXBP.Dipren.Data.Tests
 
             DateTime cut = DateTime.UtcNow.AddMinutes(-2);
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => store.TryRequestSplitAsync(null, cut, CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.TryRequestSplitAsync(null, "current", cut, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task TryRequestSplitAsync_ArgumentRequesterIsNull_ThrowsException()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            DateTime cut = DateTime.UtcNow.AddMinutes(-2);
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => store.TryRequestSplitAsync("DPJ-001", null, cut, CancellationToken.None));
         }
 
         [Test]
@@ -693,7 +703,7 @@ namespace EXBP.Dipren.Data.Tests
             DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 32, DateTimeKind.Utc);
 
-            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.TryRequestSplitAsync("DPJ-0001", cut, CancellationToken.None));
+            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.TryRequestSplitAsync("DPJ-0001", "current", cut, CancellationToken.None));
         }
 
         [Test]
@@ -706,7 +716,7 @@ namespace EXBP.Dipren.Data.Tests
             DateTime now = new DateTime(2022, 9, 12, 16, 40, 0, DateTimeKind.Utc);
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 32, DateTimeKind.Utc);
 
-            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, "current", cut, CancellationToken.None);
 
             Assert.That(result, Is.False);
         }
@@ -728,7 +738,7 @@ namespace EXBP.Dipren.Data.Tests
 
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
 
-            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, "current", cut, CancellationToken.None);
 
             Assert.That(result, Is.False);
         }
@@ -750,7 +760,7 @@ namespace EXBP.Dipren.Data.Tests
 
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, "current", cut, CancellationToken.None);
 
             Assert.That(result, Is.False);
         }
@@ -772,7 +782,7 @@ namespace EXBP.Dipren.Data.Tests
 
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
 
-            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, "current", cut, CancellationToken.None);
 
             Assert.That(result, Is.False);
         }
@@ -788,13 +798,13 @@ namespace EXBP.Dipren.Data.Tests
             DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false, 4231.1, true);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false, 4231.1, "other");
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
 
-            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, "current", cut, CancellationToken.None);
 
             Assert.That(result, Is.False);
         }
@@ -816,13 +826,14 @@ namespace EXBP.Dipren.Data.Tests
 
             DateTime cut = new DateTime(2022, 9, 12, 16, 23, 30, DateTimeKind.Utc);
 
-            bool result = await store.TryRequestSplitAsync(job.Id, cut, CancellationToken.None);
+            bool result = await store.TryRequestSplitAsync(job.Id, "current", cut, CancellationToken.None);
 
             Assert.That(result, Is.True);
 
             Partition persisted = await store.RetrievePartitionAsync(id, CancellationToken.None);
 
             Assert.That(persisted.IsSplitRequested, Is.True);
+            Assert.That(persisted.SplitRequester, Is.EqualTo("current"));
         }
 
         [Test]
@@ -889,7 +900,7 @@ namespace EXBP.Dipren.Data.Tests
             DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false, 0.0, false);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false, 0.0, null);
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
@@ -912,6 +923,7 @@ namespace EXBP.Dipren.Data.Tests
             Assert.That(persisted.IsCompleted, Is.True);
             Assert.That(persisted.Throughput, Is.EqualTo(4231.1));
             Assert.That(persisted.IsSplitRequested, Is.EqualTo(partition.IsSplitRequested));
+            Assert.That(persisted.SplitRequester, Is.EqualTo(partition.SplitRequester));
         }
 
         [Test]
@@ -946,6 +958,7 @@ namespace EXBP.Dipren.Data.Tests
             Assert.That(returned.IsCompleted, Is.True);
             Assert.That(returned.Throughput, Is.EqualTo(4231.1));
             Assert.That(returned.IsSplitRequested, Is.EqualTo(partition.IsSplitRequested));
+            Assert.That(returned.SplitRequester, Is.EqualTo(partition.SplitRequester));
         }
 
         [Test]
@@ -1093,7 +1106,7 @@ namespace EXBP.Dipren.Data.Tests
             DateTime completedCreated = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime completedUpdated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition completed = new Partition(completedId, job.Id, completedCreated, completedUpdated, "a", "m", false, "l", 13L, 0L, "owner1", true, 5123.7, false);
+            Partition completed = new Partition(completedId, job.Id, completedCreated, completedUpdated, "a", "m", false, "l", 13L, 0L, "owner1", true, 5123.7, null);
 
             await store.InsertPartitionAsync(completed, CancellationToken.None);
 
@@ -1101,7 +1114,7 @@ namespace EXBP.Dipren.Data.Tests
             DateTime pendingCreated = new DateTime(2022, 9, 12, 16, 23, 12, DateTimeKind.Utc);
             DateTime pendingUpdated = new DateTime(2022, 9, 12, 16, 24, 32, DateTimeKind.Utc);
 
-            Partition pending = new Partition(pendingId, job.Id, pendingCreated, pendingUpdated, "n", "z", true, "x", 8L, 2L, "owner2", false, 5123.7, false);
+            Partition pending = new Partition(pendingId, job.Id, pendingCreated, pendingUpdated, "n", "z", true, "x", 8L, 2L, "owner2", false, 5123.7, null);
 
             await store.InsertPartitionAsync(pending, CancellationToken.None);
 
@@ -1261,7 +1274,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "80", "90", true, "82", 3L, 8L, "owner-1", false, 5123.7, true);
+                Partition partition = new Partition(id, job.Id, created, updated, "80", "90", true, "82", 3L, 8L, "node-1", false, 5123.7, "node-6");
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1270,7 +1283,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 16, 33, 37, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "10", "20", false, "13", 4L, 6L, "owner-2", false, 4973.3, true);
+                Partition partition = new Partition(id, job.Id, created, updated, "10", "20", false, "13", 4L, 6L, "node-2", false, 4973.3, "node-7");
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1279,7 +1292,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 16, 25, 21, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "20", "30", false, "14", 5L, 5L, "owner-3", false, 3997.1, false);
+                Partition partition = new Partition(id, job.Id, created, updated, "20", "30", false, "14", 5L, 5L, "node-3", false, 3997.1, null);
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1288,7 +1301,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "30", "40", false, null, 0L, 10L, null, false, 0.0, false);
+                Partition partition = new Partition(id, job.Id, created, updated, "30", "40", false, null, 0L, 10L, null, false, 0.0, null);
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1297,7 +1310,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 17, 48, 29, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 29, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "40", "50", false, null, 0L, 10L, null, false, 0.0, false);
+                Partition partition = new Partition(id, job.Id, created, updated, "40", "50", false, null, 0L, 10L, null, false, 0.0, null);
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1306,7 +1319,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 17, 17, 16, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "50", "60", false, "51", 2L, 8L, "owner-4", false, 4997.9, false);
+                Partition partition = new Partition(id, job.Id, created, updated, "50", "60", false, "51", 2L, 8L, "node-4", false, 4997.9, null);
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1315,7 +1328,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 17, 17, 16, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "60", "70", false, "69", 10L, 0L, "owner-5", true, 5111.6, true);
+                Partition partition = new Partition(id, job.Id, created, updated, "60", "70", false, "69", 10L, 0L, "node-5", true, 5111.6, "node-8");
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1363,7 +1376,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "80", "90", true, "90", 11L, 0L, "owner-1", true, 0.0, true);
+                Partition partition = new Partition(id, job.Id, created, updated, "80", "90", true, "90", 11L, 0L, "owner-1", true, 0.0, "owner-6");
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1372,7 +1385,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 16, 33, 37, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "10", "20", false, "19", 10L, 0L, "owner-2", true, 0.0, true);
+                Partition partition = new Partition(id, job.Id, created, updated, "10", "20", false, "19", 10L, 0L, "owner-2", true, 0.0, "node-7");
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1381,7 +1394,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 16, 25, 21, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "20", "30", false, "29", 10L, 0L, "owner-3", true, 0.0, false);
+                Partition partition = new Partition(id, job.Id, created, updated, "20", "30", false, "29", 10L, 0L, "owner-3", true, 0.0, null);
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1390,7 +1403,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 31, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "30", "40", false, "39", 10L, 0L, "owner-1", true, 0.0, false);
+                Partition partition = new Partition(id, job.Id, created, updated, "30", "40", false, "39", 10L, 0L, "owner-1", true, 0.0, null);
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1399,7 +1412,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 17, 48, 29, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 29, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "40", "50", false, "49", 10L, 0L, "owner-2", true, 0.0, false);
+                Partition partition = new Partition(id, job.Id, created, updated, "40", "50", false, "49", 10L, 0L, "owner-2", true, 0.0, null);
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1408,7 +1421,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 17, 17, 16, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "50", "60", false, "59", 10L, 0L, "owner-4", true, 0.0, false);
+                Partition partition = new Partition(id, job.Id, created, updated, "50", "60", false, "59", 10L, 0L, "owner-4", true, 0.0, null);
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1417,7 +1430,7 @@ namespace EXBP.Dipren.Data.Tests
                 Guid id = Guid.NewGuid();
                 DateTime created = new DateTime(2022, 9, 12, 17, 17, 16, DateTimeKind.Utc);
                 DateTime updated = new DateTime(2022, 9, 12, 17, 48, 30, DateTimeKind.Utc);
-                Partition partition = new Partition(id, job.Id, created, updated, "60", "70", false, "69", 10L, 0L, "owner-5", true, 0.0, false);
+                Partition partition = new Partition(id, job.Id, created, updated, "60", "70", false, "69", 10L, 0L, "owner-5", true, 0.0, null);
 
                 await store.InsertPartitionAsync(partition, CancellationToken.None);
             }
@@ -1516,8 +1529,8 @@ namespace EXBP.Dipren.Data.Tests
             public Task<Partition> TryAcquirePartitionAsync(string jobId, string requester, DateTime timestamp, DateTime active, CancellationToken cancellation)
                 => this._store.TryAcquirePartitionAsync(jobId, requester, timestamp, active, cancellation);
 
-            public Task<bool> TryRequestSplitAsync(string jobId, DateTime active, CancellationToken cancellation)
-                => this._store.TryRequestSplitAsync(jobId, active, cancellation);
+            public Task<bool> TryRequestSplitAsync(string jobId, string requester, DateTime active, CancellationToken cancellation)
+                => this._store.TryRequestSplitAsync(jobId, requester, active, cancellation);
 
             public Task<Job> MarkJobAsReadyAsync(string id, DateTime timestamp, CancellationToken cancellation)
                 => this._store.MarkJobAsReadyAsync(id, timestamp, cancellation);
