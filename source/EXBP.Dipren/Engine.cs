@@ -511,10 +511,12 @@ namespace EXBP.Dipren
             Debug.Assert(processed >= 0L);
             Debug.Assert(remaining >= 0L);
 
-            string sp = job.Serializer.Serialize(position);
-            double tp = (completed == false) ? throughput : 0.0;
+            string serializedPosition = job.Serializer.Serialize(position);
 
-            Partition updated = await this.Store.ReportProgressAsync(partition.Id, this.Id, timestamp, sp, processed, remaining, completed, tp, cancellation);
+            long adjustedRemaining = (completed == false) ? remaining : 0L;
+            double adjustedThroughput = (completed == false) ? throughput : 0.0;
+
+            Partition updated = await this.Store.ReportProgressAsync(partition.Id, this.Id, timestamp, serializedPosition, processed, adjustedRemaining, completed, adjustedThroughput, cancellation);
 
             Partition<TKey> result = updated.ToPartition(job.Serializer);
 
