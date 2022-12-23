@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 
 using EXBP.Dipren.Diagnostics;
@@ -53,7 +54,8 @@ namespace EXBP.Dipren
         ///   The collection of new key ranges created.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///   Argument <paramref name="created"/> or argument <paramref name="updated"/> is a null reference.
+        ///   Argument <paramref name="updated"/> or argument <paramref name="created"/> is a <see langword="null"/>
+        ///   reference.
         /// </exception>
         public RangePartitioningResult(Range<TKey> updated, IEnumerable<Range<TKey>> created)
         {
@@ -62,6 +64,19 @@ namespace EXBP.Dipren
 
             this.Created = new List<Range<TKey>>(created);
             this.Updated = updated;
-        }   
+        }
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="RangePartitioningResult{TKey}"/> class.
+        /// </summary>
+        /// <param name="updated">
+        ///   The updated version of the key range that was split.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   Argument <paramref name="updated"/> is a <see langword="null"/> reference.
+        /// </exception>
+        public RangePartitioningResult(Range<TKey> updated) : this(updated, new Range<TKey>[0])
+        {
+        }
     }
 }

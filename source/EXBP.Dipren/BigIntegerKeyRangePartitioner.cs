@@ -76,7 +76,7 @@ namespace EXBP.Dipren
             }
             else
             {
-                result = new RangePartitioningResult<BigInteger>(range, new Range<BigInteger>[0]);
+                result = new RangePartitioningResult<BigInteger>(range);
             }
 
             return Task.FromResult(result);
