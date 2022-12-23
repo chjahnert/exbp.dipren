@@ -15,6 +15,7 @@ namespace EXBP.Dipren.Tests
                 new Range<int>(1, 7, true)
             };
 
+            Assert.Throws<ArgumentNullException>(() => new RangePartitioningResult<int>(null));
             Assert.Throws<ArgumentNullException>(() => new RangePartitioningResult<int>(null, created));
         }
 
@@ -44,9 +45,8 @@ namespace EXBP.Dipren.Tests
         public void SuccessProperty_PartitionsNotCreated_ReturnsFalse()
         {
             Range<int> updated = new Range<int>(1, 7, true);
-            IEnumerable<Range<int>> created = new List<Range<int>>();
 
-            RangePartitioningResult<int> result = new RangePartitioningResult<int>(updated, created);
+            RangePartitioningResult<int> result = new RangePartitioningResult<int>(updated);
 
             Assert.That(result.Success, Is.False);
         }
