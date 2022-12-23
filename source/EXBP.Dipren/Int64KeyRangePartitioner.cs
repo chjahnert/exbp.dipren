@@ -74,7 +74,7 @@ namespace EXBP.Dipren
             }
             else
             {
-                result = new RangePartitioningResult<long>(range, new Range<long>[0]);
+                result = new RangePartitioningResult<long>(range);
             }
 
             return Task.FromResult(result);

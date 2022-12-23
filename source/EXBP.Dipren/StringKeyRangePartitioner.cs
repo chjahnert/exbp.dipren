@@ -120,7 +120,7 @@ namespace EXBP.Dipren
             }
             else
             {
-                result = new RangePartitioningResult<string>(range, new Range<string>[0]);
+                result = new RangePartitioningResult<string>(range);
             }
 
             return result;
