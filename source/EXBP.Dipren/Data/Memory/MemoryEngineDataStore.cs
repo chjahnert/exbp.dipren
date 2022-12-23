@@ -773,7 +773,8 @@ namespace EXBP.Dipren.Data.Memory
                     Processed = processed,
                     Remaining = remaining,
                     IsCompleted = completed,
-                    Throughput = throughput
+                    Throughput = throughput,
+                    SplitRequester = (completed == false) ? persisted.SplitRequester : null
                 };
 
                 this._partitions.Remove(result.Id);

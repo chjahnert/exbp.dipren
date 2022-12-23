@@ -954,7 +954,7 @@ namespace EXBP.Dipren.Data.Tests
         }
 
         [Test]
-        public async Task ReportProgressAsync_ValidArguments_UpdatesPartition()
+        public async Task ReportProgressAsync_PartitionIsNotCompleted_UpdatesPartition()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
 
@@ -964,7 +964,79 @@ namespace EXBP.Dipren.Data.Tests
             DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
             DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
 
-            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false, 0.0, null);
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false, 0.0, "other");
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
+
+            await store.ReportProgressAsync(id, "owner", progressUpdated, "g", 5L, 19L, false, 4231.1, CancellationToken.None);
+
+            Partition persisted = await store.RetrievePartitionAsync(id, CancellationToken.None);
+
+            Assert.That(persisted.JobId, Is.EqualTo(partition.JobId));
+            Assert.That(persisted.Created, Is.EqualTo(partition.Created));
+            Assert.That(persisted.Updated, Is.EqualTo(progressUpdated));
+            Assert.That(persisted.Owner, Is.EqualTo("owner"));
+            Assert.That(persisted.First, Is.EqualTo(partition.First));
+            Assert.That(persisted.Last, Is.EqualTo(partition.Last));
+            Assert.That(persisted.IsInclusive, Is.EqualTo(partition.IsInclusive));
+            Assert.That(persisted.Position, Is.EqualTo("g"));
+            Assert.That(persisted.Processed, Is.EqualTo(5L));
+            Assert.That(persisted.Remaining, Is.EqualTo(19L));
+            Assert.That(persisted.IsCompleted, Is.False);
+            Assert.That(persisted.Throughput, Is.EqualTo(4231.1));
+            Assert.That(persisted.IsSplitRequested, Is.True);
+            Assert.That(persisted.SplitRequester, Is.EqualTo(partition.SplitRequester));
+        }
+
+        [Test]
+        public async Task ReportProgressAsync_PartitionIsNotCompleted_ReturnsUpdatedPartition()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
+
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false, 0.0, "other");
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
+
+            Partition returned = await store.ReportProgressAsync(id, "owner", progressUpdated, "g", 5L, 19L, false, 4231.1, CancellationToken.None);
+
+            Assert.That(returned.JobId, Is.EqualTo(partition.JobId));
+            Assert.That(returned.Created, Is.EqualTo(partition.Created));
+            Assert.That(returned.Updated, Is.EqualTo(progressUpdated));
+            Assert.That(returned.Owner, Is.EqualTo("owner"));
+            Assert.That(returned.First, Is.EqualTo(partition.First));
+            Assert.That(returned.Last, Is.EqualTo(partition.Last));
+            Assert.That(returned.IsInclusive, Is.EqualTo(partition.IsInclusive));
+            Assert.That(returned.Position, Is.EqualTo("g"));
+            Assert.That(returned.Processed, Is.EqualTo(5L));
+            Assert.That(returned.Remaining, Is.EqualTo(19L));
+            Assert.That(returned.IsCompleted, Is.False);
+            Assert.That(returned.Throughput, Is.EqualTo(4231.1));
+            Assert.That(returned.IsSplitRequested, Is.True);
+            Assert.That(returned.SplitRequester, Is.EqualTo(partition.SplitRequester));
+        }
+
+        [Test]
+        public async Task ReportProgressAsync_PartitionIsCompleted_UpdatesPartition()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
+
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false, 0.0, "other");
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
@@ -986,8 +1058,43 @@ namespace EXBP.Dipren.Data.Tests
             Assert.That(persisted.Remaining, Is.EqualTo(19L));
             Assert.That(persisted.IsCompleted, Is.True);
             Assert.That(persisted.Throughput, Is.EqualTo(4231.1));
-            Assert.That(persisted.IsSplitRequested, Is.EqualTo(partition.IsSplitRequested));
-            Assert.That(persisted.SplitRequester, Is.EqualTo(partition.SplitRequester));
+            Assert.That(persisted.IsSplitRequested, Is.False);
+            Assert.That(persisted.SplitRequester, Is.Null);
+        }
+
+        [Test]
+        public async Task ReportProgressAsync_PartitionIsCompleted_ReturnsUpdatedPartition()
+        {
+            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+
+            Job job = await this.EnsurePersistedJobAsync(store, JobState.Processing);
+
+            Guid id = Guid.NewGuid();
+            DateTime created = new DateTime(2022, 9, 12, 16, 22, 11, DateTimeKind.Utc);
+            DateTime updated = new DateTime(2022, 9, 12, 16, 23, 31, DateTimeKind.Utc);
+
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 2L, 22L, "owner", false, 0.0, "other");
+
+            await store.InsertPartitionAsync(partition, CancellationToken.None);
+
+            DateTime progressUpdated = new DateTime(2022, 9, 12, 16, 26, 11, DateTimeKind.Utc);
+
+            Partition returned = await store.ReportProgressAsync(id, "owner", progressUpdated, "g", 5L, 19L, true, 4231.1, CancellationToken.None);
+
+            Assert.That(returned.JobId, Is.EqualTo(partition.JobId));
+            Assert.That(returned.Created, Is.EqualTo(partition.Created));
+            Assert.That(returned.Updated, Is.EqualTo(progressUpdated));
+            Assert.That(returned.Owner, Is.EqualTo("owner"));
+            Assert.That(returned.First, Is.EqualTo(partition.First));
+            Assert.That(returned.Last, Is.EqualTo(partition.Last));
+            Assert.That(returned.IsInclusive, Is.EqualTo(partition.IsInclusive));
+            Assert.That(returned.Position, Is.EqualTo("g"));
+            Assert.That(returned.Processed, Is.EqualTo(5L));
+            Assert.That(returned.Remaining, Is.EqualTo(19L));
+            Assert.That(returned.IsCompleted, Is.True);
+            Assert.That(returned.Throughput, Is.EqualTo(4231.1));
+            Assert.That(returned.IsSplitRequested, Is.False);
+            Assert.That(returned.SplitRequester, Is.Null);
         }
 
         [Test]
