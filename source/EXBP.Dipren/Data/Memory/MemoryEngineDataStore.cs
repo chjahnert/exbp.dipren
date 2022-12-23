@@ -691,14 +691,7 @@ namespace EXBP.Dipren.Data.Memory
 
             lock (this._syncRoot)
             {
-                bool exists = this._jobs.Contains(jobId);
-
-                if (exists == false)
-                {
-                    this.RaiseErrorUnknownJobIdentifier();
-                }
-
-                result = this._partitions.Any(p => p.SplitRequester == requester);
+                result = this._partitions.Any(p => ((p.JobId == jobId) && (p.SplitRequester == requester)));
             }
 
             return Task.FromResult(result);

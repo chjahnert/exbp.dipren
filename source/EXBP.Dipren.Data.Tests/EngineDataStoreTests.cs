@@ -853,14 +853,6 @@ namespace EXBP.Dipren.Data.Tests
         }
 
         [Test]
-        public async Task IsSplitRequestPendingAsync_JobDoesNotExist_ThrowsException()
-        {
-            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
-
-            Assert.ThrowsAsync<UnknownIdentifierException>(() => store.IsSplitRequestPendingAsync("DJP-001", "node-1", CancellationToken.None));
-        }
-
-        [Test]
         public async Task IsSplitRequestPendingAsync_SplitRequestIsPending_ReturnsTrue()
         {
             using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
