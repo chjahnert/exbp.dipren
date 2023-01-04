@@ -20,6 +20,8 @@ namespace EXBP.Dipren.Data.Tests
 
         protected virtual TimeSpan PollingInterval { get; } = TimeSpan.FromMilliseconds(100);
 
+        protected virtual TimeSpan StatusReportInterval { get; } = TimeSpan.FromMilliseconds(20);
+
 
         protected abstract Task<IEngineDataStore> OnCreateEngineDataStoreAsync();
 
@@ -69,6 +71,34 @@ namespace EXBP.Dipren.Data.Tests
             await engine.RunAsync(job, false);
         }
 
+        private async Task<IEnumerable<StatusReport>> MonitorJobAsync()
+        {
+            IEngineDataStore store = await this.CreateEngineDataStoreAsync();
+
+            Scheduler scheduler = new Scheduler(store);
+
+            List<StatusReport> result = new List<StatusReport>();
+            StatusReport summary = null;
+
+            do
+            {
+                try
+                {
+                    summary = await scheduler.GetStatusReportAsync(this.JobName, CancellationToken.None);
+                }
+                catch (UnknownIdentifierException)
+                {
+                }
+
+                result.Add(summary);
+
+                await Task.Delay(this.StatusReportInterval);
+            }
+            while ((summary?.State != JobState.Completed) && (summary?.State != JobState.Failed));
+
+            return result;
+        }
+
 
         [Test]
         [Explicit]
@@ -78,6 +108,7 @@ namespace EXBP.Dipren.Data.Tests
 
             await this.ScheduleJobAsync(processor);
 
+            Task<IEnumerable<StatusReport>> monitor = Task.Run(async () => await this.MonitorJobAsync());
             Task[] tasks = new Task[this.ProcessingNodes];
 
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -88,6 +119,7 @@ namespace EXBP.Dipren.Data.Tests
             }
 
             await Task.WhenAll(tasks);
+            IEnumerable<StatusReport> snapshots = await monitor;
 
             Assert.That(processor.Count, Is.EqualTo(65536));
 
