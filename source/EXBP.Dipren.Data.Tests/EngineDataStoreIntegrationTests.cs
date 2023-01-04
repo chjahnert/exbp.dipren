@@ -1,7 +1,10 @@
 ﻿
 using System.Diagnostics;
 
+using EXBP.Dipren.Telemetry;
+
 using NUnit.Framework;
+
 
 namespace EXBP.Dipren.Data.Tests
 {
@@ -13,20 +16,16 @@ namespace EXBP.Dipren.Data.Tests
 
         protected virtual TimeSpan ProcessingTimeout { get; } = TimeSpan.FromMilliseconds(1000);
 
+        protected virtual int ProcessingNodes { get; } = 13;
+
+        protected virtual TimeSpan PollingInterval { get; } = TimeSpan.FromMilliseconds(100);
+
 
         protected abstract Task<IEngineDataStore> OnCreateEngineDataStoreAsync();
 
-        private async Task<EngineDataStoreWrapper> CreateEngineDataStoreAsync()
-        {
-            IEngineDataStore store = await this.OnCreateEngineDataStoreAsync();
-            EngineDataStoreWrapper result = new EngineDataStoreWrapper(store);
-
-            return result;
-        }
-
         protected virtual Job<int, Cuboid> OnCreateDistributeProcessingJob()
         {
-            IDataSource<int, Cuboid> source = new CuboidDataSource(1, 100000);
+            IDataSource<int, Cuboid> source = new CuboidDataSource(1, 65536);
             IBatchProcessor<Cuboid> processor = new CuboidBatchProcessor(this.BatchProcessingDuration);
 
             Job<int, Cuboid> result = new Job<int, Cuboid>(JobName, source, Int32KeyRangePartitioner.Default, Int32KeySerializer.Default, processor);
@@ -35,8 +34,19 @@ namespace EXBP.Dipren.Data.Tests
         }
 
         protected virtual Settings OnCreateDistributeProcessingJobSettings()
-            => new Settings(32, this.ProcessingTimeout, TimeSpan.Zero);
+            => new Settings(4, this.ProcessingTimeout, TimeSpan.Zero);
 
+        protected virtual Configuration OnCreateEngineConfiguration()
+            => new Configuration(this.PollingInterval);
+
+
+        private async Task<EngineDataStoreWrapper> CreateEngineDataStoreAsync()
+        {
+            IEngineDataStore store = await this.OnCreateEngineDataStoreAsync();
+            EngineDataStoreWrapper result = new EngineDataStoreWrapper(store);
+
+            return result;
+        }
 
         private async Task ScheduleJobAsync()
         {
@@ -50,15 +60,36 @@ namespace EXBP.Dipren.Data.Tests
             await scheduler.ScheduleAsync(job, settings);
         }
 
+        private async Task RunJobAsync()
+        {
+            Configuration configuration = this.OnCreateEngineConfiguration();
+            IEngineDataStore store = await this.OnCreateEngineDataStoreAsync();
+            Engine engine = new Engine(store, DebugEventLogger.Information, configuration: configuration);
+
+            Job<int, Cuboid> job = this.OnCreateDistributeProcessingJob();
+
+            await engine.RunAsync(job, false);
+        }
+
+
         [Test]
         [Explicit]
-        public async Task RunJobAsync()
+        public async Task RunDistributeProcessingJobAsync()
         {
             await this.ScheduleJobAsync();
 
+            Task[] tasks = new Task[this.ProcessingNodes];
 
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                tasks[i] = Task.Run(async () => await this.RunJobAsync());
+            }
 
+            await Task.WhenAll(tasks);
+
+            TestContext.Out.WriteLine($"Completed in {stopwatch.Elapsed.TotalSeconds} seconds.");
         }
 
 
