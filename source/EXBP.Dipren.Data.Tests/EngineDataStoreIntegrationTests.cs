@@ -7,7 +7,7 @@ namespace EXBP.Dipren.Data.Tests
 {
     public abstract class EngineDataStoreIntegrationTests
     {
-        private const string JOB_NAME = "cuboid-001";
+        protected virtual string JobName { get; } = "cuboid-001";
 
         protected virtual TimeSpan BatchProcessingDuration { get; } = TimeSpan.Zero;
 
@@ -29,7 +29,7 @@ namespace EXBP.Dipren.Data.Tests
             IDataSource<int, Cuboid> source = new CuboidDataSource(1, 100000);
             IBatchProcessor<Cuboid> processor = new CuboidBatchProcessor(this.BatchProcessingDuration);
 
-            Job<int, Cuboid> result = new Job<int, Cuboid>(JOB_NAME, source, Int32KeyRangePartitioner.Default, Int32KeySerializer.Default, processor);
+            Job<int, Cuboid> result = new Job<int, Cuboid>(JobName, source, Int32KeyRangePartitioner.Default, Int32KeySerializer.Default, processor);
 
             return result;
         }
@@ -50,12 +50,15 @@ namespace EXBP.Dipren.Data.Tests
             await scheduler.ScheduleAsync(job, settings);
         }
 
-
         [Test]
         [Explicit]
         public async Task RunJobAsync()
         {
             await this.ScheduleJobAsync();
+
+
+
+
         }
 
 
