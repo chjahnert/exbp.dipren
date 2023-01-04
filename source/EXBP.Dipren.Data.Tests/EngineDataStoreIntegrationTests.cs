@@ -23,11 +23,9 @@ namespace EXBP.Dipren.Data.Tests
 
         protected abstract Task<IEngineDataStore> OnCreateEngineDataStoreAsync();
 
-        protected virtual Job<int, Cuboid> OnCreateDistributeProcessingJob()
+        protected virtual Job<int, Cuboid> OnCreateDistributeProcessingJob(IBatchProcessor<Cuboid> processor)
         {
             IDataSource<int, Cuboid> source = new CuboidDataSource(1, 65536);
-            IBatchProcessor<Cuboid> processor = new CuboidBatchProcessor(this.BatchProcessingDuration);
-
             Job<int, Cuboid> result = new Job<int, Cuboid>(JobName, source, Int32KeyRangePartitioner.Default, Int32KeySerializer.Default, processor);
 
             return result;
@@ -48,25 +46,25 @@ namespace EXBP.Dipren.Data.Tests
             return result;
         }
 
-        private async Task ScheduleJobAsync()
+        private async Task ScheduleJobAsync(IBatchProcessor<Cuboid> processor)
         {
             IEngineDataStore store = await this.CreateEngineDataStoreAsync();
 
             Scheduler scheduler = new Scheduler(store);
 
-            Job<int, Cuboid> job = this.OnCreateDistributeProcessingJob();
+            Job<int, Cuboid> job = this.OnCreateDistributeProcessingJob(processor);
             Settings settings = this.OnCreateDistributeProcessingJobSettings();
 
             await scheduler.ScheduleAsync(job, settings);
         }
 
-        private async Task RunJobAsync()
+        private async Task RunJobAsync(IBatchProcessor<Cuboid> processor)
         {
             Configuration configuration = this.OnCreateEngineConfiguration();
             IEngineDataStore store = await this.OnCreateEngineDataStoreAsync();
             Engine engine = new Engine(store, DebugEventLogger.Information, configuration: configuration);
 
-            Job<int, Cuboid> job = this.OnCreateDistributeProcessingJob();
+            Job<int, Cuboid> job = this.OnCreateDistributeProcessingJob(processor);
 
             await engine.RunAsync(job, false);
         }
@@ -76,7 +74,9 @@ namespace EXBP.Dipren.Data.Tests
         [Explicit]
         public async Task RunDistributeProcessingJobAsync()
         {
-            await this.ScheduleJobAsync();
+            CuboidBatchProcessor processor = new CuboidBatchProcessor(this.BatchProcessingDuration);
+
+            await this.ScheduleJobAsync(processor);
 
             Task[] tasks = new Task[this.ProcessingNodes];
 
@@ -84,10 +84,12 @@ namespace EXBP.Dipren.Data.Tests
 
             for (int i = 0; i < tasks.Length; i++)
             {
-                tasks[i] = Task.Run(async () => await this.RunJobAsync());
+                tasks[i] = Task.Run(async () => await this.RunJobAsync(processor));
             }
 
             await Task.WhenAll(tasks);
+
+            Assert.That(processor.Count, Is.EqualTo(65536));
 
             TestContext.Out.WriteLine($"Completed in {stopwatch.Elapsed.TotalSeconds} seconds.");
         }
@@ -184,6 +186,10 @@ namespace EXBP.Dipren.Data.Tests
         private class CuboidBatchProcessor : IBatchProcessor<Cuboid>
         {
             private readonly TimeSpan _duration;
+            private long _count = 0L;
+
+
+            public long Count => Interlocked.Read(ref this._count);
 
 
             public CuboidBatchProcessor(TimeSpan duration)
@@ -198,6 +204,15 @@ namespace EXBP.Dipren.Data.Tests
                 {
                     await Task.Delay(this._duration);
                 }
+
+                int count = items.Count();
+
+                Interlocked.Add(ref this._count, count);
+            }
+
+            public void Reset()
+            {
+                Interlocked.Exchange(ref this._count, 0L);
             }
         }
     }
