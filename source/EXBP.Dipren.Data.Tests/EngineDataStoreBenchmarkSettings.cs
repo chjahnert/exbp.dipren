@@ -1,6 +1,10 @@
 ﻿
+using System.Diagnostics;
+
+
 namespace EXBP.Dipren.Data.Tests
 {
+    [DebuggerDisplay("Processing Nodes = {ProcessingNodes}, Dataset Size = {DatasetSize}, Batch Size = {BatchSize}, Processing Timeout = {ProcessingTimeout}, Polling Interval = {PollingInterval}")]
     public class EngineDataStoreBenchmarkSettings
     {
         private const int DEFAULT_PROCESSING_NODES = 13;
@@ -15,7 +19,7 @@ namespace EXBP.Dipren.Data.Tests
         public static EngineDataStoreBenchmarkSettings Small { get; } = new EngineDataStoreBenchmarkSettings
         {
             ProcessingNodes = 7,
-            DatasetsSize = 10000
+            DatasetSize = 10000
         };
 
         public static EngineDataStoreBenchmarkSettings Medium { get; } = new EngineDataStoreBenchmarkSettings();
@@ -23,19 +27,19 @@ namespace EXBP.Dipren.Data.Tests
         public static EngineDataStoreBenchmarkSettings Large { get; } = new EngineDataStoreBenchmarkSettings
         {
             ProcessingNodes = 47,
-            DatasetsSize = 1000000
+            DatasetSize = 1000000
         };
 
         public static EngineDataStoreBenchmarkSettings Huge { get; } = new EngineDataStoreBenchmarkSettings
         {
             ProcessingNodes = 63,
-            DatasetsSize = 10000000
+            DatasetSize = 10000000
         };
 
 
         public int ProcessingNodes { get; init; } = DEFAULT_PROCESSING_NODES;
 
-        public int DatasetsSize { get; init; } = DEFAULT_DATASET_SIZE;
+        public int DatasetSize { get; init; } = DEFAULT_DATASET_SIZE;
 
         public int BatchSize { get; init; } = DEFAULT_BATCH_SIZE;
 

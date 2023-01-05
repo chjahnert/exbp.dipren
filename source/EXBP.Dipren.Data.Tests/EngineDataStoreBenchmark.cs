@@ -52,7 +52,7 @@ namespace EXBP.Dipren.Data.Tests
             EngineDataStoreBenchmarkResult result = new EngineDataStoreBenchmarkResult
             {
                 Id = name,
-                Count = processor.Count,
+                Processed = processor.Count,
                 Duration = stopwatch.Elapsed,
                 Snapshots = await monitor,
                 Events = Enumerable.Concat(collector.Events, collectors.SelectMany(c => c.Events).OrderBy(e => e.Timestamp))
@@ -126,7 +126,7 @@ namespace EXBP.Dipren.Data.Tests
 
         protected virtual Job<int, Cuboid> CreateDistributeProcessingJob(string name, IBatchProcessor<Cuboid> processor)
         {
-            IDataSource<int, Cuboid> source = new CuboidDataSource(1, this._settings.DatasetsSize);
+            IDataSource<int, Cuboid> source = new CuboidDataSource(1, this._settings.DatasetSize);
             Job<int, Cuboid> result = new Job<int, Cuboid>(name, source, Int32KeyRangePartitioner.Default, Int32KeySerializer.Default, processor);
 
             return result;
