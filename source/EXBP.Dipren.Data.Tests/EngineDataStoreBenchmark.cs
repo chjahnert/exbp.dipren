@@ -12,27 +12,27 @@ namespace EXBP.Dipren.Data.Tests
         private readonly IEngineDataStoreFactory _factory;
         private readonly EngineDataStoreBenchmarkSettings _settings;
 
-        protected virtual string JobName { get; } = "cuboid-001";
 
-
-        public EngineDataStoreBenchmark(IEngineDataStoreFactory factory, EngineDataStoreBenchmarkSettings settings = null)
+        public EngineDataStoreBenchmark(IEngineDataStoreFactory factory, EngineDataStoreBenchmarkSettings settings)
         {
             Assert.ArgumentIsNotNull(factory, nameof(factory));
+            Assert.ArgumentIsNotNull(settings, nameof(settings));
 
             this._factory = factory;
-            this._settings = (settings ?? EngineDataStoreBenchmarkSettings.Default);
+            this._settings = settings;
         }
 
 
         public async Task<EngineDataStoreBenchmarkResult> RunAsync(CancellationToken cancellation = default)
         {
-            string name = this.JobName;
+            string name = FormattableString.Invariant($"benchmark {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+
             CuboidBatchProcessor processor = new CuboidBatchProcessor(this._settings.BatchProcessingDuration);
             CollectingEventLogger collector = new CollectingEventLogger(EventSeverity.Information);
 
             await this.ScheduleJobAsync(name, processor, collector, cancellation);
 
-            Task<IEnumerable<StatusReport>> monitor = Task.Run(async () => await this.MonitorJobAsync(cancellation));
+            Task<IEnumerable<StatusReport>> monitor = Task.Run(async () => await this.MonitorJobAsync(name, cancellation));
 
             CollectingEventLogger[] collectors = new CollectingEventLogger[this._settings.ProcessingNodes];
             Task[] tasks = new Task[this._settings.ProcessingNodes];
@@ -92,7 +92,7 @@ namespace EXBP.Dipren.Data.Tests
             }
         }
 
-        private async Task<IEnumerable<StatusReport>> MonitorJobAsync(CancellationToken cancellation)
+        private async Task<IEnumerable<StatusReport>> MonitorJobAsync(string name, CancellationToken cancellation)
         {
            List<StatusReport> result = new List<StatusReport>();
 
@@ -108,7 +108,7 @@ namespace EXBP.Dipren.Data.Tests
                 {
                     try
                     {
-                        summary = await scheduler.GetStatusReportAsync(this.JobName, CancellationToken.None);
+                        summary = await scheduler.GetStatusReportAsync(name, CancellationToken.None);
 
                         result.Add(summary);
                     }
