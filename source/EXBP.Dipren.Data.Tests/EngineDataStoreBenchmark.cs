@@ -133,7 +133,7 @@ namespace EXBP.Dipren.Data.Tests
         }
 
         protected virtual Settings CreateDistributeProcessingJobSettings()
-            => new Settings(4, this._settings.ProcessingTimeout, TimeSpan.Zero);
+            => new Settings(this._settings.BatchSize, this._settings.ProcessingTimeout, TimeSpan.Zero);
 
         protected virtual Configuration OnCreateEngineConfiguration()
             => new Configuration(this._settings.PollingInterval);
