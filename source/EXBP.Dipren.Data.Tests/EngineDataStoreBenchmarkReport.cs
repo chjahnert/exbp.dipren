@@ -32,7 +32,7 @@ namespace EXBP.Dipren.Data.Postgres.Tests
         }
 
 
-        public virtual async Task<string> GenerateReportAsync(EngineDataStoreBenchmarkRecording recording, CancellationToken cancellation = default)
+        public virtual async Task<string> GenerateAsync(EngineDataStoreBenchmarkRecording recording, CancellationToken cancellation = default)
         {
             Assert.ArgumentIsNotNull(recording, nameof(recording));
 
@@ -44,6 +44,15 @@ namespace EXBP.Dipren.Data.Postgres.Tests
             this.PlotEstimatedTime(recording, result);
             this.PlotThroughput(recording, result);
             this.PlotProgress(recording, result);
+
+            return result;
+        }
+
+        public static async Task<string> GenerateAsync(string outputDirectory, EngineDataStoreBenchmarkRecording recording, CancellationToken cancellation = default)
+        {
+            EngineDataStoreBenchmarkReport report = new EngineDataStoreBenchmarkReport(outputDirectory);
+
+            string result = await report.GenerateAsync(recording, cancellation);
 
             return result;
         }
