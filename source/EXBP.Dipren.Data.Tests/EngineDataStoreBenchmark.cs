@@ -23,9 +23,9 @@ namespace EXBP.Dipren.Data.Tests
         }
 
 
-        public async Task<EngineDataStoreBenchmarkResult> RunAsync(CancellationToken cancellation = default)
+        public async Task<EngineDataStoreBenchmarkRecording> RunAsync(CancellationToken cancellation = default)
         {
-            string name = FormattableString.Invariant($"benchmark {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            string name = FormattableString.Invariant($"benchmark {DateTime.Now:yyyy-MM-dd HH.mm.ss} - {this._settings.Name}");
 
             CuboidBatchProcessor processor = new CuboidBatchProcessor(this._settings.BatchProcessingDuration);
             CollectingEventLogger collector = new CollectingEventLogger(EventSeverity.Information);
@@ -41,6 +41,11 @@ namespace EXBP.Dipren.Data.Tests
 
             for (int i = 0; i < tasks.Length; i++)
             {
+                if (this._settings.ProcessingNodeStartupDelay >= TimeSpan.Zero)
+                {
+                    await Task.Delay(this._settings.ProcessingNodeStartupDelay);
+                }
+
                 CollectingEventLogger handler = new CollectingEventLogger(EventSeverity.Information);
 
                 tasks[i] = Task.Run(async () => await this.RunJobAsync(name, processor, handler, cancellation));
@@ -49,9 +54,10 @@ namespace EXBP.Dipren.Data.Tests
 
             await Task.WhenAll(tasks);
 
-            EngineDataStoreBenchmarkResult result = new EngineDataStoreBenchmarkResult
+            EngineDataStoreBenchmarkRecording result = new EngineDataStoreBenchmarkRecording
             {
                 Id = name,
+                Settings = this._settings,
                 Processed = processor.Count,
                 Duration = stopwatch.Elapsed,
                 Snapshots = await monitor,
@@ -245,7 +251,7 @@ namespace EXBP.Dipren.Data.Tests
 
             public async Task ProcessAsync(IEnumerable<Cuboid> items, CancellationToken cancellation)
             {
-                if (this._duration != TimeSpan.Zero)
+                if (this._duration >= TimeSpan.Zero)
                 {
                     await Task.Delay(this._duration);
                 }

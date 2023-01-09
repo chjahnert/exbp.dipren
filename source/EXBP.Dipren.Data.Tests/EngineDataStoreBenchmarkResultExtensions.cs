@@ -11,17 +11,17 @@ namespace EXBP.Dipren.Data.Tests
     {
         private const string CSV_DELIMITER = "\t";
 
-        public static async Task SaveSnapshotsAsync(this EngineDataStoreBenchmarkResult result, string fileName)
+
+        public static async Task SaveSnapshotsAsync(this EngineDataStoreBenchmarkRecording recording, string fileName)
         {
             await using StreamWriter writer = new StreamWriter(fileName, false);
 
-            await result.SaveSnapshotsAsync(writer, true);
+            await recording.SaveSnapshotsAsync(writer, true);
         }
 
-
-        public static async Task SaveSnapshotsAsync(this EngineDataStoreBenchmarkResult result, TextWriter writer, bool headers)
+        public static async Task SaveSnapshotsAsync(this EngineDataStoreBenchmarkRecording recording, TextWriter writer, bool headers)
         {
-            Assert.ArgumentIsNotNull(result, nameof(result));
+            Assert.ArgumentIsNotNull(recording, nameof(recording));
             Assert.ArgumentIsNotNull(writer, nameof(writer));
 
             if (headers == true)
@@ -45,7 +45,7 @@ namespace EXBP.Dipren.Data.Tests
                 await writer.WriteLineAsync();
             }
 
-            foreach (StatusReport snapshot in result.Snapshots.OrderBy(s => s.Timestamp))
+            foreach (StatusReport snapshot in recording.Snapshots.OrderBy(s => s.Timestamp))
             {
                 TimeSpan? eta = ((snapshot.Progress.Remaining != null) && (snapshot.CurrentThroughput > 0.0)) ? TimeSpan.FromSeconds(snapshot.Progress.Remaining.Value / snapshot.CurrentThroughput) : null;
 
