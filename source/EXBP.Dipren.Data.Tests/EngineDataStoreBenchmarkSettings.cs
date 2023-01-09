@@ -19,36 +19,38 @@ namespace EXBP.Dipren.Data.Tests
 
         public static EngineDataStoreBenchmarkSettings Tiny { get; } = new EngineDataStoreBenchmarkSettings
         {
-            Description = "Tiny",
+            Name = "tiny",
             ProcessingNodes = 3,
             DatasetSize = 1000
         };
 
         public static EngineDataStoreBenchmarkSettings Small { get; } = new EngineDataStoreBenchmarkSettings
         {
-            Description = "Small",
+            Name = "small",
             ProcessingNodes = 7,
             DatasetSize = 10_000
         };
 
         public static EngineDataStoreBenchmarkSettings Medium { get; } = new EngineDataStoreBenchmarkSettings
         {
-            Description = "Medium"
+            Name = "medium"
         };
 
         public static EngineDataStoreBenchmarkSettings Large { get; } = new EngineDataStoreBenchmarkSettings
         {
-            Description = "Large",
+            Name = "large",
             ProcessingNodes = 23,
             DatasetSize = 1_000_000
         };
 
         public static EngineDataStoreBenchmarkSettings Huge { get; } = new EngineDataStoreBenchmarkSettings
         {
-            Description = "Huge",
+            Name = "huge",
             ProcessingNodes = 47,
             DatasetSize = 10_000_000
         };
+
+        public string Name { get; init; }
 
         public string Description { get; init; }
 
