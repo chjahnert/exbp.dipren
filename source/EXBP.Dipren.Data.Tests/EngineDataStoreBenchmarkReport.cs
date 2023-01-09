@@ -32,7 +32,7 @@ namespace EXBP.Dipren.Data.Postgres.Tests
         }
 
 
-        public virtual async Task<string> GenerateReportAsync(EngineDataStoreBenchmarkResult recording, CancellationToken cancellation = default)
+        public virtual async Task<string> GenerateReportAsync(EngineDataStoreBenchmarkRecording recording, CancellationToken cancellation = default)
         {
             Assert.ArgumentIsNotNull(recording, nameof(recording));
 
@@ -48,7 +48,7 @@ namespace EXBP.Dipren.Data.Postgres.Tests
             return result;
         }
 
-        protected string EnsureOutputDirectory(EngineDataStoreBenchmarkResult recording)
+        protected string EnsureOutputDirectory(EngineDataStoreBenchmarkRecording recording)
         {
             Assert.ArgumentIsNotNull(recording, nameof(recording));
 
@@ -59,7 +59,7 @@ namespace EXBP.Dipren.Data.Postgres.Tests
             return result;
         }
 
-        protected virtual async Task WriteDatasetAsync(EngineDataStoreBenchmarkResult recording, string directory, CancellationToken cancellation)
+        protected virtual async Task WriteDatasetAsync(EngineDataStoreBenchmarkRecording recording, string directory, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(directory, nameof(directory));
             Assert.ArgumentIsNotNull(recording, nameof(recording));
@@ -77,7 +77,7 @@ namespace EXBP.Dipren.Data.Postgres.Tests
             }
         }
 
-        protected virtual void PlotPartitions(EngineDataStoreBenchmarkResult recording, string directory)
+        protected virtual void PlotPartitions(EngineDataStoreBenchmarkRecording recording, string directory)
         {
             Assert.ArgumentIsNotNull(directory, nameof(directory));
             Assert.ArgumentIsNotNull(recording, nameof(recording));
@@ -103,7 +103,7 @@ namespace EXBP.Dipren.Data.Postgres.Tests
             this.SaveImage(plot, directory, "partitions");
         }
 
-        protected virtual void PlotEstimatedTime(EngineDataStoreBenchmarkResult recording, string directory)
+        protected virtual void PlotEstimatedTime(EngineDataStoreBenchmarkRecording recording, string directory)
         {
             Assert.ArgumentIsNotNull(directory, nameof(directory));
             Assert.ArgumentIsNotNull(recording, nameof(recording));
@@ -128,7 +128,7 @@ namespace EXBP.Dipren.Data.Postgres.Tests
             this.SaveImage(plot, directory, "estimations");
         }
 
-        protected virtual void PlotThroughput(EngineDataStoreBenchmarkResult recording, string directory)
+        protected virtual void PlotThroughput(EngineDataStoreBenchmarkRecording recording, string directory)
         {
             Assert.ArgumentIsNotNull(directory, nameof(directory));
             Assert.ArgumentIsNotNull(recording, nameof(recording));
@@ -149,7 +149,7 @@ namespace EXBP.Dipren.Data.Postgres.Tests
             this.SaveImage(plot, directory, "throughput");
         }
 
-        protected virtual void PlotProgress(EngineDataStoreBenchmarkResult recording, string directory)
+        protected virtual void PlotProgress(EngineDataStoreBenchmarkRecording recording, string directory)
         {
             Assert.ArgumentIsNotNull(directory, nameof(directory));
             Assert.ArgumentIsNotNull(recording, nameof(recording));

@@ -7,7 +7,7 @@ using EXBP.Dipren.Telemetry;
 namespace EXBP.Dipren.Data.Tests
 {
     [DebuggerDisplay("Id = {Id}, Processed = {Processed}, Missed = {Missed}, Duration = {Duration}, Errors = {Errors}")]
-    public class EngineDataStoreBenchmarkResult
+    public class EngineDataStoreBenchmarkRecording
     {
         public string Id { get; init; }
 

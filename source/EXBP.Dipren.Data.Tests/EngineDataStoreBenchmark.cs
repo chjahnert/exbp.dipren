@@ -23,7 +23,7 @@ namespace EXBP.Dipren.Data.Tests
         }
 
 
-        public async Task<EngineDataStoreBenchmarkResult> RunAsync(CancellationToken cancellation = default)
+        public async Task<EngineDataStoreBenchmarkRecording> RunAsync(CancellationToken cancellation = default)
         {
             string name = FormattableString.Invariant($"benchmark {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
 
@@ -49,7 +49,7 @@ namespace EXBP.Dipren.Data.Tests
 
             await Task.WhenAll(tasks);
 
-            EngineDataStoreBenchmarkResult result = new EngineDataStoreBenchmarkResult
+            EngineDataStoreBenchmarkRecording result = new EngineDataStoreBenchmarkRecording
             {
                 Id = name,
                 Processed = processor.Count,
