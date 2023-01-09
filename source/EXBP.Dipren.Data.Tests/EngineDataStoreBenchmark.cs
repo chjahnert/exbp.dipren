@@ -57,6 +57,7 @@ namespace EXBP.Dipren.Data.Tests
             EngineDataStoreBenchmarkRecording result = new EngineDataStoreBenchmarkRecording
             {
                 Id = name,
+                Settings = this._settings,
                 Processed = processor.Count,
                 Duration = stopwatch.Elapsed,
                 Snapshots = await monitor,
