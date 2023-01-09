@@ -14,6 +14,7 @@ namespace EXBP.Dipren.Data.Tests
         private const int DEFAULT_POLLING_INTERVAL = 250;
         private const int DEFAULT_REPORTING_INTERVAL = 100;
         private const int DEFAULT_BATCH_PROCESSING_DURATION = 0;
+        private const int DEFAULT_PROCESSING_STARTUP_DELAY_MS = 20;
 
 
         public static EngineDataStoreBenchmarkSettings Tiny { get; } = new EngineDataStoreBenchmarkSettings
@@ -64,5 +65,7 @@ namespace EXBP.Dipren.Data.Tests
         public TimeSpan ReportingInterval { get; init; } = TimeSpan.FromMilliseconds(DEFAULT_REPORTING_INTERVAL);
 
         public TimeSpan BatchProcessingDuration { get; init; } = TimeSpan.FromMilliseconds(DEFAULT_BATCH_PROCESSING_DURATION);
+
+        public TimeSpan ProcessingNodeStartupDelay { get; init; } = TimeSpan.FromMilliseconds(DEFAULT_PROCESSING_STARTUP_DELAY_MS);
     }
 }

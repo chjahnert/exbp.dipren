@@ -41,6 +41,11 @@ namespace EXBP.Dipren.Data.Tests
 
             for (int i = 0; i < tasks.Length; i++)
             {
+                if (this._settings.ProcessingNodeStartupDelay >= TimeSpan.Zero)
+                {
+                    await Task.Delay(this._settings.ProcessingNodeStartupDelay);
+                }
+
                 CollectingEventLogger handler = new CollectingEventLogger(EventSeverity.Information);
 
                 tasks[i] = Task.Run(async () => await this.RunJobAsync(name, processor, handler, cancellation));
