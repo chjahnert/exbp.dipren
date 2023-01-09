@@ -25,7 +25,7 @@ namespace EXBP.Dipren.Data.Tests
 
         public async Task<EngineDataStoreBenchmarkRecording> RunAsync(CancellationToken cancellation = default)
         {
-            string name = FormattableString.Invariant($"benchmark {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            string name = FormattableString.Invariant($"benchmark {DateTime.Now:yyyy-MM-dd HH.mm.ss} - {this._settings.Description}");
 
             CuboidBatchProcessor processor = new CuboidBatchProcessor(this._settings.BatchProcessingDuration);
             CollectingEventLogger collector = new CollectingEventLogger(EventSeverity.Information);

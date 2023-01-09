@@ -11,6 +11,8 @@ namespace EXBP.Dipren.Data.Tests
     {
         public string Id { get; init; }
 
+        public EngineDataStoreBenchmarkSettings Settings { get; init; }
+
         public long Processed { get; init; }
 
         public long Missed { get; init; }
