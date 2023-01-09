@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace EXBP.Dipren.Data.Tests
 {
     [DebuggerDisplay("Processing Nodes = {ProcessingNodes}, Dataset Size = {DatasetSize}, Batch Size = {BatchSize}, Processing Timeout = {ProcessingTimeout}, Polling Interval = {PollingInterval}")]
-    public class EngineDataStoreBenchmarkSettings
+    public record EngineDataStoreBenchmarkSettings
     {
         private const int DEFAULT_PROCESSING_NODES = 13;
         private const int DEFAULT_DATASET_SIZE = 100_000;
