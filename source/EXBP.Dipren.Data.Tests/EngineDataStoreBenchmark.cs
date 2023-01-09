@@ -245,7 +245,7 @@ namespace EXBP.Dipren.Data.Tests
 
             public async Task ProcessAsync(IEnumerable<Cuboid> items, CancellationToken cancellation)
             {
-                if (this._duration != TimeSpan.Zero)
+                if (this._duration >= TimeSpan.Zero)
                 {
                     await Task.Delay(this._duration);
                 }
