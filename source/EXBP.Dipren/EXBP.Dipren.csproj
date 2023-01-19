@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Include="OpenTelemetry" Version="1.4.0-rc.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -70,6 +71,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>StringKeyRangePartitionerResources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Telemetry\OpenTelemetryEngineMetricsResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>OpenTelemetryEngineMetricsResources.resx</DependentUpon>
+    </Compile>
     <Compile Update="Telemetry\TextEventLoggerResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -106,6 +112,10 @@
     <EmbeddedResource Update="StringKeyRangePartitionerResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>StringKeyRangePartitionerResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Telemetry\OpenTelemetryEngineMetricsResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>OpenTelemetryEngineMetricsResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Telemetry\TextEventLoggerResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
