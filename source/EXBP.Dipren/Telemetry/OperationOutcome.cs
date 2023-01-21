@@ -9,11 +9,11 @@ namespace EXBP.Dipren.Telemetry
         /// <summary>
         ///   The operation succeeded.
         /// </summary>
-        Succeeded,
+        Success,
 
         /// <summary>
         ///   The operation failed.
         /// </summary>
-        Failed
+        Failure
     }
 }

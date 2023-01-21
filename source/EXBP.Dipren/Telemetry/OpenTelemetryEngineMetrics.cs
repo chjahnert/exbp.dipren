@@ -16,10 +16,18 @@ namespace EXBP.Dipren.Telemetry
         private const string TAG_NAME_JOB = "job";
         private const string TAG_NAME_PARTITION = "partition";
         private const string TAG_NAME_OUTCOME = "outcome";
+        private const string TAG_NAME_STATE = "state";
+
+        private const string TAG_VALUE_READY = "ready";
+        private const string TAG_VALUE_PROCESSING = "processing";
+        private const string TAG_VALUE_SUCCESS = "success";
+        private const string TAG_VALUE_FAILURE = "failure";
+
+        private static readonly KeyValuePair<string, object> TagEngineStateReady = new KeyValuePair<string, object>(TAG_NAME_STATE, TAG_VALUE_READY);
+        private static readonly KeyValuePair<string, object> TagEngineStateProcessing = new KeyValuePair<string, object>(TAG_NAME_STATE, TAG_VALUE_PROCESSING);
 
 
         private readonly Meter _meter;
-        private readonly bool _tags = true;
 
         private readonly Counter<long> _keysRetrievedCounter;
         private readonly Counter<long> _keysCompletedCounter;
@@ -35,15 +43,10 @@ namespace EXBP.Dipren.Telemetry
         private readonly Histogram<double> _batchProcessingDuration;
         private readonly Histogram<double> _reportProgressDuration;
 
-        private readonly ObservableGauge<int> _jobsGauge;
         private readonly ObservableGauge<int> _enginesGauge;
 
-        private int _jobsScheduled = 0;
-        private int _jobsRunning = 0;
-        private int _engineInstance = 0;
-        private int _enginesWaitingForJob = 0;
-        private int _enginesWaitingForWork = 0;
-        private int _enginesProcessing = 0;
+        private readonly object _enginesSyncRoot = new object();
+        private readonly Dictionary<string, EngineStateEntry> _engines = new Dictionary<string, EngineStateEntry>();
 
 
         /// <summary>
@@ -62,6 +65,7 @@ namespace EXBP.Dipren.Telemetry
         public OpenTelemetryEngineMetrics()
         {
             this._meter = new Meter("EXBP.Dipren");
+
             this._keysRetrievedCounter = this._meter.CreateCounter<long>("keys-retrieved", OpenTelemetryEngineMetricsResources.UnitKeys, OpenTelemetryEngineMetricsResources.InstrumentDescriptionKeysRetrieved);
             this._keysCompletedCounter = this._meter.CreateCounter<long>("keys-completed", OpenTelemetryEngineMetricsResources.UnitKeys, OpenTelemetryEngineMetricsResources.InstrumentDescriptionKeysCompleted);
             this._batchesRetrievedCounter = this._meter.CreateCounter<long>("batches-retrieved", OpenTelemetryEngineMetricsResources.UnitBatches, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchesRetrieved);
@@ -72,9 +76,11 @@ namespace EXBP.Dipren.Telemetry
             this._isSplitRequestPendingDuration = this._meter.CreateHistogram<double>("is-split-request-pending", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionIsSplitRequestPendingDuration);
             this._tryAcquirePartitionDuration = this._meter.CreateHistogram<double>("try-acquire-partition", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionTryAcquirePartitionDuration);
             this._tryRequestSplitDuration = this._meter.CreateHistogram<double>("try-request-split", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionTryRequestSplitDuration);
-            this._batchRetrievalDuration = this._meter.CreateHistogram<double>("batch-retrieval", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrimentDescriptionBatchRetrievalDuration);
+            this._batchRetrievalDuration = this._meter.CreateHistogram<double>("batch-retrieval", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchRetrievalDuration);
             this._batchProcessingDuration = this._meter.CreateHistogram<double>("batch-processing", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchProcessingDuration);
             this._reportProgressDuration = this._meter.CreateHistogram<double>("report-progress", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionReportProgressDuration);
+
+            this._enginesGauge = this._meter.CreateObservableGauge("engines", this.GetEngineStateMeasurements, OpenTelemetryEngineMetricsResources.UnitEngines, OpenTelemetryEngineMetricsResources.InstrumentDescriptionEngines);
         }
 
 
@@ -86,6 +92,80 @@ namespace EXBP.Dipren.Telemetry
             this._meter.Dispose();
         }
 
+
+        /// <summary>
+        ///   Registers the state of an engine instance.
+        /// </summary>
+        /// <param name="nodeId">
+        ///   The unique identifier of the processing node.
+        /// </param>
+        /// <param name="jobId">
+        ///   The unique identifier of the distributed processing job.
+        /// </param>
+        /// <param name="state">
+        ///   A <see cref="EngineState"/> value indicating the state of the engine.
+        /// </param>
+        public void RegisterEngineState(string nodeId, string jobId, EngineState state)
+        {
+            Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
+            Assert.ArgumentIsNotNull(jobId, nameof(jobId));
+            Assert.ArgumentIsDefined(state, nameof(state));
+
+            lock (this._enginesSyncRoot)
+            {
+                bool exists = this._engines.TryGetValue(nodeId, out EngineStateEntry entry);
+
+                if (state != EngineState.Stopped)
+                {
+                    if (exists == false)
+                    {
+                        entry = new EngineStateEntry(nodeId, jobId, state);
+
+                        this._engines.Add(nodeId, entry);
+                    }
+                    else
+                    {
+                        entry.State = state;
+                    }
+                }
+                else
+                {
+                    if (exists == true)
+                    {
+                        this._engines.Remove(nodeId);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        ///   Returns a snapshot of the current engine states.
+        /// </summary>
+        /// <returns>
+        ///   An <see cref="IEnumerable{T}"/> of <see cref="Measurement{T}"/> values containing the measurements.
+        /// </returns>
+        private IEnumerable<Measurement<int>> GetEngineStateMeasurements()
+        {
+            List<Measurement<int>> result = new List<Measurement<int>>();
+
+            lock (this._enginesSyncRoot)
+            {
+                IEnumerable<IGrouping<string, EngineStateEntry>> groups = this._engines.Values.GroupBy(entry => entry.JobId);
+
+                foreach(IGrouping<string, EngineStateEntry> group in groups)
+                {
+                    KeyValuePair<string, object> tagJob = new KeyValuePair<string, object>(TAG_NAME_JOB, group.Key);
+
+                    Measurement<int> enginesReady = new Measurement<int>(group.Count(entry => entry.State == EngineState.Ready), TagEngineStateReady, tagJob);
+                    Measurement<int> enginesProcessing = new Measurement<int>(group.Count(entry => entry.State == EngineState.Processing), TagEngineStateProcessing, tagJob);
+
+                    result.Add(enginesReady);
+                    result.Add(enginesProcessing);
+                }
+            }
+
+            return result;
+        }
 
         /// <summary>
         ///   Registers the event when a new partition is created.
@@ -216,22 +296,16 @@ namespace EXBP.Dipren.Telemetry
         /// <param name="jobId">
         ///   The unique identifier of the job the measurements are related to.
         /// </param>
-        /// <param name="partitionId">
-        ///   The unique identifier of the partition the measurements are related to.
-        /// </param>
-        /// <param name="outcome">
-        ///   The outcome of the operation.
-        /// </param>
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
-        public void RegisterSplitRequestPendingCheck(string nodeId, string jobId, Guid partitionId, OperationOutcome outcome, TimeSpan duration)
+        public void RegisterIsSplitRequestPending(string nodeId, string jobId, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, partitionId, outcome);
+            TagList tags = this.CreateTags(nodeId, jobId, null);
 
             this._isSplitRequestPendingDuration.Record(duration.TotalMilliseconds, tags);
         }
@@ -245,22 +319,19 @@ namespace EXBP.Dipren.Telemetry
         /// <param name="jobId">
         ///   The unique identifier of the job the measurements are related to.
         /// </param>
-        /// <param name="partitionId">
-        ///   The unique identifier of the partition the measurements are related to.
-        /// </param>
         /// <param name="outcome">
         ///   The outcome of the operation.
         /// </param>
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
-        public void RegisterTryAcquirePartition(string nodeId, string jobId, Guid partitionId, OperationOutcome outcome, TimeSpan duration)
+        public void RegisterTryAcquirePartition(string nodeId, string jobId, OperationOutcome outcome, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, partitionId, outcome);
+            TagList tags = this.CreateTags(nodeId, jobId, null, outcome);
 
             this._tryAcquirePartitionDuration.Record(duration.TotalMilliseconds, tags);
         }
@@ -274,22 +345,19 @@ namespace EXBP.Dipren.Telemetry
         /// <param name="jobId">
         ///   The unique identifier of the job the measurements are related to.
         /// </param>
-        /// <param name="partitionId">
-        ///   The unique identifier of the partition the measurements are related to.
-        /// </param>
         /// <param name="outcome">
         ///   The outcome of the operation.
         /// </param>
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
-        public void RegisterTryRequestSplit(string nodeId, string jobId, Guid partitionId, OperationOutcome outcome, TimeSpan duration)
+        public void RegisterTryRequestSplit(string nodeId, string jobId, OperationOutcome outcome, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, partitionId, outcome);
+            TagList tags = this.CreateTags(nodeId, jobId, null, outcome);
 
             this._tryRequestSplitDuration.Record(duration.TotalMilliseconds, tags);
         }
@@ -348,47 +416,66 @@ namespace EXBP.Dipren.Telemetry
             Debug.Assert(nodeId != null);
             Debug.Assert(jobId != null);
 
-            TagList result = new TagList();
-
-            if (this._tags == true)
+            TagList result = new TagList
             {
-                result.Add(TAG_NAME_NODE, nodeId);
+                { TAG_NAME_NODE, nodeId }
+            };
 
-                if (jobId != null)
+            if (jobId != null)
+            {
+                result.Add(TAG_NAME_JOB, jobId);
+            }
+
+            if (partitionId != null)
+            {
+                string value = partitionId.Value.ToString("d");
+
+                result.Add(TAG_NAME_PARTITION, value);
+            }
+
+            if (outcome != null)
+            {
+                Assert.ArgumentIsDefined(outcome.Value, nameof(outcome));
+
+                string value = null;
+
+                switch (outcome.Value)
                 {
-                    result.Add(TAG_NAME_JOB, jobId);
+                    case OperationOutcome.Success:
+                        value = TAG_VALUE_SUCCESS;
+                        break;
+
+                    case OperationOutcome.Failure:
+                        value = TAG_VALUE_FAILURE;
+                        break;
                 }
 
-                if (partitionId != null)
-                {
-                    string value = partitionId.Value.ToString("d");
-
-                    result.Add(TAG_NAME_PARTITION, value);
-                }
-
-                if (outcome != null)
-                {
-                    Assert.ArgumentIsDefined(outcome.Value, nameof(outcome));
-
-                    string value = null;
-
-                    switch (outcome.Value)
-                    {
-                        case OperationOutcome.Succeeded:
-                            value = "succeeded";
-                            break;
-
-                        case OperationOutcome.Failed:
-                            value = "failed";
-                            break;
-                    }
-
-                    result.Add(TAG_NAME_OUTCOME, value);
-                    ;
-                }
+                result.Add(TAG_NAME_OUTCOME, value);
+                ;
             }
 
             return result;
+        }
+
+
+        private class EngineStateEntry
+        {
+            public string NodeId { get; }
+
+            public string JobId { get; }
+
+            public EngineState State { get; set; }
+
+
+            public EngineStateEntry(string nodeId, string jobId, EngineState state)
+            {
+                Debug.Assert(nodeId != null);
+                Debug.Assert(jobId != null);
+
+                this.NodeId = nodeId;
+                this.JobId = jobId;
+                this.State = state;
+            }
         }
     }
 }

@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="InstrimentDescriptionBatchRetrievalDuration" xml:space="preserve">
-    <value>The duration of retrieving a batch of items from the data source.</value>
-  </data>
   <data name="InstrumentDescriptionBatchesCompleted" xml:space="preserve">
     <value>The number of batches processed.</value>
   </data>
@@ -128,6 +125,12 @@
   </data>
   <data name="InstrumentDescriptionBatchProcessingDuration" xml:space="preserve">
     <value>The duration of processing a batch.</value>
+  </data>
+  <data name="InstrumentDescriptionBatchRetrievalDuration" xml:space="preserve">
+    <value>The duration of retrieving a batch of items from the data source.</value>
+  </data>
+  <data name="InstrumentDescriptionEngines" xml:space="preserve">
+    <value>The number of engines in various states.</value>
   </data>
   <data name="InstrumentDescriptionIsSplitRequestPendingDuration" xml:space="preserve">
     <value>The duration of checking if a split request is pending.</value>
@@ -155,6 +158,9 @@
   </data>
   <data name="UnitBatches" xml:space="preserve">
     <value>batches</value>
+  </data>
+  <data name="UnitEngines" xml:space="preserve">
+    <value>engines</value>
   </data>
   <data name="UnitKeys" xml:space="preserve">
     <value>keys</value>

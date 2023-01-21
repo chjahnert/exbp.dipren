@@ -61,15 +61,6 @@ namespace EXBP.Dipren.Telemetry {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The duration of retrieving a batch of items from the data source..
-        /// </summary>
-        internal static string InstrimentDescriptionBatchRetrievalDuration {
-            get {
-                return ResourceManager.GetString("InstrimentDescriptionBatchRetrievalDuration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The number of batches processed..
         /// </summary>
         internal static string InstrumentDescriptionBatchesCompleted {
@@ -93,6 +84,24 @@ namespace EXBP.Dipren.Telemetry {
         internal static string InstrumentDescriptionBatchProcessingDuration {
             get {
                 return ResourceManager.GetString("InstrumentDescriptionBatchProcessingDuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The duration of retrieving a batch of items from the data source..
+        /// </summary>
+        internal static string InstrumentDescriptionBatchRetrievalDuration {
+            get {
+                return ResourceManager.GetString("InstrumentDescriptionBatchRetrievalDuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number of engines in various states..
+        /// </summary>
+        internal static string InstrumentDescriptionEngines {
+            get {
+                return ResourceManager.GetString("InstrumentDescriptionEngines", resourceCulture);
             }
         }
         
@@ -174,6 +183,15 @@ namespace EXBP.Dipren.Telemetry {
         internal static string UnitBatches {
             get {
                 return ResourceManager.GetString("UnitBatches", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to engines.
+        /// </summary>
+        internal static string UnitEngines {
+            get {
+                return ResourceManager.GetString("UnitEngines", resourceCulture);
             }
         }
         
