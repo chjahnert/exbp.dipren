@@ -560,7 +560,7 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
-            this._metrics.RegisterReportProgress(this.Id, job.Id, partition.Id, OperationOutcome.Success, stopwatch.Elapsed);
+            this._metrics.RegisterReportProgress(this.Id, job.Id, partition.Id, stopwatch.Elapsed);
 
             return result;
         }

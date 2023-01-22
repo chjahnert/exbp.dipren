@@ -374,19 +374,16 @@ namespace EXBP.Dipren.Telemetry
         /// <param name="partitionId">
         ///   The unique identifier of the partition the measurements are related to.
         /// </param>
-        /// <param name="outcome">
-        ///   The outcome of the operation.
-        /// </param>
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
-        public void RegisterReportProgress(string nodeId, string jobId, Guid partitionId, OperationOutcome outcome, TimeSpan duration)
+        public void RegisterReportProgress(string nodeId, string jobId, Guid partitionId, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, partitionId, outcome);
+            TagList tags = this.CreateTags(nodeId, jobId, partitionId);
 
             this._reportProgressDuration.Record(duration.TotalMilliseconds, tags);
         }
