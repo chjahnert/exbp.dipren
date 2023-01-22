@@ -232,20 +232,20 @@ namespace EXBP.Dipren.Telemetry
         /// <param name="keys">
         ///   The number of keys in the batch.
         /// </param>
-        /// <param name="outcome">
-        ///   The outcome of the operation.
+        /// <param name="success">
+        ///   A flag that indicates the outcome of the operation.
         /// </param>
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
-        public void RegisterBatchRetrieved(string nodeId, string jobId, Guid partitionId, long keys, OperationOutcome outcome, TimeSpan duration)
+        public void RegisterBatchRetrieved(string nodeId, string jobId, Guid partitionId, long keys, bool success, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsGreaterOrEqual(keys, 0L, nameof(keys));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, partitionId, outcome);
+            TagList tags = this.CreateTags(nodeId, jobId, partitionId, (success ? OperationOutcome.Success : OperationOutcome.Failure));
 
             this._keysRetrievedCounter.Add(keys, tags);
             this._batchesRetrievedCounter.Add(1L, tags);
@@ -267,20 +267,20 @@ namespace EXBP.Dipren.Telemetry
         /// <param name="keys">
         ///   The number of keys in the batch.
         /// </param>
-        /// <param name="outcome">
-        ///   The outcome of the operation.
+        /// <param name="success">
+        ///   A flag that indicates the outcome of the operation.
         /// </param>
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
-        public void RegisterBatchProcessed(string nodeId, string jobId, Guid partitionId, long keys, OperationOutcome outcome, TimeSpan duration)
+        public void RegisterBatchProcessed(string nodeId, string jobId, Guid partitionId, long keys, bool success, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsGreaterOrEqual(keys, 0, nameof(keys));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, partitionId, outcome);
+            TagList tags = this.CreateTags(nodeId, jobId, partitionId, (success ? OperationOutcome.Success : OperationOutcome.Failure));
 
             this._keysCompletedCounter.Add(keys, tags);
             this._batchesCompletedCounter.Add(1L, tags);
@@ -319,19 +319,19 @@ namespace EXBP.Dipren.Telemetry
         /// <param name="jobId">
         ///   The unique identifier of the job the measurements are related to.
         /// </param>
-        /// <param name="outcome">
-        ///   The outcome of the operation.
+        /// <param name="success">
+        ///   A flag that indicates the outcome of the operation.
         /// </param>
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
-        public void RegisterTryAcquirePartition(string nodeId, string jobId, OperationOutcome outcome, TimeSpan duration)
+        public void RegisterTryAcquirePartition(string nodeId, string jobId, bool success, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, null, outcome);
+            TagList tags = this.CreateTags(nodeId, jobId, null, (success ? OperationOutcome.Success : OperationOutcome.Failure));
 
             this._tryAcquirePartitionDuration.Record(duration.TotalMilliseconds, tags);
         }
@@ -345,19 +345,19 @@ namespace EXBP.Dipren.Telemetry
         /// <param name="jobId">
         ///   The unique identifier of the job the measurements are related to.
         /// </param>
-        /// <param name="outcome">
-        ///   The outcome of the operation.
+        /// <param name="success">
+        ///   A flag that indicates the outcome of the operation.
         /// </param>
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
-        public void RegisterTryRequestSplit(string nodeId, string jobId, OperationOutcome outcome, TimeSpan duration)
+        public void RegisterTryRequestSplit(string nodeId, string jobId, bool success, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, null, outcome);
+            TagList tags = this.CreateTags(nodeId, jobId, null, (success ? OperationOutcome.Success : OperationOutcome.Failure));
 
             this._tryRequestSplitDuration.Record(duration.TotalMilliseconds, tags);
         }
@@ -454,6 +454,11 @@ namespace EXBP.Dipren.Telemetry
             return result;
         }
 
+        private enum OperationOutcome
+        {
+            Success,
+            Failure
+        }
 
         private class EngineStateEntry
         {

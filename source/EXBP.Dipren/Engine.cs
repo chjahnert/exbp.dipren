@@ -324,7 +324,7 @@ namespace EXBP.Dipren
                 string descriptionBatchRetrieved = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchRetrieved, count, stopwatch.Elapsed.TotalMilliseconds);
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchRetrieved, cancellation);
 
-                this._metrics.RegisterBatchRetrieved(this.Id, job.Id, partition.Id, count, OperationOutcome.Success, stopwatch.Elapsed);
+                this._metrics.RegisterBatchRetrieved(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
 
                 if (count > 0L)
                 {
@@ -332,7 +332,7 @@ namespace EXBP.Dipren
 
                     stopwatch.Restart();
 
-                    OperationOutcome outcome = OperationOutcome.Success;
+                    bool succeeded = true;
 
                     try
                     {
@@ -357,14 +357,14 @@ namespace EXBP.Dipren
                         string descriptionBatchProcessingFailed = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessingFailed, batchDescriptor);
                         await this.Dispatcher.DispatchEventAsync(EventSeverity.Warning, job.Id, partition.Id, descriptionBatchProcessingFailed, ex, cancellation);
 
-                        outcome = OperationOutcome.Failure;
+                        succeeded = false;
                     }
 
                     stopwatch.Stop();
 
-                    this._metrics.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, outcome, stopwatch.Elapsed);
+                    this._metrics.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, succeeded, stopwatch.Elapsed);
 
-                    if (outcome == OperationOutcome.Success)
+                    if (succeeded == true)
                     {
                         string descriptionBatchProcessed = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessed, count, stopwatch.Elapsed.TotalMilliseconds);
                         await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchProcessed, cancellation);
@@ -449,19 +449,19 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
+            this._metrics.RegisterTryAcquirePartition(this.Id, job.Id, (acquired != null), stopwatch.Elapsed);
+
             Partition<TKey> result = null;
 
             if (acquired != null)
             {
-                result = acquired.ToPartition(job.Serializer);
-
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, result.Id, EngineResources.EventPartitionAcquired, cancellation);
-                this._metrics.RegisterTryAcquirePartition(this.Id, job.Id, OperationOutcome.Success, stopwatch.Elapsed);
+
+                result = acquired.ToPartition(job.Serializer);
             }
             else
             {
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventPartitionNotAcquired, cancellation);
-                this._metrics.RegisterTryAcquirePartition(this.Id, job.Id, OperationOutcome.Failure, stopwatch.Elapsed);
 
                 stopwatch.Restart();
 
@@ -483,7 +483,7 @@ namespace EXBP.Dipren
 
                     await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, (succeeded ? EngineResources.EventSplitRequestSucceeded : EngineResources.EventSplitRequestFailed), cancellation);
 
-                    this._metrics.RegisterTryRequestSplit(this.Id, job.Id, ((succeeded == true) ? OperationOutcome.Success : OperationOutcome.Failure), stopwatch.Elapsed);
+                    this._metrics.RegisterTryRequestSplit(this.Id, job.Id, succeeded, stopwatch.Elapsed);
                 }
                 else
                 {
