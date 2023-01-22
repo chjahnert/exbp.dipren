@@ -15,7 +15,7 @@ namespace EXBP.Dipren
     public class Engine : Node
     {
         private readonly Configuration _configuration;
-        private readonly OpenTelemetryEngineMetrics _metrics = OpenTelemetryEngineMetrics.Default;
+        private readonly IEngineMetrics _metrics = OpenTelemetryEngineMetrics.Instance;
 
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
-            this._metrics.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
+            this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
 
             try
             {
@@ -196,7 +196,7 @@ namespace EXBP.Dipren
 
                         if (partition != null)
                         {
-                            this._metrics.RegisterEngineState(this.Id, job.Id, EngineState.Processing);
+                            this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Processing);
 
                             try
                             {
@@ -212,7 +212,7 @@ namespace EXBP.Dipren
                             }
                             finally
                             {
-                                this._metrics.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
+                                this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
                             }
                         }
                         else
@@ -254,7 +254,7 @@ namespace EXBP.Dipren
             }
             finally
             {
-                this._metrics.RegisterEngineState(this.Id, job.Id, EngineState.Stopped);
+                this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Stopped);
             }
         }
 
@@ -324,7 +324,7 @@ namespace EXBP.Dipren
                 string descriptionBatchRetrieved = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchRetrieved, count, stopwatch.Elapsed.TotalMilliseconds);
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchRetrieved, cancellation);
 
-                this._metrics.RegisterBatchRetrieved(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
+                this._metrics?.RegisterBatchRetrieved(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
 
                 if (count > 0L)
                 {
@@ -362,7 +362,7 @@ namespace EXBP.Dipren
 
                     stopwatch.Stop();
 
-                    this._metrics.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, succeeded, stopwatch.Elapsed);
+                    this._metrics?.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, succeeded, stopwatch.Elapsed);
 
                     if (succeeded == true)
                     {
@@ -406,7 +406,7 @@ namespace EXBP.Dipren
 
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventPartitionCompleted, cancellation);
 
-            this._metrics.RegisterPartitionCompleted(this.Id, job.Id, partition.Id);
+            this._metrics?.RegisterPartitionCompleted(this.Id, job.Id, partition.Id);
         }
 
         /// <summary>
@@ -449,7 +449,7 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
-            this._metrics.RegisterTryAcquirePartition(this.Id, job.Id, (acquired != null), stopwatch.Elapsed);
+            this._metrics?.RegisterTryAcquirePartition(this.Id, job.Id, (acquired != null), stopwatch.Elapsed);
 
             Partition<TKey> result = null;
 
@@ -469,7 +469,7 @@ namespace EXBP.Dipren
 
                 stopwatch.Stop();
 
-                this._metrics.RegisterIsSplitRequestPending(this.Id, job.Id, stopwatch.Elapsed);
+                this._metrics?.RegisterIsSplitRequestPending(this.Id, job.Id, stopwatch.Elapsed);
 
                 if (pending == false)
                 {
@@ -483,7 +483,7 @@ namespace EXBP.Dipren
 
                     await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, (succeeded ? EngineResources.EventSplitRequestSucceeded : EngineResources.EventSplitRequestFailed), cancellation);
 
-                    this._metrics.RegisterTryRequestSplit(this.Id, job.Id, succeeded, stopwatch.Elapsed);
+                    this._metrics?.RegisterTryRequestSplit(this.Id, job.Id, succeeded, stopwatch.Elapsed);
                 }
                 else
                 {
@@ -560,7 +560,7 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
-            this._metrics.RegisterReportProgress(this.Id, job.Id, partition.Id, stopwatch.Elapsed);
+            this._metrics?.RegisterReportProgress(this.Id, job.Id, partition.Id, stopwatch.Elapsed);
 
             return result;
         }
@@ -635,7 +635,7 @@ namespace EXBP.Dipren
                     string descriptionPartitionSplit = String.Format(CultureInfo.InvariantCulture, EngineResources.EventPartitionSplit, updatedPartition.Range.First, updatedPartition.Range.Last, excludedPartition.Id, excludedPartition.Range.First, excludedPartition.Range.Last, stopwatch.Elapsed.TotalMilliseconds);
                     await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, descriptionPartitionSplit, cancellation);
 
-                    this._metrics.RegisterPartitionCreated(this.Id, job.Id, partition.Id);
+                    this._metrics?.RegisterPartitionCreated(this.Id, job.Id, partition.Id);
                 }
                 else
                 {

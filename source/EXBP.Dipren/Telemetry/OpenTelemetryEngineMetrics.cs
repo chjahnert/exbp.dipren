@@ -10,7 +10,7 @@ namespace EXBP.Dipren.Telemetry
     /// <summary>
     ///   Implements performance metrics for the <see cref="Engine"/> type using OpenTelemetry.
     /// </summary>
-    public class OpenTelemetryEngineMetrics : IDisposable
+    public sealed class OpenTelemetryEngineMetrics : IEngineMetrics, IDisposable
     {
         private const string TAG_NAME_NODE = "node";
         private const string TAG_NAME_JOB = "job";
@@ -56,13 +56,13 @@ namespace EXBP.Dipren.Telemetry
         ///   A <see cref="OpenTelemetryEngineMetrics"/> object that can be injected into a <see cref="Engine"/>
         ///   instance.
         /// </value>
-        public static OpenTelemetryEngineMetrics Default { get; } = new OpenTelemetryEngineMetrics();
+        public static OpenTelemetryEngineMetrics Instance { get; } = new OpenTelemetryEngineMetrics();
 
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="OpenTelemetryEngineMetrics"/> class.
         /// </summary>
-        public OpenTelemetryEngineMetrics()
+        private OpenTelemetryEngineMetrics()
         {
             this._meter = new Meter("EXBP.Dipren");
 
