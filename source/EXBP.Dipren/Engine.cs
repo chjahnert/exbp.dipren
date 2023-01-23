@@ -455,7 +455,7 @@ namespace EXBP.Dipren
 
             if (acquired != null)
             {
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, result.Id, EngineResources.EventPartitionAcquired, cancellation);
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, acquired.Id, EngineResources.EventPartitionAcquired, cancellation);
 
                 result = acquired.ToPartition(job.Serializer);
             }
