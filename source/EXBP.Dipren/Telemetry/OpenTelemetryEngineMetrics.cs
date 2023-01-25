@@ -14,6 +14,10 @@ namespace EXBP.Dipren.Telemetry
     {
         private const string METER_NAME = "EXBP.Dipren";
 
+        internal const string INSTRUMENT_NAME_KEYS_COMPLETED = "keys-completed";
+        internal const string INSTRUMENT_NAME_BATCHES_COMPLETED = "batches-completed";
+
+        internal const string INSTRUMENT_NAME_BATCH_PROCESSING = "batch-processing";
         internal const string INSTRUMENT_NAME_REPORT_PROGRESS = "report-progress";
 
         internal const string TAG_NAME_NODE = "node";
@@ -79,9 +83,9 @@ namespace EXBP.Dipren.Telemetry
             this._meter = new Meter(METER_NAME);
 
             this._keysRetrievedCounter = this._meter.CreateCounter<long>("keys-retrieved", OpenTelemetryEngineMetricsResources.UnitKeys, OpenTelemetryEngineMetricsResources.InstrumentDescriptionKeysRetrieved);
-            this._keysCompletedCounter = this._meter.CreateCounter<long>("keys-completed", OpenTelemetryEngineMetricsResources.UnitKeys, OpenTelemetryEngineMetricsResources.InstrumentDescriptionKeysCompleted);
+            this._keysCompletedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_KEYS_COMPLETED, OpenTelemetryEngineMetricsResources.UnitKeys, OpenTelemetryEngineMetricsResources.InstrumentDescriptionKeysCompleted);
             this._batchesRetrievedCounter = this._meter.CreateCounter<long>("batches-retrieved", OpenTelemetryEngineMetricsResources.UnitBatches, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchesRetrieved);
-            this._batchesCompletedCounter = this._meter.CreateCounter<long>("batches-completed", OpenTelemetryEngineMetricsResources.UnitBatches, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchesCompleted);
+            this._batchesCompletedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_BATCHES_COMPLETED, OpenTelemetryEngineMetricsResources.UnitBatches, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchesCompleted);
             this._partitionsCreatedCounter = this._meter.CreateCounter<long>("partitions-created", OpenTelemetryEngineMetricsResources.UnitPartitions, OpenTelemetryEngineMetricsResources.InstrumentDescriptionPartitionsCreated);
             this._partitionsCompletedCounter = this._meter.CreateCounter<long>("partitions-completed", OpenTelemetryEngineMetricsResources.UnitPartitions, OpenTelemetryEngineMetricsResources.InstrumentDescriptionPartitionsCompleted);
 
@@ -89,7 +93,7 @@ namespace EXBP.Dipren.Telemetry
             this._tryAcquirePartitionDuration = this._meter.CreateHistogram<double>("try-acquire-partition", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionTryAcquirePartitionDuration);
             this._tryRequestSplitDuration = this._meter.CreateHistogram<double>("try-request-split", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionTryRequestSplitDuration);
             this._batchRetrievalDuration = this._meter.CreateHistogram<double>("batch-retrieval", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchRetrievalDuration);
-            this._batchProcessingDuration = this._meter.CreateHistogram<double>("batch-processing", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchProcessingDuration);
+            this._batchProcessingDuration = this._meter.CreateHistogram<double>(INSTRUMENT_NAME_BATCH_PROCESSING, OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchProcessingDuration);
             this._reportProgressDuration = this._meter.CreateHistogram<double>(INSTRUMENT_NAME_REPORT_PROGRESS, OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionReportProgressDuration);
 
             this._enginesGauge = this._meter.CreateObservableGauge("engines", this.GetEngineStateMeasurements, OpenTelemetryEngineMetricsResources.UnitEngines, OpenTelemetryEngineMetricsResources.InstrumentDescriptionEngines);

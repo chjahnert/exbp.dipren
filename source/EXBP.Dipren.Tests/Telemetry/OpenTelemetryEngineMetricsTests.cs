@@ -50,7 +50,113 @@ namespace EXBP.Dipren.Tests.Telemetry
         }
 
         [Test]
-        public void RegisterReportProgress_MultipleEventsRegistered_InstrumentReflectsEvents()
+        public void RegisterBatchProcessed_MultipleEventsRegistered_InstrumentsReflectEvents()
+        {
+            List<MetricSnapshot> metrics = new List<MetricSnapshot>();
+
+            using MeterProvider provider = Sdk.CreateMeterProviderBuilder()
+                .AddDiprenMeters()
+                .AddInMemoryExporter(metrics)
+                .Build();
+
+            string nodeId = "n1";
+            string jobId = "j1";
+            Guid partitionId = Guid.NewGuid();
+
+            OpenTelemetryEngineMetrics.Instance.RegisterBatchProcessed(nodeId, jobId, partitionId, 7L, true, TimeSpan.FromMilliseconds(2));
+            OpenTelemetryEngineMetrics.Instance.RegisterBatchProcessed(nodeId, jobId, partitionId, 5L, true, TimeSpan.FromMilliseconds(3));
+            OpenTelemetryEngineMetrics.Instance.RegisterBatchProcessed(nodeId, jobId, partitionId, 3L, false, TimeSpan.FromMilliseconds(4));
+
+            provider.Shutdown();
+
+            {
+                MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_KEYS_COMPLETED) && (m.MetricType == MetricType.LongSum));
+
+                Assert.That(snapshot, Is.Not.Null);
+                Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
+
+                MetricPoint pointSucceeded = snapshot.MetricPoints.FirstOrDefault(p =>
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+
+                long succeeded = pointSucceeded.GetSumLong();
+
+                Assert.That(succeeded, Is.EqualTo(12L));
+
+                MetricPoint pointFailed = snapshot.MetricPoints.FirstOrDefault(p =>
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+
+                long failed = pointFailed.GetSumLong();
+
+                Assert.That(failed, Is.EqualTo(3L));
+            }
+
+            {
+                MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_BATCHES_COMPLETED) && (m.MetricType == MetricType.LongSum));
+
+                Assert.That(snapshot, Is.Not.Null);
+                Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
+
+                MetricPoint pointSucceeded = snapshot.MetricPoints.FirstOrDefault(p =>
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+
+                long succeeded = pointSucceeded.GetSumLong();
+
+                Assert.That(succeeded, Is.EqualTo(2L));
+
+                MetricPoint pointFailed = snapshot.MetricPoints.FirstOrDefault(p =>
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+
+                long failed = pointFailed.GetSumLong();
+
+                Assert.That(failed, Is.EqualTo(1L));
+            }
+
+            {
+                MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_BATCH_PROCESSING) && (m.MetricType == MetricType.Histogram));
+
+                Assert.That(snapshot, Is.Not.Null);
+                Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
+
+                MetricPoint pointSucceeded = snapshot.MetricPoints.FirstOrDefault(p =>
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+
+                long succeededCount = pointSucceeded.GetHistogramCount();
+                double succeededSum = pointSucceeded.GetHistogramSum();
+
+                Assert.That(succeededCount, Is.EqualTo(2));
+                Assert.That(succeededSum, Is.EqualTo(5.0));
+
+                MetricPoint pointFailed = snapshot.MetricPoints.FirstOrDefault(p =>
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+
+                long failedCount = pointFailed.GetHistogramCount();
+                double failedSum = pointFailed.GetHistogramSum();
+
+                Assert.That(failedCount, Is.EqualTo(1));
+                Assert.That(failedSum, Is.EqualTo(4.0));
+            }
+        }
+
+        [Test]
+        public void RegisterReportProgress_MultipleEventsRegistered_InstrumentsReflectEvents()
         {
             List<MetricSnapshot> metrics = new List<MetricSnapshot>();
 
