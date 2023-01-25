@@ -12,16 +12,20 @@ namespace EXBP.Dipren.Telemetry
     /// </summary>
     public sealed class OpenTelemetryEngineMetrics : IEngineMetrics, IDisposable
     {
-        private const string TAG_NAME_NODE = "node";
-        private const string TAG_NAME_JOB = "job";
-        private const string TAG_NAME_PARTITION = "partition";
-        private const string TAG_NAME_OUTCOME = "outcome";
-        private const string TAG_NAME_STATE = "state";
+        private const string METER_NAME = "EXBP.Dipren";
 
-        private const string TAG_VALUE_READY = "ready";
-        private const string TAG_VALUE_PROCESSING = "processing";
-        private const string TAG_VALUE_SUCCESS = "success";
-        private const string TAG_VALUE_FAILURE = "failure";
+        internal const string INSTRUMENT_NAME_REPORT_PROGRESS = "report-progress";
+
+        internal const string TAG_NAME_NODE = "node";
+        internal const string TAG_NAME_JOB = "job";
+        internal const string TAG_NAME_PARTITION = "partition";
+        internal const string TAG_NAME_OUTCOME = "outcome";
+        internal const string TAG_NAME_STATE = "state";
+
+        internal const string TAG_VALUE_READY = "ready";
+        internal const string TAG_VALUE_PROCESSING = "processing";
+        internal const string TAG_VALUE_SUCCESS = "success";
+        internal const string TAG_VALUE_FAILURE = "failure";
 
         private static readonly KeyValuePair<string, object> TagEngineStateReady = new KeyValuePair<string, object>(TAG_NAME_STATE, TAG_VALUE_READY);
         private static readonly KeyValuePair<string, object> TagEngineStateProcessing = new KeyValuePair<string, object>(TAG_NAME_STATE, TAG_VALUE_PROCESSING);
@@ -58,13 +62,21 @@ namespace EXBP.Dipren.Telemetry
         /// </value>
         public static OpenTelemetryEngineMetrics Instance { get; } = new OpenTelemetryEngineMetrics();
 
+        /// <summary>
+        ///   Gets the name of the meter.
+        /// </summary>
+        /// <value>
+        ///   A <see cref="string"/> value containing the name of the meter.
+        /// </value>
+        public static string MeterName { get; } = METER_NAME;
+
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="OpenTelemetryEngineMetrics"/> class.
         /// </summary>
         private OpenTelemetryEngineMetrics()
         {
-            this._meter = new Meter("EXBP.Dipren");
+            this._meter = new Meter(METER_NAME);
 
             this._keysRetrievedCounter = this._meter.CreateCounter<long>("keys-retrieved", OpenTelemetryEngineMetricsResources.UnitKeys, OpenTelemetryEngineMetricsResources.InstrumentDescriptionKeysRetrieved);
             this._keysCompletedCounter = this._meter.CreateCounter<long>("keys-completed", OpenTelemetryEngineMetricsResources.UnitKeys, OpenTelemetryEngineMetricsResources.InstrumentDescriptionKeysCompleted);
@@ -78,7 +90,7 @@ namespace EXBP.Dipren.Telemetry
             this._tryRequestSplitDuration = this._meter.CreateHistogram<double>("try-request-split", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionTryRequestSplitDuration);
             this._batchRetrievalDuration = this._meter.CreateHistogram<double>("batch-retrieval", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchRetrievalDuration);
             this._batchProcessingDuration = this._meter.CreateHistogram<double>("batch-processing", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchProcessingDuration);
-            this._reportProgressDuration = this._meter.CreateHistogram<double>("report-progress", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionReportProgressDuration);
+            this._reportProgressDuration = this._meter.CreateHistogram<double>(INSTRUMENT_NAME_REPORT_PROGRESS, OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionReportProgressDuration);
 
             this._enginesGauge = this._meter.CreateObservableGauge("engines", this.GetEngineStateMeasurements, OpenTelemetryEngineMetricsResources.UnitEngines, OpenTelemetryEngineMetricsResources.InstrumentDescriptionEngines);
         }
