@@ -50,6 +50,41 @@ namespace EXBP.Dipren.Tests.Telemetry
         }
 
         [Test]
+        public void RegisterPartitionCreated_MultipleEventsRegistered_InstrumentsReflectEvents()
+        {
+            List<MetricSnapshot> metrics = new List<MetricSnapshot>();
+
+            using MeterProvider provider = Sdk.CreateMeterProviderBuilder()
+                .AddDiprenMeters()
+                .AddInMemoryExporter(metrics)
+                .Build();
+
+            string nodeId = "n1";
+            string jobId = "j1";
+            Guid partitionId = Guid.NewGuid();
+
+            OpenTelemetryEngineMetrics.Instance.RegisterPartitionCreated(nodeId, jobId, partitionId);
+            OpenTelemetryEngineMetrics.Instance.RegisterPartitionCreated(nodeId, jobId, partitionId, 2L);
+            OpenTelemetryEngineMetrics.Instance.RegisterPartitionCreated(nodeId, jobId, partitionId, 5L);
+
+            provider.Shutdown();
+
+            MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_PARTITIONS_CREATED) && (m.MetricType == MetricType.LongSum));
+
+            Assert.That(snapshot, Is.Not.Null);
+            Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(1));
+
+            MetricPoint point = snapshot.MetricPoints.FirstOrDefault(p =>
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")));
+
+            long count = point.GetSumLong();
+
+            Assert.That(count, Is.EqualTo(8L));
+        }
+
+        [Test]
         public void RegisterPartitionCompleted_MultipleEventsRegistered_InstrumentsReflectEvents()
         {
             List<MetricSnapshot> metrics = new List<MetricSnapshot>();
@@ -69,7 +104,7 @@ namespace EXBP.Dipren.Tests.Telemetry
 
             provider.Shutdown();
 
-            MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_PARTITONS_COMPLETED) && (m.MetricType == MetricType.LongSum));
+            MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_PARTITIONS_COMPLETED) && (m.MetricType == MetricType.LongSum));
 
             Assert.That(snapshot, Is.Not.Null);
             Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(1));

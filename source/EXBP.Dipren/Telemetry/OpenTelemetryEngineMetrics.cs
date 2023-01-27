@@ -18,7 +18,8 @@ namespace EXBP.Dipren.Telemetry
         internal const string INSTRUMENT_NAME_BATCHES_RETRIEVED = "batches-retrieved";
         internal const string INSTRUMENT_NAME_KEYS_COMPLETED = "keys-completed";
         internal const string INSTRUMENT_NAME_BATCHES_COMPLETED = "batches-completed";
-        internal const string INSTRUMENT_NAME_PARTITONS_COMPLETED = "partitions-completed";
+        internal const string INSTRUMENT_NAME_PARTITIONS_CREATED = "partitions-created";
+        internal const string INSTRUMENT_NAME_PARTITIONS_COMPLETED = "partitions-completed";
 
         internal const string INSTRUMENT_NAME_BATCH_RETRIEVAL = "batch-retrieval";
         internal const string INSTRUMENT_NAME_BATCH_PROCESSING = "batch-processing";
@@ -90,8 +91,8 @@ namespace EXBP.Dipren.Telemetry
             this._keysCompletedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_KEYS_COMPLETED, OpenTelemetryEngineMetricsResources.UnitKeys, OpenTelemetryEngineMetricsResources.InstrumentDescriptionKeysCompleted);
             this._batchesRetrievedCounter = this._meter.CreateCounter<long>("batches-retrieved", OpenTelemetryEngineMetricsResources.UnitBatches, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchesRetrieved);
             this._batchesCompletedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_BATCHES_COMPLETED, OpenTelemetryEngineMetricsResources.UnitBatches, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchesCompleted);
-            this._partitionsCreatedCounter = this._meter.CreateCounter<long>("partitions-created", OpenTelemetryEngineMetricsResources.UnitPartitions, OpenTelemetryEngineMetricsResources.InstrumentDescriptionPartitionsCreated);
-            this._partitionsCompletedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_PARTITONS_COMPLETED, OpenTelemetryEngineMetricsResources.UnitPartitions, OpenTelemetryEngineMetricsResources.InstrumentDescriptionPartitionsCompleted);
+            this._partitionsCreatedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_PARTITIONS_CREATED, OpenTelemetryEngineMetricsResources.UnitPartitions, OpenTelemetryEngineMetricsResources.InstrumentDescriptionPartitionsCreated);
+            this._partitionsCompletedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_PARTITIONS_COMPLETED, OpenTelemetryEngineMetricsResources.UnitPartitions, OpenTelemetryEngineMetricsResources.InstrumentDescriptionPartitionsCompleted);
 
             this._isSplitRequestPendingDuration = this._meter.CreateHistogram<double>("is-split-request-pending", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionIsSplitRequestPendingDuration);
             this._tryAcquirePartitionDuration = this._meter.CreateHistogram<double>("try-acquire-partition", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionTryAcquirePartitionDuration);
