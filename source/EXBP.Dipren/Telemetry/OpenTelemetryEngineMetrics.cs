@@ -22,6 +22,7 @@ namespace EXBP.Dipren.Telemetry
         internal const string INSTRUMENT_NAME_PARTITIONS_COMPLETED = "partitions-completed";
 
         internal const string INSTRUMENT_NAME_IS_SPLIT_REQUEST_PENDING = "is-split-request-pending";
+        internal const string INSTRUMENT_NAME_TRY_ACQUIRE_PARTITION = "try-acquire-partition";
         internal const string INSTRUMENT_NAME_BATCH_RETRIEVAL = "batch-retrieval";
         internal const string INSTRUMENT_NAME_BATCH_PROCESSING = "batch-processing";
         internal const string INSTRUMENT_NAME_REPORT_PROGRESS = "report-progress";
@@ -96,7 +97,7 @@ namespace EXBP.Dipren.Telemetry
             this._partitionsCompletedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_PARTITIONS_COMPLETED, OpenTelemetryEngineMetricsResources.UnitPartitions, OpenTelemetryEngineMetricsResources.InstrumentDescriptionPartitionsCompleted);
 
             this._isSplitRequestPendingDuration = this._meter.CreateHistogram<double>(INSTRUMENT_NAME_IS_SPLIT_REQUEST_PENDING, OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionIsSplitRequestPendingDuration);
-            this._tryAcquirePartitionDuration = this._meter.CreateHistogram<double>("try-acquire-partition", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionTryAcquirePartitionDuration);
+            this._tryAcquirePartitionDuration = this._meter.CreateHistogram<double>(INSTRUMENT_NAME_TRY_ACQUIRE_PARTITION, OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionTryAcquirePartitionDuration);
             this._tryRequestSplitDuration = this._meter.CreateHistogram<double>("try-request-split", OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionTryRequestSplitDuration);
             this._batchRetrievalDuration = this._meter.CreateHistogram<double>(INSTRUMENT_NAME_BATCH_RETRIEVAL, OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchRetrievalDuration);
             this._batchProcessingDuration = this._meter.CreateHistogram<double>(INSTRUMENT_NAME_BATCH_PROCESSING, OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchProcessingDuration);
