@@ -89,7 +89,7 @@ namespace EXBP.Dipren.Telemetry
 
             this._keysRetrievedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_KEYS_RETRIEVED, OpenTelemetryEngineMetricsResources.UnitKeys, OpenTelemetryEngineMetricsResources.InstrumentDescriptionKeysRetrieved);
             this._keysCompletedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_KEYS_COMPLETED, OpenTelemetryEngineMetricsResources.UnitKeys, OpenTelemetryEngineMetricsResources.InstrumentDescriptionKeysCompleted);
-            this._batchesRetrievedCounter = this._meter.CreateCounter<long>("batches-retrieved", OpenTelemetryEngineMetricsResources.UnitBatches, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchesRetrieved);
+            this._batchesRetrievedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_BATCHES_RETRIEVED, OpenTelemetryEngineMetricsResources.UnitBatches, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchesRetrieved);
             this._batchesCompletedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_BATCHES_COMPLETED, OpenTelemetryEngineMetricsResources.UnitBatches, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchesCompleted);
             this._partitionsCreatedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_PARTITIONS_CREATED, OpenTelemetryEngineMetricsResources.UnitPartitions, OpenTelemetryEngineMetricsResources.InstrumentDescriptionPartitionsCreated);
             this._partitionsCompletedCounter = this._meter.CreateCounter<long>(INSTRUMENT_NAME_PARTITIONS_COMPLETED, OpenTelemetryEngineMetricsResources.UnitPartitions, OpenTelemetryEngineMetricsResources.InstrumentDescriptionPartitionsCompleted);
