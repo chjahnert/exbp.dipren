@@ -15,7 +15,7 @@ namespace EXBP.Dipren
     public class Engine : Node
     {
         private readonly Configuration _configuration;
-        private readonly IEngineMetrics _metrics = OpenTelemetryEngineMetrics.Instance;
+        private readonly IEngineMetrics _metrics;
 
 
         /// <summary>
@@ -30,6 +30,9 @@ namespace EXBP.Dipren
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
+        /// <param name="configuration">
+        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
+        /// </param>
         /// <param name="clock">
         ///   A <see cref="ITimestampProvider"/> that can be used to generate timestamp values; or
         ///   <see langword="null"/> to use a <see cref="UtcTimestampProvider"/> instance.
@@ -38,12 +41,14 @@ namespace EXBP.Dipren
         ///   The <see cref="IEventHandler"/> object to use to emit event notifications; or <see langword="null"/> to
         ///   discard event notifications.
         /// </param>
-        /// <param name="configuration">
-        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
+        /// <param name="metrics">
+        ///   The <see cref="IEngineMetrics"/> object to use to collect performance metrics; or <see langword="null"/>
+        ///   to use <see cref="OpenTelemetryEngineMetrics"/> instance.
         /// </param>
-        internal Engine(IEngineDataStore store, ITimestampProvider clock, IEventHandler handler = null, Configuration configuration = null) : base(NodeType.Engine, store, clock, handler)
+        internal Engine(IEngineDataStore store, Configuration configuration = null, ITimestampProvider clock = null, IEventHandler handler = null, IEngineMetrics metrics = null) : base(NodeType.Engine, store, clock, handler)
         {
             this._configuration = (configuration ?? new Configuration());
+            this._metrics = (metrics ?? OpenTelemetryEngineMetrics.Instance);
         }
 
         /// <summary>
@@ -52,16 +57,21 @@ namespace EXBP.Dipren
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
+        /// <param name="configuration">
+        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
+        /// </param>
         /// <param name="handler">
         ///   The <see cref="IEventHandler"/> object to use to emit event notifications; or <see langword="null"/> to
         ///   discard event notifications.
         /// </param>
-        /// <param name="configuration">
-        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
+        /// <param name="metrics">
+        ///   The <see cref="IEngineMetrics"/> object to use to collect performance metrics; or <see langword="null"/>
+        ///   to use <see cref="OpenTelemetryEngineMetrics"/> instance.
         /// </param>
-        public Engine(IEngineDataStore store, IEventHandler handler = null, Configuration configuration = null) : base(NodeType.Engine, store, null, handler)
+        public Engine(IEngineDataStore store, Configuration configuration = null, IEventHandler handler = null, IEngineMetrics metrics = null) : base(NodeType.Engine, store, null, handler)
         {
             this._configuration = (configuration ?? new Configuration());
+            this._metrics = (metrics ?? OpenTelemetryEngineMetrics.Instance);
         }
 
         /// <summary>

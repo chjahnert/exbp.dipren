@@ -90,7 +90,7 @@ namespace EXBP.Dipren.Data.Tests
             {
                 Configuration configuration = this.OnCreateEngineConfiguration();
                 CompositeEventHandler composite = new CompositeEventHandler(DebugEventLogger.Information, handler);
-                Engine engine = new Engine(wrapped, composite, configuration: configuration);
+                Engine engine = new Engine(wrapped, configuration, composite);
 
                 Job<int, Cuboid> job = this.CreateDistributeProcessingJob(name, processor);
 
