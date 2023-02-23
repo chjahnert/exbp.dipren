@@ -456,5 +456,56 @@ namespace EXBP.Dipren.Tests.Telemetry
             Assert.That(countFailure, Is.EqualTo(1));
             Assert.That(sumFailure, Is.EqualTo(7));
         }
+
+        [Test]
+        public void RegisterTryRequestSplit_MultipleEventsRegistered_InstrumentsReflectEvents()
+        {
+            List<MetricSnapshot> metrics = new List<MetricSnapshot>();
+
+            using MeterProvider provider = Sdk.CreateMeterProviderBuilder()
+                .AddDiprenMeters()
+                .AddInMemoryExporter(metrics)
+                .Build();
+
+            string nodeId = "n1";
+            string jobId = "j1";
+            Guid partitionId = Guid.NewGuid();
+            TimeSpan duration1 = TimeSpan.FromMilliseconds(2);
+            TimeSpan duration2 = TimeSpan.FromMilliseconds(3);
+            TimeSpan duration3 = TimeSpan.FromMilliseconds(7);
+
+            OpenTelemetryEngineMetrics.Instance.RegisterTryRequestSplit(nodeId, jobId, true, duration1);
+            OpenTelemetryEngineMetrics.Instance.RegisterTryRequestSplit(nodeId, jobId, true, duration2);
+            OpenTelemetryEngineMetrics.Instance.RegisterTryRequestSplit(nodeId, jobId, false, duration3);
+
+            provider.Shutdown();
+
+            MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_TRY_REQUEST_SPLIT) && (m.MetricType == MetricType.Histogram));
+
+            Assert.That(snapshot, Is.Not.Null);
+            Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
+
+            MetricPoint pointSuccess = snapshot.MetricPoints.FirstOrDefault(p =>
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+
+            long countSuccess = pointSuccess.GetHistogramCount();
+            double sumSuccess = pointSuccess.GetHistogramSum();
+
+            Assert.That(countSuccess, Is.EqualTo(2));
+            Assert.That(sumSuccess, Is.EqualTo(5));
+
+            MetricPoint pointFailure = snapshot.MetricPoints.FirstOrDefault(p =>
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+
+            long countFailure = pointFailure.GetHistogramCount();
+            double sumFailure = pointFailure.GetHistogramSum();
+
+            Assert.That(countFailure, Is.EqualTo(1));
+            Assert.That(sumFailure, Is.EqualTo(7));
+        }
     }
 }
