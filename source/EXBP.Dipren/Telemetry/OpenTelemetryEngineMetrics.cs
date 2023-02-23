@@ -20,13 +20,13 @@ namespace EXBP.Dipren.Telemetry
         internal const string INSTRUMENT_NAME_BATCHES_COMPLETED = "batches-completed";
         internal const string INSTRUMENT_NAME_PARTITIONS_CREATED = "partitions-created";
         internal const string INSTRUMENT_NAME_PARTITIONS_COMPLETED = "partitions-completed";
-
         internal const string INSTRUMENT_NAME_IS_SPLIT_REQUEST_PENDING = "is-split-request-pending";
         internal const string INSTRUMENT_NAME_TRY_ACQUIRE_PARTITION = "try-acquire-partition";
         internal const string INSTRUMENT_NAME_TRY_REQUEST_SPLIT = "try-request-split";
         internal const string INSTRUMENT_NAME_BATCH_RETRIEVAL = "batch-retrieval";
         internal const string INSTRUMENT_NAME_BATCH_PROCESSING = "batch-processing";
         internal const string INSTRUMENT_NAME_REPORT_PROGRESS = "report-progress";
+        internal const string INSTRUMENT_NAME_ENGINES = "engines";
 
         internal const string TAG_NAME_NODE = "node";
         internal const string TAG_NAME_JOB = "job";
@@ -104,7 +104,7 @@ namespace EXBP.Dipren.Telemetry
             this._batchProcessingDuration = this._meter.CreateHistogram<double>(INSTRUMENT_NAME_BATCH_PROCESSING, OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionBatchProcessingDuration);
             this._reportProgressDuration = this._meter.CreateHistogram<double>(INSTRUMENT_NAME_REPORT_PROGRESS, OpenTelemetryEngineMetricsResources.UnitMilliseconds, OpenTelemetryEngineMetricsResources.InstrumentDescriptionReportProgressDuration);
 
-            this._enginesGauge = this._meter.CreateObservableGauge("engines", this.GetEngineStateMeasurements, OpenTelemetryEngineMetricsResources.UnitEngines, OpenTelemetryEngineMetricsResources.InstrumentDescriptionEngines);
+            this._enginesGauge = this._meter.CreateObservableGauge(INSTRUMENT_NAME_ENGINES, this.GetEngineStateMeasurements, OpenTelemetryEngineMetricsResources.UnitEngines, OpenTelemetryEngineMetricsResources.InstrumentDescriptionEngines);
         }
 
 
