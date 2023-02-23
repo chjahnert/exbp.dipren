@@ -2,8 +2,6 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
-using EXBP.Dipren.Diagnostics;
-
 
 namespace EXBP.Dipren.Diagnostics
 {
