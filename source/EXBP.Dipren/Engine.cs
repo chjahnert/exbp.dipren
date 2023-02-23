@@ -15,6 +15,7 @@ namespace EXBP.Dipren
     public class Engine : Node
     {
         private readonly Configuration _configuration;
+        private readonly IEngineMetrics _metrics;
 
 
         /// <summary>
@@ -29,6 +30,9 @@ namespace EXBP.Dipren
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
+        /// <param name="configuration">
+        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
+        /// </param>
         /// <param name="clock">
         ///   A <see cref="ITimestampProvider"/> that can be used to generate timestamp values; or
         ///   <see langword="null"/> to use a <see cref="UtcTimestampProvider"/> instance.
@@ -37,12 +41,14 @@ namespace EXBP.Dipren
         ///   The <see cref="IEventHandler"/> object to use to emit event notifications; or <see langword="null"/> to
         ///   discard event notifications.
         /// </param>
-        /// <param name="configuration">
-        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
+        /// <param name="metrics">
+        ///   The <see cref="IEngineMetrics"/> object to use to collect performance metrics; or <see langword="null"/>
+        ///   to use <see cref="OpenTelemetryEngineMetrics"/> instance.
         /// </param>
-        internal Engine(IEngineDataStore store, ITimestampProvider clock, IEventHandler handler = null, Configuration configuration = null) : base(NodeType.Engine, store, clock, handler)
+        internal Engine(IEngineDataStore store, Configuration configuration = null, ITimestampProvider clock = null, IEventHandler handler = null, IEngineMetrics metrics = null) : base(NodeType.Engine, store, clock, handler)
         {
             this._configuration = (configuration ?? new Configuration());
+            this._metrics = (metrics ?? OpenTelemetryEngineMetrics.Instance);
         }
 
         /// <summary>
@@ -51,16 +57,21 @@ namespace EXBP.Dipren
         /// <param name="store">
         ///   The <see cref="IEngineDataStore"/> to use.
         /// </param>
+        /// <param name="configuration">
+        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
+        /// </param>
         /// <param name="handler">
         ///   The <see cref="IEventHandler"/> object to use to emit event notifications; or <see langword="null"/> to
         ///   discard event notifications.
         /// </param>
-        /// <param name="configuration">
-        ///   The configuration settings to use; or <see langword="null"/> to use the default configuration settings.
+        /// <param name="metrics">
+        ///   The <see cref="IEngineMetrics"/> object to use to collect performance metrics; or <see langword="null"/>
+        ///   to use <see cref="OpenTelemetryEngineMetrics"/> instance.
         /// </param>
-        public Engine(IEngineDataStore store, IEventHandler handler = null, Configuration configuration = null) : base(NodeType.Engine, store, null, handler)
+        public Engine(IEngineDataStore store, Configuration configuration = null, IEventHandler handler = null, IEngineMetrics metrics = null) : base(NodeType.Engine, store, null, handler)
         {
             this._configuration = (configuration ?? new Configuration());
+            this._metrics = (metrics ?? OpenTelemetryEngineMetrics.Instance);
         }
 
         /// <summary>
@@ -98,6 +109,8 @@ namespace EXBP.Dipren
         public async Task RunAsync<TKey, TItem>(Job<TKey, TItem> job, bool wait, CancellationToken cancellation = default)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
+
+            this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
 
             try
             {
@@ -193,6 +206,8 @@ namespace EXBP.Dipren
 
                         if (partition != null)
                         {
+                            this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Processing);
+
                             try
                             {
                                 await this.ProcessPartitionAsync(job, partition, settings, cancellation);
@@ -204,6 +219,10 @@ namespace EXBP.Dipren
                                 //
 
                                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventPartitionTaken, cancellation);
+                            }
+                            finally
+                            {
+                                this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
                             }
                         }
                         else
@@ -242,6 +261,10 @@ namespace EXBP.Dipren
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Error, job.Id, EngineResources.EventProcessingFailed, ex, cancellation);
 
                 throw;
+            }
+            finally
+            {
+                this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Stopped);
             }
         }
 
@@ -293,7 +316,6 @@ namespace EXBP.Dipren
 
             while (partition.IsCompleted == false)
             {
-
                 TKey first = ((partition.Processed == 0L) ? partition.Range.First : partition.Position);
                 Range<TKey> range = new Range<TKey>(first, partition.Range.Last, partition.Range.IsInclusive);
                 int skip = ((partition.Processed == 0L) ? 0 : 1);
@@ -312,13 +334,15 @@ namespace EXBP.Dipren
                 string descriptionBatchRetrieved = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchRetrieved, count, stopwatch.Elapsed.TotalMilliseconds);
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchRetrieved, cancellation);
 
+                this._metrics?.RegisterBatchRetrieved(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
+
                 if (count > 0L)
                 {
                     IEnumerable<TItem> items = batch.Select(kvp => kvp.Value);
 
                     stopwatch.Restart();
 
-                    bool failed = false;
+                    bool succeeded = true;
 
                     try
                     {
@@ -343,12 +367,14 @@ namespace EXBP.Dipren
                         string descriptionBatchProcessingFailed = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessingFailed, batchDescriptor);
                         await this.Dispatcher.DispatchEventAsync(EventSeverity.Warning, job.Id, partition.Id, descriptionBatchProcessingFailed, ex, cancellation);
 
-                        failed = true;
+                        succeeded = false;
                     }
 
                     stopwatch.Stop();
 
-                    if (failed == false)
+                    this._metrics?.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, succeeded, stopwatch.Elapsed);
+
+                    if (succeeded == true)
                     {
                         string descriptionBatchProcessed = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessed, count, stopwatch.Elapsed.TotalMilliseconds);
                         await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchProcessed, cancellation);
@@ -389,6 +415,8 @@ namespace EXBP.Dipren
             }
 
             await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventPartitionCompleted, cancellation);
+
+            this._metrics?.RegisterPartitionCompleted(this.Id, job.Id, partition.Id);
         }
 
         /// <summary>
@@ -425,29 +453,47 @@ namespace EXBP.Dipren
             DateTime now = this.Clock.GetCurrentTimestamp();
             DateTime cut = (now - settings.Timeout - settings.ClockDrift);
 
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             Partition acquired = await this.Store.TryAcquirePartitionAsync(job.Id, this.Id, now, cut, cancellation);
+
+            stopwatch.Stop();
+
+            this._metrics?.RegisterTryAcquirePartition(this.Id, job.Id, (acquired != null), stopwatch.Elapsed);
 
             Partition<TKey> result = null;
 
             if (acquired != null)
             {
-                result = acquired.ToPartition(job.Serializer);
+                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, acquired.Id, EngineResources.EventPartitionAcquired, cancellation);
 
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, result.Id, EngineResources.EventPartitionAcquired, cancellation);
+                result = acquired.ToPartition(job.Serializer);
             }
             else
             {
                 await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventPartitionNotAcquired, cancellation);
 
+                stopwatch.Restart();
+
                 bool pending = await this.Store.IsSplitRequestPendingAsync(job.Id, this.Id, cancellation);
+
+                stopwatch.Stop();
+
+                this._metrics?.RegisterIsSplitRequestPending(this.Id, job.Id, stopwatch.Elapsed);
 
                 if (pending == false)
                 {
                     await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventRequestingSplit, cancellation);
 
+                    stopwatch.Restart();
+
                     bool succeeded = await this.Store.TryRequestSplitAsync(job.Id, this.Id, cut, cancellation);
 
+                    stopwatch.Stop();
+
                     await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, (succeeded ? EngineResources.EventSplitRequestSucceeded : EngineResources.EventSplitRequestFailed), cancellation);
+
+                    this._metrics?.RegisterTryRequestSplit(this.Id, job.Id, succeeded, stopwatch.Elapsed);
                 }
                 else
                 {
@@ -511,6 +557,8 @@ namespace EXBP.Dipren
             Debug.Assert(processed >= 0L);
             Debug.Assert(remaining >= 0L);
 
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             string serializedPosition = job.Serializer.Serialize(position);
 
             long adjustedRemaining = (completed == false) ? remaining : 0L;
@@ -519,6 +567,10 @@ namespace EXBP.Dipren
             Partition updated = await this.Store.ReportProgressAsync(partition.Id, this.Id, timestamp, serializedPosition, processed, adjustedRemaining, completed, adjustedThroughput, cancellation);
 
             Partition<TKey> result = updated.ToPartition(job.Serializer);
+
+            stopwatch.Stop();
+
+            this._metrics?.RegisterReportProgress(this.Id, job.Id, partition.Id, stopwatch.Elapsed);
 
             return result;
         }
@@ -592,6 +644,8 @@ namespace EXBP.Dipren
 
                     string descriptionPartitionSplit = String.Format(CultureInfo.InvariantCulture, EngineResources.EventPartitionSplit, updatedPartition.Range.First, updatedPartition.Range.Last, excludedPartition.Id, excludedPartition.Range.First, excludedPartition.Range.Last, stopwatch.Elapsed.TotalMilliseconds);
                     await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, descriptionPartitionSplit, cancellation);
+
+                    this._metrics?.RegisterPartitionCreated(this.Id, job.Id, partition.Id);
                 }
                 else
                 {

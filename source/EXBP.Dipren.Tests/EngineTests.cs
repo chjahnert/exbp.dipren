@@ -17,14 +17,14 @@ namespace EXBP.Dipren.Tests
         [Test]
         public void Ctor_ArgumentStoreIsNull_ThrowsException()
         {
-            Assert.Throws<ArgumentNullException>(() => new Engine(null));
+            Assert.Throws<ArgumentNullException>(() => new Engine(null, null, null, null));
         }
 
         [Test]
         public void RunAsync_ArgumentJobIsNull_ThrowsException()
         {
             MemoryEngineDataStore store = new MemoryEngineDataStore();
-            Engine engine = new Engine(store);
+            Engine engine = new Engine(store, null, null, null);
 
             Assert.ThrowsAsync<ArgumentNullException>(() => engine.RunAsync<int, int>(null, false));
         }
@@ -46,7 +46,7 @@ namespace EXBP.Dipren.Tests
 
             await scheduler.ScheduleAsync(job, settings);
 
-            Engine engine = new Engine(store, this.DefaultEventHandler);
+            Engine engine = new Engine(store, null ,null, this.DefaultEventHandler);
 
             await engine.RunAsync(job, false);
 
@@ -71,7 +71,7 @@ namespace EXBP.Dipren.Tests
 
             await scheduler.ScheduleAsync(job, settings);
 
-            Engine engine = new Engine(store, this.DefaultEventHandler);
+            Engine engine = new Engine(store, null, null, this.DefaultEventHandler);
 
             await engine.RunAsync(job, false);
 
@@ -94,7 +94,7 @@ namespace EXBP.Dipren.Tests
 
             await scheduler.ScheduleAsync(job, settings);
 
-            Engine engine = new Engine(store, this.DefaultEventHandler);
+            Engine engine = new Engine(store, null, null, this.DefaultEventHandler);
 
             await engine.RunAsync(job, false);
 
