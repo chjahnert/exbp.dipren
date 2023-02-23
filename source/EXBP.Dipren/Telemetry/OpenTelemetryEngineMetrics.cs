@@ -462,15 +462,48 @@ namespace EXBP.Dipren.Telemetry
             return result;
         }
 
-        private class EngineStateEntry
+        /// <summary>
+        ///   Holds the current state of an engine.
+        /// </summary>
+        private sealed class EngineStateEntry
         {
+            /// <summary>
+            ///   Gets the unique identifier of the processing node.
+            /// </summary>
+            /// <value>
+            ///   A <see cref="string"/> value containing the unique identifier of the processing node.
+            /// </value>
             public string NodeId { get; }
 
+            /// <summary>
+            ///   Gets the unique identifier of the distributed processing job.
+            /// </summary>
+            /// <value>
+            ///   A <see cref="string"/> value containing the unique identifier of the distributed processing job.
+            /// </value>
             public string JobId { get; }
 
+            /// <summary>
+            ///   Gets the current state of the processing engine.
+            /// </summary>
+            /// <value>
+            ///   A <see cref="EngineState"/> value indicating the current state of the processing engine.
+            /// </value>
             public EngineState State { get; set; }
 
 
+            /// <summary>
+            ///   Initializes a new instance of the <see cref="EngineStateEntry"/> class.
+            /// </summary>
+            /// <param name="nodeId">
+            ///   The unique identifier of the processing node.
+            /// </param>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job.
+            /// </param>
+            /// <param name="state">
+            ///   The current state of the processing engine.
+            /// </param>
             public EngineStateEntry(string nodeId, string jobId, EngineState state)
             {
                 Debug.Assert(nodeId != null);
