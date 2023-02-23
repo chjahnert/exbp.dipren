@@ -36,8 +36,8 @@ namespace EXBP.Dipren.Telemetry
 
         internal const string TAG_VALUE_READY = "ready";
         internal const string TAG_VALUE_PROCESSING = "processing";
-        internal const string TAG_VALUE_SUCCESS = "success";
-        internal const string TAG_VALUE_FAILURE = "failure";
+        internal const string TAG_VALUE_SUCCEEDED = "succeeded";
+        internal const string TAG_VALUE_FAILED = "failed";
 
         private static readonly KeyValuePair<string, object> TagEngineStateReady = new KeyValuePair<string, object>(TAG_NAME_STATE, TAG_VALUE_READY);
         private static readonly KeyValuePair<string, object> TagEngineStateProcessing = new KeyValuePair<string, object>(TAG_NAME_STATE, TAG_VALUE_PROCESSING);
@@ -269,7 +269,7 @@ namespace EXBP.Dipren.Telemetry
             Assert.ArgumentIsGreaterOrEqual(keys, 0L, nameof(keys));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, partitionId, (success ? OperationOutcome.Success : OperationOutcome.Failure));
+            TagList tags = this.CreateTags(nodeId, jobId, partitionId, (success ? TAG_VALUE_SUCCEEDED : TAG_VALUE_FAILED));
 
             this._keysRetrievedCounter.Add(keys, tags);
             this._batchesRetrievedCounter.Add(1L, tags);
@@ -304,7 +304,7 @@ namespace EXBP.Dipren.Telemetry
             Assert.ArgumentIsGreaterOrEqual(keys, 0, nameof(keys));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, partitionId, (success ? OperationOutcome.Success : OperationOutcome.Failure));
+            TagList tags = this.CreateTags(nodeId, jobId, partitionId, (success ? TAG_VALUE_SUCCEEDED : TAG_VALUE_FAILED));
 
             this._keysCompletedCounter.Add(keys, tags);
             this._batchesCompletedCounter.Add(1L, tags);
@@ -355,7 +355,7 @@ namespace EXBP.Dipren.Telemetry
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, null, (success ? OperationOutcome.Success : OperationOutcome.Failure));
+            TagList tags = this.CreateTags(nodeId, jobId, null, (success ? TAG_VALUE_SUCCEEDED : TAG_VALUE_FAILED));
 
             this._tryAcquirePartitionDuration.Record(duration.TotalMilliseconds, tags);
         }
@@ -381,7 +381,7 @@ namespace EXBP.Dipren.Telemetry
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
             Assert.ArgumentIsGreaterOrEqual(duration, TimeSpan.Zero, nameof(duration));
 
-            TagList tags = this.CreateTags(nodeId, jobId, null, (success ? OperationOutcome.Success : OperationOutcome.Failure));
+            TagList tags = this.CreateTags(nodeId, jobId, null, (success ? TAG_VALUE_SUCCEEDED : TAG_VALUE_FAILED));
 
             this._tryRequestSplitDuration.Record(duration.TotalMilliseconds, tags);
         }
@@ -426,13 +426,13 @@ namespace EXBP.Dipren.Telemetry
         ///   The unique identifier if the partition; or <see langword="null"/> if not available.
         /// </param>
         /// <param name="outcome">
-        ///   A <see cref="OperationOutcome"/> value indicating the outcome of the operation; or <see langword="null"/>
+        ///   A <see cref="string"/> value indicating the outcome of the operation; or <see langword="null"/>
         ///   if not relevant.
         /// </param>
         /// <returns>
         ///   A <see cref="TagList"/> object containing the tags for the provided measurement attributes.
         /// </returns>
-        private TagList CreateTags(string nodeId, string jobId = null, Guid? partitionId = null, OperationOutcome? outcome = null)
+        private TagList CreateTags(string nodeId, string jobId = null, Guid? partitionId = null, string outcome = null)
         {
             Debug.Assert(nodeId != null);
             Debug.Assert(jobId != null);
@@ -456,32 +456,10 @@ namespace EXBP.Dipren.Telemetry
 
             if (outcome != null)
             {
-                Assert.ArgumentIsDefined(outcome.Value, nameof(outcome));
-
-                string value = null;
-
-                switch (outcome.Value)
-                {
-                    case OperationOutcome.Success:
-                        value = TAG_VALUE_SUCCESS;
-                        break;
-
-                    case OperationOutcome.Failure:
-                        value = TAG_VALUE_FAILURE;
-                        break;
-                }
-
-                result.Add(TAG_NAME_OUTCOME, value);
-                ;
+                result.Add(TAG_NAME_OUTCOME, outcome);
             }
 
             return result;
-        }
-
-        private enum OperationOutcome
-        {
-            Success,
-            Failure
         }
 
         private class EngineStateEntry

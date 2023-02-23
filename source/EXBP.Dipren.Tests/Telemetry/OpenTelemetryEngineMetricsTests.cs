@@ -149,7 +149,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCEEDED));
 
                 long succeeded = pointSucceeded.GetSumLong();
 
@@ -159,7 +159,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED));
 
                 long failed = pointFailed.GetSumLong();
 
@@ -176,7 +176,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCEEDED));
 
                 long succeeded = pointSucceeded.GetSumLong();
 
@@ -186,7 +186,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED));
 
                 long failed = pointFailed.GetSumLong();
 
@@ -203,7 +203,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCEEDED));
 
                 long succeededCount = pointSucceeded.GetHistogramCount();
                 double succeededSum = pointSucceeded.GetHistogramSum();
@@ -215,7 +215,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED));
 
                 long failedCount = pointFailed.GetHistogramCount();
                 double failedSum = pointFailed.GetHistogramSum();
@@ -255,7 +255,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCEEDED));
 
                 long succeeded = pointSucceeded.GetSumLong();
 
@@ -265,7 +265,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED));
 
                 long failed = pointFailed.GetSumLong();
 
@@ -282,7 +282,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCEEDED));
 
                 long succeeded = pointSucceeded.GetSumLong();
 
@@ -292,7 +292,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED));
 
                 long failed = pointFailed.GetSumLong();
 
@@ -309,7 +309,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCEEDED));
 
                 long succeededCount = pointSucceeded.GetHistogramCount();
                 double succeededSum = pointSucceeded.GetHistogramSum();
@@ -321,7 +321,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED));
 
                 long failedCount = pointFailed.GetHistogramCount();
                 double failedSum = pointFailed.GetHistogramSum();
@@ -437,7 +437,7 @@ namespace EXBP.Dipren.Tests.Telemetry
             MetricPoint pointSuccess = snapshot.MetricPoints.FirstOrDefault(p =>
                 p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                 p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
-                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCEEDED));
 
             long countSuccess = pointSuccess.GetHistogramCount();
             double sumSuccess = pointSuccess.GetHistogramSum();
@@ -448,7 +448,7 @@ namespace EXBP.Dipren.Tests.Telemetry
             MetricPoint pointFailure = snapshot.MetricPoints.FirstOrDefault(p =>
                 p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                 p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
-                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED));
 
             long countFailure = pointFailure.GetHistogramCount();
             double sumFailure = pointFailure.GetHistogramSum();
@@ -488,7 +488,7 @@ namespace EXBP.Dipren.Tests.Telemetry
             MetricPoint pointSuccess = snapshot.MetricPoints.FirstOrDefault(p =>
                 p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                 p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
-                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCESS));
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_SUCCEEDED));
 
             long countSuccess = pointSuccess.GetHistogramCount();
             double sumSuccess = pointSuccess.GetHistogramSum();
@@ -499,7 +499,7 @@ namespace EXBP.Dipren.Tests.Telemetry
             MetricPoint pointFailure = snapshot.MetricPoints.FirstOrDefault(p =>
                 p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
                 p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
-                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILURE));
+                p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED));
 
             long countFailure = pointFailure.GetHistogramCount();
             double sumFailure = pointFailure.GetHistogramSum();
