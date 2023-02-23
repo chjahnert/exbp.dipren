@@ -1,10 +1,8 @@
 ﻿
-using EXBP.Dipren.Diagnostics;
-
 using OpenTelemetry.Metrics;
 
 
-namespace EXBP.Dipren.Telemetry
+namespace EXBP.Dipren.Diagnostics
 {
     /// <summary>
     ///   Implements extension methods for the <see cref="MeterProviderBuilder"/> class.

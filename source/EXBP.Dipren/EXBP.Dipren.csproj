@@ -71,7 +71,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>StringKeyRangePartitionerResources.resx</DependentUpon>
     </Compile>
-    <Compile Update="Telemetry\OpenTelemetryEngineMetricsResources.Designer.cs">
+    <Compile Update="Diagnostics\OpenTelemetryEngineMetricsResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>OpenTelemetryEngineMetricsResources.resx</DependentUpon>
@@ -113,7 +113,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>StringKeyRangePartitionerResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Telemetry\OpenTelemetryEngineMetricsResources.resx">
+    <EmbeddedResource Update="Diagnostics\OpenTelemetryEngineMetricsResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>OpenTelemetryEngineMetricsResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>

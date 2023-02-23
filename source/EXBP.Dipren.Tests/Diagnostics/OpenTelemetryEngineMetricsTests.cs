@@ -1,13 +1,15 @@
 ﻿
-using EXBP.Dipren.Telemetry;
+using EXBP.Dipren.Diagnostics;
 
 using NUnit.Framework;
 
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 
+using Assert = NUnit.Framework.Assert;
 
-namespace EXBP.Dipren.Tests.Telemetry
+
+namespace EXBP.Dipren.Tests.Diagnostics
 {
     [TestFixture]
     public class OpenTelemetryEngineMetricsTests
@@ -28,15 +30,15 @@ namespace EXBP.Dipren.Tests.Telemetry
 
             provider.Shutdown();
 
-            MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == "engines") && (m.MetricType == MetricType.LongGauge));
+            MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == "engines" && m.MetricType == MetricType.LongGauge);
 
             Assert.That(snapshot, Is.Not.Null);
             Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(4));
 
-            MetricPoint p1 = snapshot.MetricPoints.FirstOrDefault(p => p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, "j1") && (p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_STATE, OpenTelemetryEngineMetrics.TAG_VALUE_READY)));
-            MetricPoint p2 = snapshot.MetricPoints.FirstOrDefault(p => p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, "j1") && (p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_STATE, OpenTelemetryEngineMetrics.TAG_VALUE_PROCESSING)));
-            MetricPoint p3 = snapshot.MetricPoints.FirstOrDefault(p => p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, "j2") && (p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_STATE, OpenTelemetryEngineMetrics.TAG_VALUE_READY)));
-            MetricPoint p4 = snapshot.MetricPoints.FirstOrDefault(p => p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, "j2") && (p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_STATE, OpenTelemetryEngineMetrics.TAG_VALUE_PROCESSING)));
+            MetricPoint p1 = snapshot.MetricPoints.FirstOrDefault(p => p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, "j1") && p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_STATE, OpenTelemetryEngineMetrics.TAG_VALUE_READY));
+            MetricPoint p2 = snapshot.MetricPoints.FirstOrDefault(p => p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, "j1") && p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_STATE, OpenTelemetryEngineMetrics.TAG_VALUE_PROCESSING));
+            MetricPoint p3 = snapshot.MetricPoints.FirstOrDefault(p => p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, "j2") && p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_STATE, OpenTelemetryEngineMetrics.TAG_VALUE_READY));
+            MetricPoint p4 = snapshot.MetricPoints.FirstOrDefault(p => p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, "j2") && p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_STATE, OpenTelemetryEngineMetrics.TAG_VALUE_PROCESSING));
 
             long c1 = p1.GetGaugeLastValueLong();
             long c2 = p2.GetGaugeLastValueLong();
@@ -69,7 +71,7 @@ namespace EXBP.Dipren.Tests.Telemetry
 
             provider.Shutdown();
 
-            MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_PARTITIONS_CREATED) && (m.MetricType == MetricType.LongSum));
+            MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_PARTITIONS_CREATED && m.MetricType == MetricType.LongSum);
 
             Assert.That(snapshot, Is.Not.Null);
             Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(1));
@@ -104,7 +106,7 @@ namespace EXBP.Dipren.Tests.Telemetry
 
             provider.Shutdown();
 
-            MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_PARTITIONS_COMPLETED) && (m.MetricType == MetricType.LongSum));
+            MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_PARTITIONS_COMPLETED && m.MetricType == MetricType.LongSum);
 
             Assert.That(snapshot, Is.Not.Null);
             Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(1));
@@ -140,7 +142,7 @@ namespace EXBP.Dipren.Tests.Telemetry
             provider.Shutdown();
 
             {
-                MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_KEYS_RETRIEVED) && (m.MetricType == MetricType.LongSum));
+                MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_KEYS_RETRIEVED && m.MetricType == MetricType.LongSum);
 
                 Assert.That(snapshot, Is.Not.Null);
                 Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
@@ -167,7 +169,7 @@ namespace EXBP.Dipren.Tests.Telemetry
             }
 
             {
-                MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_BATCHES_RETRIEVED) && (m.MetricType == MetricType.LongSum));
+                MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_BATCHES_RETRIEVED && m.MetricType == MetricType.LongSum);
 
                 Assert.That(snapshot, Is.Not.Null);
                 Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
@@ -194,7 +196,7 @@ namespace EXBP.Dipren.Tests.Telemetry
             }
 
             {
-                MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_BATCH_RETRIEVAL) && (m.MetricType == MetricType.Histogram));
+                MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_BATCH_RETRIEVAL && m.MetricType == MetricType.Histogram);
 
                 Assert.That(snapshot, Is.Not.Null);
                 Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
@@ -246,7 +248,7 @@ namespace EXBP.Dipren.Tests.Telemetry
             provider.Shutdown();
 
             {
-                MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_KEYS_COMPLETED) && (m.MetricType == MetricType.LongSum));
+                MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_KEYS_COMPLETED && m.MetricType == MetricType.LongSum);
 
                 Assert.That(snapshot, Is.Not.Null);
                 Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
@@ -273,7 +275,7 @@ namespace EXBP.Dipren.Tests.Telemetry
             }
 
             {
-                MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_BATCHES_COMPLETED) && (m.MetricType == MetricType.LongSum));
+                MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_BATCHES_COMPLETED && m.MetricType == MetricType.LongSum);
 
                 Assert.That(snapshot, Is.Not.Null);
                 Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
@@ -300,7 +302,7 @@ namespace EXBP.Dipren.Tests.Telemetry
             }
 
             {
-                MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_BATCH_PROCESSING) && (m.MetricType == MetricType.Histogram));
+                MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_BATCH_PROCESSING && m.MetricType == MetricType.Histogram);
 
                 Assert.That(snapshot, Is.Not.Null);
                 Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
@@ -352,7 +354,7 @@ namespace EXBP.Dipren.Tests.Telemetry
 
             provider.Shutdown();
 
-            MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_REPORT_PROGRESS) && (m.MetricType == MetricType.Histogram));
+            MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_REPORT_PROGRESS && m.MetricType == MetricType.Histogram);
 
             Assert.That(snapshot, Is.Not.Null);
             Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(1));
@@ -390,7 +392,7 @@ namespace EXBP.Dipren.Tests.Telemetry
 
             provider.Shutdown();
 
-            MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_IS_SPLIT_REQUEST_PENDING) && (m.MetricType == MetricType.Histogram));
+            MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_IS_SPLIT_REQUEST_PENDING && m.MetricType == MetricType.Histogram);
 
             Assert.That(snapshot, Is.Not.Null);
             Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(1));
@@ -429,7 +431,7 @@ namespace EXBP.Dipren.Tests.Telemetry
 
             provider.Shutdown();
 
-            MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_TRY_ACQUIRE_PARTITION) && (m.MetricType == MetricType.Histogram));
+            MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_TRY_ACQUIRE_PARTITION && m.MetricType == MetricType.Histogram);
 
             Assert.That(snapshot, Is.Not.Null);
             Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
@@ -480,7 +482,7 @@ namespace EXBP.Dipren.Tests.Telemetry
 
             provider.Shutdown();
 
-            MetricSnapshot snapshot = metrics.LastOrDefault(m => (m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_TRY_REQUEST_SPLIT) && (m.MetricType == MetricType.Histogram));
+            MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_TRY_REQUEST_SPLIT && m.MetricType == MetricType.Histogram);
 
             Assert.That(snapshot, Is.Not.Null);
             Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));

@@ -5,7 +5,7 @@ using System.Diagnostics.Metrics;
 using EXBP.Dipren.Diagnostics;
 
 
-namespace EXBP.Dipren.Telemetry
+namespace EXBP.Dipren.Diagnostics
 {
     /// <summary>
     ///   Implements performance metrics for the <see cref="Engine"/> type using OpenTelemetry.

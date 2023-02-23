@@ -2,7 +2,7 @@
 using OpenTelemetry.Metrics;
 
 
-namespace EXBP.Dipren.Tests.Telemetry
+namespace EXBP.Dipren.Tests.Diagnostics
 {
     internal static class MetricPointExtensions
     {
@@ -12,7 +12,7 @@ namespace EXBP.Dipren.Tests.Telemetry
 
             foreach (KeyValuePair<string, object> tag in point.Tags)
             {
-                result = (name.Equals(tag.Key) && value.Equals(tag.Value));
+                result = name.Equals(tag.Key) && value.Equals(tag.Value);
 
                 if (result == true)
                 {

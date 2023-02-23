@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EXBP.Dipren.Telemetry {
+namespace EXBP.Dipren.Diagnostics {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace EXBP.Dipren.Telemetry {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EXBP.Dipren.Telemetry.OpenTelemetryEngineMetricsResources", typeof(OpenTelemetryEngineMetricsResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EXBP.Dipren.Diagnostics.OpenTelemetryEngineMetricsResources", typeof(OpenTelemetryEngineMetricsResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
