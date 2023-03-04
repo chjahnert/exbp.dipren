@@ -720,23 +720,23 @@ namespace EXBP.Dipren
                 this._dispatcher = dispatcher;
             }
 
-            internal async Task JobStartedAsync(string jobId, CancellationToken cancellation)
-                => await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobStarted, cancellation);
+            internal Task JobStartedAsync(string jobId, CancellationToken cancellation)
+                => this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobStarted, cancellation);
 
-            internal async Task JobNotStartedAsync(string jobId, CancellationToken cancellation)
-                    => await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobNotScheduled, cancellation);
+            internal Task JobNotStartedAsync(string jobId, CancellationToken cancellation)
+                    => this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobNotScheduled, cancellation);
 
-            internal async Task WaitingForJobToBeReadyAsync(string jobId, CancellationToken cancellation)
-                    => await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, EngineResources.EventWaitingForJobToBeReady, cancellation);
+            internal Task WaitingForJobToBeReadyAsync(string jobId, CancellationToken cancellation)
+                    => this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, EngineResources.EventWaitingForJobToBeReady, cancellation);
 
-            internal async Task JobCompletedAsync(string jobId, CancellationToken cancellation)
-                => await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobCompleted, cancellation);
+            internal Task JobCompletedAsync(string jobId, CancellationToken cancellation)
+                => this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobCompleted, cancellation);
 
-            internal async Task PartitionTakenAsync(string jobId, Guid partitionId, CancellationToken cancellation)
-                => await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventPartitionTaken, cancellation);
+            internal Task PartitionTakenAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+                => this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventPartitionTaken, cancellation);
 
-            internal async Task ProcessingFailedAsync(string jobId, Exception ex, CancellationToken cancellation)
-                => await this._dispatcher.DispatchEventAsync(EventSeverity.Error, jobId, EngineResources.EventProcessingFailed, ex, cancellation);
+            internal Task ProcessingFailedAsync(string jobId, Exception ex, CancellationToken cancellation)
+                => this._dispatcher.DispatchEventAsync(EventSeverity.Error, jobId, EngineResources.EventProcessingFailed, ex, cancellation);
 
         }
     }
