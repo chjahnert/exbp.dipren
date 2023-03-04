@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -16,6 +17,7 @@ namespace EXBP.Dipren
     {
         private readonly Configuration _configuration;
         private readonly IEngineMetrics _metrics;
+        private readonly Log _log;
 
 
         /// <summary>
@@ -49,6 +51,7 @@ namespace EXBP.Dipren
         {
             this._configuration = (configuration ?? new Configuration());
             this._metrics = (metrics ?? OpenTelemetryEngineMetrics.Instance);
+            this._log = new Log(this.Dispatcher);
         }
 
         /// <summary>
@@ -72,6 +75,7 @@ namespace EXBP.Dipren
         {
             this._configuration = (configuration ?? new Configuration());
             this._metrics = (metrics ?? OpenTelemetryEngineMetrics.Instance);
+            this._log = new Log(this.Dispatcher);
         }
 
         /// <summary>
@@ -110,12 +114,11 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
+            await this._log.JobStartedAsync(job.Id, cancellation);
             this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
 
             try
             {
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobStarted, cancellation);
-
                 //
                 // Flow:
                 //
@@ -147,7 +150,7 @@ namespace EXBP.Dipren
                 }
                 catch (UnknownIdentifierException ex)
                 {
-                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobNotScheduled, cancellation);
+                    await this._log.JobNotStartedAsync(job.Id, cancellation);
 
                     if (wait == false)
                     {
@@ -162,7 +165,7 @@ namespace EXBP.Dipren
 
                 while ((persisted == null) || (persisted.State == JobState.Initializing))
                 {
-                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, EngineResources.EventWaitingForJobToBeReady, cancellation);
+                    await this._log.WaitingForJobToBeReadyAsync(job.Id, cancellation);
 
                     await Task.Delay(this._configuration.PollingInterval, cancellation);
 
@@ -186,7 +189,7 @@ namespace EXBP.Dipren
 
                 if (persisted.State == JobState.Completed || persisted.State == JobState.Failed)
                 {
-                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobCompleted, cancellation);
+                    await this._log.JobCompletedAsync(job.Id, cancellation);
                 }
                 else
                 {
@@ -218,7 +221,7 @@ namespace EXBP.Dipren
                                 // The partition being processed was taken by another processing node.
                                 //
 
-                                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventPartitionTaken, cancellation);
+                                await this._log.PartitionTakenAsync(job.Id, partition.Id, cancellation);
                             }
                             finally
                             {
@@ -233,7 +236,7 @@ namespace EXBP.Dipren
                             {
                                 persisted = await this.MarkJobAsCompletedAsync(persisted.Id, cancellation);
 
-                                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventJobCompleted, cancellation);
+                                await this._log.JobCompletedAsync(job.Id, cancellation);
                             }
                             else
                             {
@@ -258,7 +261,7 @@ namespace EXBP.Dipren
             }
             catch (Exception ex)
             {
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Error, job.Id, EngineResources.EventProcessingFailed, ex, cancellation);
+                await this._log.ProcessingFailedAsync(job.Id, ex, cancellation);
 
                 throw;
             }
@@ -702,6 +705,39 @@ namespace EXBP.Dipren
             Job result = await this.Store.MarkJobAsCompletedAsync(id, timestamp, cancellation);
 
             return result;
+        }
+
+
+        private sealed class Log
+        {
+            private readonly EventDispatcher _dispatcher;
+
+
+            internal Log(EventDispatcher dispatcher)
+            {
+                Debug.Assert(dispatcher != null);
+
+                this._dispatcher = dispatcher;
+            }
+
+            internal async Task JobStartedAsync(string jobId, CancellationToken cancellation)
+                => await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobStarted, cancellation);
+
+            internal async Task JobNotStartedAsync(string jobId, CancellationToken cancellation)
+                    => await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobNotScheduled, cancellation);
+
+            internal async Task WaitingForJobToBeReadyAsync(string jobId, CancellationToken cancellation)
+                    => await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, EngineResources.EventWaitingForJobToBeReady, cancellation);
+
+            internal async Task JobCompletedAsync(string jobId, CancellationToken cancellation)
+                => await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobCompleted, cancellation);
+
+            internal async Task PartitionTakenAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+                => await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventPartitionTaken, cancellation);
+
+            internal async Task ProcessingFailedAsync(string jobId, Exception ex, CancellationToken cancellation)
+                => await this._dispatcher.DispatchEventAsync(EventSeverity.Error, jobId, EngineResources.EventProcessingFailed, ex, cancellation);
+
         }
     }
 }
