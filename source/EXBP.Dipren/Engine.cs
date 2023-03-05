@@ -1,6 +1,4 @@
 ﻿
-using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -8,7 +6,6 @@ using EXBP.Dipren.Data;
 using EXBP.Dipren.Diagnostics;
 using EXBP.Dipren.Telemetry;
 
-using OpenTelemetry;
 
 namespace EXBP.Dipren
 {
@@ -591,7 +588,7 @@ namespace EXBP.Dipren
         {
             Debug.Assert(partition != null);
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventSplitRequested, cancellation);
+            await this._events.SplitRequestedAsync(job.Id, partition.Id, cancellation);
 
             Range<TKey> remainingKeyRange = partition.GetRemainingKeyRange();
             RangePartitioningResult<TKey> ranges = await job.Partitioner.SplitAsync(remainingKeyRange, cancellation);
@@ -628,19 +625,18 @@ namespace EXBP.Dipren
 
                     result = updatedPartition;
 
-                    string descriptionPartitionSplit = String.Format(CultureInfo.InvariantCulture, EngineResources.EventPartitionSplit, updatedPartition.Range.First, updatedPartition.Range.Last, excludedPartition.Id, excludedPartition.Range.First, excludedPartition.Range.Last, stopwatch.Elapsed.TotalMilliseconds);
-                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, descriptionPartitionSplit, cancellation);
+                    await this._events.PartitionSplitAsync(job.Id, partition.Id, job.Serializer, updatedPartition.Range.First, updatedPartition.Range.Last, excludedPartition.Id, excludedPartition.Range.First, excludedPartition.Range.Last, stopwatch.Elapsed.TotalMilliseconds, cancellation);
 
                     this._metrics?.RegisterPartitionCreated(this.Id, job.Id, partition.Id);
                 }
                 else
                 {
-                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventPartitionTooSmallToBeSplit, cancellation);
+                    await this._events.PartitionTooSmallToBeSplitAsync(job.Id, partition.Id, cancellation);
                 }
             }
             else
             {
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventCouldNotSplitPartition, cancellation);
+                await this._events.CouldNotSplitPartitionAsync(job.Id, partition.Id, cancellation);
             }
 
             return result;
@@ -878,6 +874,47 @@ namespace EXBP.Dipren
                 Debug.Assert(jobId != null);
 
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, EngineResources.EventSplitAlreadyRequested, cancellation);
+            }
+
+            internal async Task SplitRequestedAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventSplitRequested, cancellation);
+            }
+
+            internal async Task PartitionSplitAsync<TKey>(string jobId, Guid partitionId, IKeySerializer<TKey> serializer, TKey updatedFirst, TKey updatedLast, Guid createdPartitionId, TKey createdFirst, TKey createdLast, double duration, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+                Debug.Assert(serializer != null);
+                Debug.Assert(updatedFirst != null);
+                Debug.Assert(updatedLast != null);
+                Debug.Assert(createdFirst != null);
+                Debug.Assert(createdLast != null);
+                Debug.Assert(duration >= 0.0);
+
+                string serializedUpdatedFirst = serializer.Serialize(updatedFirst);
+                string serializedUpdatedLast = serializer.Serialize(updatedLast);
+                string serializedCreatedFirst = serializer.Serialize(createdFirst);
+                string serializedCreatedLast = serializer.Serialize(createdLast);
+
+                string message = String.Format(CultureInfo.InvariantCulture, EngineResources.EventPartitionSplit, serializedUpdatedFirst, serializedUpdatedLast, createdPartitionId, serializedCreatedFirst, serializedCreatedLast, duration);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, message, cancellation);
+            }
+
+            internal async Task PartitionTooSmallToBeSplitAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventPartitionTooSmallToBeSplit, cancellation);
+            }
+
+            internal async Task CouldNotSplitPartitionAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventCouldNotSplitPartition, cancellation);
             }
         }
     }
