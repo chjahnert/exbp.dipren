@@ -427,7 +427,7 @@ namespace EXBP.Dipren
             Debug.Assert(job != null);
             Debug.Assert(settings != null);
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventTryingToAcquirePartition, cancellation);
+            await this._events.TryingToAcquirePartitionAsync(job.Id, cancellation);
 
             DateTime now = this.Clock.GetCurrentTimestamp();
             DateTime cut = (now - settings.Timeout - settings.ClockDrift);
@@ -444,13 +444,13 @@ namespace EXBP.Dipren
 
             if (acquired != null)
             {
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, acquired.Id, EngineResources.EventPartitionAcquired, cancellation);
+                await this._events.PartitionAcquiredAsync(job.Id, acquired.Id, cancellation);
 
                 result = acquired.ToPartition(job.Serializer);
             }
             else
             {
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventPartitionNotAcquired, cancellation);
+                await this._events.PartitionNotAcquiredAsync(job.Id, cancellation);
 
                 stopwatch.Restart();
 
@@ -462,7 +462,7 @@ namespace EXBP.Dipren
 
                 if (pending == false)
                 {
-                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, EngineResources.EventRequestingSplit, cancellation);
+                    await this._events.RequestingSplitAsync(job.Id, cancellation);
 
                     stopwatch.Restart();
 
@@ -470,13 +470,20 @@ namespace EXBP.Dipren
 
                     stopwatch.Stop();
 
-                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, (succeeded ? EngineResources.EventSplitRequestSucceeded : EngineResources.EventSplitRequestFailed), cancellation);
+                    if (succeeded == true)
+                    {
+                        await this._events.SplitRequestSucceededAsync(job.Id, cancellation);
+                    }
+                    else
+                    {
+                        await this._events.SplitRequestFailedAsync(job.Id, cancellation);
+                    }
 
                     this._metrics?.RegisterTryRequestSplit(this.Id, job.Id, succeeded, stopwatch.Elapsed);
                 }
                 else
                 {
-                    await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, EngineResources.EventSplitAlreadyRequested, cancellation);
+                    await this._events.SplitAlreadyRequestedAsync(job.Id, cancellation);
                 }
             }
 
@@ -822,6 +829,55 @@ namespace EXBP.Dipren
                 Debug.Assert(jobId != null);
 
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventPartitionCompleted, cancellation);
+            }
+
+            internal async Task TryingToAcquirePartitionAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventTryingToAcquirePartition, cancellation);
+            }
+
+            internal async Task PartitionAcquiredAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventPartitionAcquired, cancellation);
+            }
+
+            internal async Task PartitionNotAcquiredAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventPartitionNotAcquired, cancellation);
+            }
+
+            internal async Task RequestingSplitAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventRequestingSplit, cancellation);
+            }
+
+            internal async Task SplitRequestSucceededAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventSplitRequestSucceeded, cancellation);
+            }
+
+            internal async Task SplitRequestFailedAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventSplitRequestFailed, cancellation);
+            }
+
+            internal async Task SplitAlreadyRequestedAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, EngineResources.EventSplitAlreadyRequested, cancellation);
             }
         }
     }
