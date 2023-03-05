@@ -8,6 +8,7 @@ using EXBP.Dipren.Data;
 using EXBP.Dipren.Diagnostics;
 using EXBP.Dipren.Telemetry;
 
+using OpenTelemetry;
 
 namespace EXBP.Dipren
 {
@@ -302,8 +303,6 @@ namespace EXBP.Dipren
             Assert.ArgumentIsNotNull(job, nameof(job));
             Assert.ArgumentIsNotNull(partition, nameof(partition));
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventProcessingPartition, cancellation);
-
             //
             // 1. Fetch the next batch of items to be processed from the data source.
             // 2. Process the batch.
@@ -314,7 +313,8 @@ namespace EXBP.Dipren
             // 5. Repeat from step 1 until completed.
             //
 
-            long timeoutTooLow = 0L;
+            await this._events.ProcessingPartitionAsync(job.Id, partition.Id, cancellation);
+
             Stopwatch iteration = Stopwatch.StartNew();
             MovingAverage throughputs = new MovingAverage(1024);
 
@@ -341,9 +341,9 @@ namespace EXBP.Dipren
                 {
                     IEnumerable<TItem> items = batch.Select(kvp => kvp.Value);
 
-                    stopwatch.Restart();
-
                     bool succeeded = true;
+
+                    stopwatch.Restart();
 
                     try
                     {
@@ -351,44 +351,23 @@ namespace EXBP.Dipren
                     }
                     catch (Exception ex)
                     {
-                        string batchDescriptor = null;
-
-                        if (count > 1)
-                        {
-                            string firstInBatch = job.Serializer.Serialize(batch.First().Key);
-                            string lastInBatch = job.Serializer.Serialize(batch.Last().Key);
-
-                            batchDescriptor = string.Format(CultureInfo.InvariantCulture, EngineResources.BatchDescriptior, firstInBatch, lastInBatch);
-                        }
-                        else
-                        {
-                            batchDescriptor = job.Serializer.Serialize(batch.First().Key);
-                        }
-
-                        string descriptionBatchProcessingFailed = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessingFailed, batchDescriptor);
-                        await this.Dispatcher.DispatchEventAsync(EventSeverity.Warning, job.Id, partition.Id, descriptionBatchProcessingFailed, ex, cancellation);
+                        this._metrics?.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, false, stopwatch.Elapsed);
+                        await this._events.BatchProcessingFailedAsync(job.Id, partition.Id, ex, count, job.Serializer, batch.First().Key, batch.Last().Key, cancellation);
 
                         succeeded = false;
                     }
 
                     stopwatch.Stop();
 
-                    this._metrics?.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, succeeded, stopwatch.Elapsed);
-
                     if (succeeded == true)
                     {
-                        string descriptionBatchProcessed = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessed, count, stopwatch.Elapsed.TotalMilliseconds);
-                        await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchProcessed, cancellation);
-                    }
+                        this._metrics?.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
+                        await this._events.BatchProcessedAsync(job.Id, partition.Id, count, stopwatch.Elapsed.TotalMilliseconds, cancellation);
 
-                    if (stopwatch.Elapsed >= settings.Timeout)
-                    {
-                        if (timeoutTooLow == 0L)
+                        if (stopwatch.Elapsed >= settings.Timeout)
                         {
-                            await this.Dispatcher.DispatchEventAsync(EventSeverity.Warning, job.Id, partition.Id, EngineResources.EventTimeoutValueTooLow, cancellation);
+                            await this._events.TimeoutValueTooLowAsync(job.Id, partition.Id, cancellation);
                         }
-
-                        timeoutTooLow += 1L;
                     }
                 }
 
@@ -415,8 +394,7 @@ namespace EXBP.Dipren
                 }
             }
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partition.Id, EngineResources.EventPartitionCompleted, cancellation);
-
+            await this._events.PartitionCompletedAsync(job.Id, partition.Id, cancellation);
             this._metrics?.RegisterPartitionCompleted(this.Id, job.Id, partition.Id);
         }
 
@@ -761,6 +739,13 @@ namespace EXBP.Dipren
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Error, jobId, EngineResources.EventProcessingFailed, exception, cancellation);
             }
 
+            internal async Task ProcessingPartitionAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventProcessingPartition, cancellation);
+            }
+
             internal async Task RequestingNextBatchAsync<TKey>(string jobId, Guid partitionId, int batchSize, IKeySerializer<TKey> serializer, TKey first, TKey last, int skip, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
@@ -784,7 +769,59 @@ namespace EXBP.Dipren
                 Debug.Assert(duration >= 0.0);
 
                 string message = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchRetrieved, count, duration);
+
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, partitionId, message, cancellation);
+            }
+
+            internal async Task BatchProcessingFailedAsync<TKey>(string jobId, Guid partitionId, Exception exception, long count, IKeySerializer<TKey> serializer, TKey first, TKey last, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+                Debug.Assert(exception != null);
+                Debug.Assert(count > 0);
+                Debug.Assert(serializer != null);
+                Debug.Assert(first != null);
+                Debug.Assert(last != null);
+
+                string batch;
+
+                if (count > 1)
+                {
+                    string serializedFirst = serializer.Serialize(first);
+                    string serializedLast = serializer.Serialize(last);
+
+                    batch = string.Format(CultureInfo.InvariantCulture, EngineResources.BatchDescriptior, serializedFirst, serializedLast);
+                }
+                else
+                {
+                    batch = serializer.Serialize(first);
+                }
+
+                string message = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessingFailed, batch);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Warning, jobId, partitionId, message, exception, cancellation);
+            }
+
+            internal async Task BatchProcessedAsync(string jobId, Guid partitionId, long count, double duration, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                string message = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessed, count, duration);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, partitionId, message, cancellation);
+            }
+
+            internal async Task TimeoutValueTooLowAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Warning, jobId, partitionId, EngineResources.EventTimeoutValueTooLow, cancellation);
+            }
+
+            internal async Task PartitionCompletedAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventPartitionCompleted, cancellation);
             }
         }
     }
