@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
@@ -17,7 +18,7 @@ namespace EXBP.Dipren
     {
         private readonly Configuration _configuration;
         private readonly IEngineMetrics _metrics;
-        private readonly Log _log;
+        private readonly Events _events;
 
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace EXBP.Dipren
         {
             this._configuration = (configuration ?? new Configuration());
             this._metrics = (metrics ?? OpenTelemetryEngineMetrics.Instance);
-            this._log = new Log(this.Dispatcher);
+            this._events = new Events(this.Dispatcher);
         }
 
         /// <summary>
@@ -75,7 +76,7 @@ namespace EXBP.Dipren
         {
             this._configuration = (configuration ?? new Configuration());
             this._metrics = (metrics ?? OpenTelemetryEngineMetrics.Instance);
-            this._log = new Log(this.Dispatcher);
+            this._events = new Events(this.Dispatcher);
         }
 
         /// <summary>
@@ -114,7 +115,7 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
-            await this._log.JobStartedAsync(job.Id, cancellation);
+            await this._events.JobStartedAsync(job.Id, cancellation);
             this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
 
             try
@@ -150,7 +151,7 @@ namespace EXBP.Dipren
                 }
                 catch (UnknownIdentifierException ex)
                 {
-                    await this._log.JobNotStartedAsync(job.Id, cancellation);
+                    await this._events.JobNotStartedAsync(job.Id, cancellation);
 
                     if (wait == false)
                     {
@@ -165,7 +166,7 @@ namespace EXBP.Dipren
 
                 while ((persisted == null) || (persisted.State == JobState.Initializing))
                 {
-                    await this._log.WaitingForJobToBeReadyAsync(job.Id, cancellation);
+                    await this._events.WaitingForJobToBeReadyAsync(job.Id, cancellation);
 
                     await Task.Delay(this._configuration.PollingInterval, cancellation);
 
@@ -189,7 +190,7 @@ namespace EXBP.Dipren
 
                 if (persisted.State == JobState.Completed || persisted.State == JobState.Failed)
                 {
-                    await this._log.JobCompletedAsync(job.Id, cancellation);
+                    await this._events.JobCompletedAsync(job.Id, cancellation);
                 }
                 else
                 {
@@ -221,7 +222,7 @@ namespace EXBP.Dipren
                                 // The partition being processed was taken by another processing node.
                                 //
 
-                                await this._log.PartitionTakenAsync(job.Id, partition.Id, cancellation);
+                                await this._events.PartitionTakenAsync(job.Id, partition.Id, cancellation);
                             }
                             finally
                             {
@@ -236,7 +237,7 @@ namespace EXBP.Dipren
                             {
                                 persisted = await this.MarkJobAsCompletedAsync(persisted.Id, cancellation);
 
-                                await this._log.JobCompletedAsync(job.Id, cancellation);
+                                await this._events.JobCompletedAsync(job.Id, cancellation);
                             }
                             else
                             {
@@ -261,7 +262,7 @@ namespace EXBP.Dipren
             }
             catch (Exception ex)
             {
-                await this._log.ProcessingFailedAsync(job.Id, ex, cancellation);
+                await this._events.ProcessingFailedAsync(job.Id, ex, cancellation);
 
                 throw;
             }
@@ -323,8 +324,7 @@ namespace EXBP.Dipren
                 Range<TKey> range = new Range<TKey>(first, partition.Range.Last, partition.Range.IsInclusive);
                 int skip = ((partition.Processed == 0L) ? 0 : 1);
 
-                string descriptionRequestingNextBatch = string.Format(CultureInfo.InvariantCulture, EngineResources.EventRequestingNextBatch, settings.BatchSize, range.First, range.Last, skip);
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionRequestingNextBatch, cancellation);
+                await this._events.RequestingNextBatchAsync(job.Id, partition.Id, settings.BatchSize, job.Serializer, range.First, range.Last, skip, cancellation);
 
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -334,9 +334,7 @@ namespace EXBP.Dipren
 
                 long count = batch.Count();
 
-                string descriptionBatchRetrieved = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchRetrieved, count, stopwatch.Elapsed.TotalMilliseconds);
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Debug, job.Id, partition.Id, descriptionBatchRetrieved, cancellation);
-
+                await this._events.BatchRetrievedAsync(job.Id, partition.Id, count, stopwatch.Elapsed.TotalMilliseconds, cancellation);
                 this._metrics?.RegisterBatchRetrieved(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
 
                 if (count > 0L)
@@ -708,36 +706,86 @@ namespace EXBP.Dipren
         }
 
 
-        private sealed class Log
+        private sealed class Events
         {
             private readonly EventDispatcher _dispatcher;
 
 
-            internal Log(EventDispatcher dispatcher)
+            internal Events(EventDispatcher dispatcher)
             {
                 Debug.Assert(dispatcher != null);
 
                 this._dispatcher = dispatcher;
             }
 
-            internal Task JobStartedAsync(string jobId, CancellationToken cancellation)
-                => this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobStarted, cancellation);
+            internal async Task JobStartedAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
 
-            internal Task JobNotStartedAsync(string jobId, CancellationToken cancellation)
-                    => this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobNotScheduled, cancellation);
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobStarted, cancellation);
+            }
 
-            internal Task WaitingForJobToBeReadyAsync(string jobId, CancellationToken cancellation)
-                    => this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, EngineResources.EventWaitingForJobToBeReady, cancellation);
+            internal async Task JobNotStartedAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
 
-            internal Task JobCompletedAsync(string jobId, CancellationToken cancellation)
-                => this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobCompleted, cancellation);
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobNotScheduled, cancellation);
+            }
 
-            internal Task PartitionTakenAsync(string jobId, Guid partitionId, CancellationToken cancellation)
-                => this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventPartitionTaken, cancellation);
+            internal async Task WaitingForJobToBeReadyAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
 
-            internal Task ProcessingFailedAsync(string jobId, Exception ex, CancellationToken cancellation)
-                => this._dispatcher.DispatchEventAsync(EventSeverity.Error, jobId, EngineResources.EventProcessingFailed, ex, cancellation);
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, EngineResources.EventWaitingForJobToBeReady, cancellation);
+            }
 
+            internal async Task JobCompletedAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobCompleted, cancellation);
+            }
+
+            internal async Task PartitionTakenAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventPartitionTaken, cancellation);
+            }
+
+            internal async Task ProcessingFailedAsync(string jobId, Exception exception, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+                Debug.Assert(exception != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Error, jobId, EngineResources.EventProcessingFailed, exception, cancellation);
+            }
+
+            internal async Task RequestingNextBatchAsync<TKey>(string jobId, Guid partitionId, int batchSize, IKeySerializer<TKey> serializer, TKey first, TKey last, int skip, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+                Debug.Assert(batchSize >= 0);
+                Debug.Assert(serializer != null);
+                Debug.Assert(first != null);
+                Debug.Assert(last != null);
+                Debug.Assert(skip >= 0);
+
+                string serializedFirst = serializer.Serialize(first);
+                string serializedLast = serializer.Serialize(last);
+                string message = string.Format(CultureInfo.InvariantCulture, EngineResources.EventRequestingNextBatch, batchSize, serializedFirst, serializedLast, skip);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, partitionId, message, cancellation);
+            }
+
+            internal async Task BatchRetrievedAsync(string jobId, Guid partitionId, long count, double duration, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+                Debug.Assert(count >= 0);
+                Debug.Assert(duration >= 0.0);
+
+                string message = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchRetrieved, count, duration);
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, partitionId, message, cancellation);
+            }
         }
     }
 }
