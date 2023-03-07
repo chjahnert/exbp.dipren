@@ -149,7 +149,7 @@ namespace EXBP.Dipren
                 }
                 catch (UnknownIdentifierException ex)
                 {
-                    await this._events.JobNotStartedAsync(job.Id, cancellation);
+                    await this._events.RaiseJobNotStartedAsync(job.Id, cancellation);
 
                     if (wait == false)
                     {
@@ -728,7 +728,20 @@ namespace EXBP.Dipren
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobStarted, cancellation);
             }
 
-            internal async Task JobNotStartedAsync(string jobId, CancellationToken cancellation)
+            /// <summary>
+            ///   Raises the event when a distributed processing could not be started.
+            /// </summary>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job.
+            /// </param>
+            /// <param name="cancellation">
+            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+            ///   canceled.
+            /// </param>
+            /// <returns>
+            ///   A <see cref="Task"/> object that represents the asynchronous operation.
+            /// </returns>
+            internal async Task RaiseJobNotStartedAsync(string jobId, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
 
