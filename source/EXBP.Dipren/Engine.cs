@@ -220,7 +220,7 @@ namespace EXBP.Dipren
                                 // The partition being processed was taken by another processing node.
                                 //
 
-                                await this._events.PartitionTakenAsync(job.Id, partition.Id, cancellation);
+                                await this._events.RaisePartitionTakenAsync(job.Id, partition.Id, cancellation);
                             }
                             finally
                             {
@@ -789,7 +789,23 @@ namespace EXBP.Dipren
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobCompleted, cancellation);
             }
 
-            internal async Task PartitionTakenAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            /// <summary>
+            ///   Raises the event when another processing node takes ownership of the partition.
+            /// </summary>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job.
+            /// </param>
+            /// <param name="partitionId">
+            ///   The unique identifier of the partition.
+            /// </param>
+            /// <param name="cancellation">
+            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+            ///   canceled.
+            /// </param>
+            /// <returns>
+            ///   A <see cref="Task"/> object that represents the asynchronous operation.
+            /// </returns>
+            internal async Task RaisePartitionTakenAsync(string jobId, Guid partitionId, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
 
