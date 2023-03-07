@@ -113,7 +113,7 @@ namespace EXBP.Dipren
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
-            await this._events.JobStartedAsync(job.Id, cancellation);
+            await this._events.RaiseJobStartedAsync(job.Id, cancellation);
             this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
 
             try
@@ -687,11 +687,20 @@ namespace EXBP.Dipren
         }
 
 
+        /// <summary>
+        ///   Exposes methods for raising <see cref="Engine"/> events.
+        /// </summary>
         private sealed class Events
         {
             private readonly EventDispatcher _dispatcher;
 
 
+            /// <summary>
+            ///   Initializes a new instance of the <see cref="Events"/> class.
+            /// </summary>
+            /// <param name="dispatcher">
+            ///   The <see cref="Node.EventDispatcher"/> to use to dispatch events.
+            /// </param>
             internal Events(EventDispatcher dispatcher)
             {
                 Debug.Assert(dispatcher != null);
@@ -699,7 +708,20 @@ namespace EXBP.Dipren
                 this._dispatcher = dispatcher;
             }
 
-            internal async Task JobStartedAsync(string jobId, CancellationToken cancellation)
+            /// <summary>
+            ///   Raises the event when a distributed processing job is started.
+            /// </summary>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job.
+            /// </param>
+            /// <param name="cancellation">
+            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+            ///   canceled.
+            /// </param>
+            /// <returns>
+            ///   A <see cref="Task"/> object that represents the asynchronous operation.
+            /// </returns>
+            internal async Task RaiseJobStartedAsync(string jobId, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
 
