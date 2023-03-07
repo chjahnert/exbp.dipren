@@ -189,7 +189,7 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
-            await this._events.RangeBoundariesRetrievedAsync(job.Id, partitionId, job.Serializer, range.First, range.Last, stopwatch.Elapsed.TotalMilliseconds, cancellation);
+            await this._events.RangeBoundariesRetrievedAsync(job.Id, partitionId, job.Serializer, range.First, range.Last, stopwatch.Elapsed, cancellation);
 
             await this._events.EstimatingRangeSizeAsync(job.Id, partitionId, cancellation);
 
@@ -199,7 +199,7 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
-            await this._events.RangeSizeEstimatedAsync(job.Id, partitionId, remaining, stopwatch.Elapsed.TotalMilliseconds, cancellation);
+            await this._events.RangeSizeEstimatedAsync(job.Id, partitionId, remaining, stopwatch.Elapsed, cancellation);
 
             //
             // When a split request is honored, the size of two key ranges is estimated. The timeout value should allow
@@ -311,18 +311,18 @@ namespace EXBP.Dipren
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventRetrievingRangeBoundaries, cancellation);
             }
 
-            internal async Task RangeBoundariesRetrievedAsync<TKey>(string jobId, Guid partitionId, IKeySerializer<TKey> serializer, TKey first, TKey last, double duration, CancellationToken cancellation)
+            internal async Task RangeBoundariesRetrievedAsync<TKey>(string jobId, Guid partitionId, IKeySerializer<TKey> serializer, TKey first, TKey last, TimeSpan duration, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(serializer != null);
                 Debug.Assert(first != null);
                 Debug.Assert(last != null);
-                Debug.Assert(duration >= 0.0);
+                Debug.Assert(duration >= TimeSpan.Zero);
 
                 string serializedFirst = serializer.Serialize(first);
                 string serializedLast = serializer.Serialize(last);
 
-                string message = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeBoundariesRetrieved, serializedFirst, serializedLast, duration);
+                string message = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeBoundariesRetrieved, serializedFirst, serializedLast, duration.TotalMilliseconds);
 
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, message, cancellation);
             }
@@ -334,13 +334,13 @@ namespace EXBP.Dipren
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventEstimatingRangeSize, cancellation);
             }
 
-            internal async Task RangeSizeEstimatedAsync(string jobId, Guid partitionId, long count, double duration, CancellationToken cancellation)
+            internal async Task RangeSizeEstimatedAsync(string jobId, Guid partitionId, long count, TimeSpan duration, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(count >= 0);
-                Debug.Assert(duration >= 0.0);
+                Debug.Assert(duration >= TimeSpan.Zero);
 
-                string message = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeSizeEstimated, count, duration);
+                string message = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeSizeEstimated, count, duration.TotalMilliseconds);
 
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, message, cancellation);
             }

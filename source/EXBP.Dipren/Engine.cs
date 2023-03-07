@@ -331,7 +331,7 @@ namespace EXBP.Dipren
 
                 long count = batch.Count();
 
-                await this._events.BatchRetrievedAsync(job.Id, partition.Id, count, stopwatch.Elapsed.TotalMilliseconds, cancellation);
+                await this._events.BatchRetrievedAsync(job.Id, partition.Id, count, stopwatch.Elapsed, cancellation);
                 this._metrics?.RegisterBatchRetrieved(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
 
                 if (count > 0L)
@@ -359,7 +359,7 @@ namespace EXBP.Dipren
                     if (succeeded == true)
                     {
                         this._metrics?.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
-                        await this._events.BatchProcessedAsync(job.Id, partition.Id, count, stopwatch.Elapsed.TotalMilliseconds, cancellation);
+                        await this._events.BatchProcessedAsync(job.Id, partition.Id, count, stopwatch.Elapsed, cancellation);
 
                         if (stopwatch.Elapsed >= settings.Timeout)
                         {
@@ -625,7 +625,7 @@ namespace EXBP.Dipren
 
                     result = updatedPartition;
 
-                    await this._events.PartitionSplitAsync(job.Id, partition.Id, job.Serializer, updatedPartition.Range.First, updatedPartition.Range.Last, excludedPartition.Id, excludedPartition.Range.First, excludedPartition.Range.Last, stopwatch.Elapsed.TotalMilliseconds, cancellation);
+                    await this._events.PartitionSplitAsync(job.Id, partition.Id, job.Serializer, updatedPartition.Range.First, updatedPartition.Range.Last, excludedPartition.Id, excludedPartition.Range.First, excludedPartition.Range.Last, stopwatch.Elapsed, cancellation);
 
                     this._metrics?.RegisterPartitionCreated(this.Id, job.Id, partition.Id);
                 }
@@ -765,13 +765,13 @@ namespace EXBP.Dipren
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, partitionId, message, cancellation);
             }
 
-            internal async Task BatchRetrievedAsync(string jobId, Guid partitionId, long count, double duration, CancellationToken cancellation)
+            internal async Task BatchRetrievedAsync(string jobId, Guid partitionId, long count, TimeSpan duration, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(count >= 0);
-                Debug.Assert(duration >= 0.0);
+                Debug.Assert(duration >= TimeSpan.Zero);
 
-                string message = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchRetrieved, count, duration);
+                string message = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchRetrieved, count, duration.TotalMilliseconds);
 
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, partitionId, message, cancellation);
             }
@@ -804,11 +804,13 @@ namespace EXBP.Dipren
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Warning, jobId, partitionId, message, exception, cancellation);
             }
 
-            internal async Task BatchProcessedAsync(string jobId, Guid partitionId, long count, double duration, CancellationToken cancellation)
+            internal async Task BatchProcessedAsync(string jobId, Guid partitionId, long count, TimeSpan duration, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
+                Debug.Assert(count >= 0);
+                Debug.Assert(duration >= TimeSpan.Zero);
 
-                string message = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessed, count, duration);
+                string message = string.Format(CultureInfo.InvariantCulture, EngineResources.EventBatchProcessed, count, duration.TotalMilliseconds);
 
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, partitionId, message, cancellation);
             }
@@ -883,7 +885,7 @@ namespace EXBP.Dipren
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, EngineResources.EventSplitRequested, cancellation);
             }
 
-            internal async Task PartitionSplitAsync<TKey>(string jobId, Guid partitionId, IKeySerializer<TKey> serializer, TKey updatedFirst, TKey updatedLast, Guid createdPartitionId, TKey createdFirst, TKey createdLast, double duration, CancellationToken cancellation)
+            internal async Task PartitionSplitAsync<TKey>(string jobId, Guid partitionId, IKeySerializer<TKey> serializer, TKey updatedFirst, TKey updatedLast, Guid createdPartitionId, TKey createdFirst, TKey createdLast, TimeSpan duration, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(serializer != null);
@@ -891,14 +893,14 @@ namespace EXBP.Dipren
                 Debug.Assert(updatedLast != null);
                 Debug.Assert(createdFirst != null);
                 Debug.Assert(createdLast != null);
-                Debug.Assert(duration >= 0.0);
+                Debug.Assert(duration >= TimeSpan.Zero);
 
                 string serializedUpdatedFirst = serializer.Serialize(updatedFirst);
                 string serializedUpdatedLast = serializer.Serialize(updatedLast);
                 string serializedCreatedFirst = serializer.Serialize(createdFirst);
                 string serializedCreatedLast = serializer.Serialize(createdLast);
 
-                string message = String.Format(CultureInfo.InvariantCulture, EngineResources.EventPartitionSplit, serializedUpdatedFirst, serializedUpdatedLast, createdPartitionId, serializedCreatedFirst, serializedCreatedLast, duration);
+                string message = String.Format(CultureInfo.InvariantCulture, EngineResources.EventPartitionSplit, serializedUpdatedFirst, serializedUpdatedLast, createdPartitionId, serializedCreatedFirst, serializedCreatedLast, duration.TotalMilliseconds);
 
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, message, cancellation);
             }
