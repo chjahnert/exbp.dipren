@@ -688,7 +688,7 @@ namespace EXBP.Dipren
 
 
         /// <summary>
-        ///   Exposes methods for raising <see cref="Engine"/> events.
+        ///   Implements methods for raising <see cref="Engine"/> events.
         /// </summary>
         private sealed class Events
         {
@@ -707,6 +707,7 @@ namespace EXBP.Dipren
 
                 this._dispatcher = dispatcher;
             }
+
 
             /// <summary>
             ///   Raises the event when a distributed processing job is started.
