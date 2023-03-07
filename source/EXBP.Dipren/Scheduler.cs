@@ -14,6 +14,9 @@ namespace EXBP.Dipren
     /// </summary>
     public class Scheduler : Node
     {
+        private readonly Events _events;
+
+
         /// <summary>
         ///   Initializes a new instance of the <see cref="Scheduler"/> class.
         /// </summary>
@@ -28,6 +31,7 @@ namespace EXBP.Dipren
         /// </param>
         internal Scheduler(IEngineDataStore store, ITimestampProvider clock, IEventHandler handler) : base(NodeType.Scheduler, store, clock, handler)
         {
+            this._events = new Events(this.Dispatcher);
         }
 
         /// <summary>
@@ -41,6 +45,7 @@ namespace EXBP.Dipren
         /// </param>
         public Scheduler(IEngineDataStore store, IEventHandler handler = null) : this(store, UtcTimestampProvider.Default, handler)
         {
+            this._events = new Events(this.Dispatcher);
         }
 
 
@@ -136,11 +141,11 @@ namespace EXBP.Dipren
             DateTime timestamp = this.Clock.GetCurrentTimestamp();
             Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing, settings.BatchSize, settings.Timeout, settings.ClockDrift);
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, SchedulerResources.EventCreatingJob, cancellation);
+            await this._events.CreatingJobAsync(job.Id, cancellation);
 
             await this.Store.InsertJobAsync(result, cancellation);
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, SchedulerResources.EventJobCreated, cancellation);
+            await this._events.JobCreatedAsync(job.Id, cancellation);
 
             return result;
         }
@@ -175,8 +180,8 @@ namespace EXBP.Dipren
 
             Guid partitionId = Guid.NewGuid();
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, SchedulerResources.EventCreatingInitialPartition, cancellation);
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, SchedulerResources.EventRetrievingRangeBoundaries, cancellation);
+            await this._events.CreatingInitialPartitionAsync(job.Id, partitionId, cancellation);
+            await this._events.RetrievingRangeBoundariesAsync(job.Id, partitionId, cancellation);
 
             Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -184,9 +189,9 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
-            string descriptionRangeBoundariesRetrieved = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeBoundariesRetrieved, range.First, range.Last, stopwatch.Elapsed.TotalMilliseconds);
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, descriptionRangeBoundariesRetrieved, cancellation);
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, SchedulerResources.EventEstimatingRangeSize, cancellation);
+            await this._events.RangeBoundariesRetrievedAsync(job.Id, partitionId, job.Serializer, range.First, range.Last, stopwatch.Elapsed.TotalMilliseconds, cancellation);
+
+            await this._events.EstimatingRangeSizeAsync(job.Id, partitionId, cancellation);
 
             stopwatch.Restart();
 
@@ -194,8 +199,7 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
-            string descriptionRangeSizeEstimated = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeSizeEstimated, remaining, stopwatch.Elapsed.TotalMilliseconds);
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, descriptionRangeSizeEstimated, cancellation);
+            await this._events.RangeSizeEstimatedAsync(job.Id, partitionId, remaining, stopwatch.Elapsed.TotalMilliseconds, cancellation);
 
             //
             // When a split request is honored, the size of two key ranges is estimated. The timeout value should allow
@@ -204,7 +208,7 @@ namespace EXBP.Dipren
 
             if (stopwatch.Elapsed >= (settings.Timeout / 2))
             {
-                await this.Dispatcher.DispatchEventAsync(EventSeverity.Warning, job.Id, partitionId, SchedulerResources.EventTimeoutValueTooLow, cancellation);
+                await this._events.TimeoutValueTooLowAsync(job.Id, partitionId, cancellation);
             }
 
             DateTime timestampPartitionCreated = this.Clock.GetCurrentTimestamp();
@@ -213,7 +217,7 @@ namespace EXBP.Dipren
 
             await this.Store.InsertPartitionAsync(result, cancellation);
 
-            await this.Dispatcher.DispatchEventAsync(EventSeverity.Information, job.Id, partitionId, SchedulerResources.EventInitialPartitionCreated, cancellation);
+            await this._events.InitialPartitionCreatedAsync(job.Id, partitionId, cancellation);
 
             return result;
         }
@@ -263,6 +267,97 @@ namespace EXBP.Dipren
             Job result = await this.Store.MarkJobAsFailedAsync(jobId, timestamp, exception?.Message, cancellation);
 
             return result;
+        }
+
+
+        private sealed class Events
+        {
+            private readonly EventDispatcher _dispatcher;
+
+
+            internal Events(EventDispatcher dispatcher)
+            {
+                Debug.Assert(dispatcher != null);
+
+                this._dispatcher = dispatcher;
+            }
+
+
+            internal async Task CreatingJobAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, SchedulerResources.EventCreatingJob, cancellation);
+            }
+
+            internal async Task JobCreatedAsync(string jobId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, SchedulerResources.EventJobCreated, cancellation);
+            }
+
+            internal async Task CreatingInitialPartitionAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventCreatingInitialPartition, cancellation);
+            }
+
+            internal async Task RetrievingRangeBoundariesAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventRetrievingRangeBoundaries, cancellation);
+            }
+
+            internal async Task RangeBoundariesRetrievedAsync<TKey>(string jobId, Guid partitionId, IKeySerializer<TKey> serializer, TKey first, TKey last, double duration, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+                Debug.Assert(serializer != null);
+                Debug.Assert(first != null);
+                Debug.Assert(last != null);
+                Debug.Assert(duration >= 0.0);
+
+                string serializedFirst = serializer.Serialize(first);
+                string serializedLast = serializer.Serialize(last);
+
+                string message = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeBoundariesRetrieved, serializedFirst, serializedLast, duration);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, message, cancellation);
+            }
+
+            internal async Task EstimatingRangeSizeAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventEstimatingRangeSize, cancellation);
+            }
+
+            internal async Task RangeSizeEstimatedAsync(string jobId, Guid partitionId, long count, double duration, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+                Debug.Assert(count >= 0);
+                Debug.Assert(duration >= 0.0);
+
+                string message = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeSizeEstimated, count, duration);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, message, cancellation);
+            }
+
+            internal async Task TimeoutValueTooLowAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Warning, jobId, partitionId, SchedulerResources.EventTimeoutValueTooLow, cancellation);
+            }
+
+            internal async Task InitialPartitionCreatedAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            {
+                Debug.Assert(jobId != null);
+
+                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventInitialPartitionCreated, cancellation);
+            }
         }
     }
 }
