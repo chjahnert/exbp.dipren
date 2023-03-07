@@ -188,7 +188,7 @@ namespace EXBP.Dipren
 
                 if (persisted.State == JobState.Completed || persisted.State == JobState.Failed)
                 {
-                    await this._events.JobCompletedAsync(job.Id, cancellation);
+                    await this._events.RaiseJobCompletedAsync(job.Id, cancellation);
                 }
                 else
                 {
@@ -235,7 +235,7 @@ namespace EXBP.Dipren
                             {
                                 persisted = await this.MarkJobAsCompletedAsync(persisted.Id, cancellation);
 
-                                await this._events.JobCompletedAsync(job.Id, cancellation);
+                                await this._events.RaiseJobCompletedAsync(job.Id, cancellation);
                             }
                             else
                             {
@@ -769,7 +769,20 @@ namespace EXBP.Dipren
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Debug, jobId, EngineResources.EventWaitingForJobToBeReady, cancellation);
             }
 
-            internal async Task JobCompletedAsync(string jobId, CancellationToken cancellation)
+            /// <summary>
+            ///   Raises the event when a distributed processing job completes.
+            /// </summary>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job.
+            /// </param>
+            /// <param name="cancellation">
+            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+            ///   canceled.
+            /// </param>
+            /// <returns>
+            ///   A <see cref="Task"/> object that represents the asynchronous operation.
+            /// </returns>
+            internal async Task RaiseJobCompletedAsync(string jobId, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
 
