@@ -164,7 +164,7 @@ namespace EXBP.Dipren
 
                 while ((persisted == null) || (persisted.State == JobState.Initializing))
                 {
-                    await this._events.WaitingForJobToBeReadyAsync(job.Id, cancellation);
+                    await this._events.RaiseWaitingForJobToBeReadyAsync(job.Id, cancellation);
 
                     await Task.Delay(this._configuration.PollingInterval, cancellation);
 
@@ -748,7 +748,21 @@ namespace EXBP.Dipren
                 await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, EngineResources.EventJobNotScheduled, cancellation);
             }
 
-            internal async Task WaitingForJobToBeReadyAsync(string jobId, CancellationToken cancellation)
+            /// <summary>
+            ///   Raises the event when the <see cref="Engine"/> is waiting for the distributed processing job to be
+            ///   ready.
+            /// </summary>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job.
+            /// </param>
+            /// <param name="cancellation">
+            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+            ///   canceled.
+            /// </param>
+            /// <returns>
+            ///   A <see cref="Task"/> object that represents the asynchronous operation.
+            /// </returns>
+            internal async Task RaiseWaitingForJobToBeReadyAsync(string jobId, CancellationToken cancellation)
             {
                 Debug.Assert(jobId != null);
 
