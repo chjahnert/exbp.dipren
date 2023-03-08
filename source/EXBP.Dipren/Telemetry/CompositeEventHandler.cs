@@ -66,5 +66,21 @@ namespace EXBP.Dipren.Telemetry
 
             await Task.WhenAll(tasks);
         }
+
+        /// <summary>
+        ///   Handles events.
+        /// </summary>
+        /// <param name="descriptor">
+        ///   An <see cref="EventDescriptor"/> object that holds information about the event that occurred.
+        /// </param>
+        public virtual void HandleEvent(EventDescriptor descriptor)
+        {
+            Assert.ArgumentIsNotNull(descriptor, nameof(descriptor));
+
+            for (int i = 0; i < this._handlers.Length; i++)
+            {
+                this._handlers[i].HandleEvent(descriptor);
+            }
+        }
     }
 }

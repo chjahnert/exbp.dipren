@@ -78,5 +78,23 @@ namespace EXBP.Dipren.Telemetry
 
             return Task.CompletedTask;
         }
+
+        /// <summary>
+        ///   Handles events.
+        /// </summary>
+        /// <param name="descriptor">
+        ///   An <see cref="EventDescriptor"/> object that holds information about the event that occurred.
+        /// </param>
+        public virtual void HandleEvent(EventDescriptor descriptor)
+        {
+            Assert.ArgumentIsNotNull(descriptor, nameof(descriptor));
+
+            if (descriptor.Severity >= this._level)
+            {
+                string output = this.Format(descriptor);
+
+                Console.WriteLine(output);
+            }
+        }
     }
 }
