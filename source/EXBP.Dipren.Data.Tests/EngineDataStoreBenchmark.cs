@@ -2,7 +2,6 @@
 using System.Diagnostics;
 
 using EXBP.Dipren.Diagnostics;
-using EXBP.Dipren.Telemetry;
 
 
 namespace EXBP.Dipren.Data.Tests
@@ -285,7 +284,7 @@ namespace EXBP.Dipren.Data.Tests
             }
 
 
-            public virtual Task HandleEventAsync(EventDescriptor descriptor, CancellationToken cancellation)
+            public void HandleEvent(EventDescriptor descriptor)
             {
                 Assert.ArgumentIsNotNull(descriptor, nameof(descriptor));
 
@@ -293,8 +292,6 @@ namespace EXBP.Dipren.Data.Tests
                 {
                     this._events.Add(descriptor);
                 }
-
-                return Task.CompletedTask;
             }
         }
     }

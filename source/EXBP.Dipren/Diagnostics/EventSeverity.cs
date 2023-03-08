@@ -1,5 +1,5 @@
 ﻿
-namespace EXBP.Dipren.Telemetry
+namespace EXBP.Dipren.Diagnostics
 {
     /// <summary>
     ///   Indicates the severity of a log message.

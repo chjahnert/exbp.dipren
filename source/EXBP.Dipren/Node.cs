@@ -3,7 +3,6 @@ using System.Diagnostics;
 
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Diagnostics;
-using EXBP.Dipren.Telemetry;
 
 
 namespace EXBP.Dipren
@@ -129,14 +128,7 @@ namespace EXBP.Dipren
             /// <param name="description">
             ///   A description of the event.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            public async Task DispatchEventAsync(EventSeverity severity, string jobId, string description, CancellationToken cancellation)
+            internal void DispatchEvent(EventSeverity severity, string jobId, string description)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(description != null);
@@ -153,7 +145,7 @@ namespace EXBP.Dipren
                         Description = description
                     };
 
-                    await this._handler.HandleEventAsync(descriptor, cancellation);
+                    this._handler.HandleEvent(descriptor);
                 }
             }
 
@@ -173,14 +165,7 @@ namespace EXBP.Dipren
             ///   The exception providing further information about the event; or <see langword="null"/> if not
             ///   available.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            internal async Task DispatchEventAsync(EventSeverity severity, string jobId, string description, Exception exception, CancellationToken cancellation)
+            internal void DispatchEvent(EventSeverity severity, string jobId, string description, Exception exception)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(description != null);
@@ -198,7 +183,7 @@ namespace EXBP.Dipren
                         Exception = exception
                     };
 
-                    await this._handler.HandleEventAsync(descriptor, cancellation);
+                    this._handler.HandleEvent(descriptor);
                 }
             }
 
@@ -217,14 +202,7 @@ namespace EXBP.Dipren
             /// <param name="description">
             ///   A description of the event.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            public async Task DispatchEventAsync(EventSeverity severity, string jobId, Guid partitonId, string description, CancellationToken cancellation)
+            internal void DispatchEvent(EventSeverity severity, string jobId, Guid partitonId, string description)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(description != null);
@@ -242,7 +220,7 @@ namespace EXBP.Dipren
                         Description = description
                     };
 
-                    await this._handler.HandleEventAsync(descriptor, cancellation);
+                    this._handler.HandleEvent(descriptor);
                 }
             }
 
@@ -265,14 +243,7 @@ namespace EXBP.Dipren
             ///   The exception providing further information about the event; or <see langword="null"/> if not
             ///   available.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            internal async Task DispatchEventAsync(EventSeverity severity, string jobId, Guid partitonId, string description, Exception exception, CancellationToken cancellation)
+            internal void DispatchEvent(EventSeverity severity, string jobId, Guid partitonId, string description, Exception exception)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(description != null);
@@ -291,7 +262,7 @@ namespace EXBP.Dipren
                         Exception = exception
                     };
 
-                    await this._handler.HandleEventAsync(descriptor, cancellation);
+                    this._handler.HandleEvent(descriptor);
                 }
             }
         }

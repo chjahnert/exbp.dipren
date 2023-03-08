@@ -1,5 +1,5 @@
 ﻿
-namespace EXBP.Dipren.Telemetry
+namespace EXBP.Dipren.Diagnostics
 {
     /// <summary>
     ///   Holds information about an event that occurred.

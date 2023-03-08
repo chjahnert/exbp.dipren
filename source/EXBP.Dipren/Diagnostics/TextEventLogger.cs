@@ -1,10 +1,8 @@
 ﻿
 using System.Text;
 
-using EXBP.Dipren.Diagnostics;
 
-
-namespace EXBP.Dipren.Telemetry
+namespace EXBP.Dipren.Diagnostics
 {
     /// <summary>
     ///   Serves as abase class for event handlers that output events into a text stream.

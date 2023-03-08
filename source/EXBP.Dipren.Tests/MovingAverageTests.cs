@@ -1,10 +1,8 @@
 ﻿
-using EXBP.Dipren.Telemetry;
-
 using NUnit.Framework;
 
 
-namespace EXBP.Dipren.Tests.Telemetry
+namespace EXBP.Dipren.Tests
 {
     [TestFixture]
     public class MovingAverageTests

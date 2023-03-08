@@ -4,7 +4,6 @@ using System.Globalization;
 
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Diagnostics;
-using EXBP.Dipren.Telemetry;
 
 
 namespace EXBP.Dipren
@@ -141,11 +140,11 @@ namespace EXBP.Dipren
             DateTime timestamp = this.Clock.GetCurrentTimestamp();
             Job result = new Job(job.Id, timestamp, timestamp, JobState.Initializing, settings.BatchSize, settings.Timeout, settings.ClockDrift);
 
-            await this._events.RaiseCreatingJobAsync(job.Id, cancellation);
+            this._events.RaiseCreatingJob(job.Id);
 
             await this.Store.InsertJobAsync(result, cancellation);
 
-            await this._events.RaiseJobCreatedAsync(job.Id, cancellation);
+            this._events.RaiseJobCreated(job.Id);
 
             return result;
         }
@@ -180,8 +179,8 @@ namespace EXBP.Dipren
 
             Guid partitionId = Guid.NewGuid();
 
-            await this._events.RaiseCreatingInitialPartitionAsync(job.Id, partitionId, cancellation);
-            await this._events.RaiseRetrievingRangeBoundariesAsync(job.Id, partitionId, cancellation);
+            this._events.RaiseCreatingInitialPartition(job.Id, partitionId);
+            this._events.RaiseRetrievingRangeBoundaries(job.Id, partitionId);
 
             Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -189,9 +188,8 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
-            await this._events.RaiseRangeBoundariesRetrievedAsync(job.Id, partitionId, job.Serializer, range.First, range.Last, stopwatch.Elapsed, cancellation);
-
-            await this._events.RaiseEstimatingRangeSizeAsync(job.Id, partitionId, cancellation);
+            this._events.RaiseRangeBoundariesRetrieved(job.Id, partitionId, job.Serializer, range.First, range.Last, stopwatch.Elapsed);
+            this._events.RaiseEstimatingRangeSize(job.Id, partitionId);
 
             stopwatch.Restart();
 
@@ -199,7 +197,7 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
-            await this._events.RaiseRangeSizeEstimatedAsync(job.Id, partitionId, remaining, stopwatch.Elapsed, cancellation);
+            this._events.RaiseRangeSizeEstimated(job.Id, partitionId, remaining, stopwatch.Elapsed);
 
             //
             // When a split request is honored, the size of two key ranges is estimated. The timeout value should allow
@@ -208,7 +206,7 @@ namespace EXBP.Dipren
 
             if (stopwatch.Elapsed >= (settings.Timeout / 2))
             {
-                await this._events.RaiseTimeoutValueTooLowAsync(job.Id, partitionId, cancellation);
+                this._events.RaiseTimeoutValueTooLow(job.Id, partitionId);
             }
 
             DateTime timestampPartitionCreated = this.Clock.GetCurrentTimestamp();
@@ -217,7 +215,7 @@ namespace EXBP.Dipren
 
             await this.Store.InsertPartitionAsync(result, cancellation);
 
-            await this._events.RaiseInitialPartitionCreatedAsync(job.Id, partitionId, cancellation);
+            this._events.RaiseInitialPartitionCreated(job.Id, partitionId);
 
             return result;
         }
@@ -298,18 +296,11 @@ namespace EXBP.Dipren
             /// <param name="jobId">
             ///   The unique identifier of the distributed processing job.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            internal async Task RaiseCreatingJobAsync(string jobId, CancellationToken cancellation)
+            internal void RaiseCreatingJob(string jobId)
             {
                 Debug.Assert(jobId != null);
 
-                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, SchedulerResources.EventCreatingJob, cancellation);
+                this._dispatcher.DispatchEvent(EventSeverity.Information, jobId, SchedulerResources.EventCreatingJob);
             }
 
             /// <summary>
@@ -318,18 +309,11 @@ namespace EXBP.Dipren
             /// <param name="jobId">
             ///   The unique identifier of the distributed processing job.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            internal async Task RaiseJobCreatedAsync(string jobId, CancellationToken cancellation)
+            internal void RaiseJobCreated(string jobId)
             {
                 Debug.Assert(jobId != null);
 
-                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, SchedulerResources.EventJobCreated, cancellation);
+                this._dispatcher.DispatchEvent(EventSeverity.Information, jobId, SchedulerResources.EventJobCreated);
             }
 
             /// <summary>
@@ -341,18 +325,11 @@ namespace EXBP.Dipren
             /// <param name="partitionId">
             ///   The unique identifier of the partition.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            internal async Task RaiseCreatingInitialPartitionAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            internal void RaiseCreatingInitialPartition(string jobId, Guid partitionId)
             {
                 Debug.Assert(jobId != null);
 
-                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventCreatingInitialPartition, cancellation);
+                this._dispatcher.DispatchEvent(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventCreatingInitialPartition);
             }
 
             /// <summary>
@@ -364,18 +341,11 @@ namespace EXBP.Dipren
             /// <param name="partitionId">
             ///   The unique identifier of the partition.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            internal async Task RaiseRetrievingRangeBoundariesAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            internal void RaiseRetrievingRangeBoundaries(string jobId, Guid partitionId)
             {
                 Debug.Assert(jobId != null);
 
-                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventRetrievingRangeBoundaries, cancellation);
+                this._dispatcher.DispatchEvent(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventRetrievingRangeBoundaries);
             }
 
             /// <summary>
@@ -403,14 +373,7 @@ namespace EXBP.Dipren
             /// <param name="duration">
             ///   The time it took to retrieve the range boundaries.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            internal async Task RaiseRangeBoundariesRetrievedAsync<TKey>(string jobId, Guid partitionId, IKeySerializer<TKey> serializer, TKey first, TKey last, TimeSpan duration, CancellationToken cancellation)
+            internal void RaiseRangeBoundariesRetrieved<TKey>(string jobId, Guid partitionId, IKeySerializer<TKey> serializer, TKey first, TKey last, TimeSpan duration)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(serializer != null);
@@ -423,7 +386,7 @@ namespace EXBP.Dipren
 
                 string message = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeBoundariesRetrieved, serializedFirst, serializedLast, duration.TotalMilliseconds);
 
-                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, message, cancellation);
+                this._dispatcher.DispatchEvent(EventSeverity.Information, jobId, partitionId, message);
             }
 
             /// <summary>
@@ -435,18 +398,11 @@ namespace EXBP.Dipren
             /// <param name="partitionId">
             ///   The unique identifier of the partition.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            internal async Task RaiseEstimatingRangeSizeAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            internal void RaiseEstimatingRangeSize(string jobId, Guid partitionId)
             {
                 Debug.Assert(jobId != null);
 
-                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventEstimatingRangeSize, cancellation);
+                this._dispatcher.DispatchEvent(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventEstimatingRangeSize);
             }
 
             /// <summary>
@@ -464,14 +420,7 @@ namespace EXBP.Dipren
             /// <param name="duration">
             ///   The time it took to complete the operation.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            internal async Task RaiseRangeSizeEstimatedAsync(string jobId, Guid partitionId, long count, TimeSpan duration, CancellationToken cancellation)
+            internal void RaiseRangeSizeEstimated(string jobId, Guid partitionId, long count, TimeSpan duration)
             {
                 Debug.Assert(jobId != null);
                 Debug.Assert(count >= 0);
@@ -479,7 +428,7 @@ namespace EXBP.Dipren
 
                 string message = string.Format(CultureInfo.InvariantCulture, SchedulerResources.EventRangeSizeEstimated, count, duration.TotalMilliseconds);
 
-                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, message, cancellation);
+                this._dispatcher.DispatchEvent(EventSeverity.Information, jobId, partitionId, message);
             }
 
             /// <summary>
@@ -491,18 +440,11 @@ namespace EXBP.Dipren
             /// <param name="partitionId">
             ///   The unique identifier of the partition.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            internal async Task RaiseTimeoutValueTooLowAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            internal void RaiseTimeoutValueTooLow(string jobId, Guid partitionId)
             {
                 Debug.Assert(jobId != null);
 
-                await this._dispatcher.DispatchEventAsync(EventSeverity.Warning, jobId, partitionId, SchedulerResources.EventTimeoutValueTooLow, cancellation);
+                this._dispatcher.DispatchEvent(EventSeverity.Warning, jobId, partitionId, SchedulerResources.EventTimeoutValueTooLow);
             }
 
             /// <summary>
@@ -514,18 +456,11 @@ namespace EXBP.Dipren
             /// <param name="partitionId">
             ///   The unique identifier of the partition.
             /// </param>
-            /// <param name="cancellation">
-            ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-            ///   canceled.
-            /// </param>
-            /// <returns>
-            ///   A <see cref="Task"/> object that represents the asynchronous operation.
-            /// </returns>
-            internal async Task RaiseInitialPartitionCreatedAsync(string jobId, Guid partitionId, CancellationToken cancellation)
+            internal void RaiseInitialPartitionCreated(string jobId, Guid partitionId)
             {
                 Debug.Assert(jobId != null);
 
-                await this._dispatcher.DispatchEventAsync(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventInitialPartitionCreated, cancellation);
+                this._dispatcher.DispatchEvent(EventSeverity.Information, jobId, partitionId, SchedulerResources.EventInitialPartitionCreated);
             }
         }
     }

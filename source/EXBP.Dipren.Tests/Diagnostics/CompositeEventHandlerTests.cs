@@ -1,10 +1,12 @@
 ﻿
-using EXBP.Dipren.Telemetry;
+using EXBP.Dipren.Diagnostics;
 
 using NUnit.Framework;
 
+using Assert = NUnit.Framework.Assert;
 
-namespace EXBP.Dipren.Tests.Telemetry
+
+namespace EXBP.Dipren.Tests.Diagnostics
 {
     [TestFixture]
     public class CompositeEventHandlerTests
@@ -25,16 +27,16 @@ namespace EXBP.Dipren.Tests.Telemetry
         }
 
         [Test]
-        public void HandleEventAsync_ArgumentDescriptorIsNull_ThrowsException()
+        public void HandleEvent_ArgumentDescriptorIsNull_ThrowsException()
         {
             IEventHandler collecting = new CollectingEventHandler();
             IEventHandler composite = new CompositeEventHandler(collecting);
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => composite.HandleEventAsync(null, CancellationToken.None));
+            Assert.Throws<ArgumentNullException>(() => composite.HandleEvent(null));
         }
 
         [Test]
-        public async Task HandleEventAsync_MultipleHandlers_HandlersReceiveEvent()
+        public void HandleEvent_MultipleHandlers_HandlersReceiveEvent()
         {
             CollectingEventHandler first = new CollectingEventHandler();
             CollectingEventHandler second = new CollectingEventHandler();
@@ -51,7 +53,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                 Description = "xyz"
             };
 
-            await composite.HandleEventAsync(descriptor, CancellationToken.None);
+            composite.HandleEvent(descriptor);
 
             Assert.That(first.Events.Count, Is.EqualTo(1));
             Assert.That(second.Events.Count, Is.EqualTo(1));
@@ -63,14 +65,12 @@ namespace EXBP.Dipren.Tests.Telemetry
             private readonly List<EventDescriptor> _events = new List<EventDescriptor>();
 
 
-            public IReadOnlyList<EventDescriptor> Events => this._events;
+            public IReadOnlyList<EventDescriptor> Events => _events;
 
 
-            public Task HandleEventAsync(EventDescriptor descriptor, CancellationToken cancellation)
+            public void HandleEvent(EventDescriptor descriptor)
             {
-                this._events.Add(descriptor);
-
-                return Task.CompletedTask;
+                _events.Add(descriptor);
             }
         }
     }

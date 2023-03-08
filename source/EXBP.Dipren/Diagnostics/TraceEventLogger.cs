@@ -1,10 +1,8 @@
 ﻿
 using System.Diagnostics;
 
-using EXBP.Dipren.Diagnostics;
 
-
-namespace EXBP.Dipren.Telemetry
+namespace EXBP.Dipren.Diagnostics
 {
     /// <summary>
     ///   Implements an <see cref="IEventHandler"/> that sends log messages about events to the trace output.
@@ -60,14 +58,7 @@ namespace EXBP.Dipren.Telemetry
         /// <param name="descriptor">
         ///   An <see cref="EventDescriptor"/> object that holds information about the event that occurred.
         /// </param>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task"/> that represents the asynchronous operation.
-        /// </returns>
-        public virtual Task HandleEventAsync(EventDescriptor descriptor, CancellationToken cancellation)
+        public virtual void HandleEvent(EventDescriptor descriptor)
         {
             Assert.ArgumentIsNotNull(descriptor, nameof(descriptor));
 
@@ -77,8 +68,6 @@ namespace EXBP.Dipren.Telemetry
 
                 Trace.WriteLine(output);
             }
-
-            return Task.CompletedTask;
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿
-namespace EXBP.Dipren.Telemetry
+namespace EXBP.Dipren.Diagnostics
 {
     /// <summary>
     ///   Allows a class to implement an event handler that receives notifications about events during processing.
@@ -12,13 +12,6 @@ namespace EXBP.Dipren.Telemetry
         /// <param name="descriptor">
         ///   An <see cref="EventDescriptor"/> object that holds information about the event that occurred.
         /// </param>
-        /// <param name="cancellation">
-        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
-        ///   canceled.
-        /// </param>
-        /// <returns>
-        ///   A <see cref="Task"/> that represents the asynchronous operation.
-        /// </returns>
-        Task HandleEventAsync(EventDescriptor descriptor, CancellationToken cancellation);
+        void HandleEvent(EventDescriptor descriptor);
     }
 }
