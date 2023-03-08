@@ -72,6 +72,11 @@ namespace EXBP.Dipren.Tests.Telemetry
 
                 return Task.CompletedTask;
             }
+
+            public void HandleEvent(EventDescriptor descriptor)
+            {
+                this._events.Add(descriptor);
+            }
         }
     }
 }
