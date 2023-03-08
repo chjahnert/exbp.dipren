@@ -285,18 +285,6 @@ namespace EXBP.Dipren.Data.Tests
             }
 
 
-            public virtual Task HandleEventAsync(EventDescriptor descriptor, CancellationToken cancellation)
-            {
-                Assert.ArgumentIsNotNull(descriptor, nameof(descriptor));
-
-                if (descriptor.Severity >= this._level)
-                {
-                    this._events.Add(descriptor);
-                }
-
-                return Task.CompletedTask;
-            }
-
             public void HandleEvent(EventDescriptor descriptor)
             {
                 Assert.ArgumentIsNotNull(descriptor, nameof(descriptor));

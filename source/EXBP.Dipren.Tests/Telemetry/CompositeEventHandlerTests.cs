@@ -25,16 +25,16 @@ namespace EXBP.Dipren.Tests.Telemetry
         }
 
         [Test]
-        public void HandleEventAsync_ArgumentDescriptorIsNull_ThrowsException()
+        public void HandleEvent_ArgumentDescriptorIsNull_ThrowsException()
         {
             IEventHandler collecting = new CollectingEventHandler();
             IEventHandler composite = new CompositeEventHandler(collecting);
 
-            Assert.ThrowsAsync<ArgumentNullException>(() => composite.HandleEventAsync(null, CancellationToken.None));
+            Assert.Throws<ArgumentNullException>(() => composite.HandleEvent(null));
         }
 
         [Test]
-        public async Task HandleEventAsync_MultipleHandlers_HandlersReceiveEvent()
+        public void HandleEvent_MultipleHandlers_HandlersReceiveEvent()
         {
             CollectingEventHandler first = new CollectingEventHandler();
             CollectingEventHandler second = new CollectingEventHandler();
@@ -51,7 +51,7 @@ namespace EXBP.Dipren.Tests.Telemetry
                 Description = "xyz"
             };
 
-            await composite.HandleEventAsync(descriptor, CancellationToken.None);
+            composite.HandleEvent(descriptor);
 
             Assert.That(first.Events.Count, Is.EqualTo(1));
             Assert.That(second.Events.Count, Is.EqualTo(1));
@@ -65,13 +65,6 @@ namespace EXBP.Dipren.Tests.Telemetry
 
             public IReadOnlyList<EventDescriptor> Events => this._events;
 
-
-            public Task HandleEventAsync(EventDescriptor descriptor, CancellationToken cancellation)
-            {
-                this._events.Add(descriptor);
-
-                return Task.CompletedTask;
-            }
 
             public void HandleEvent(EventDescriptor descriptor)
             {
