@@ -113,7 +113,7 @@ namespace EXBP.Dipren
             Assert.ArgumentIsNotNull(job, nameof(job));
 
             this._events.RaiseJobStarted(job.Id);
-            this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
+            this._metrics.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
 
             try
             {
@@ -207,7 +207,7 @@ namespace EXBP.Dipren
 
                         if (partition != null)
                         {
-                            this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Processing);
+                            this._metrics.RegisterEngineState(this.Id, job.Id, EngineState.Processing);
 
                             try
                             {
@@ -223,7 +223,7 @@ namespace EXBP.Dipren
                             }
                             finally
                             {
-                                this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
+                                this._metrics.RegisterEngineState(this.Id, job.Id, EngineState.Ready);
                             }
                         }
                         else
@@ -265,7 +265,7 @@ namespace EXBP.Dipren
             }
             finally
             {
-                this._metrics?.RegisterEngineState(this.Id, job.Id, EngineState.Stopped);
+                this._metrics.RegisterEngineState(this.Id, job.Id, EngineState.Stopped);
             }
         }
 
@@ -330,8 +330,8 @@ namespace EXBP.Dipren
 
                 long count = batch.Count();
 
+                this._metrics.RegisterBatchRetrieved(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
                 this._events.RaiseBatchRetrieved(job.Id, partition.Id, count, stopwatch.Elapsed);
-                this._metrics?.RegisterBatchRetrieved(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
 
                 if (count > 0L)
                 {
@@ -347,7 +347,7 @@ namespace EXBP.Dipren
                     }
                     catch (Exception ex)
                     {
-                        this._metrics?.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, false, stopwatch.Elapsed);
+                        this._metrics.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, false, stopwatch.Elapsed);
                         this._events.RaiseBatchProcessingFailed(job.Id, partition.Id, ex, count, job.Serializer, batch.First().Key, batch.Last().Key);
 
                         succeeded = false;
@@ -357,7 +357,7 @@ namespace EXBP.Dipren
 
                     if (succeeded == true)
                     {
-                        this._metrics?.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
+                        this._metrics.RegisterBatchProcessed(this.Id, job.Id, partition.Id, count, true, stopwatch.Elapsed);
                         this._events.RaiseBatchProcessed(job.Id, partition.Id, count, stopwatch.Elapsed);
 
                         if (stopwatch.Elapsed >= settings.Timeout)
@@ -390,8 +390,8 @@ namespace EXBP.Dipren
                 }
             }
 
+            this._metrics.RegisterPartitionCompleted(this.Id, job.Id, partition.Id);
             this._events.RaisePartitionCompleted(job.Id, partition.Id);
-            this._metrics?.RegisterPartitionCompleted(this.Id, job.Id, partition.Id);
         }
 
         /// <summary>
@@ -434,7 +434,7 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
-            this._metrics?.RegisterTryAcquirePartition(this.Id, job.Id, (acquired != null), stopwatch.Elapsed);
+            this._metrics.RegisterTryAcquirePartition(this.Id, job.Id, (acquired != null), stopwatch.Elapsed);
 
             Partition<TKey> result = null;
 
@@ -454,7 +454,7 @@ namespace EXBP.Dipren
 
                 stopwatch.Stop();
 
-                this._metrics?.RegisterIsSplitRequestPending(this.Id, job.Id, stopwatch.Elapsed);
+                this._metrics.RegisterIsSplitRequestPending(this.Id, job.Id, stopwatch.Elapsed);
 
                 if (pending == false)
                 {
@@ -475,7 +475,7 @@ namespace EXBP.Dipren
                         this._events.RaiseSplitRequestFailed(job.Id);
                     }
 
-                    this._metrics?.RegisterTryRequestSplit(this.Id, job.Id, succeeded, stopwatch.Elapsed);
+                    this._metrics.RegisterTryRequestSplit(this.Id, job.Id, succeeded, stopwatch.Elapsed);
                 }
                 else
                 {
@@ -552,7 +552,7 @@ namespace EXBP.Dipren
 
             stopwatch.Stop();
 
-            this._metrics?.RegisterReportProgress(this.Id, job.Id, partition.Id, stopwatch.Elapsed);
+            this._metrics.RegisterReportProgress(this.Id, job.Id, partition.Id, stopwatch.Elapsed);
 
             return result;
         }
@@ -624,9 +624,8 @@ namespace EXBP.Dipren
 
                     result = updatedPartition;
 
+                    this._metrics.RegisterPartitionCreated(this.Id, job.Id, partition.Id);
                     this._events.RaisePartitionSplit(job.Id, partition.Id, job.Serializer, updatedPartition.Range.First, updatedPartition.Range.Last, excludedPartition.Id, excludedPartition.Range.First, excludedPartition.Range.Last, stopwatch.Elapsed);
-
-                    this._metrics?.RegisterPartitionCreated(this.Id, job.Id, partition.Id);
                 }
                 else
                 {
