@@ -1,5 +1,5 @@
 ﻿
-namespace EXBP.Dipren.Telemetry
+namespace EXBP.Dipren
 {
     /// <summary>
     ///   Calculates a moving average.
