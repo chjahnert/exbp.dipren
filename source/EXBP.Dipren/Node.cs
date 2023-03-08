@@ -169,6 +169,39 @@ namespace EXBP.Dipren
             /// <param name="description">
             ///   A description of the event.
             /// </param>
+            internal void DispatchEvent(EventSeverity severity, string jobId, string description)
+            {
+                Debug.Assert(jobId != null);
+                Debug.Assert(description != null);
+
+                if (this._handler != null)
+                {
+                    EventDescriptor descriptor = new EventDescriptor
+                    {
+                        Timestamp = this._clock.GetCurrentTimestamp(),
+                        Source = this._type,
+                        Severity = severity,
+                        EngineId = this._id,
+                        JobId = jobId,
+                        Description = description
+                    };
+
+                    this._handler.HandleEvent(descriptor);
+                }
+            }
+
+            /// <summary>
+            ///   Dispatches an event related to a job and a partition.
+            /// </summary>
+            /// <param name="severity">
+            ///   A <see cref="EventSeverity"/> value indicating the severity of the event.
+            /// </param>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job the event is related to.
+            /// </param>
+            /// <param name="description">
+            ///   A description of the event.
+            /// </param>
             /// <param name="exception">
             ///   The exception providing further information about the event; or <see langword="null"/> if not
             ///   available.
@@ -199,6 +232,44 @@ namespace EXBP.Dipren
                     };
 
                     await this._handler.HandleEventAsync(descriptor, cancellation);
+                }
+            }
+
+            /// <summary>
+            ///   Dispatches an event related to a job and a partition.
+            /// </summary>
+            /// <param name="severity">
+            ///   A <see cref="EventSeverity"/> value indicating the severity of the event.
+            /// </param>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job the event is related to.
+            /// </param>
+            /// <param name="description">
+            ///   A description of the event.
+            /// </param>
+            /// <param name="exception">
+            ///   The exception providing further information about the event; or <see langword="null"/> if not
+            ///   available.
+            /// </param>
+            internal void DispatchEvent(EventSeverity severity, string jobId, string description, Exception exception)
+            {
+                Debug.Assert(jobId != null);
+                Debug.Assert(description != null);
+
+                if (this._handler != null)
+                {
+                    EventDescriptor descriptor = new EventDescriptor
+                    {
+                        Timestamp = this._clock.GetCurrentTimestamp(),
+                        Source = this._type,
+                        Severity = severity,
+                        EngineId = this._id,
+                        JobId = jobId,
+                        Description = description,
+                        Exception = exception
+                    };
+
+                    this._handler.HandleEvent(descriptor);
                 }
             }
 
@@ -261,6 +332,43 @@ namespace EXBP.Dipren
             /// <param name="description">
             ///   A description of the event.
             /// </param>
+            internal void DispatchEvent(EventSeverity severity, string jobId, Guid partitonId, string description)
+            {
+                Debug.Assert(jobId != null);
+                Debug.Assert(description != null);
+
+                if (this._handler != null)
+                {
+                    EventDescriptor descriptor = new EventDescriptor
+                    {
+                        Timestamp = this._clock.GetCurrentTimestamp(),
+                        Source = this._type,
+                        Severity = severity,
+                        EngineId = this._id,
+                        JobId = jobId,
+                        PartitionId = partitonId,
+                        Description = description
+                    };
+
+                    this._handler.HandleEvent(descriptor);
+                }
+            }
+
+            /// <summary>
+            ///   Dispatches an event related to a job and a partition.
+            /// </summary>
+            /// <param name="severity">
+            ///   A <see cref="EventSeverity"/> value indicating the severity of the event.
+            /// </param>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job the event is related to.
+            /// </param>
+            /// <param name="partitonId">
+            ///   The unique identifier of the partition the event is related to.
+            /// </param>
+            /// <param name="description">
+            ///   A description of the event.
+            /// </param>
             /// <param name="exception">
             ///   The exception providing further information about the event; or <see langword="null"/> if not
             ///   available.
@@ -292,6 +400,48 @@ namespace EXBP.Dipren
                     };
 
                     await this._handler.HandleEventAsync(descriptor, cancellation);
+                }
+            }
+
+            /// <summary>
+            ///   Dispatches an event related to a job and a partition.
+            /// </summary>
+            /// <param name="severity">
+            ///   A <see cref="EventSeverity"/> value indicating the severity of the event.
+            /// </param>
+            /// <param name="jobId">
+            ///   The unique identifier of the distributed processing job the event is related to.
+            /// </param>
+            /// <param name="partitonId">
+            ///   The unique identifier of the partition the event is related to.
+            /// </param>
+            /// <param name="description">
+            ///   A description of the event.
+            /// </param>
+            /// <param name="exception">
+            ///   The exception providing further information about the event; or <see langword="null"/> if not
+            ///   available.
+            /// </param>
+            internal void DispatchEvent(EventSeverity severity, string jobId, Guid partitonId, string description, Exception exception)
+            {
+                Debug.Assert(jobId != null);
+                Debug.Assert(description != null);
+
+                if (this._handler != null)
+                {
+                    EventDescriptor descriptor = new EventDescriptor
+                    {
+                        Timestamp = this._clock.GetCurrentTimestamp(),
+                        Source = this._type,
+                        Severity = severity,
+                        EngineId = this._id,
+                        JobId = jobId,
+                        PartitionId = partitonId,
+                        Description = description,
+                        Exception = exception
+                    };
+
+                    this._handler.HandleEvent(descriptor);
                 }
             }
         }
