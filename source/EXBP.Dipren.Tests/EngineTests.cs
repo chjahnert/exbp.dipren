@@ -1,9 +1,11 @@
 ﻿
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Data.Memory;
-using EXBP.Dipren.Telemetry;
+using EXBP.Dipren.Diagnostics;
 
 using NUnit.Framework;
+
+using Assert = NUnit.Framework.Assert;
 
 
 namespace EXBP.Dipren.Tests

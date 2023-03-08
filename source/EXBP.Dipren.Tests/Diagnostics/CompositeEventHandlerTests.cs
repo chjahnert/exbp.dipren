@@ -1,10 +1,12 @@
 ﻿
-using EXBP.Dipren.Telemetry;
+using EXBP.Dipren.Diagnostics;
 
 using NUnit.Framework;
 
+using Assert = NUnit.Framework.Assert;
 
-namespace EXBP.Dipren.Tests.Telemetry
+
+namespace EXBP.Dipren.Tests.Diagnostics
 {
     [TestFixture]
     public class CompositeEventHandlerTests
@@ -63,12 +65,12 @@ namespace EXBP.Dipren.Tests.Telemetry
             private readonly List<EventDescriptor> _events = new List<EventDescriptor>();
 
 
-            public IReadOnlyList<EventDescriptor> Events => this._events;
+            public IReadOnlyList<EventDescriptor> Events => _events;
 
 
             public void HandleEvent(EventDescriptor descriptor)
             {
-                this._events.Add(descriptor);
+                _events.Add(descriptor);
             }
         }
     }

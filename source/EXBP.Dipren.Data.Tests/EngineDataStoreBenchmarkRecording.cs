@@ -1,7 +1,7 @@
 ﻿
 using System.Diagnostics;
 
-using EXBP.Dipren.Telemetry;
+using EXBP.Dipren.Diagnostics;
 
 
 namespace EXBP.Dipren.Data.Tests

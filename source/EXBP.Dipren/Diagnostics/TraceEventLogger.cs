@@ -1,10 +1,8 @@
 ﻿
 using System.Diagnostics;
 
-using EXBP.Dipren.Diagnostics;
 
-
-namespace EXBP.Dipren.Telemetry
+namespace EXBP.Dipren.Diagnostics
 {
     /// <summary>
     ///   Implements an <see cref="IEventHandler"/> that sends log messages about events to the trace output.

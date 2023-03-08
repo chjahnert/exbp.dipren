@@ -2,7 +2,7 @@
 using EXBP.Dipren.Diagnostics;
 
 
-namespace EXBP.Dipren.Telemetry
+namespace EXBP.Dipren.Diagnostics
 {
     /// <summary>
     ///   Implements an <see cref="IEventHandler"/> that sends log messages to multiple event handlers.

@@ -76,7 +76,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>OpenTelemetryEngineMetricsResources.resx</DependentUpon>
     </Compile>
-    <Compile Update="Telemetry\TextEventLoggerResources.Designer.cs">
+    <Compile Update="Diagnostics\TextEventLoggerResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TextEventLoggerResources.resx</DependentUpon>
@@ -117,7 +117,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>OpenTelemetryEngineMetricsResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Telemetry\TextEventLoggerResources.resx">
+    <EmbeddedResource Update="Diagnostics\TextEventLoggerResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TextEventLoggerResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>

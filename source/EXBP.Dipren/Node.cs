@@ -3,7 +3,6 @@ using System.Diagnostics;
 
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Diagnostics;
-using EXBP.Dipren.Telemetry;
 
 
 namespace EXBP.Dipren

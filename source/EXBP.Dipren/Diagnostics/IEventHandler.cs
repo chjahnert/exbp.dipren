@@ -1,5 +1,5 @@
 ﻿
-namespace EXBP.Dipren.Telemetry
+namespace EXBP.Dipren.Diagnostics
 {
     /// <summary>
     ///   Allows a class to implement an event handler that receives notifications about events during processing.
