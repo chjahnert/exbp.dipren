@@ -71,6 +71,32 @@ namespace EXBP.Dipren
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
         public async Task ScheduleAsync<TKey, TItem>(Job<TKey, TItem> job, Settings settings, CancellationToken cancellation = default)
+            => await this.ScheduleImpAsync(job, settings, cancellation).ConfigureAwait(false);
+
+
+        /// <summary>
+        ///   Schedules a distributed processing job.
+        /// </summary>
+        /// <typeparam name="TKey">
+        ///   The type of the item key.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        ///   The type of items to process.
+        /// </typeparam>
+        /// <param name="job">
+        ///   The job to schedule for distributed processing.
+        /// </param>
+        /// <param name="settings">
+        ///   The job settings to use.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> object that represents the asynchronous operation.
+        /// </returns>
+        private async Task ScheduleImpAsync<TKey, TItem>(Job<TKey, TItem> job, Settings settings, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
@@ -104,6 +130,23 @@ namespace EXBP.Dipren
         ///   operation.
         /// </returns>
         public async Task<StatusReport> GetStatusReportAsync(string id, CancellationToken cancellation = default)
+            => await this.GetStatusReportImpAsync(id, cancellation).ConfigureAwait(false);
+
+        /// <summary>
+        ///   Gets a status report of the job with the specified unique identifier.
+        /// </summary>
+        /// <param name="id">
+        ///   The unique identifier of the job.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task{TResult}"/> of <see cref="StatusReport"/> object that represents the asynchronous
+        ///   operation.
+        /// </returns>
+        private async Task<StatusReport> GetStatusReportImpAsync(string id, CancellationToken cancellation)
         {
             DateTime timestamp = this.Clock.GetCurrentTimestamp();
 

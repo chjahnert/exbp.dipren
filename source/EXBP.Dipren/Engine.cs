@@ -109,6 +109,42 @@ namespace EXBP.Dipren
         ///   </para>
         /// </remarks>
         public async Task RunAsync<TKey, TItem>(Job<TKey, TItem> job, bool wait, CancellationToken cancellation = default)
+            => await this.RunImpAsync(job, wait, cancellation).ConfigureAwait(false);
+
+
+        /// <summary>
+        ///   Executes a distributed processing job.
+        /// </summary>
+        /// <typeparam name="TKey">
+        ///   The type of the item key.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        ///   The type of items to process.
+        /// </typeparam>
+        /// <param name="job">
+        ///   The job to start.
+        /// </param>
+        /// <param name="wait">
+        ///   <see langword="true"/> to wait for the job to be ready; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <param name="cancellation">
+        ///   The <see cref="CancellationToken"/> used to propagate notifications that the operation should be
+        ///   canceled.
+        /// </param>
+        /// <returns>
+        ///   A <see cref="Task"/> that represents the asynchronous operation and can be used to access the result.
+        /// </returns>
+        /// <exception cref="JobNotScheduledException">
+        ///   Argument <paramref name="wait"/> is <see langword="false"/> and the job has not yet been scheduled for
+        ///   processing.
+        /// </exception>
+        /// <remarks>
+        ///   <para>
+        ///     If <paramref name="wait"/> is <see langword="true"/> and the job is not yet scheduled, the method will
+        ///     wait for the job to be scheduled.
+        ///   </para>
+        /// </remarks>
+        private async Task RunImpAsync<TKey, TItem>(Job<TKey, TItem> job, bool wait, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(job, nameof(job));
 
