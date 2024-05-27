@@ -120,7 +120,7 @@ namespace EXBP.Dipren.Tests
             }
 
 
-            public Task<long> EstimateRangeSizeAsync(Range<int> range, CancellationToken canellation)
+            public Task<long> EstimateRangeSizeAsync(Range<int> range, CancellationToken cancellation)
                 => Task.FromResult<long>(Math.Abs(range.Last - range.First) + ((range.IsInclusive == true) ? 1 : 0));
 
             public Task<Range<int>> GetEntireRangeAsync(CancellationToken cancellation)
