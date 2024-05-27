@@ -78,7 +78,7 @@ namespace EXBP.Dipren.Tests
             await engine.RunAsync(job, false);
 
             Assert.That(processor.Items.Count, Is.EqualTo(128));
-            CollectionAssert.IsOrdered(processor.Items);
+            Assert.That(processor.Items, Is.Ordered.Ascending);
         }
 
         [Test]
@@ -101,7 +101,7 @@ namespace EXBP.Dipren.Tests
             await engine.RunAsync(job, false);
 
             Assert.That(processor.Items.Count, Is.EqualTo(128));
-            CollectionAssert.IsOrdered(processor.Items.Reverse());
+            Assert.That(processor.Items, Is.Ordered.Descending);
         }
 
 
