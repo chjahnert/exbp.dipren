@@ -78,7 +78,7 @@ namespace EXBP.Dipren.Tests
             await engine.RunAsync(job, false);
 
             Assert.That(processor.Items.Count, Is.EqualTo(128));
-            CollectionAssert.IsOrdered(processor.Items);
+            Assert.That(processor.Items, Is.Ordered.Ascending);
         }
 
         [Test]
@@ -101,7 +101,7 @@ namespace EXBP.Dipren.Tests
             await engine.RunAsync(job, false);
 
             Assert.That(processor.Items.Count, Is.EqualTo(128));
-            CollectionAssert.IsOrdered(processor.Items.Reverse());
+            Assert.That(processor.Items, Is.Ordered.Descending);
         }
 
 
@@ -120,7 +120,7 @@ namespace EXBP.Dipren.Tests
             }
 
 
-            public Task<long> EstimateRangeSizeAsync(Range<int> range, CancellationToken canellation)
+            public Task<long> EstimateRangeSizeAsync(Range<int> range, CancellationToken cancellation)
                 => Task.FromResult<long>(Math.Abs(range.Last - range.First) + ((range.IsInclusive == true) ? 1 : 0));
 
             public Task<Range<int>> GetEntireRangeAsync(CancellationToken cancellation)

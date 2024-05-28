@@ -82,7 +82,7 @@ namespace EXBP.Dipren.Data.Postgres.Tests
                     WriteIndented = true
                 };
 
-                await JsonSerializer.SerializeAsync(writer, recording, options);
+                await JsonSerializer.SerializeAsync(writer, recording, options, cancellation);
             }
         }
 

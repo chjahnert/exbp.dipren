@@ -22,7 +22,7 @@ namespace EXBP.Dipren.Tests
 
             string expected = FormattableString.Invariant($"S{NodeIdentifier.DELIMITER}{Environment.MachineName}{NodeIdentifier.DELIMITER}{Environment.ProcessId}{NodeIdentifier.DELIMITER}{AppDomain.CurrentDomain.Id}{NodeIdentifier.DELIMITER}");
 
-            StringAssert.StartsWith(expected, actual);
+            Assert.That(actual, Does.StartWith(expected));
         }
 
         [Test]
