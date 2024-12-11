@@ -1,7 +1,4 @@
 ﻿
-using System.Runtime.Serialization;
-
-
 namespace EXBP.Dipren.Data
 {
     /// <summary>
@@ -37,20 +34,6 @@ namespace EXBP.Dipren.Data
         ///   The exception that is the cause of the current exception.
         /// </param>
         public LockException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        /// <summary>
-        ///   Initializes a new instance of the <see cref="LockException"/> class with the specified serialization
-        ///   and context information.
-        /// </summary>
-        /// <param name="info">
-        ///   The data for serializing or deserializing the file.
-        /// </param>
-        /// <param name="context">
-        ///   The source and destination for the file.
-        /// </param>
-        protected LockException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }
