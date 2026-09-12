@@ -1205,13 +1205,6 @@ namespace EXBP.Dipren.Data.Tests
             Assert.ThrowsAsync<DuplicateIdentifierException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
         }
 
-        /// <summary>
-        ///   Verifies that a stale split is rejected without changing the current owner's partition or
-        ///   inserting another partition.
-        /// </summary>
-        /// <returns>
-        ///   A <see cref="Task"/> that represents the asynchronous test operation.
-        /// </returns>
         [Test]
         public async Task InsertSplitPartitionAsync_PartitionLockNoLongerOwned_ThrowsExceptionAndPreservesPartitions()
         {
@@ -1229,21 +1222,7 @@ namespace EXBP.Dipren.Data.Tests
             DateTime progressUpdated = this.FormatDateTime(acquiredAt.AddSeconds(1));
             DateTime splitCompleted = this.FormatDateTime(acquiredAt.AddSeconds(2));
 
-            Partition partition = new Partition(
-                id,
-                job.Id,
-                created,
-                updated,
-                "a",
-                "z",
-                true,
-                "c",
-                3L,
-                23L,
-                "original-owner",
-                false,
-                0.0,
-                "split-requester");
+            Partition partition = new Partition(id, job.Id, created, updated, "a", "z", true, "c", 3L, 23L, "original-owner", false, 0.0, "split-requester");
 
             await store.InsertPartitionAsync(partition, CancellationToken.None);
 
@@ -1261,60 +1240,29 @@ namespace EXBP.Dipren.Data.Tests
             };
 
             Guid partitionToInsertId = Guid.NewGuid();
-            Partition partitionToInsert = new Partition(
-                partitionToInsertId,
-                job.Id,
-                splitCompleted,
-                splitCompleted,
-                "m",
-                "z",
-                true,
-                null,
-                0L,
-                14L);
+            Partition partitionToInsert = new Partition(partitionToInsertId, job.Id, splitCompleted, splitCompleted, "m", "z", true, null, 0L, 14L);
 
             //
             // Before the split is saved, another worker acquires the expired partition and makes progress.
             //
 
             DateTime cut = this.FormatDateTime(acquiredAt - job.Timeout - job.ClockDrift);
-            Partition acquired = await store.TryAcquirePartitionAsync(
-                job.Id,
-                "new-owner",
-                acquiredAt,
-                cut,
-                CancellationToken.None);
+            Partition acquired = await store.TryAcquirePartitionAsync(job.Id, "new-owner", acquiredAt, cut, CancellationToken.None);
 
             Assert.That(acquired, Is.Not.Null);
             Assert.That(acquired.Id, Is.EqualTo(id));
             Assert.That(acquired.Owner, Is.EqualTo("new-owner"));
 
-            Partition current = await store.ReportProgressAsync(
-                id,
-                "new-owner",
-                progressUpdated,
-                "g",
-                7L,
-                19L,
-                false,
-                10.0,
-                CancellationToken.None);
+            Partition current = await store.ReportProgressAsync(id, "new-owner", progressUpdated, "g", 7L, 19L, false, 10.0, CancellationToken.None);
 
             await Assert.MultipleAsync(async () =>
             {
-                Assert.ThrowsAsync<LockException>(() => store.InsertSplitPartitionAsync(
-                    partitionToUpdate,
-                    partitionToInsert,
-                    CancellationToken.None));
+                Assert.ThrowsAsync<LockException>(() => store.InsertSplitPartitionAsync(partitionToUpdate, partitionToInsert, CancellationToken.None));
 
                 Partition persisted = await store.RetrievePartitionAsync(id, CancellationToken.None);
 
-                Assert.That(
-                    persisted,
-                    Is.EqualTo(current),
-                    "A stale split must preserve the new owner's partition and progress.");
-                Assert.ThrowsAsync<UnknownIdentifierException>(
-                    () => store.RetrievePartitionAsync(partitionToInsert.Id, CancellationToken.None));
+                Assert.That(persisted, Is.EqualTo(current), "A stale split must preserve the new owner's partition and progress.");
+                Assert.ThrowsAsync<UnknownIdentifierException>(() => store.RetrievePartitionAsync(partitionToInsert.Id, CancellationToken.None));
             });
         }
 
