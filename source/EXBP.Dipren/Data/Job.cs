@@ -144,6 +144,13 @@ namespace EXBP.Dipren.Data
         /// <param name="error">
         ///   The description of the error that caused the job to fail; or <see langword="null"/> if not available.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="id"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="batchSize"/> or <paramref name="timeout"/> is less than or equal to zero, or
+        ///   <paramref name="clockDrift"/> is negative.
+        /// </exception>
         public Job(string id, DateTime created, DateTime updated, JobState state, int batchSize, TimeSpan timeout, TimeSpan clockDrift, DateTime? started = null, DateTime? completed = null, string error = null)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));

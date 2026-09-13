@@ -21,6 +21,9 @@ namespace EXBP.Dipren
         /// <summary>
         ///   Gets the configuration settings for the current distributed processing engine instance.
         /// </summary>
+        /// <value>
+        ///   The configuration settings used by this engine instance.
+        /// </value>
         public Configuration Configuration => this._configuration;
 
 
@@ -161,10 +164,10 @@ namespace EXBP.Dipren
                 // 3. If there are no free or abandoned partitions, request (the largest) partition to be split.
                 // 4. Take ownership of the partition.
                 // 5. Start processing the partition in a loop.
-                //    a. Process the next batch of keys
-                //    b. Record progress
+                //    a. Process the next batch of keys.
+                //    b. Record progress.
                 //    c. Check job state.
-                //    d. If requested, split the current partition
+                //    d. If requested, split the current partition.
                 // 6. Once the current partition is completed, repeat from step 1 until all keys are processed.
                 // 7. Mark the job completed.
                 //
@@ -236,7 +239,8 @@ namespace EXBP.Dipren
                     while (persisted?.State == JobState.Processing)
                     {
                         //
-                        // Acquire a partition that is ready to be processed or request an existing partition to be split.
+                        // Acquire a partition that is ready to be processed, or request that an existing partition be
+                        // split.
                         //
 
                         Partition<TKey> partition = await this.TryAcquirePartitionAsync(job, settings, cancellation);
@@ -275,8 +279,8 @@ namespace EXBP.Dipren
                             else
                             {
                                 //
-                                // If a partition could not be acquired, wait the configured amount of time and check if the job
-                                // has not completed, failed, or was deleted in the meanwhile.
+                                // If a partition could not be acquired, wait for the configured polling interval. Then
+                                // check whether the job has completed, failed, or been deleted in the meantime.
                                 //
 
                                 await Task.Delay(this._configuration.PollingInterval, cancellation);
@@ -619,6 +623,9 @@ namespace EXBP.Dipren
         ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
         ///   operation. The <see cref="Task{TResult}.Result"/> property contains the updated partition.
         /// </returns>
+        /// <exception cref="NotSupportedException">
+        ///   The partitioner creates more than one additional range when splitting the partition.
+        /// </exception>
         private async Task<Partition<TKey>> SplitPartitionAsync<TKey, TItem>(Job<TKey, TItem> job, Partition<TKey> partition, Settings settings, CancellationToken cancellation)
         {
             Debug.Assert(partition != null);

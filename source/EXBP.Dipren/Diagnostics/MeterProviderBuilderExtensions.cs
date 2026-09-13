@@ -18,6 +18,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <returns>
         ///   The <see cref="MeterProviderBuilder"/> for chaining.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="builder"/> is <see langword="null"/>.
+        /// </exception>
         public static MeterProviderBuilder AddDiprenMeters(this MeterProviderBuilder builder)
         {
             Assert.ArgumentIsNotNull(builder, nameof(builder));

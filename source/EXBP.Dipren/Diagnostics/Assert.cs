@@ -13,6 +13,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <summary>
         ///   Throws an <see cref="ArgumentNullException"/> if the specified value is <see langword="null"/>.
         /// </summary>
+        /// <typeparam name="TValue">
+        ///   The type of the value to verify.
+        /// </typeparam>
         /// <param name="value">
         ///   The parameter value to verify.
         /// </param>
@@ -94,7 +97,8 @@ namespace EXBP.Dipren.Diagnostics
         ///   The name of the parameter.
         /// </param>
         /// <param name="whitespace">
-        ///   <see langword="true"/> to treat strings with whitespace characters only as valid; otherwise, <see langword="false"/>.
+        ///   <see langword="true"/> to treat strings containing only whitespace as valid; otherwise,
+        ///   <see langword="false"/>.
         /// </param>
         /// <param name="message">
         ///   The description of the error.
@@ -122,6 +126,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <summary>
         ///   Throws an <see cref="ArgumentException"/> if the specified collection has no elements.
         /// </summary>
+        /// <typeparam name="TValue">
+        ///   The type of collection to verify.
+        /// </typeparam>
         /// <param name="value">
         ///   The <see cref="IEnumerable{T}"/> value to verify.
         /// </param>
@@ -205,7 +212,7 @@ namespace EXBP.Dipren.Diagnostics
         /// </returns>
         /// <exception cref="ArgumentException">
         ///   <paramref name="value"/> is not defined in the specified enumeration; or <typeparamref name="TEnum"/> is
-        ///   not an enumeration, or type of <paramref name="value"/> is not the underlying type of the  enumeration.
+        ///   not an enumeration, or the type of <paramref name="value"/> is not the enumeration's underlying type.
         /// </exception>
         public static TEnum ArgumentIsDefined<TEnum>(TEnum value, string name, string message = null) where TEnum : struct => Assert.ArgumentIsDefined<TEnum, TEnum>(value, name, message);
 
@@ -229,7 +236,7 @@ namespace EXBP.Dipren.Diagnostics
         /// </returns>
         /// <exception cref="ArgumentException">
         ///   <paramref name="value"/> is not defined in the specified enumeration; or <typeparamref name="TEnum"/> is
-        ///   not an enumeration, or type of <paramref name="value"/> is not the underlying type of the  enumeration.
+        ///   not an enumeration, or the type of <paramref name="value"/> is not the enumeration's underlying type.
         /// </exception>
         public static string ArgumentIsDefined<TEnum>(string value, string name, string message = null) where TEnum : struct => Assert.ArgumentIsDefined<string, TEnum>(value, name, message);
 
@@ -253,7 +260,7 @@ namespace EXBP.Dipren.Diagnostics
         /// </returns>
         /// <exception cref="ArgumentException">
         ///   <paramref name="value"/> is not defined in the specified enumeration; or <typeparamref name="TEnum"/> is
-        ///   not an enumeration, or type of <paramref name="value"/> is not the underlying type of the  enumeration.
+        ///   not an enumeration, or the type of <paramref name="value"/> is not the enumeration's underlying type.
         /// </exception>
         public static byte ArgumentIsDefined<TEnum>(byte value, string name, string message = null) where TEnum : struct => Assert.ArgumentIsDefined<byte, TEnum>(value, name, message);
 
@@ -277,7 +284,7 @@ namespace EXBP.Dipren.Diagnostics
         /// </returns>
         /// <exception cref="ArgumentException">
         ///   <paramref name="value"/> is not defined in the specified enumeration; or <typeparamref name="TEnum"/> is
-        ///   not an enumeration, or type of <paramref name="value"/> is not the underlying type of the  enumeration.
+        ///   not an enumeration, or the type of <paramref name="value"/> is not the enumeration's underlying type.
         /// </exception>
         public static short ArgumentIsDefined<TEnum>(short value, string name, string message = null) where TEnum : struct => Assert.ArgumentIsDefined<short, TEnum>(value, name, message);
 
@@ -301,7 +308,7 @@ namespace EXBP.Dipren.Diagnostics
         /// </returns>
         /// <exception cref="ArgumentException">
         ///   <paramref name="value"/> is not defined in the specified enumeration; or <typeparamref name="TEnum"/> is
-        ///   not an enumeration, or type of <paramref name="value"/> is not the underlying type of the  enumeration.
+        ///   not an enumeration, or the type of <paramref name="value"/> is not the enumeration's underlying type.
         /// </exception>
         public static int ArgumentIsDefined<TEnum>(int value, string name, string message = null) where TEnum : struct => Assert.ArgumentIsDefined<int, TEnum>(value, name, message);
 
@@ -325,7 +332,7 @@ namespace EXBP.Dipren.Diagnostics
         /// </returns>
         /// <exception cref="ArgumentException">
         ///   <paramref name="value"/> is not defined in the specified enumeration; or <typeparamref name="TEnum"/> is
-        ///   not an enumeration, or type of <paramref name="value"/> is not the underlying type of the  enumeration.
+        ///   not an enumeration, or the type of <paramref name="value"/> is not the enumeration's underlying type.
         /// </exception>
         public static long ArgumentIsDefined<TEnum>(long value, string name, string message = null) where TEnum : struct => Assert.ArgumentIsDefined<long, TEnum>(value, name, message);
 
@@ -352,7 +359,7 @@ namespace EXBP.Dipren.Diagnostics
         /// </returns>
         /// <exception cref="ArgumentException">
         ///   <paramref name="value"/> is not defined in the specified enumeration; or <typeparamref name="TEnum"/> is
-        ///   not an enumeration, or type of <paramref name="value"/> is not the underlying type of the  enumeration.
+        ///   not an enumeration, or the type of <paramref name="value"/> is not the enumeration's underlying type.
         /// </exception>
         private static TValue ArgumentIsDefined<TValue, TEnum>(TValue value, string name, string message = null)
         {
@@ -449,6 +456,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <exception cref="ArgumentException">
         ///   The specified <paramref name="value"/> is not in local time.
         /// </exception>
+        /// <returns>
+        ///   The verified <paramref name="value"/>.
+        /// </returns>
         public static DateTime ArgumentIsLocalTime(DateTime value, string name, string message = null)
         {
             if (value.Kind != DateTimeKind.Local)
@@ -475,6 +485,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <exception cref="ArgumentException">
         ///   The specified <paramref name="value"/> is not in UTC time.
         /// </exception>
+        /// <returns>
+        ///   The verified <paramref name="value"/>.
+        /// </returns>
         public static DateTime ArgumentIsUniversalTime(DateTime value, string name, string message = null)
         {
             if (value.Kind != DateTimeKind.Utc)
@@ -510,6 +523,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <exception cref="ArgumentOutOfRangeException">
         ///   Argument <paramref name="value"/> is less than or equal to <paramref name="comparand"/>.
         /// </exception>
+        /// <returns>
+        ///   The verified <paramref name="value"/>.
+        /// </returns>
         public static TValue ArgumentIsGreater<TValue>(TValue value, TValue comparand, string name, string message = null) where TValue : IComparable<TValue>
         {
             Assert.ArgumentIsNotNull(comparand, nameof(comparand), AssertResources.MessageComparandIsNull);
@@ -548,6 +564,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <exception cref="ArgumentOutOfRangeException">
         ///   Argument <paramref name="value"/> is less than <paramref name="comparand"/>.
         /// </exception>
+        /// <returns>
+        ///   The verified <paramref name="value"/>.
+        /// </returns>
         public static TValue ArgumentIsGreaterOrEqual<TValue>(TValue value, TValue comparand, string name, string message = null) where TValue : IComparable<TValue>
         {
             Assert.ArgumentIsNotNull(comparand, nameof(comparand), AssertResources.MessageComparandIsNull);
@@ -587,6 +606,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <exception cref="ArgumentOutOfRangeException">
         ///   Argument <paramref name="value"/> is greater than or equal to <paramref name="comparand"/>.
         /// </exception>
+        /// <returns>
+        ///   The verified <paramref name="value"/>.
+        /// </returns>
         public static TValue ArgumentIsLess<TValue>(TValue value, TValue comparand, string name, string message = null) where TValue : IComparable<TValue>
         {
             Assert.ArgumentIsNotNull(comparand, nameof(comparand), AssertResources.MessageComparandIsNull);
@@ -623,8 +645,11 @@ namespace EXBP.Dipren.Diagnostics
         ///   Argument <paramref name="comparand"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        ///   Argument <paramref name="value"/> is less than <paramref name="comparand"/>.
+        ///   Argument <paramref name="value"/> is greater than <paramref name="comparand"/>.
         /// </exception>
+        /// <returns>
+        ///   The verified <paramref name="value"/>.
+        /// </returns>
         public static TValue ArgumentIsLessOrEqual<TValue>(TValue value, TValue comparand, string name, string message = null) where TValue : IComparable<TValue>
         {
             Assert.ArgumentIsNotNull(comparand, nameof(comparand), AssertResources.MessageComparandIsNull);

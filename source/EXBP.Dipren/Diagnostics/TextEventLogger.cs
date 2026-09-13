@@ -5,7 +5,7 @@ using System.Text;
 namespace EXBP.Dipren.Diagnostics
 {
     /// <summary>
-    ///   Serves as abase class for event handlers that output events into a text stream.
+    ///   Serves as a base class for event handlers that output events to a text stream.
     /// </summary>
     public abstract class TextEventLogger
     {
@@ -25,6 +25,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <returns>
         ///   A <see cref="string"/> value that can be output to a text stream.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="descriptor"/> is <see langword="null"/>.
+        /// </exception>
         protected string Format(EventDescriptor descriptor)
         {
             Assert.ArgumentIsNotNull(descriptor, nameof(descriptor));

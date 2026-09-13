@@ -5,7 +5,7 @@ using EXBP.Dipren.Diagnostics;
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Implements a partitioner for 32 bit signed integer key ranges that computes the range boundaries.
+    ///   Implements a partitioner that computes boundaries for 32-bit signed integer key ranges.
     /// </summary>
     public class Int32KeyRangePartitioner : IRangePartitioner<int>
     {
@@ -26,7 +26,7 @@ namespace EXBP.Dipren
         ///   Initializes a new instance of the <see cref="Int32KeyRangePartitioner"/> class.
         /// </summary>
         /// <param name="comparer">
-        ///   The <see cref="IComparable{T}"/> of <see cref="int"/> object to use to compare key values; or
+        ///   The <see cref="IComparer{T}"/> of <see cref="int"/> to use when comparing key values; or
         ///   <see langword="null"/> to use the default comparer.
         /// </param>
         public Int32KeyRangePartitioner(IComparer<int> comparer = null)
@@ -46,8 +46,11 @@ namespace EXBP.Dipren
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> object that represents the asynchronous operation.
+        ///   A task whose result contains the updated range and any range created by the split.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="range"/> is <see langword="null"/>.
+        /// </exception>
         public Task<RangePartitioningResult<int>> SplitAsync(Range<int> range, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(range, nameof(range));

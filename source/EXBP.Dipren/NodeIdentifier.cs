@@ -24,6 +24,12 @@ namespace EXBP.Dipren
         /// <returns>
         ///   A <see cref="string"/> value that contains a new unique identifier for a node.
         /// </returns>
+        /// <exception cref="ArgumentException">
+        ///   <paramref name="type"/> is not a defined <see cref="NodeType"/> value.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        ///   <paramref name="type"/> is defined but is not supported as a node identifier prefix.
+        /// </exception>
         internal static string Generate(NodeType type)
         {
             Assert.ArgumentIsDefined(type, nameof(type));

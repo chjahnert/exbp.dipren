@@ -27,18 +27,18 @@ namespace EXBP.Dipren
         ///   A <typeparamref name="TKey"/> value that is the first key in the range.
         /// </value>
         /// <remarks>
-        ///   The key does not have to actually exist.
+        ///   The key is a boundary and does not need to exist in the data source.
         /// </remarks>
         public TKey First => this._first;
 
         /// <summary>
-        ///   Gets the key at which to start processing.
+        ///   Gets the last key of the current range.
         /// </summary>
         /// <value>
-        ///   A <typeparamref name="TKey"/> value that is the key at which to start processing.
+        ///   A <typeparamref name="TKey"/> value that is the last key in the range.
         /// </value>
         /// <remarks>
-        ///   The key does not have to actually exist.
+        ///   The key is a boundary and does not need to exist in the data source.
         /// </remarks>
         public TKey Last => this._last;
 
@@ -65,6 +65,9 @@ namespace EXBP.Dipren
         ///   <see langword="true"/> if <paramref name="last"/> is included in the range; otherwise,
         ///   <see langword="false"/>.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="first"/> or <paramref name="last"/> is <see langword="null"/>.
+        /// </exception>
         public Range(TKey first, TKey last, bool inclusive = true)
         {
             Assert.ArgumentIsNotNull(first, nameof(first));

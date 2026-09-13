@@ -1,4 +1,4 @@
-﻿
+
 using EXBP.Dipren.Diagnostics;
 
 
@@ -44,6 +44,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="level">
         ///   The minimum severity level of the messages to output.
         /// </param>
+        /// <exception cref="ArgumentException">
+        ///   <paramref name="level"/> is not a defined <see cref="EventSeverity"/> value.
+        /// </exception>
         protected DebugEventLogger(EventSeverity level)
         {
             Assert.ArgumentIsDefined(level, nameof(level));
@@ -58,6 +61,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="descriptor">
         ///   An <see cref="EventDescriptor"/> object that holds information about the event that occurred.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="descriptor"/> is <see langword="null"/>.
+        /// </exception>
         public virtual void HandleEvent(EventDescriptor descriptor)
         {
             Assert.ArgumentIsNotNull(descriptor, nameof(descriptor));

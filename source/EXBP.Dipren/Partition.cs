@@ -180,7 +180,7 @@ namespace EXBP.Dipren
         /// </param>
         /// <param name="requester">
         ///   The unique identifier of the processing node that requested the partition to be split; or
-        ///   <see langword="null"/> a split is not requested.
+        ///   <see langword="null"/> if a split is not requested.
         /// </param>
         internal Partition(Guid id, string jobId, string owner, DateTime created, DateTime updated, Range<TKey> range, TKey position, long processed, long remaining, bool completed, double throughput, string requester)
         {

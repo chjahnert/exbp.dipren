@@ -8,7 +8,7 @@ using EXBP.Dipren.Diagnostics;
 namespace EXBP.Dipren
 {
     /// <summary>
-    ///   Implements a partitioner for GUID / UUID key ranges that computes the range boundaries.
+    ///   Implements a partitioner that computes boundaries for GUID key ranges.
     /// </summary>
     public class GuidKeyRangePartitioner : IRangePartitioner<Guid>
     {
@@ -18,7 +18,7 @@ namespace EXBP.Dipren
 
 
         /// <summary>
-        ///   Gets a <see cref="GuidKeyRangePartitioner"/> object that uses the GUID layout used by Microsoft SQL Server.
+        ///   Gets a partitioner that uses the GUID layout used by Microsoft SQL Server.
         /// </summary>
         /// <value>
         ///   A <see cref="GuidKeyRangePartitioner"/> object that uses the GUID layout used by Microsoft SQL Server.
@@ -46,9 +46,14 @@ namespace EXBP.Dipren
         ///   Initializes a new instance of the <see cref="GuidKeyRangePartitioner"/> class.
         /// </summary>
         /// <param name="layout">
-        ///   An array of 16 <see cref="byte"/> values between 0 and 15 indicating the layout of UUID values in little
-        ///   endian order.
+        ///   An array containing each byte position from 0 through 15 in the order used to compare GUID values.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="layout"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   <paramref name="layout"/> does not contain every byte position from 0 through 15 exactly once.
+        /// </exception>
         public GuidKeyRangePartitioner(byte[] layout)
         {
             Assert.ArgumentIsNotNull(layout, nameof(layout));
@@ -72,8 +77,11 @@ namespace EXBP.Dipren
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> object that represents the asynchronous operation.
+        ///   A task whose result contains the updated range and any range created by the split.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="range"/> is <see langword="null"/>.
+        /// </exception>
         public async Task<RangePartitioningResult<Guid>> SplitAsync(Range<Guid> range, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(range, nameof(range));

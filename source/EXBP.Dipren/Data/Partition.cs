@@ -219,7 +219,7 @@ namespace EXBP.Dipren.Data
         /// </param>
         /// <param name="position">
         ///   The string representation of the key of the last item that was processed in the partition or
-        ///   <see langword="null"/> if no item was process yet.
+        ///   <see langword="null"/> if no item has been processed yet.
         /// </param>
         /// <param name="processed">
         ///   The number of items processed in the partition so far.
@@ -238,8 +238,11 @@ namespace EXBP.Dipren.Data
         /// </param>
         /// <param name="requester">
         ///   The unique identifier of the processing node that requested the partition to be split; or
-        ///   <see langword="null"/> a split is not requested.
+        ///   <see langword="null"/> if a split is not requested.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="jobId"/> or <paramref name="first"/> is <see langword="null"/>.
+        /// </exception>
         public Partition(Guid id, string jobId, DateTime created, DateTime updated, string first, string last, bool inclusive, string position, long processed, long remaining, string owner = null, bool completed = false, double throughput = 0.0, string requester = null)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));

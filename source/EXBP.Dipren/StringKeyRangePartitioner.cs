@@ -20,11 +20,11 @@ namespace EXBP.Dipren
 
         /// <summary>
         ///   Gets a <see cref="string"/> containing all possible characters allowed in the key, ordered according to
-        ///   the sorting rules used by the underlaying database.
+        ///   the sorting rules used by the underlying database.
         /// </summary>
         /// <value>
         ///   A <see cref="string"/> value containing all possible characters allowed in the key, ordered according to
-        ///   the sorting rules used by the underlaying database.
+        ///   the sorting rules used by the underlying database.
         /// </value>
         protected string Characters => this._characters;
 
@@ -42,7 +42,7 @@ namespace EXBP.Dipren
         /// </summary>
         /// <param name="characters">
         ///   A <see cref="string"/> containing all possible characters allowed in the key sorted according to the
-        ///   sorting rules used by the underlaying data source.
+        ///   sorting rules used by the underlying data source.
         /// </param>
         /// <param name="length">
         ///   The maximum length of the key.
@@ -51,7 +51,7 @@ namespace EXBP.Dipren
         ///   Argument <paramref name="characters"/> is a <see langword="null"/> reference.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///   Argument <paramref name="characters"/> contains duplicate characters.
+        ///   Argument <paramref name="characters"/> is empty or contains duplicate characters.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///   Argument <paramref name="length"/> is less than one.
@@ -59,7 +59,7 @@ namespace EXBP.Dipren
         /// <remarks>
         ///   <para>
         ///     When specifying the <paramref name="characters"/>, the order in which the characters appear is
-        ///     important. They should be ordered the same way as the underlaying database would sort them. If the
+        ///     important. They should be ordered the same way as the underlying database would sort them. If the
         ///     character set contained 'a' and 'b', the possible key combinations in ascending order would be:
         ///     '', 'a', 'aa', 'ab', 'b', 'ba', and 'bb'. In contrast, if character set contained 'b' and 'a' instead,
         ///     the possible key combinations in ascending order would be: '', 'b', 'bb', 'ba', 'a', 'ab', and 'aa'.
@@ -96,8 +96,14 @@ namespace EXBP.Dipren
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> object that represents the asynchronous operation.
+        ///   A task whose result contains the updated range and any range created by the split.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="range"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   A boundary exceeds the configured maximum length or contains a character outside the configured set.
+        /// </exception>
         public virtual async Task<RangePartitioningResult<string>> SplitAsync(Range<string> range, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(range, nameof(range));

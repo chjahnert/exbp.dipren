@@ -1,4 +1,4 @@
-﻿
+
 using EXBP.Dipren.Diagnostics;
 
 
@@ -19,6 +19,9 @@ namespace EXBP.Dipren.Diagnostics
         ///   An <see cref="IEnumerable{T}"/> of <see cref="IEventHandler"/> objects to which to forward the event
         ///   notifications.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="handlers"/> is <see langword="null"/>.
+        /// </exception>
         public CompositeEventHandler(IEnumerable<IEventHandler> handlers)
         {
             Assert.ArgumentIsNotNull(handlers, nameof(handlers));
@@ -32,6 +35,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="handlers">
         ///   One or more <see cref="IEventHandler"/> objects to which to forward the event notifications.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="handlers"/> is <see langword="null"/>.
+        /// </exception>
         public CompositeEventHandler(params IEventHandler[] handlers)
         {
             Assert.ArgumentIsNotNull(handlers, nameof(handlers));
@@ -46,6 +52,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="descriptor">
         ///   An <see cref="EventDescriptor"/> object that holds information about the event that occurred.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="descriptor"/> is <see langword="null"/>.
+        /// </exception>
         public virtual void HandleEvent(EventDescriptor descriptor)
         {
             Assert.ArgumentIsNotNull(descriptor, nameof(descriptor));
