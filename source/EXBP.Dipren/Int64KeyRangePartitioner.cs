@@ -54,21 +54,26 @@ namespace EXBP.Dipren
 
             RangePartitioningResult<long> result;
 
-            double distance = Math.Abs(((double) range.Last) - ((double) range.First));
+            bool ascending = range.IsAscending(this._comparer);
+
+            ulong firstValue = unchecked((ulong) range.First);
+            ulong lastValue = unchecked((ulong) range.Last);
+            ulong distance = ascending ? lastValue - firstValue : firstValue - lastValue;
 
             if (((range.IsInclusive == true) && (distance >= 2)) || ((range.IsInclusive == false) && (distance >= 3)))
             {
-                long half = (long) Math.Round(distance / 2);
+                ulong half = distance / 2;
 
-                bool ascending = range.IsAscending(this._comparer);
-
-                if (ascending == false)
+                if (((distance % 2) == 1) && ((half % 2) == 1))
                 {
-                    half *= -1;
+                    half++;
                 }
 
-                Range<long> updated = new Range<long>(range.First, range.First + half, false);
-                Range<long> created = new Range<long>(range.First + half, range.Last, range.IsInclusive);
+                ulong value = ascending ? firstValue + half : firstValue - half;
+                long midpoint = unchecked((long) value);
+
+                Range<long> updated = new Range<long>(range.First, midpoint, false);
+                Range<long> created = new Range<long>(midpoint, range.Last, range.IsInclusive);
 
                 result = new RangePartitioningResult<long>(updated, new Range<long>[] { created });
             }
