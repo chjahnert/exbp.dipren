@@ -205,6 +205,9 @@ namespace EXBP.Dipren.Data.Memory
         /// <exception cref="DuplicateIdentifierException">
         ///   The partition to insert already exists in the data store.
         /// </exception>
+        /// <exception cref="LockException">
+        ///   The partition to update is no longer owned by the owner specified by the partition.
+        /// </exception>
         public Task InsertSplitPartitionAsync(Partition partitionToUpdate, Partition partitionToInsert, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(partitionToUpdate, nameof(partitionToUpdate));
@@ -226,14 +229,20 @@ namespace EXBP.Dipren.Data.Memory
                     this.RaiseErrorDuplicatePartitionIdentifier();
                 }
 
+                Partition persisted = this._partitions[partitionToUpdate.Id];
+
+                if (persisted.Owner != partitionToUpdate.Owner)
+                {
+                    this.RaiseErrorLockNoLongerHeld();
+                }
+
                 //
                 // Only update fields that are valid to update. The job identifier and the creation date should never
                 // be changed.
                 //
 
-                Partition updated = this._partitions[partitionToUpdate.Id] with
+                Partition updated = persisted with
                 {
-                    Owner = partitionToUpdate.Owner,
                     Updated = partitionToUpdate.Updated,
                     Last = partitionToUpdate.Last,
                     IsInclusive = partitionToUpdate.IsInclusive,
