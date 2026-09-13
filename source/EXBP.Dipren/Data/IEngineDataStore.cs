@@ -211,6 +211,9 @@ namespace EXBP.Dipren.Data
         /// <exception cref="DuplicateIdentifierException">
         ///   The partition to insert already exists in the data store.
         /// </exception>
+        /// <exception cref="LockException">
+        ///   The partition to update is no longer owned by the owner specified by the partition.
+        /// </exception>
         Task InsertSplitPartitionAsync(Partition partitionToUpdate, Partition partitionToInsert, CancellationToken cancellation);
 
         /// <summary>
