@@ -39,7 +39,7 @@ namespace EXBP.Dipren
         ///   Gets the data source that is used to access the entries to be processed.
         /// </summary>
         /// <value>
-        ///   An <see cref="IDataSource{TKey, TValue}"/> object that is used to access the entries to be processed.
+        ///   The <see cref="IDataSource{TKey, TItem}"/> used to access the items to be processed.
         /// </value>
         public IDataSource<TKey, TItem> Source => this._source;
 
@@ -55,8 +55,7 @@ namespace EXBP.Dipren
         ///   Gets the serializer to use to convert keys to their string representation and back.
         /// </summary>
         /// <value>
-        ///   A <see cref="IRangePartitioner{TKey}"/> object that can convert between keys and their string
-        ///   representations.
+        ///   The <see cref="IKeySerializer{TKey}"/> used to convert between keys and their string representations.
         /// </value>
         public IKeySerializer<TKey> Serializer => this._serializer;
 
@@ -64,31 +63,35 @@ namespace EXBP.Dipren
         ///   Gets the object that processes batches of entries.
         /// </summary>
         /// <value>
-        ///   An <see cref="IBatchProcessor{TEntry}"/> object that is used to process the entries.
+        ///   The <see cref="IBatchProcessor{TItem}"/> used to process batches of items.
         /// </value>
         public IBatchProcessor<TItem> Processor => this._processor;
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Job{TKey, TValue}"/> class.
+        ///   Initializes a new instance of the <see cref="Job{TKey, TItem}"/> class.
         /// </summary>
         /// <param name="id">
         ///   A <see cref="string"/> value that contains the unique identifier (or name) of the distributed processing
         ///   job.
         /// </param>
         /// <param name="source">
-        ///   The <see cref="IDataSource{TKey, TValue}"/> object to use to access the entries to be processed.
+        ///   The <see cref="IDataSource{TKey, TItem}"/> to use to access the items to be processed.
         /// </param>
         /// <param name="partitioner">
         ///   The <see cref="IRangePartitioner{TKey}"/> object to use to manipulate key ranges.
         /// </param>
         /// <param name="serializer">
-        ///   The <see cref="IRangePartitioner{TKey}"/> object to use to convert between key values and their string
+        ///   The <see cref="IKeySerializer{TKey}"/> to use to convert between key values and their string
         ///   representation.
         /// </param>
         /// <param name="processor">
-        ///   The <see cref="IBatchProcessor{TEntry}"/> object to use to process the entries.
+        ///   The <see cref="IBatchProcessor{TItem}"/> to use to process batches of items.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="id"/>, <paramref name="source"/>, <paramref name="partitioner"/>,
+        ///   <paramref name="serializer"/>, or <paramref name="processor"/> is <see langword="null"/>.
+        /// </exception>
         public Job(string id, IDataSource<TKey, TItem> source, IRangePartitioner<TKey> partitioner, IKeySerializer<TKey> serializer, IBatchProcessor<TItem> processor)
         {
             Assert.ArgumentIsNotNull(id, nameof(id));

@@ -2,7 +2,7 @@
 namespace EXBP.Dipren.Data
 {
     /// <summary>
-    ///   Allows a class to implement a data store for the distributed processing engine.
+    ///   Defines persistent storage operations used by the distributed processing engine.
     /// </summary>
     public interface IEngineDataStore
     {
@@ -14,8 +14,7 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and can
-        ///   be used to access the result.
+        ///   A task whose result is the total number of jobs in the data store.
         /// </returns>
         Task<long> CountJobsAsync(CancellationToken cancellation);
 
@@ -30,9 +29,14 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and can
-        ///   be used to access the result.
+        ///   A task whose result is the number of incomplete partitions for the job.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="id"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
         Task<long> CountIncompletePartitionsAsync(string id, CancellationToken cancellation);
 
         /// <summary>
@@ -51,6 +55,9 @@ namespace EXBP.Dipren.Data
         /// <exception cref="DuplicateIdentifierException">
         ///   A job with the specified unique identifier already exists in the store.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="job"/> is <see langword="null"/>.
+        /// </exception>
         Task InsertJobAsync(Job job, CancellationToken cancellation);
 
         /// <summary>
@@ -67,8 +74,7 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
-        ///   provides access to the result of the operation.
+        ///   A task whose result is the updated job entry.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
@@ -92,8 +98,7 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
-        ///   provides access to the result of the operation.
+        ///   A task whose result is the updated job entry.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
@@ -117,8 +122,7 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
-        ///   provides access to the result of the operation.
+        ///   A task whose result is the updated job entry.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
@@ -145,8 +149,7 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
-        ///   provides access to the result of the operation.
+        ///   A task whose result is the updated job entry.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///   Argument <paramref name="id"/> is a <see langword="null"/> reference.
@@ -167,8 +170,11 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation.
+        ///   A task whose result is the requested job entry.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="id"/> is <see langword="null"/>.
+        /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist.
         /// </exception>
@@ -187,6 +193,15 @@ namespace EXBP.Dipren.Data
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="partition"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="DuplicateIdentifierException">
+        ///   A partition with the specified unique identifier already exists in the data store.
+        /// </exception>
+        /// <exception cref="InvalidReferenceException">
+        ///   The job referenced by <paramref name="partition"/> does not exist in the data store.
+        /// </exception>
         Task InsertPartitionAsync(Partition partition, CancellationToken cancellation);
 
         /// <summary>
@@ -205,6 +220,10 @@ namespace EXBP.Dipren.Data
         /// <returns>
         ///   A <see cref="Task"/> object that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="partitionToUpdate"/> or <paramref name="partitionToInsert"/> is
+        ///   <see langword="null"/>.
+        /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   The partition to update does not exist in the data store.
         /// </exception>
@@ -227,8 +246,7 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
-        ///   operation.
+        ///   A task whose result is the requested partition entry.
         /// </returns>
         /// <exception cref="UnknownIdentifierException">
         ///   A partition with the specified unique identifier does not exist.
@@ -255,10 +273,11 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
-        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the acquired partition if succeeded;
-        ///   otherwise, <see langword="null"/>.
+        ///   A task whose result is the acquired partition, or <see langword="null"/> if no partition is available.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="jobId"/> or <paramref name="requester"/> is <see langword="null"/>.
+        /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
@@ -281,10 +300,12 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="bool"/> object that represents the asynchronous
-        ///   operation. The <see cref="Task{TResult}.Result"/> property contains a value indicating whether a split
-        ///   was requested.
+        ///   A task whose result is <see langword="true"/> if a split was requested; otherwise,
+        ///   <see langword="false"/>.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="jobId"/> or <paramref name="requester"/> is <see langword="null"/>.
+        /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>
@@ -304,14 +325,16 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="bool"/> object that represents the asynchronous
-        ///   operation. The <see cref="Task{TResult}.Result"/> property contains a value indicating whether a split
-        ///   request is pending.
+        ///   A task whose result is <see langword="true"/> if the split request is pending; otherwise,
+        ///   <see langword="false"/>.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="jobId"/> or <paramref name="requester"/> is <see langword="null"/>.
+        /// </exception>
         Task<bool> IsSplitRequestPendingAsync(string jobId, string requester, CancellationToken cancellation);
 
         /// <summary>
-        ///   Update a partition with the progress made.
+        ///   Updates a partition with the reported processing progress.
         /// </summary>
         /// <param name="id">
         ///   The unique identifier of the partition.
@@ -342,9 +365,11 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Partition"/> object that represents the asynchronous
-        ///   operation. The <see cref="Task{TResult}.Result"/> property contains the updated partition.
+        ///   A task whose result is the updated partition entry.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="owner"/> or <paramref name="position"/> is <see langword="null"/>.
+        /// </exception>
         /// <exception cref="LockException">
         ///   The specified <paramref name="owner"/> no longer holds the lock on the partition.
         /// </exception>
@@ -367,9 +392,11 @@ namespace EXBP.Dipren.Data
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="Job"/> object that represents the asynchronous operation and
-        ///   provides access to the result of the operation.
+        ///   A task whose result is the status report for the requested job.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="id"/> is <see langword="null"/>.
+        /// </exception>
         /// <exception cref="UnknownIdentifierException">
         ///   A job with the specified unique identifier does not exist in the data store.
         /// </exception>

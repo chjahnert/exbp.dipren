@@ -69,7 +69,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   Gets the exception that was thrown.
         /// </summary>
         /// <value>
-        ///   A <see cref="Exception"/> object that is the exception that was throw; or <see langword="null"/> if no
+        ///   The exception that was thrown; or <see langword="null"/> if no
         ///   exception was thrown.
         /// </value>
         public Exception Exception { get; init; }

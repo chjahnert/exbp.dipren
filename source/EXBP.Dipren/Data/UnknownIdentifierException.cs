@@ -2,7 +2,7 @@
 namespace EXBP.Dipren.Data
 {
     /// <summary>
-    ///   The exception that is thrown when the entry being updated does not exists.
+    ///   The exception that is thrown when an entry to be updated does not exist.
     /// </summary>
     [Serializable]
     public class UnknownIdentifierException : Exception

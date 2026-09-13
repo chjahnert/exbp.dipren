@@ -35,7 +35,7 @@ namespace EXBP.Dipren
         protected IEngineDataStore Store => this._store;
 
         /// <summary>
-        ///   Gets the date and time provider that can be use to generate timestamp values.
+        ///   Gets the date and time provider used to generate timestamp values.
         /// </summary>
         /// <value>
         ///   A <see cref="ITimestampProvider"/> object that can be used to generate timestamp values.
@@ -46,13 +46,13 @@ namespace EXBP.Dipren
         ///   Gets the event dispatcher that is used to emit event notifications.
         /// </summary>
         /// <value>
-        ///   A <see cref="EventDispatcher"/> object that is used to emit event notification.
+        ///   The <see cref="EventDispatcher"/> used to emit event notifications.
         /// </value>
         protected EventDispatcher Dispatcher => this._dispatcher;
 
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="Engine"/> class.
+        ///   Initializes a new instance of the <see cref="Node"/> class.
         /// </summary>
         /// <param name="type">
         ///   A <see cref="NodeType"/> value that indicates the type of the current node.
@@ -66,6 +66,12 @@ namespace EXBP.Dipren
         /// <param name="handler">
         ///   The <see cref="IEventHandler"/> object to use to emit event notifications.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="store"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   <paramref name="type"/> is not a defined <see cref="NodeType"/> value.
+        /// </exception>
         protected Node(NodeType type, IEngineDataStore store, ITimestampProvider clock, IEventHandler handler)
         {
             Assert.ArgumentIsDefined(type, nameof(type));

@@ -78,6 +78,9 @@ namespace EXBP.Dipren
         /// <param name="clockDrift">
         ///   The maximum time divergence between processing nodes.
         /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="batchSize"/> or <paramref name="timeout"/> is less than or equal to zero.
+        /// </exception>
         public Settings(int batchSize, TimeSpan timeout, TimeSpan clockDrift)
         {
             Assert.ArgumentIsGreater(batchSize, 0, nameof(batchSize));
@@ -97,6 +100,9 @@ namespace EXBP.Dipren
         /// <param name="timeout">
         ///   The amount of time after which the processing of a partition is considered unsuccessful or stalled.
         /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="batchSize"/> or <paramref name="timeout"/> is less than or equal to zero.
+        /// </exception>
         public Settings(int batchSize, TimeSpan timeout) : this(batchSize, timeout, Settings.DefaultClockDrift)
         {
         }
@@ -114,6 +120,9 @@ namespace EXBP.Dipren
         /// <param name="clockDrift">
         ///   The maximum time divergence between processing nodes expressed in milliseconds.
         /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="batchSize"/> or <paramref name="timeout"/> is less than or equal to zero.
+        /// </exception>
         public Settings(int batchSize, int timeout, int clockDrift = DEFAULT_CLOCK_DRIFT_MS) : this(batchSize, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(clockDrift))
         {
         }

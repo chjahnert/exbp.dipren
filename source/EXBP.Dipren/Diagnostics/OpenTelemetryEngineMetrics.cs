@@ -127,6 +127,12 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="state">
         ///   A <see cref="EngineState"/> value indicating the state of the engine.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="nodeId"/> or <paramref name="jobId"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   <paramref name="state"/> is not a defined <see cref="EngineState"/> value.
+        /// </exception>
         public void RegisterEngineState(string nodeId, string jobId, EngineState state)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
@@ -204,6 +210,9 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="count">
         ///   The number of partitions created.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="nodeId"/> or <paramref name="jobId"/> is <see langword="null"/>.
+        /// </exception>
         public void RegisterPartitionCreated(string nodeId, string jobId, Guid? partitionId, long count = 1L)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
@@ -227,8 +236,11 @@ namespace EXBP.Dipren.Diagnostics
         ///   The unique identifier of the partition the measurements are related to.
         /// </param>
         /// <param name="count">
-        ///   The number of partitions created.
+        ///   The number of partitions completed.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="nodeId"/> or <paramref name="jobId"/> is <see langword="null"/>.
+        /// </exception>
         public void RegisterPartitionCompleted(string nodeId, string jobId, Guid? partitionId, long count = 1L)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
@@ -240,7 +252,7 @@ namespace EXBP.Dipren.Diagnostics
         }
 
         /// <summary>
-        ///    Registers the performance metrics after a batch of items was retrieved.
+        ///   Registers performance metrics after a batch of items is retrieved.
         /// </summary>
         /// <param name="nodeId">
         ///   The unique identifier of the processing node on which the measurements were taken.
@@ -260,6 +272,12 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="nodeId"/> or <paramref name="jobId"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="keys"/> or <paramref name="duration"/> is negative.
+        /// </exception>
         public void RegisterBatchRetrieved(string nodeId, string jobId, Guid partitionId, long keys, bool success, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
@@ -275,7 +293,7 @@ namespace EXBP.Dipren.Diagnostics
         }
 
         /// <summary>
-        ///    Registers the performance metrics after a batch of items was processed.
+        ///   Registers performance metrics after a batch of items is processed.
         /// </summary>
         /// <param name="nodeId">
         ///   The unique identifier of the processing node on which the measurements were taken.
@@ -295,6 +313,12 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="nodeId"/> or <paramref name="jobId"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="keys"/> or <paramref name="duration"/> is negative.
+        /// </exception>
         public void RegisterBatchProcessed(string nodeId, string jobId, Guid partitionId, long keys, bool success, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
@@ -310,7 +334,7 @@ namespace EXBP.Dipren.Diagnostics
         }
 
         /// <summary>
-        ///    Registers the performance metrics of checking if a split request is already pending.
+        ///   Registers the duration of checking whether a split request is pending.
         /// </summary>
         /// <param name="nodeId">
         ///   The unique identifier of the processing node on which the measurements were taken.
@@ -321,6 +345,12 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="nodeId"/> or <paramref name="jobId"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="duration"/> is negative.
+        /// </exception>
         public void RegisterIsSplitRequestPending(string nodeId, string jobId, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
@@ -333,7 +363,7 @@ namespace EXBP.Dipren.Diagnostics
         }
 
         /// <summary>
-        ///    Registers the performance metrics of checking if a split request is already pending.
+        ///   Registers the outcome and duration of an attempt to acquire a partition.
         /// </summary>
         /// <param name="nodeId">
         ///   The unique identifier of the processing node on which the measurements were taken.
@@ -347,6 +377,12 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="nodeId"/> or <paramref name="jobId"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="duration"/> is negative.
+        /// </exception>
         public void RegisterTryAcquirePartition(string nodeId, string jobId, bool success, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
@@ -359,7 +395,7 @@ namespace EXBP.Dipren.Diagnostics
         }
 
         /// <summary>
-        ///    Registers the performance metrics of checking if a split request is already pending.
+        ///   Registers the outcome and duration of an attempt to request a partition split.
         /// </summary>
         /// <param name="nodeId">
         ///   The unique identifier of the processing node on which the measurements were taken.
@@ -373,6 +409,12 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="nodeId"/> or <paramref name="jobId"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="duration"/> is negative.
+        /// </exception>
         public void RegisterTryRequestSplit(string nodeId, string jobId, bool success, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
@@ -385,7 +427,7 @@ namespace EXBP.Dipren.Diagnostics
         }
 
         /// <summary>
-        ///    Registers the performance metrics of checking if a split request is already pending.
+        ///   Registers the duration of reporting progress for a partition.
         /// </summary>
         /// <param name="nodeId">
         ///   The unique identifier of the processing node on which the measurements were taken.
@@ -399,6 +441,12 @@ namespace EXBP.Dipren.Diagnostics
         /// <param name="duration">
         ///   The duration of the operation.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="nodeId"/> or <paramref name="jobId"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///   <paramref name="duration"/> is negative.
+        /// </exception>
         public void RegisterReportProgress(string nodeId, string jobId, Guid partitionId, TimeSpan duration)
         {
             Assert.ArgumentIsNotNull(nodeId, nameof(nodeId));
@@ -421,7 +469,7 @@ namespace EXBP.Dipren.Diagnostics
         ///   The unique identifier of the distributed processing job; or <see langword="null"/> if not available.
         /// </param>
         /// <param name="partitionId">
-        ///   The unique identifier if the partition; or <see langword="null"/> if not available.
+        ///   The unique identifier of the partition; or <see langword="null"/> if not available.
         /// </param>
         /// <param name="outcome">
         ///   A <see cref="string"/> value indicating the outcome of the operation; or <see langword="null"/>

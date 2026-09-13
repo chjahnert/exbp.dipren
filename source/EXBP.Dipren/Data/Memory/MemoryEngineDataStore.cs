@@ -50,8 +50,7 @@ namespace EXBP.Dipren.Data.Memory
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and can
-        ///   be used to access the result.
+        ///   A task whose result is the total number of jobs in the data store.
         /// </returns>
         public Task<long> CountJobsAsync(CancellationToken cancellation)
         {
@@ -76,9 +75,14 @@ namespace EXBP.Dipren.Data.Memory
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> or <see cref="long"/> that represents the asynchronous operation and can
-        ///   be used to access the result.
+        ///   A task whose result is the number of incomplete partitions for the job.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="jobId"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="UnknownIdentifierException">
+        ///   A job with the specified unique identifier does not exist in the data store.
+        /// </exception>
         public Task<long> CountIncompletePartitionsAsync(string jobId, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));
@@ -687,10 +691,12 @@ namespace EXBP.Dipren.Data.Memory
         ///   canceled.
         /// </param>
         /// <returns>
-        ///   A <see cref="Task{TResult}"/> of <see cref="bool"/> object that represents the asynchronous
-        ///   operation. The <see cref="Task{TResult}.Result"/> property contains a value indicating whether a split
-        ///   request is pending.
+        ///   A task whose result is <see langword="true"/> if the split request is pending; otherwise,
+        ///   <see langword="false"/>.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   <paramref name="jobId"/> or <paramref name="requester"/> is <see langword="null"/>.
+        /// </exception>
         public Task<bool> IsSplitRequestPendingAsync(string jobId, string requester, CancellationToken cancellation)
         {
             Assert.ArgumentIsNotNull(jobId, nameof(jobId));

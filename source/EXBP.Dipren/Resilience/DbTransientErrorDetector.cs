@@ -26,7 +26,7 @@ namespace EXBP.Dipren.Resilience
         ///   Initializes a new instance of the <see cref="DbTransientErrorDetector"/> class.
         /// </summary>
         /// <param name="default">
-        ///   <see langword="true"/> to threat all exceptions that are not derived from <see cref="DbException"/> as
+        ///   <see langword="true"/> to treat all exceptions that are not derived from <see cref="DbException"/> as
         ///   transient errors; otherwise <see langword="false"/>. The default value is <see langword="false"/>.
         /// </param>
         public DbTransientErrorDetector(bool @default = false)
@@ -42,7 +42,7 @@ namespace EXBP.Dipren.Resilience
         /// </param>
         /// <returns>
         ///   <see langword="true"/> if <paramref name="exception"/> is of type <see cref="DbException"/> and the
-        ///   <see cref="DbException.IsTransient"/> property is returning <see langword="true"/>; otherwise the default
+        ///   <see cref="DbException.IsTransient"/> property returns <see langword="true"/>; otherwise, the default
         ///   value specified at construction time.
         /// </returns>
         public bool IsTransientError(Exception exception)
