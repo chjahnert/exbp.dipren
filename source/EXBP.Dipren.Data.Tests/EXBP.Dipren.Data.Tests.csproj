@@ -42,7 +42,6 @@
     </PackageReference>
     <PackageReference Include="OpenTelemetry" Version="1.18.0" />
     <PackageReference Include="ScottPlot" Version="4.1.60" />
-    <PackageReference Include="System.Text.Json" Version="10.0.12" />
   </ItemGroup>
 
   <ItemGroup>
