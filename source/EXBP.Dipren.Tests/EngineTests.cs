@@ -1,7 +1,9 @@
-﻿
+
 using EXBP.Dipren.Data;
 using EXBP.Dipren.Data.Memory;
 using EXBP.Dipren.Diagnostics;
+
+using NSubstitute;
 
 using NUnit.Framework;
 
@@ -29,6 +31,61 @@ namespace EXBP.Dipren.Tests
             Engine engine = new Engine(store, null, null, null);
 
             Assert.ThrowsAsync<ArgumentNullException>(() => engine.RunAsync<int, int>(null, false));
+        }
+
+        [Test]
+        public async Task RunAsync_PartitionIsWithinConfiguredClockDrift_DoesNotAcquirePartition()
+        {
+            const string jobId = "DPJ-001";
+
+            DateTime now = new DateTime(2026, 9, 13, 12, 0, 0, DateTimeKind.Utc);
+            TimeSpan timeout = TimeSpan.FromSeconds(60);
+            TimeSpan drift = TimeSpan.FromSeconds(30);
+            TimeSpan age = TimeSpan.FromSeconds(70);
+            TimeSpan interval = TimeSpan.FromSeconds(10);
+            DateTime updated = now - age;
+
+            Configuration configuration = new Configuration(interval);
+            ITimestampProvider clock = Substitute.For<ITimestampProvider>();
+
+            clock.GetCurrentTimestamp().Returns(now);
+
+            MemoryEngineDataStore store = new MemoryEngineDataStore();
+
+            Job persistedJob = new Job(jobId, now, now, JobState.Processing, 4, timeout, drift, now);
+
+            Guid activePartitionId = Guid.NewGuid();
+            Partition activePartition = new Partition(activePartitionId, jobId, now, updated, "1", "4", true, null, 0L, 4L, "other-engine");
+
+            Int32SequenceDataSource source = new Int32SequenceDataSource(1, 4);
+
+            CollectingBatchProcessor processor = new CollectingBatchProcessor();
+
+            Job<int, string> job = new Job<int, string>(jobId, source, Int32KeyRangePartitioner.Default, Int32KeySerializer.Default, processor);
+
+            Engine engine = new Engine(store, configuration, clock);
+
+            TimeSpan cancellation = TimeSpan.FromMilliseconds(100);
+            using CancellationTokenSource cts = new CancellationTokenSource(cancellation);
+
+            await store.InsertJobAsync(persistedJob, CancellationToken.None);
+            await store.InsertPartitionAsync(activePartition, CancellationToken.None);
+
+            //
+            // The configured timeout plus clock drift is 90 seconds, so a partition last updated 70 seconds ago
+            // remains active and cannot be acquired by this engine.
+            //
+
+            await Assert.MultipleAsync((Func<Task>) (async () =>
+            {
+                Assert.CatchAsync<OperationCanceledException>(() => engine.RunAsync(job, false, cts.Token));
+
+                Partition persisted = await store.RetrievePartitionAsync(activePartition.Id, CancellationToken.None);
+
+                Assert.That(processor.Items, Is.Empty);
+                Assert.That(persisted.Owner, Is.EqualTo(activePartition.Owner));
+                Assert.That(persisted.Processed, Is.Zero);
+            }));
         }
 
         [Test]

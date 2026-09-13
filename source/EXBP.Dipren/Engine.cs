@@ -1,4 +1,4 @@
-﻿
+
 using System.Diagnostics;
 using System.Globalization;
 
@@ -231,7 +231,7 @@ namespace EXBP.Dipren
                     // Processing is only started if the scheduled job is in either Ready or Processing state.
                     //
 
-                    Settings settings = new Settings(persisted.BatchSize, persisted.Timeout);
+                    Settings settings = new Settings(persisted.BatchSize, persisted.Timeout, persisted.ClockDrift);
 
                     while (persisted?.State == JobState.Processing)
                     {
