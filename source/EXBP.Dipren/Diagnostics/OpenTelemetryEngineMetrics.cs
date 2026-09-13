@@ -328,8 +328,12 @@ namespace EXBP.Dipren.Diagnostics
 
             TagList tags = this.CreateTags(nodeId, jobId, partitionId, (success ? TAG_VALUE_SUCCEEDED : TAG_VALUE_FAILED));
 
-            this._keysCompletedCounter.Add(keys, tags);
-            this._batchesCompletedCounter.Add(1L, tags);
+            if (success == true)
+            {
+                this._keysCompletedCounter.Add(keys, tags);
+                this._batchesCompletedCounter.Add(1L, tags);
+            }
+
             this._batchProcessingDuration.Record(duration.TotalMilliseconds, tags);
         }
 

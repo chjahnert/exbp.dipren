@@ -228,7 +228,7 @@ namespace EXBP.Dipren.Tests.Diagnostics
         }
 
         [Test]
-        public void RegisterBatchProcessed_MultipleEventsRegistered_InstrumentsReflectEvents()
+        public void RegisterBatchProcessed_FailedBatchIsRegistered_FailedBatchIsNotRecordedAsCompleted()
         {
             List<MetricSnapshot> metrics = new List<MetricSnapshot>();
 
@@ -251,7 +251,7 @@ namespace EXBP.Dipren.Tests.Diagnostics
                 MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_KEYS_COMPLETED && m.MetricType == MetricType.LongSum);
 
                 Assert.That(snapshot, Is.Not.Null);
-                Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
+                Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(1));
 
                 MetricPoint pointSucceeded = snapshot.MetricPoints.FirstOrDefault(p =>
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
@@ -263,22 +263,14 @@ namespace EXBP.Dipren.Tests.Diagnostics
 
                 Assert.That(succeeded, Is.EqualTo(12L));
 
-                MetricPoint pointFailed = snapshot.MetricPoints.FirstOrDefault(p =>
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED));
-
-                long failed = pointFailed.GetSumLong();
-
-                Assert.That(failed, Is.EqualTo(3L));
+                Assert.That(snapshot.MetricPoints.Any(p => p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED)), Is.False);
             }
 
             {
                 MetricSnapshot snapshot = metrics.LastOrDefault(m => m.Name == OpenTelemetryEngineMetrics.INSTRUMENT_NAME_BATCHES_COMPLETED && m.MetricType == MetricType.LongSum);
 
                 Assert.That(snapshot, Is.Not.Null);
-                Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(2));
+                Assert.That(snapshot.MetricPoints.Count, Is.EqualTo(1));
 
                 MetricPoint pointSucceeded = snapshot.MetricPoints.FirstOrDefault(p =>
                     p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
@@ -290,15 +282,7 @@ namespace EXBP.Dipren.Tests.Diagnostics
 
                 Assert.That(succeeded, Is.EqualTo(2L));
 
-                MetricPoint pointFailed = snapshot.MetricPoints.FirstOrDefault(p =>
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_NODE, nodeId) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_JOB, jobId) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_PARTITION, partitionId.ToString("d")) &&
-                    p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED));
-
-                long failed = pointFailed.GetSumLong();
-
-                Assert.That(failed, Is.EqualTo(1L));
+                Assert.That(snapshot.MetricPoints.Any(p => p.HasTag(OpenTelemetryEngineMetrics.TAG_NAME_OUTCOME, OpenTelemetryEngineMetrics.TAG_VALUE_FAILED)), Is.False);
             }
 
             {
