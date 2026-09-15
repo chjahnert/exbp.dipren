@@ -1459,6 +1459,7 @@ namespace EXBP.Dipren.Data.Tests
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(job.Id));
             Assert.That(result.Timestamp, Is.EqualTo(timestamp));
+            Assert.That(result.Timestamp.Kind, Is.EqualTo(DateTimeKind.Utc));
             Assert.That(result.Created, Is.EqualTo(job.Created));
             Assert.That(result.Updated, Is.EqualTo(job.Updated));
             Assert.That(result.BatchSize, Is.EqualTo(job.BatchSize));
@@ -1467,6 +1468,7 @@ namespace EXBP.Dipren.Data.Tests
             Assert.That(result.Completed, Is.EqualTo(job.Completed));
             Assert.That(result.State, Is.EqualTo(job.State));
             Assert.That(result.Error, Is.EqualTo(job.Error));
+            Assert.That(result.LastActivity.Kind, Is.EqualTo(DateTimeKind.Utc));
 
             Assert.That(result.Partitions, Is.Not.Null);
             Assert.That(result.Partitions.Untouched, Is.EqualTo(1L));
