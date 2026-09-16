@@ -112,7 +112,7 @@ namespace EXBP.Dipren.Data.Tests
         [Test]
         public async Task InsertJobAsync_JobWithSameIdentifierAlreadyExists_ThrowsException()
         {
-            using EngineDataStoreWrapper store = await CreateEngineDataStoreAsync();
+            using EngineDataStoreWrapper store = await this.CreateEngineDataStoreAsync();
 
             const string id = "DPJ-0001";
             DateTime timestamp = this.FormatDateTime(DateTime.UtcNow);
@@ -124,6 +124,24 @@ namespace EXBP.Dipren.Data.Tests
             Job second = first with { };
 
             Assert.ThrowsAsync<DuplicateIdentifierException>(() => store.InsertJobAsync(second, CancellationToken.None));
+        }
+
+        [Test]
+        public async Task InsertJobAsync_TimestampsAreStoredAsInstants_PreservesUtcInstant()
+        {
+            const string id = "DPJ-0001";
+            DateTime timestamp = new DateTime(2022, 9, 21, 11, 12, 13, DateTimeKind.Utc);
+            Job job = new Job(id, timestamp, timestamp, JobState.Initializing, 66, TimeSpan.FromMinutes(1), TimeSpan.Zero);
+
+            using EngineDataStoreWrapper store = await this.CreateEngineDataStoreAsync();
+
+            await store.InsertJobAsync(job, CancellationToken.None);
+
+            Job persisted = await store.RetrieveJobAsync(id, CancellationToken.None);
+
+            Assert.That(persisted, Is.Not.Null);
+            Assert.That(persisted.Created, Is.EqualTo(timestamp));
+            Assert.That(persisted.Updated, Is.EqualTo(timestamp));
         }
 
         [Test]
